@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>ตรวจสอบความถูกต้องของบัตรสารวัตรนักเรียน - โรงเรียนพระนารายณ์</title>
+  
+  <!-- Web Icon / Favicon (SARAWAT Official Logo) -->
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Chakra+Petch:wght@500;600;700;800&family=Michroma&family=Kanit:ital,wght@0,400;0,600;0,700;0,800;0,900&family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+  <style>
+    body { font-family: 'Prompt', sans-serif; background: #070b14; color: #f8fafc; }
+    
+    .id-card-cr80 {
+      width: 280px;
+      height: 442px;
+      max-width: 100%;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-3">
+
+  <div class="max-w-md w-full bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-6 shadow-2xl text-center relative overflow-hidden flex flex-col items-center">
+    
+    <!-- Top Decorative Line -->
+    <div class="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 via-amber-400 to-red-600"></div>
+
+    <!-- School Header -->
+    <div class="flex items-center justify-center space-x-3 mb-4 mt-1">
+      <img src="/assets/logo.jpg" alt="ตราสารวัตรนักเรียน" class="w-9 h-9 rounded-full object-cover border border-amber-400 shadow-md">
+      <div class="text-left">
+        <h1 class="text-sm font-bold text-white uppercase tracking-wider">โรงเรียนพระนารายณ์</h1>
+        <p class="text-[10px] text-amber-400 font-semibold">ฝ่ายสารวัตรนักเรียน • STUDENT INSPECTOR</p>
+      </div>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading" class="py-16 space-y-3">
+      <div class="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <p class="text-xs text-slate-400">กำลังตรวจสอบรหัสบัตรประจำตัวสารวัตร...</p>
+    </div>
+
+    <!-- Valid Card Result -->
+    <div id="result-valid" class="hidden flex flex-col items-center w-full space-y-3">
+      
+      <div class="inline-flex items-center px-3.5 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse mr-2"></span>
+        บัตรประจำตัวถูกต้องตามระเบียบ
+      </div>
+
+      <!-- SARAWAT ID CARD (CR80 EXACT MOCKUP) -->
+      <div class="id-card-cr80 relative bg-white text-neutral-900 border border-slate-300 rounded-lg shadow-2xl overflow-hidden select-none text-left" id="verifyCardElement" style="width: 280px; height: 442px;">
+        
+        <!-- Left Blue Stripe / Right Red Stripe -->
+        <div class="absolute left-0 top-0 bottom-0 w-[9px] bg-[#002b80] z-30"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-[9px] bg-[#b91c1c] z-30"></div>
+
+        <!-- Vertical PRANARAI SCHOOL text alongside red stripe -->
+        <div class="absolute right-[11px] top-[70px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[3px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
+          PRANARAI SCHOOL
+        </div>
+
+        <!-- Circular Watermark Emblem behind left shoulder -->
+        <img src="/assets/logo.png" alt="Watermark" class="absolute -left-3 top-[48px] w-[165px] h-[165px] object-contain opacity-45 pointer-events-none z-[2]" style="transform: rotate(-14deg);">
+
+        <!-- Student Photo with soft bottom gradient fade-out (No black border) -->
+        <div class="absolute left-[22px] right-[28px] top-[78px] h-[235px] flex items-center justify-center pointer-events-none z-[5]">
+          <img id="v-photo" src="" alt="Photo" class="w-full h-full object-cover hidden" style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);">
+          <span id="v-photo-placeholder" class="text-5xl text-slate-400">👤</span>
+        </div>
+
+        <!-- Ambient Color Fades (Over profile photo, strictly behind all text) -->
+        <div class="absolute left-0 top-0 bottom-0 w-[90px] bg-gradient-to-r from-[#002b80]/22 via-[#002b80]/08 to-transparent z-[8] pointer-events-none"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-[90px] bg-gradient-to-l from-[#b91c1c]/22 via-[#b91c1c]/08 to-transparent z-[8] pointer-events-none"></div>
+        <div class="absolute left-0 right-0 top-[200px] h-[115px] bg-gradient-to-t from-white/95 via-white/50 to-transparent z-[8] pointer-events-none"></div>
+
+        <!-- Top Header: Wide Bold SARAWAT + Hollow Outline INSPECTOR -->
+        <div class="absolute left-[9px] right-[9px] top-[6px] text-center z-20 pointer-events-none">
+          <h1 class="text-[31px] font-bold tracking-[2.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
+            SARAWAT
+          </h1>
+          <p class="text-[17px] font-bold tracking-[4.5px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-[-1px] text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
+            INSPECTOR
+          </p>
+        </div>
+
+        <!-- Middle Text: Giant Nickname + Code Line -->
+        <div class="absolute left-[9px] right-[9px] bottom-[78px] text-center z-20 px-1 pointer-events-none">
+          <div id="v-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[31px] font-bold text-black uppercase leading-[0.9] tracking-[3px] truncate" style="transform: scaleY(1.05);">
+            NAMNUAH
+          </div>
+          <div id="v-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12.5px] font-bold text-black uppercase tracking-[1.5px] leading-tight mt-1 truncate">
+            M5-7-TS1-0634125121
+          </div>
+        </div>
+
+        <!-- Bottom Row: Left (Thai Nick + Full Name + Barcode) / Right (School Emblem) -->
+        <div class="absolute left-[9px] right-[9px] bottom-[6px] px-2 flex items-end justify-between z-20 pointer-events-none">
+          <!-- Left Column -->
+          <div class="flex flex-col items-center justify-end flex-1 text-center pr-1">
+            <div id="v-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13.5px] font-bold text-black leading-none">
+              นำเหนือ
+            </div>
+            <div id="v-name" class="font-['Prompt','Kanit',sans-serif] text-[10.5px] font-semibold text-black leading-tight mt-0.5 whitespace-nowrap">
+              นายณิชกานต์ คำไชย
+            </div>
+            <div class="mt-1 flex items-center justify-center w-[120px] h-[32px]">
+              <svg id="v-barcode" class="w-full h-8"></svg>
+            </div>
+          </div>
+
+          <!-- Right Column (School Emblem without black box) -->
+          <div class="flex items-center justify-center flex-shrink-0 pb-0.5">
+            <img src="/assets/school_emblem.png" alt="ตราโรงเรียน" class="w-[52px] h-[64px] object-contain">
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="w-full max-w-[280px] grid grid-cols-2 gap-2 pt-1">
+        <button onclick="downloadVerifyPNG()" class="py-2.5 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow">
+          <span>📥</span> บันทึก PNG
+        </button>
+        <button onclick="window.print()" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1.5 shadow">
+          <span>🖨️</span> สั่งพิมพ์บัตร
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Invalid Card Result -->
+    <div id="result-invalid" class="hidden py-12 space-y-4">
+      <div class="w-16 h-16 rounded-full bg-rose-500/10 border border-rose-500/40 text-rose-400 text-3xl flex items-center justify-center mx-auto">
+        ✕
+      </div>
+      <h2 class="text-base font-bold text-white">ไม่พบข้อมูลหรือบัตรหมดอายุ</h2>
+      <p class="text-xs text-slate-400 max-w-xs">รหัสบัตรประจำตัวนี้ไม่ตรงกับฐานข้อมูลสารวัตรนักเรียนที่กำลังปฏิบัติหน้าที่ในปัจจุบัน</p>
+    </div>
+
+    <div class="mt-6 pt-3 border-t border-slate-800/80 text-[10px] text-slate-500 w-full text-center">
+      ระบบตรวจสอบความถูกต้องแบบเรียลไทม์ • SARAWAT PRANARAI OS
+    </div>
+
+  </div>
+
+  <script>
+    const COMMON_NICKNAMES = {
+      'น้ำเหนือ': 'NAMNUAH',
+      'นำเหนือ': 'NAMNUAH',
+      'น้ำำ': 'NAM',
+      'น้ำ': 'NAM',
+      'ปัน': 'PUN',
+      'นน': 'NON',
+      'ดิสดิส': 'DISDIS',
+      'โบ๊ท': 'BOAT',
+      'โบ๊ต': 'BOAT',
+      'บอส': 'BOSS',
+      'เบสท์': 'BEST',
+      'เบส': 'BEST',
+      'แบงค์': 'BANK',
+      'แบงก์': 'BANK',
+      'อาร์ม': 'ARM',
+      'ไอซ์': 'ICE',
+      'กาย': 'GUY',
+      'มิว': 'MEW',
+      'ภูมิ': 'POOM',
+      'วิน': 'WIN',
+      'นิว': 'NEW',
+      'ฟลุ๊ค': 'FLUKE',
+      'ฟลุ๊คส์': 'FLUKE',
+      'ฟลุค': 'FLUKE',
+      'นนท์': 'NON',
+      'นนท': 'NON',
+      'กันต์': 'GUN',
+      'กัน': 'GUN',
+      'มาร์ค': 'MARK',
+      'มาร์คัส': 'MARCUS',
+      'เกม': 'GAME',
+      'เกมส์': 'GAME',
+      'ก้อง': 'KONG',
+      'เฟิร์ส': 'FIRST',
+      'บิว': 'BEW',
+      'เต้': 'TAE',
+      'ตูน': 'TOON',
+      'ต้น': 'TON',
+      'นัท': 'NUT',
+      'พี': 'PEE',
+      'พีท': 'PETE',
+      'กอล์ฟ': 'GOLF',
+      'กิ๊ฟ': 'GIFT',
+      'แอน': 'ANN',
+      'ฟ้า': 'FAH',
+      'พลอย': 'PLOY',
+      'มายด์': 'MIND',
+      'มาย': 'MIND',
+      'เฟิร์น': 'FERN',
+      'มุก': 'MOOK',
+      'บิวตี้': 'BEAUTY',
+      'เจมส์': 'JAMES',
+      'ปอนด์': 'POUND',
+      'โฟกัส': 'FOCUS',
+      'มิกซ์': 'MIX',
+      'ออฟ': 'OFF',
+      'เต๋า': 'TAO',
+      'ท็อป': 'TOP',
+      'มิ้น': 'MINT',
+      'มินต์': 'MINT',
+      'แพร': 'PRAE',
+      'พิม': 'PIM',
+      'บอม': 'BOMB',
+      'บอมบ์': 'BOMB',
+      'เบียร์': 'BEER',
+      'วิว': 'VIEW',
+      'โอ๊ค': 'OAK',
+      'เอิร์ธ': 'EARTH',
+      'ข้าว': 'KHAO',
+      'เนย': 'NOEY',
+      'เตย': 'TOEY',
+      'เป็ด': 'PED',
+      'ไก่': 'KAI',
+      'หมู': 'MOO',
+      'ปลา': 'PLA'
+    };
+
+    function romanizeThaiNickname(thai) {
+      if (!thai) return 'SARAWAT';
+      const clean = thai.trim();
+      if (!clean || clean === '.' || clean === '-') return 'SARAWAT';
+      
+      if (/^[A-Za-z0-9_\-\s]+$/.test(clean)) {
+        return clean.toUpperCase();
+      }
+
+      if (COMMON_NICKNAMES[clean]) {
+        return COMMON_NICKNAMES[clean];
+      }
+
+      const withoutTones = clean.replace(/[\u0E48-\u0E4C\u0E47\u0E4D\u0E4E\u0E3A]/g, '');
+      if (COMMON_NICKNAMES[withoutTones]) {
+        return COMMON_NICKNAMES[withoutTones];
+      }
+
+      for (const [k, v] of Object.entries(COMMON_NICKNAMES)) {
+        if (clean === k || withoutTones === k) return v;
+      }
+
+      let res = clean;
+      res = res.replace(/เ(.*)ือ(.*)/g, '$1UAH$2');
+      res = res.replace(/แ(.*)ว/g, '$1AEW');
+      res = res.replace(/เ(.*)ย/g, '$1OEY');
+      res = res.replace(/เ(.*)า/g, '$1AO');
+      res = res.replace(/โ(.*)ะ/g, '$1O');
+      res = res.replace(/โ(.*)/g, '$1O');
+      res = res.replace(/แ(.*)/g, '$1AE');
+      res = res.replace(/เ(.*)/g, '$1E');
+      res = res.replace(/ำ/g, 'AM');
+      res = res.replace(/ั/g, 'U');
+      res = res.replace(/า/g, 'A');
+      res = res.replace(/ิ/g, 'I');
+      res = res.replace(/ี/g, 'EE');
+      res = res.replace(/ึ/g, 'EU');
+      res = res.replace(/ื/g, 'EU');
+      res = res.replace(/ุ/g, 'U');
+      res = res.replace(/ู/g, 'OO');
+      
+      const consonants = {
+        'ก': 'K', 'ข': 'KH', 'ฃ': 'KH', 'ค': 'KH', 'ฅ': 'KH', 'ฆ': 'KH',
+        'ง': 'NG', 'จ': 'J', 'ฉ': 'CH', 'ช': 'CH', 'ซ': 'S', 'ฌ': 'CH',
+        'ญ': 'Y', 'ด': 'D', 'ต': 'T', 'ถ': 'TH', 'ท': 'TH', 'ธ': 'TH',
+        'น': 'N', 'บ': 'B', 'ป': 'P', 'ผ': 'PH', 'ฝ': 'F', 'พ': 'PH',
+        'ฟ': 'F', 'ภ': 'PH', 'ม': 'M', 'ย': 'Y', 'ร': 'R', 'ล': 'L',
+        'ว': 'W', 'ศ': 'S', 'ษ': 'S', 'ส': 'S', 'ห': 'H', 'ฬ': 'L',
+        'อ': 'O', 'ฮ': 'H', 'ๆ': ''
+      };
+
+      let out = '';
+      for (let i = 0; i < res.length; i++) {
+        const ch = res[i];
+        if (consonants[ch] !== undefined) {
+          out += consonants[ch];
+        } else if (/[A-Z0-9]/i.test(ch)) {
+          out += ch.toUpperCase();
+        }
+      }
+
+      out = out.replace(/[^A-Z0-9]/g, '');
+      return out || 'SARAWAT';
+    }
+
+    let currentNick = 'SARAWAT';
+
+    async function verifyCard() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const memberId = urlParams.get('id');
+
+      if (!memberId) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('result-invalid').classList.remove('hidden');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/verify/${memberId}`);
+        const data = await res.json();
+
+        document.getElementById('loading').classList.add('hidden');
+
+        if (data.valid && data.member) {
+          const m = data.member;
+          currentNick = m.nickname || 'SARAWAT';
+          const englishNick = romanizeThaiNickname(currentNick);
+          const thaiNickname = m.thai_nickname || currentNick;
+          let fullName = m.name || `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'นายณิชกานต์ คำไชย';
+          if (!fullName.startsWith('นาย') && !fullName.startsWith('นางสาว') && !fullName.startsWith('ด.ช.') && !fullName.startsWith('ด.ญ.')) {
+            fullName = `นาย${fullName}`;
+          }
+
+          const rawClass = (m.grade_class || '').replace('ม.', '').trim();
+          const classDisplay = rawClass ? `M${rawClass.replace('/', '-')}` : 'M5-7';
+          const dutyId = m.duty_id || 'TS1';
+          const phoneOrNo = m.phone_number || m.student_no || '0634125121';
+          const codeLine = `${classDisplay}-${dutyId}-${phoneOrNo}`;
+
+          const nameEl = document.getElementById('v-name');
+          if (nameEl) nameEl.textContent = fullName;
+          const nickEl = document.getElementById('v-nickname');
+          if (nickEl) nickEl.textContent = englishNick;
+          const thaiNickEl = document.getElementById('v-thainick');
+          if (thaiNickEl) thaiNickEl.textContent = thaiNickname;
+          const codeEl = document.getElementById('v-codeline');
+          if (codeEl) codeEl.textContent = codeLine;
+          
+          if (m.profile_image_url) {
+            const photoEl = document.getElementById('v-photo');
+            photoEl.src = m.profile_image_url;
+            photoEl.classList.remove('hidden');
+            document.getElementById('v-photo-placeholder').classList.add('hidden');
+          }
+
+          // Barcode
+          if (window.JsBarcode) {
+            try {
+              JsBarcode("#v-barcode", `${dutyId}-${m.student_no || '69055'}`, {
+                format: "CODE128",
+                width: 1.2,
+                height: 32,
+                displayValue: false,
+                margin: 0,
+                background: "transparent",
+                lineColor: "#050505"
+              });
+            } catch (e) {}
+          }
+
+          document.getElementById('result-valid').classList.remove('hidden');
+        } else {
+          document.getElementById('result-invalid').classList.remove('hidden');
+        }
+      } catch (err) {
+        document.getElementById('loading').classList.add('hidden');
+        document.getElementById('result-invalid').classList.remove('hidden');
+      }
+    }
+
+    async function downloadVerifyPNG() {
+      const card = document.getElementById('verifyCardElement');
+      if (!card) return;
+      try {
+        const canvas = await html2canvas(card, {
+          scale: 3,
+          useCORS: true,
+          allowTaint: true,
+          backgroundColor: '#ffffff'
+        });
+        const link = document.createElement('a');
+        link.download = `SARAWAT_CARD_${currentNick}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      } catch (err) {
+        alert('เกิดข้อผิดพลาดในการโหลดรูปภาพ: ' + err.message);
+      }
+    }
+
+    verifyCard();
+  </script>
+</body>
+</html>
