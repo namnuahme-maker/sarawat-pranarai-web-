@@ -20,6 +20,8 @@
   <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   
   <script>
     tailwind.config = {
@@ -162,6 +164,36 @@
       background: rgba(23, 35, 61, 0.9);
       border-color: rgba(245, 158, 11, 0.3);
       box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+    }
+
+    /* Print Layout for A4 Sheet (8 Cards / Page) */
+    @media print {
+      body { background: #ffffff !important; color: #000000 !important; }
+      body > *:not(#a4-print-sheet) { display: none !important; }
+      #a4-print-sheet {
+        display: grid !important;
+        grid-template-columns: repeat(2, 86mm) !important;
+        grid-template-rows: repeat(4, 54mm) !important;
+        gap: 6mm 10mm !important;
+        justify-content: center !important;
+        align-content: center !important;
+        width: 210mm !important;
+        height: 297mm !important;
+        margin: 0 auto !important;
+        padding: 8mm 6mm !important;
+        box-sizing: border-box !important;
+      }
+      .a4-card-cut-box {
+        position: relative !important;
+        border: 1px dashed #94a3b8 !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important;
+        page-break-inside: avoid !important;
+      }
+      @page {
+        size: A4 portrait;
+        margin: 0;
+      }
     }
   </style>
 </head>
@@ -380,6 +412,123 @@
         <!-- Shift Grid Cards -->
         <div id="overview-shift-grid" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <!-- Populated by JS -->
+        </div>
+      </div>
+
+      <!-- 📊 PERSONNEL MANAGEMENT & SHIFT DISCIPLINE DASHBOARD -->
+      <div class="glass-panel rounded-2xl p-5 sm:p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-navy-800 pb-4">
+          <div>
+            <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
+              <span class="text-emerald-400">📊</span> แดชบอร์ดวินัยเวรและความพร้อมกำลังพล (DISCIPLINE & READINESS ANALYTICS)
+            </h2>
+            <p class="text-xs text-slate-400 mt-0.5">
+              วิเคราะห์ความพร้อมสารวัตรนักเรียนแบบ Real-time ตามคำขอลาเวรและสถิติรายสัปดาห์
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              REALTIME SYNC ACTIVE
+            </span>
+          </div>
+        </div>
+
+        <!-- 4 Discipline KPI Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+          <div class="bg-navy-900/90 border border-navy-700/80 rounded-xl p-3.5 sm:p-4">
+            <div class="flex justify-between items-center text-slate-400 text-xs">
+              <span class="font-medium">ดัชนีความพร้อมรวม</span>
+              <span class="text-base">🛡️</span>
+            </div>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span id="kpi-readiness-rate" class="font-mono text-2xl sm:text-3xl font-extrabold text-emerald-400">100%</span>
+            </div>
+            <p class="text-[10px] text-emerald-300/80 mt-1">พร้อมปฏิบัติหน้าที่ตามเวร</p>
+          </div>
+
+          <div class="bg-navy-900/90 border border-navy-700/80 rounded-xl p-3.5 sm:p-4">
+            <div class="flex justify-between items-center text-slate-400 text-xs">
+              <span class="font-medium">เข้าเวรจริงวันนี้</span>
+              <span class="text-base">👮</span>
+            </div>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span id="kpi-active-today" class="font-mono text-2xl sm:text-3xl font-extrabold text-white">0</span>
+              <span class="text-xs text-slate-400">นาย</span>
+            </div>
+            <p class="text-[10px] text-slate-400 mt-1">เวรหลัก + เวรพิเศษวันนี้</p>
+          </div>
+
+          <div class="bg-navy-900/90 border border-navy-700/80 rounded-xl p-3.5 sm:p-4">
+            <div class="flex justify-between items-center text-slate-400 text-xs">
+              <span class="font-medium">ยอดขอลาเวรวันนี้</span>
+              <span class="text-base">📝</span>
+            </div>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span id="kpi-leaves-today" class="font-mono text-2xl sm:text-3xl font-extrabold text-amber-400">0</span>
+              <span class="text-xs text-slate-400">นาย</span>
+            </div>
+            <p class="text-[10px] text-amber-300/80 mt-1">มีผู้ปฏิบัติหน้าที่แทน</p>
+          </div>
+
+          <div class="bg-navy-900/90 border border-navy-700/80 rounded-xl p-3.5 sm:p-4">
+            <div class="flex justify-between items-center text-slate-400 text-xs">
+              <span class="font-medium">เวรความพร้อมสูงสุด</span>
+              <span class="text-base">⭐</span>
+            </div>
+            <div class="mt-2 flex items-baseline gap-1">
+              <span id="kpi-best-shift" class="font-mono text-lg sm:text-xl font-extrabold text-cyan-400 truncate">วันจันทร์ (M)</span>
+            </div>
+            <p class="text-[10px] text-cyan-300/80 mt-1">อัตราการลาเวรต่ำสุด</p>
+          </div>
+        </div>
+
+        <!-- 3 Tactical Charts Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 pt-2">
+          <!-- Chart 1: Daily Duty Force (Col 5) -->
+          <div class="lg:col-span-5 bg-navy-900/90 border border-navy-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 font-mono">
+                  <span class="text-blue-400">📊</span> กำลังพลประจำแต่ละวัน (จันทร์-ศุกร์)
+                </h3>
+                <p class="text-[11px] text-slate-400">เปรียบเทียบเวรปกติ vs เวรพิเศษที่มาช่วย</p>
+              </div>
+            </div>
+            <div class="relative h-[220px] w-full">
+              <canvas id="chart-daily-force"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 2: Leave Types (Col 3) -->
+          <div class="lg:col-span-3 bg-navy-900/90 border border-navy-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 font-mono">
+                  <span class="text-amber-400">🍩</span> สัดส่วนประเภทการลา
+                </h3>
+                <p class="text-[11px] text-slate-400">จำแนกตามเหตุผลการลา</p>
+              </div>
+            </div>
+            <div class="relative h-[220px] w-full flex items-center justify-center">
+              <canvas id="chart-leave-types"></canvas>
+            </div>
+          </div>
+
+          <!-- Chart 3: Weekly Leave Trend (Col 4) -->
+          <div class="lg:col-span-4 bg-navy-900/90 border border-navy-700/80 rounded-2xl p-4 sm:p-5 flex flex-col justify-between">
+            <div class="flex items-center justify-between mb-2">
+              <div>
+                <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 font-mono">
+                  <span class="text-purple-400">📈</span> แนวโน้มการลา 7 วันย้อนหลัง
+                </h3>
+                <p class="text-[11px] text-slate-400">สถิติปริมาณคำขอลาเวรรายวัน</p>
+              </div>
+            </div>
+            <div class="relative h-[220px] w-full">
+              <canvas id="chart-weekly-trend"></canvas>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -612,6 +761,48 @@
           <button onclick="batchExportAllCards()" id="btn-batch-export" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-navy-950 font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-lg">
             <span>📦</span> ทำบัตรทุกคน (ZIP)
           </button>
+          <button onclick="openA4PrintModal()" class="px-3.5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-lg">
+            <span>🖨️</span> จัดหน้าพิมพ์ A4 (8 ใบ)
+          </button>
+        </div>
+      </div>
+
+      <!-- Preset Template & Quick Styling Toolbar -->
+      <div class="flex flex-wrap items-center justify-between gap-3 bg-navy-900 border border-navy-700/80 rounded-2xl p-3.5 px-4 shadow-lg">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-mono">
+            <span>🎨</span> คลังเทมเพลต:
+          </span>
+          <button onclick="applyPreset('tactical')" class="px-3 py-1.5 rounded-xl bg-navy-950 hover:bg-navy-800 border border-blue-500/40 text-blue-400 hover:text-blue-300 font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow">
+            <span>🛡️</span> 1. Tactical Standard
+          </button>
+          <button onclick="applyPreset('executive')" class="px-3 py-1.5 rounded-xl bg-navy-950 hover:bg-navy-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow">
+            <span>👑</span> 2. Executive Gold
+          </button>
+          <button onclick="applyPreset('academic')" class="px-3 py-1.5 rounded-xl bg-navy-950 hover:bg-navy-800 border border-cyan-500/40 text-cyan-400 hover:text-cyan-300 font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow">
+            <span>🎓</span> 3. Formal Academic
+          </button>
+        </div>
+
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-mono">
+            <span>🏅</span> ตราเวร:
+          </span>
+          <button onclick="stampDutyBadge('M')" class="w-7 h-7 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500 text-blue-400 font-bold text-xs" title="เพิ่มตราเวรจันทร์">🔵</button>
+          <button onclick="stampDutyBadge('T')" class="w-7 h-7 rounded-lg bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500 text-purple-400 font-bold text-xs" title="เพิ่มตราเวรอังคาร">🟣</button>
+          <button onclick="stampDutyBadge('W')" class="w-7 h-7 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500 text-emerald-400 font-bold text-xs" title="เพิ่มตราเวรพุธ">🟢</button>
+          <button onclick="stampDutyBadge('Ts')" class="w-7 h-7 rounded-lg bg-orange-600/20 hover:bg-orange-600/40 border border-orange-500 text-orange-400 font-bold text-xs" title="เพิ่มตราเวรพฤหัสบดี">🟠</button>
+          <button onclick="stampDutyBadge('F')" class="w-7 h-7 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500 text-rose-400 font-bold text-xs" title="เพิ่มตราเวรศุกร์">🔴</button>
+          <button onclick="stampDutyBadge('S')" class="w-7 h-7 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500 text-amber-400 font-bold text-xs" title="เพิ่มตราเวรพิเศษ">⭐</button>
+
+          <span class="text-slate-600 mx-1">|</span>
+
+          <span class="text-xs font-bold text-slate-300 flex items-center gap-1.5 font-mono">
+            <span>🖼️</span> กรอบรูป:
+          </span>
+          <button onclick="setPhotoFrameShape('fade')" class="px-2.5 py-1 rounded-lg bg-navy-950 hover:bg-navy-800 border border-navy-700 text-slate-300 text-xs" title="รูปไล่เฉด Fade-out ไร้กรอบ">Fade</button>
+          <button onclick="setPhotoFrameShape('rounded')" class="px-2.5 py-1 rounded-lg bg-navy-950 hover:bg-navy-800 border border-navy-700 text-slate-300 text-xs" title="กรอบสี่เหลี่ยมมน คมชัด">มน</button>
+          <button onclick="setPhotoFrameShape('shield')" class="px-2.5 py-1 rounded-lg bg-navy-950 hover:bg-navy-800 border border-navy-700 text-slate-300 text-xs" title="กรอบทรงโล่สารวัตร">ทรงโล่</button>
         </div>
       </div>
 
@@ -898,6 +1089,64 @@
   </div>
 
   <!-- ========================================================= -->
+  <!-- MODAL: A4 PRINT SHEET PREVIEW (8 CARDS / PAGE) -->
+  <!-- ========================================================= -->
+  <div id="a4-print-modal" class="fixed inset-0 z-50 bg-navy-950/85 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4 transition-all">
+    <div class="max-w-4xl w-full bg-slate-900 border border-slate-700/80 rounded-3xl p-4 sm:p-6 shadow-2xl flex flex-col space-y-4 max-h-[95vh] text-left">
+      
+      <!-- Modal Header -->
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+            <span>🖨️</span> จัดหน้าพิมพ์บัตร A4 (Print-Ready A4 Sheet)
+          </h3>
+          <p class="text-xs text-slate-400 mt-0.5">
+            จัดเรียง 8 ใบต่อหน้า A4 (2 คอลัมน์ × 4 แถว) สัดส่วน CR80 พร้อมเส้นประไกด์รอยตัดสำหรับเครื่องตัดบัตร
+          </p>
+        </div>
+        
+        <div class="flex items-center gap-2 self-end sm:self-center">
+          <select id="a4-shift-filter" onchange="renderA4Sheet(this.value)" class="bg-slate-800 border border-slate-700 text-amber-400 font-bold text-xs rounded-xl px-3 py-2 outline-none cursor-pointer">
+            <option value="ALL">สมาชิกทั้งหมด (เรียงตามผลัด)</option>
+            <option value="M">เวรวันจันทร์ (M & MS)</option>
+            <option value="T">เวรวันอังคาร (T & TS)</option>
+            <option value="W">เวรวันพุธ (W & WS)</option>
+            <option value="Ts">เวรวันพฤหัสบดี (Ts & TSS)</option>
+            <option value="F">เวรวันศุกร์ (F & FS)</option>
+            <option value="S">เวรพิเศษเท่านั้น (S)</option>
+          </select>
+
+          <button onclick="printA4Sheet()" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow">
+            <span>🖨️</span> สั่งพิมพ์ A4
+          </button>
+          
+          <button onclick="closeA4PrintModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center text-sm font-bold">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Live A4 Sheet Preview Container -->
+      <div class="flex-1 overflow-y-auto bg-slate-950 p-4 rounded-2xl flex justify-center border border-slate-800/80">
+        <div id="a4-preview-wrapper" class="bg-white text-black shadow-2xl rounded p-4 transform origin-top" style="width: 210mm; min-height: 297mm; box-sizing: border-box;">
+          <div id="a4-cards-grid" class="grid grid-cols-2 gap-x-4 gap-y-4 justify-items-center">
+            <!-- Populated dynamically by renderA4Sheet -->
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between text-[11px] text-slate-400 gap-2 pt-1 border-t border-slate-800">
+        <span>💡 <b>คำแนะนำ:</b> ตั้งค่าเครื่องพิมพ์เลือกกระดาษ <b>A4</b>, Margins: <b>None</b>, และเปิด <b>Background graphics: On</b></span>
+        <span id="a4-card-count-label" class="font-mono text-amber-400 font-bold">แสดง 0 / 0 ใบ</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Hidden Printable A4 Container for @media print -->
+  <div id="a4-print-sheet" class="hidden"></div>
+
+  <!-- ========================================================= -->
   <!-- MOBILE BOTTOM NAVIGATION DOCK (iOS / Android Style) -->
   <!-- ========================================================= -->
   <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-navy-900/95 backdrop-blur-lg border-t border-navy-800 px-2 py-1.5 flex justify-around items-center">
@@ -1135,6 +1384,7 @@
           }
 
           renderOverviewShiftGrid(stats.shifts);
+          updateDisciplineOverview(stats);
         }
 
         // 2. Fetch Members
@@ -2484,8 +2734,424 @@
       }, 3000);
     }
 
+    // ==========================================================
+    // 📊 TACTICAL DISCIPLINE ANALYTICS & CHARTS (Chart.js)
+    // ==========================================================
+    let chartDailyForce = null;
+    let chartLeaveTypes = null;
+    let chartWeeklyTrend = null;
+
+    function initDisciplineCharts() {
+      // 1. Daily Shift Force (Bar)
+      const ctxForce = document.getElementById('chart-daily-force')?.getContext('2d');
+      if (ctxForce && window.Chart) {
+        chartDailyForce = new Chart(ctxForce, {
+          type: 'bar',
+          data: {
+            labels: ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Ts)', 'ศุกร์ (F)', 'พิเศษ (S)'],
+            datasets: [{
+              label: 'กำลังพลตามเวร (นาย)',
+              data: [0, 0, 0, 0, 0, 0],
+              backgroundColor: [
+                'rgba(59, 130, 246, 0.7)',
+                'rgba(168, 85, 247, 0.7)',
+                'rgba(34, 197, 94, 0.7)',
+                'rgba(249, 115, 22, 0.7)',
+                'rgba(239, 68, 68, 0.7)',
+                'rgba(234, 179, 8, 0.7)'
+              ],
+              borderColor: [
+                '#3b82f6', '#a855f7', '#22c55e', '#f97316', '#ef4444', '#eab308'
+              ],
+              borderWidth: 1.5,
+              borderRadius: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                titleColor: '#38bdf8',
+                bodyColor: '#e2e8f0',
+                borderColor: '#334155',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 10 } }, beginAtZero: true }
+            }
+          }
+        });
+      }
+
+      // 2. Leave Types Breakdown (Doughnut)
+      const ctxTypes = document.getElementById('chart-leave-types')?.getContext('2d');
+      if (ctxTypes && window.Chart) {
+        chartLeaveTypes = new Chart(ctxTypes, {
+          type: 'doughnut',
+          data: {
+            labels: ['ป่วย', 'กิจ', 'กิจกรรม', 'อื่นๆ'],
+            datasets: [{
+              data: [0, 0, 0, 0],
+              backgroundColor: ['#ef4444', '#f59e0b', '#3b82f6', '#8b5cf6'],
+              borderColor: '#0b1329',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            cutout: '70%',
+            plugins: {
+              legend: { position: 'bottom', labels: { color: '#94a3b8', boxWidth: 12, font: { size: 11 } } },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                borderColor: '#334155',
+                borderWidth: 1
+              }
+            }
+          }
+        });
+      }
+
+      // 3. 7-Day Weekly Leave Trend (Line)
+      const ctxTrend = document.getElementById('chart-weekly-trend')?.getContext('2d');
+      if (ctxTrend && window.Chart) {
+        chartWeeklyTrend = new Chart(ctxTrend, {
+          type: 'line',
+          data: {
+            labels: ['D-6', 'D-5', 'D-4', 'D-3', 'D-2', 'เมื่อวาน', 'วันนี้'],
+            datasets: [{
+              label: 'สถิติการลา (ครั้ง)',
+              data: [0, 0, 0, 0, 0, 0, 0],
+              borderColor: '#06b6d4',
+              backgroundColor: 'rgba(6, 182, 212, 0.15)',
+              tension: 0.35,
+              fill: true,
+              pointBackgroundColor: '#06b6d4',
+              pointRadius: 4
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { display: false },
+              tooltip: {
+                backgroundColor: '#0f172a',
+                borderColor: '#334155',
+                borderWidth: 1
+              }
+            },
+            scales: {
+              x: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
+              y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#94a3b8', stepSize: 1, font: { size: 10 } }, beginAtZero: true }
+            }
+          }
+        });
+      }
+    }
+
+    function updateDisciplineOverview(stats) {
+      if (!stats) return;
+
+      const totalActive = (stats.members && stats.members.active) || 0;
+      const leavesToday = (stats.leaves && stats.leaves.today) || 0;
+      const activeToday = Math.max(0, totalActive - leavesToday);
+      const readinessPct = totalActive > 0 ? Math.round((activeToday / totalActive) * 100) : 100;
+
+      const readyEl = document.getElementById('kpi-readiness-percent');
+      if (readyEl) readyEl.textContent = `${readinessPct}%`;
+
+      const readyBar = document.getElementById('kpi-readiness-bar');
+      if (readyBar) readyBar.style.width = `${readinessPct}%`;
+
+      const forceActive = document.getElementById('kpi-force-active');
+      if (forceActive) forceActive.textContent = `${activeToday} นาย`;
+
+      const forceLeaves = document.getElementById('kpi-force-leaves');
+      if (forceLeaves) forceLeaves.textContent = `${leavesToday} นาย`;
+
+      // Find best shift
+      const shifts = (stats.members && stats.members.shifts) || {};
+      let maxShift = '-';
+      let maxShiftCount = 0;
+      const shiftNames = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Ts: 'พฤหัสบดี', F: 'ศุกร์', S: 'เวรพิเศษ' };
+      for (const [sKey, count] of Object.entries(shifts)) {
+        if (count > maxShiftCount) {
+          maxShiftCount = count;
+          maxShift = `เวรวัน${shiftNames[sKey] || sKey} (${count} นาย)`;
+        }
+      }
+      const bestShiftEl = document.getElementById('kpi-best-shift');
+      if (bestShiftEl) bestShiftEl.textContent = maxShift;
+
+      // Update Chart 1: Force Bar
+      if (chartDailyForce) {
+        chartDailyForce.data.datasets[0].data = [
+          shifts.M || 0,
+          shifts.T || 0,
+          shifts.W || 0,
+          shifts.Ts || 0,
+          shifts.F || 0,
+          shifts.S || 0
+        ];
+        chartDailyForce.update();
+      }
+
+      // Update Chart 2: Leave Breakdown
+      if (chartLeaveTypes && stats.leaves && stats.leaves.byType) {
+        const bt = stats.leaves.byType;
+        const total = (bt.sick || 0) + (bt.personal || 0) + (bt.activity || 0) + (bt.other || 0);
+        chartLeaveTypes.data.datasets[0].data = total > 0 ? [bt.sick || 0, bt.personal || 0, bt.activity || 0, bt.other || 0] : [0, 0, 0, 0];
+        chartLeaveTypes.update();
+      }
+
+      // Update Chart 3: Weekly Trend
+      if (chartWeeklyTrend && stats.leaves && Array.isArray(stats.leaves.weeklyTrend)) {
+        chartWeeklyTrend.data.labels = stats.leaves.weeklyTrend.map(d => d.date.slice(5)); // MM-DD
+        chartWeeklyTrend.data.datasets[0].data = stats.leaves.weeklyTrend.map(d => d.count);
+        chartWeeklyTrend.update();
+      }
+    }
+
+    // ==========================================================
+    // ⚡ SUPABASE REALTIME CLIENT
+    // ==========================================================
+    let supabaseRealtimeClient = null;
+    async function initSupabaseRealtime() {
+      try {
+        const res = await fetch('/api/config/supabase-env');
+        const env = await res.json();
+        if (env.configured && window.supabase && env.supabaseUrl && env.supabaseAnonKey) {
+          supabaseRealtimeClient = window.supabase.createClient(env.supabaseUrl, env.supabaseAnonKey);
+          supabaseRealtimeClient
+            .channel('sarawat-portal-realtime')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'leave_requests' }, () => {
+              console.log('[REALTIME] leave_requests updated');
+              fetchData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
+              console.log('[REALTIME] members updated');
+              fetchData(false);
+            })
+            .subscribe();
+          console.log('[REALTIME] Connected to Supabase Realtime');
+        }
+      } catch (err) {
+        console.warn('[REALTIME] Supabase Realtime setup note:', err.message);
+      }
+    }
+
+    // ==========================================================
+    // 🎨 PRESET TEMPLATES & QUICK STAMPS (CARD STUDIO PRO)
+    // ==========================================================
+    const PRESET_TEMPLATES = {
+      tactical: {
+        name: 'Tactical Standard (มืด-ฟ้าแทคติคอล)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#ffffff';
+          if (studioConfig.elements.headerInspector) studioConfig.elements.headerInspector.fill = '#38bdf8';
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#0284c7';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#e2e8f0';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#0369a1';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#0f172a';
+          studioConfig.photoShape = 'fade';
+        }
+      },
+      executive: {
+        name: 'Executive Gold (ทองหรูหราผู้บริหาร)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#fef08a';
+          if (studioConfig.elements.headerInspector) studioConfig.elements.headerInspector.fill = '#eab308';
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#b45309';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#ca8a04';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#92400e';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#451a03';
+          studioConfig.photoShape = 'rounded';
+        }
+      },
+      academic: {
+        name: 'Formal Academic (สถาบันการศึกษาทางการ)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#ffffff';
+          if (studioConfig.elements.headerInspector) studioConfig.elements.headerInspector.fill = '#06b6d4';
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#0e7490';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#155e75';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#164e63';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#082f49';
+          studioConfig.photoShape = 'shield';
+        }
+      }
+    };
+
+    function applyPreset(presetKey) {
+      const preset = PRESET_TEMPLATES[presetKey];
+      if (!preset) return;
+      preset.apply();
+      renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      showNotification(`🎨 ปรับใช้เทมเพลต ${preset.name} สำเร็จ!`);
+    }
+
+    function stampDutyBadge(badgeCode) {
+      if (!studioCanvas) return;
+      const badgeColors = {
+        M: { bg: '#2563eb', text: '🔵 M' },
+        T: { bg: '#9333ea', text: '🟣 T' },
+        W: { bg: '#16a34a', text: '🟢 W' },
+        Ts: { bg: '#ea580c', text: '🟠 Ts' },
+        F: { bg: '#dc2626', text: '🔴 F' },
+        S: { bg: '#ca8a04', text: '⭐ S' }
+      };
+      const info = badgeColors[badgeCode] || { bg: '#2563eb', text: badgeCode };
+
+      let badgeObj = studioCanvas.getObjects().find(o => o.isDutyBadgeStamp);
+      if (badgeObj) {
+        studioCanvas.remove(badgeObj);
+      }
+
+      const rect = new fabric.Rect({
+        width: 48,
+        height: 24,
+        rx: 12,
+        ry: 12,
+        fill: info.bg,
+        originX: 'center',
+        originY: 'center'
+      });
+      const text = new fabric.Text(info.text, {
+        fontSize: 12,
+        fontFamily: 'Prompt',
+        fontWeight: 'bold',
+        fill: '#ffffff',
+        originX: 'center',
+        originY: 'center'
+      });
+      badgeObj = new fabric.Group([rect, text], {
+        left: 355,
+        top: 440,
+        isDutyBadgeStamp: true,
+        selectable: true
+      });
+      studioCanvas.add(badgeObj);
+      studioCanvas.setActiveObject(badgeObj);
+      studioCanvas.renderAll();
+      showNotification(`🏷️ ประทับตราเวร [${info.text}] บนบัตรเรียบร้อย!`);
+    }
+
+    function setPhotoFrameShape(shape) {
+      studioConfig.photoShape = shape;
+      renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      showNotification(`🖼️ เปลี่ยนกรอบรูปถ่ายเป็น: ${shape.toUpperCase()}`);
+    }
+
+    // ==========================================================
+    // 🖨️ A4 SHEET PRINT PREVIEW & PRINT ENGINE (8 CARDS/SHEET)
+    // ==========================================================
+    function openA4PrintModal() {
+      const modal = document.getElementById('a4-print-modal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+
+      const shiftSelect = document.getElementById('a4-shift-filter');
+      if (shiftSelect && shiftSelect.options.length <= 1) {
+        shiftSelect.innerHTML = `
+          <option value="all">👥 สมาชิกทั้งหมด (เรียงตามลำดับ)</option>
+          <option value="M">🔵 เวรวันจันทร์ (M)</option>
+          <option value="T">🟣 เวรวันอังคาร (T)</option>
+          <option value="W">🟢 เวรวันพุธ (W)</option>
+          <option value="Ts">🟠 เวรวันพฤหัสบดี (Ts)</option>
+          <option value="F">🔴 เวรวันศุกร์ (F)</option>
+          <option value="S">⭐ เวรพิเศษ (S)</option>
+        `;
+      }
+      renderA4Sheet('all');
+    }
+
+    function closeA4PrintModal() {
+      const modal = document.getElementById('a4-print-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderA4Sheet(filterShift = 'all') {
+      const grid = document.getElementById('a4-cards-grid');
+      if (!grid) return;
+
+      let membersToPrint = allMembers.filter(m => m.status === 'active');
+      if (filterShift !== 'all') {
+        membersToPrint = membersToPrint.filter(m => (m.shift || '').toUpperCase() === filterShift.toUpperCase());
+      }
+      if (membersToPrint.length === 0) {
+        membersToPrint = [SAMPLE_MEMBER];
+      }
+
+      const pageMembers = membersToPrint.slice(0, 8);
+      while (pageMembers.length < 8) {
+        pageMembers.push(pageMembers[pageMembers.length % membersToPrint.length]);
+      }
+
+      grid.innerHTML = pageMembers.map((m, idx) => {
+        const dutyId = m.duty_id || `SARAWAT-${String(idx+1).padStart(3, '0')}`;
+        const nick = m.nickname || 'SARAWAT';
+        const fullname = m.full_name || 'สารวัตรนักเรียน พระนารายณ์';
+        const shiftBadge = m.shift || 'M';
+        const photo = m.photo_url || '/assets/logo.png';
+
+        return `
+          <div class="relative w-[340px] h-[538px] bg-slate-900 border border-dashed border-slate-700 rounded-xl overflow-hidden shadow p-3 flex flex-col justify-between text-white" style="page-break-inside: avoid;">
+            <!-- Cutting Corner Marks -->
+            <div class="absolute -top-1 -left-1 w-3 h-3 border-t-2 border-l-2 border-blue-500"></div>
+            <div class="absolute -top-1 -right-1 w-3 h-3 border-t-2 border-r-2 border-blue-500"></div>
+            <div class="absolute -bottom-1 -left-1 w-3 h-3 border-b-2 border-l-2 border-blue-500"></div>
+            <div class="absolute -bottom-1 -right-1 w-3 h-3 border-b-2 border-r-2 border-blue-500"></div>
+
+            <!-- Card Header -->
+            <div class="flex items-center justify-between border-b border-slate-700/60 pb-2">
+              <div class="flex items-center gap-2">
+                <img src="/assets/school_emblem.png" class="w-8 h-8 object-contain" alt="Emblem" onerror="this.src='/assets/logo.png'">
+                <div>
+                  <div class="text-[11px] font-black tracking-widest text-sky-400">STUDENT INSPECTOR</div>
+                  <div class="text-[9px] text-slate-400">โรงเรียนพระนารายณ์</div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-300 border border-blue-500/40">${shiftBadge}</span>
+            </div>
+
+            <!-- Card Photo & ID -->
+            <div class="my-auto flex flex-col items-center text-center">
+              <div class="w-24 h-32 rounded-lg border-2 border-sky-500/50 overflow-hidden mb-2 shadow">
+                <img src="${photo}" class="w-full h-full object-cover" alt="${fullname}">
+              </div>
+              <div class="text-base font-black tracking-wider text-white">${nick}</div>
+              <div class="text-[11px] text-slate-300 font-medium">${fullname}</div>
+              <div class="text-[10px] font-mono text-sky-400 mt-1">${dutyId}</div>
+            </div>
+
+            <!-- Card Footer Barcode -->
+            <div class="pt-2 border-t border-slate-700/60 flex items-center justify-between text-[9px] text-slate-400">
+              <span>SARAWAT DIGITAL ID</span>
+              <span class="font-mono text-slate-300">VALID 2026</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function printA4Sheet() {
+      window.print();
+    }
+
     // Initial Load
     initLiveClock();
+    initDisciplineCharts();
+    initSupabaseRealtime();
     fetchData();
     setInterval(() => fetchData(), 30000); // Background refresh every 30s
   </script>

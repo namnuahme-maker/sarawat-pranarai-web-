@@ -78,6 +78,28 @@ app.get('/api/stats', async (req, res) => {
     let totalLeaves = 0;
     let pendingLeaves = 0;
     let todayLeavesCount = 0;
+    const leaveTypes = {
+      sick: 0,        // ลาป่วย
+      personal: 0,    // ลากิจ
+      activity: 0,    // กิจกรรมโรงเรียน/แข่งขัน
+      other: 0        // อื่นๆ
+    };
+
+    // สถิติแนวโน้มย้อนหลัง 7 วัน
+    const weeklyTrend = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      const iso = d.toISOString().slice(0, 10);
+      const dayNames = ['อา.', 'จ.', 'อ.', 'พ.', 'พฤ.', 'ศ.', 'ส.'];
+      weeklyTrend.push({
+        date: iso,
+        dayLabel: dayNames[d.getDay()],
+        count: 0
+      });
+    }
+
     try {
       const { count: cLeaves } = await supabase.from('leave_requests').select('*', { count: 'exact', head: true });
       totalLeaves = cLeaves || 0;
@@ -85,20 +107,40 @@ app.get('/api/stats', async (req, res) => {
       const { count: pLeaves } = await supabase.from('leave_requests').select('*', { count: 'exact', head: true }).eq('status', 'PENDING');
       pendingLeaves = pLeaves || 0;
 
-      const { data: recentLeaves } = await supabase.from('leave_requests')
-        .select('leave_date, created_at')
+      const { data: allLeaves } = await supabase.from('leave_requests')
+        .select('leave_date, leave_type, created_at')
         .order('created_at', { ascending: false })
-        .limit(50);
+        .limit(100);
 
       const today = new Date();
       const todayISO = today.toISOString().slice(0, 10);
       const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
       const todayThaiPattern = `${today.getDate()} ${thaiMonths[today.getMonth()]}`;
 
-      (recentLeaves || []).forEach(l => {
+      (allLeaves || []).forEach(l => {
+        // นับยอดลาวันนี้
         if ((l.leave_date && l.leave_date.includes(todayThaiPattern)) ||
             (l.created_at && l.created_at.startsWith(todayISO))) {
           todayLeavesCount++;
+        }
+
+        // จัดหมวดหมู่ประเภทการลา
+        const t = (l.leave_type || '').toLowerCase();
+        if (t.includes('ป่วย') || t.includes('sick')) {
+          leaveTypes.sick++;
+        } else if (t.includes('กิจ') || t.includes('personal')) {
+          leaveTypes.personal++;
+        } else if (t.includes('กิจกรรม') || t.includes('แข่ง') || t.includes('activity')) {
+          leaveTypes.activity++;
+        } else {
+          leaveTypes.other++;
+        }
+
+        // จับคู่ลงในแนวโน้ม 7 วัน
+        if (l.created_at) {
+          const itemDate = l.created_at.slice(0, 10);
+          const trendItem = weeklyTrend.find(w => w.date === itemDate);
+          if (trendItem) trendItem.count++;
         }
       });
     } catch (e) {
@@ -121,13 +163,26 @@ app.get('/api/stats', async (req, res) => {
       leaves: {
         total: totalLeaves,
         today: todayLeavesCount,
-        pending: pendingLeaves
+        pending: pendingLeaves,
+        types: leaveTypes,
+        trend: weeklyTrend
       },
       shifts: shiftCounts
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// -------------------------------------------------------------
+// 2.05 API: ค่า Config สำหรับ Supabase Realtime Client
+// -------------------------------------------------------------
+app.get('/api/config/supabase-env', (req, res) => {
+  res.json({
+    success: true,
+    supabaseUrl: process.env.SUPABASE_URL || '',
+    supabaseKey: process.env.SUPABASE_SERVICE_ROLE_KEY || ''
+  });
 });
 
 // -------------------------------------------------------------
