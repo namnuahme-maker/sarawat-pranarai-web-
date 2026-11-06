@@ -1,80 +1,42 @@
 <!DOCTYPE html>
-<html lang="th" class="dark h-full antialiased">
+<html lang="th" class="dark h-full antialiased bg-black text-zinc-100">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>SARAWAT PORTAL - พอร์ทัลบริการนักเรียนและโรงเรียนพระนารายณ์</title>
+  <title>SARAWAT TACTICAL TERMINAL // SEC-OPS PRANARAI</title>
   
-  <!-- Web Icon / Favicon -->
   <link rel="icon" type="image/png" href="/assets/logo.png">
   <link rel="shortcut icon" href="/assets/logo.png">
   <link rel="apple-touch-icon" href="/assets/logo.png">
   
-  <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <link rel="preconnect" href="https://fonts.gstatic.com">
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  
+
   <script>
     tailwind.config = {
       darkMode: 'class',
       theme: {
         extend: {
           fontFamily: {
-            sans: ['Prompt', 'Kanit', 'sans-serif'],
-            display: ['Kanit', 'Prompt', 'sans-serif'],
-            mono: ['Chakra Petch', 'monospace'],
+            sans: ['Chakra Petch', 'Prompt', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Chakra Petch', 'monospace'],
           },
           colors: {
-            portal: {
-              50: '#f0f5fc',
-              100: '#e1ecf9',
-              200: '#c3daf4',
-              300: '#95c0ec',
-              400: '#5f9fe1',
-              500: '#387fd4',
-              600: '#2563eb',
-              700: '#1d4ed8',
-              800: '#1e3a8a',
-              900: '#0c1a30',
-              950: '#071020'
-            },
-            gold: {
-              300: '#fcd34d',
-              400: '#fbbf24',
-              500: '#f59e0b',
-              600: '#d97706',
-              700: '#b45309'
-            }
-          },
-          animation: {
-            'pulse-subtle': 'pulseSubtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'float': 'float 3s ease-in-out infinite',
-            'fade-in': 'fadeIn 0.25s ease-out forwards',
-            'slide-up': 'slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-          },
-          keyframes: {
-            pulseSubtle: {
-              '0%, 100%': { opacity: '1' },
-              '50%': { opacity: '0.6' }
-            },
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-4px)' }
-            },
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'scale(0.98)' },
-              '100%': { opacity: '1', transform: 'scale(1)' }
-            },
-            slideUp: {
-              '0%': { opacity: '0', transform: 'translateY(10px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
+            tac: {
+              black: '#000000',
+              panel: '#09090b',
+              surface: '#121215',
+              border: '#27272a',
+              borderLight: '#3f3f46',
+              green: '#10b981',
+              greenGlow: '#059669',
+              amber: '#f59e0b',
+              red: '#ef4444',
+              cyan: '#06b6d4',
+              blue: '#3b82f6'
             }
           }
         }
@@ -83,1363 +45,952 @@
   </script>
 
   <style>
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    .dark ::-webkit-scrollbar-thumb { background: #1e3a8a; border-radius: 9999px; }
-    .dark ::-webkit-scrollbar-thumb:hover { background: #2563eb; }
-    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
-    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-
-    /* Bento Grid Card Glass Style */
-    .bento-card {
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    /* OLED Pitch Black Terminal Base */
+    html, body {
+      background-color: #000000;
+      color: #f4f4f5;
     }
-    .bento-card:hover {
-      transform: translateY(-2px);
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: #000000; }
+    ::-webkit-scrollbar-thumb { background: #27272a; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3f3f46; }
+
+    /* Tactical Border Crosshairs */
+    .tac-box {
+      background-color: #09090b;
+      border: 1px solid #27272a;
+      position: relative;
+    }
+    .tac-box::before {
+      content: '+';
+      position: absolute;
+      top: -7px;
+      left: -5px;
+      font-size: 10px;
+      color: #71717a;
+      font-family: monospace;
+      pointer-events: none;
+    }
+    .tac-box::after {
+      content: '+';
+      position: absolute;
+      bottom: -7px;
+      right: -5px;
+      font-size: 10px;
+      color: #71717a;
+      font-family: monospace;
+      pointer-events: none;
     }
 
-    .counter-value {
-      display: inline-block;
+    .num-tabular {
       font-variant-numeric: tabular-nums;
-      transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
     }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-portal-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col font-sans transition-colors duration-200">
+<body class="bg-black text-zinc-200 min-h-screen flex flex-col font-sans select-none antialiased">
 
   <!-- ========================================================= -->
-  <!-- 🛡️ TOP NAV BAR: BRAND, LIVE CLOCK & CONTROLS -->
+  <!-- 🛡️ TOP TACTICAL HUD: SYSTEM TELEMETRY & REALTIME CLOCK -->
   <!-- ========================================================= -->
-  <header class="sticky top-0 z-40 bg-white/90 dark:bg-portal-900/90 backdrop-blur-md border-b border-slate-200 dark:border-portal-800/80 transition-colors shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16 sm:h-20">
-        
-        <!-- Brand Identity -->
-        <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('portal')">
-          <div class="relative flex items-center justify-center">
-            <img src="/assets/school_emblem.png" alt="โรงเรียนพระนารายณ์" class="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow" onerror="this.src='/assets/logo.png'">
-            <img src="/assets/logo.png" alt="สารวัตรนักเรียน" class="w-5 h-5 sm:w-6 sm:h-6 absolute -bottom-1 -right-1 rounded-full border-2 border-white dark:border-portal-900 object-cover shadow">
-          </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <span class="font-display font-extrabold text-base sm:text-lg tracking-wide text-portal-900 dark:text-white">SARAWAT PORTAL</span>
-              <span class="hidden md:inline-flex px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold-500/15 text-gold-600 dark:text-gold-400 border border-gold-500/30">
-                พระนารายณ์
-              </span>
-            </div>
-            <p class="text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium">ศูนย์บริการนักเรียนและระบบสารวัตร</p>
-          </div>
-        </div>
-
-        <!-- Live Clock & Status Badge (Desktop) -->
-        <div class="hidden lg:flex items-center gap-3">
-          <div class="px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center gap-2 text-xs font-semibold">
-            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
-            <span id="hud-duty-day-label">ตรวจความพร้อม: เวรประจำวันพร้อมปฏิบัติการ</span>
-          </div>
-          <div class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800/60 border border-slate-200 dark:border-portal-700/50 text-xs font-mono text-slate-600 dark:text-slate-300">
-            <span id="hud-live-clock">--:--:-- น.</span>
-          </div>
-        </div>
-
-        <!-- Header Actions: Theme Toggle & Staff Mode -->
+  <header class="bg-black border-b border-zinc-800 px-4 py-2.5 sticky top-0 z-40">
+    <div class="max-w-[1700px] mx-auto flex flex-wrap items-center justify-between gap-3 text-xs">
+      
+      <!-- Brand & Security Clearance -->
+      <div class="flex items-center gap-3">
         <div class="flex items-center gap-2">
-          <!-- Theme Toggle -->
-          <button onclick="toggleDarkMode()" aria-label="สลับธีม" class="p-2 sm:px-3 sm:py-2 rounded-xl bg-slate-100 dark:bg-portal-800/80 hover:bg-slate-200 dark:hover:bg-portal-700/80 text-slate-600 dark:text-slate-300 transition text-xs font-semibold flex items-center gap-1.5">
-            <span id="theme-icon">🌙</span>
-            <span class="hidden sm:inline" id="theme-text">โหมดมืด</span>
-          </button>
-
-          <!-- Refresh Data -->
-          <button onclick="fetchData(true)" aria-label="รีเฟรชข้อมูล" class="p-2 rounded-xl bg-slate-100 dark:bg-portal-800/80 hover:bg-slate-200 dark:hover:bg-portal-700/80 text-slate-600 dark:text-slate-300 transition">
-            <svg id="refresh-icon" class="w-4 h-4 transition-transform duration-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-            </svg>
-          </button>
-
-          <!-- Staff Mode Button -->
-          <button onclick="switchTab('staff')" id="btn-staff-header" class="px-3 py-2 rounded-xl bg-portal-600 hover:bg-portal-500 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm active:scale-95">
-            <span>🛡️</span>
-            <span class="hidden md:inline">โหมดสารวัตร</span>
-          </button>
+          <img src="/assets/school_emblem.png" class="w-6 h-6 object-contain" alt="">
+          <img src="/assets/logo.png" class="w-6 h-6 object-contain" alt="">
+          <span class="font-mono font-bold tracking-widest text-emerald-400 text-sm">SARAWAT//SEC-OPS</span>
         </div>
-
+        <span class="text-zinc-600">|</span>
+        <span class="font-mono text-[11px] text-zinc-400 uppercase tracking-wider">PRANARAI TACTICAL DATA TERMINAL</span>
+        <span class="px-2 py-0.5 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-800 text-[10px] font-mono font-bold">
+          LIVE TELEMETRY
+        </span>
       </div>
 
-      <!-- Desktop Nav Tabs -->
-      <nav class="hidden sm:flex items-center space-x-1 border-t border-slate-200 dark:border-portal-800/60 py-2 overflow-x-auto text-xs font-semibold">
-        <button onclick="switchTab('portal')" id="nav-desktop-portal" class="nav-tab-btn px-4 py-2 rounded-xl transition flex items-center gap-2 bg-portal-600 text-white shadow-sm font-bold">
-          <span>🏠</span> หน้าแรกบริการ
+      <!-- Live Counters & Auto-Refresh Ticker -->
+      <div class="flex items-center gap-4 font-mono text-[11px]">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span class="text-zinc-400">STATUS:</span>
+          <span class="text-emerald-400 font-bold" id="tac-shift-status">OPERATIONAL</span>
+        </div>
+
+        <div class="hidden md:flex items-center gap-1.5 text-zinc-400">
+          <span>ACTIVE FORCE:</span>
+          <span class="text-cyan-400 font-bold num-tabular" id="tac-cnt-force">--</span>
+        </div>
+
+        <div class="hidden md:flex items-center gap-1.5 text-zinc-400">
+          <span>OPEN INCIDENTS:</span>
+          <span class="text-amber-400 font-bold num-tabular" id="tac-cnt-cases">--</span>
+        </div>
+
+        <div class="flex items-center gap-1.5 text-zinc-400">
+          <span>SYNC:</span>
+          <span class="text-zinc-200 font-bold num-tabular" id="tac-countdown">30s</span>
+        </div>
+
+        <button onclick="manualRefresh()" class="px-2.5 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 rounded text-[11px] font-mono transition flex items-center gap-1">
+          <span>↻</span> <span>REFRESH</span>
         </button>
-        <button onclick="switchTab('lostfound')" id="nav-desktop-lostfound" class="nav-tab-btn px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-portal-800">
-          <span>📦</span> ของหายได้คืน (Lost & Found)
-        </button>
-        <button onclick="switchTab('incident')" id="nav-desktop-incident" class="nav-tab-btn px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-portal-800">
-          <span>🚨</span> แจ้งเหตุด่วน SOS
-        </button>
-        <button onclick="switchTab('duty')" id="nav-desktop-duty" class="nav-tab-btn px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-portal-800">
-          <span>👮</span> สารวัตร & จุดตรวจ
-        </button>
-        <button onclick="switchTab('staff')" id="nav-desktop-staff" class="nav-tab-btn px-4 py-2 rounded-xl transition flex items-center gap-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-portal-800">
-          <span>🛡️</span> งานสารวัตร & บัตร
-        </button>
-      </nav>
+
+        <div class="text-zinc-400 bg-zinc-950 px-2.5 py-1 border border-zinc-800 rounded font-bold" id="tac-clock">
+          00:00:00 UTC+7
+        </div>
+      </div>
 
     </div>
   </header>
 
   <!-- ========================================================= -->
-  <!-- 📱 MAIN CONTAINER (TAB CONTENT) -->
+  <!-- 🎛️ MAIN HIGH-DENSITY TERMINAL GRID -->
   <!-- ========================================================= -->
-  <main class="flex-grow max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 pb-24 sm:pb-12">
+  <main class="flex-grow max-w-[1700px] w-full mx-auto p-3 sm:p-4 space-y-4">
 
-    <!-- ======================================================= -->
-    <!-- 🏠 TAB 1: PORTAL HOME (BENTO GRID HERO) -->
-    <!-- ======================================================= -->
-    <div id="tab-portal" class="tab-pane space-y-6 animate-fade-in">
-
-      <!-- Hero Header Banner -->
-      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-portal-900 via-portal-800 to-portal-950 text-white p-6 sm:p-10 border border-portal-700/40 shadow-xl">
-        <div class="absolute -right-12 -top-12 w-64 h-64 bg-gold-500/10 rounded-full blur-3xl pointer-events-none"></div>
-        <div class="absolute -left-12 -bottom-12 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl pointer-events-none"></div>
-
-        <div class="relative z-10 max-w-2xl space-y-3">
-          <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold-500/20 text-gold-300 border border-gold-500/40 text-xs font-bold">
-            <span>✨</span> บริการออนไลน์สำหรับนักเรียนและครู
-          </div>
-          <h1 class="text-2xl sm:text-4xl font-display font-extrabold tracking-tight text-white leading-tight">
-            ศูนย์พอร์ทัลบริการนักเรียน <br>
-            <span class="text-transparent bg-clip-text bg-gradient-to-r from-gold-400 to-amber-300">กลุ่มงานสารวัตร โรงเรียนพระนารายณ์</span>
-          </h1>
-          <p class="text-sm sm:text-base text-slate-300 leading-relaxed">
-            ติดตามของหาย แจ้งเหตุฉุกเฉิน และตรวจสอบสารวัตรประจำจุดตรวจแบบ Real-time เพื่อความปลอดภัยของชาวพระนารายณ์ทุกคน
-          </p>
-        </div>
+    <!-- TOP SECTION: OPERATIONAL TELEMETRY & A4 DISPATCH STRIP -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2.5 font-mono text-xs">
+      <div class="tac-box p-3 bg-zinc-950">
+        <p class="text-[10px] text-zinc-500 uppercase">ACTIVE OFFICERS</p>
+        <p class="text-xl font-bold text-emerald-400 num-tabular mt-0.5" id="telemetry-officers">--</p>
+        <p class="text-[9px] text-zinc-500 mt-0.5">READY FOR DUTY</p>
       </div>
 
-      <!-- Bento Grid (3-4 Columns on Desktop) -->
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <!-- Card 1: 🔍 Lost & Found Quick Hub (Col Span 2) -->
-        <div class="md:col-span-2 bento-card rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 shadow-sm flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-2xl bg-amber-500/15 text-gold-500 flex items-center justify-center text-xl font-bold">
-                  🔍
-                </div>
-                <div>
-                  <h3 class="font-display font-bold text-lg text-slate-900 dark:text-white">ของหายได้คืน (Lost & Found)</h3>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">ค้นหาของที่คุณทำหาย หรือแจ้งพบสิ่งของในโรงเรียน</p>
-                </div>
-              </div>
-              <button onclick="switchTab('lostfound')" class="text-xs font-bold text-portal-600 dark:text-gold-400 hover:underline flex items-center gap-1">
-                ดูกระดานทั้งหมด →
-              </button>
-            </div>
-
-            <!-- Fast Search Input -->
-            <div class="relative">
-              <input type="text" id="portal-lost-search" placeholder="พิมพ์ชื่อของที่ทำหาย เช่น กระเป๋าเงิน, กุญแจรถ, หูฟัง, บัตรนักเรียน..." 
-                     class="w-full pl-11 pr-4 py-3 rounded-2xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-sm focus:outline-none focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100 transition"
-                     onkeyup="handlePortalSearch(event)">
-              <span class="absolute left-4 top-3.5 text-slate-400 text-base">🔍</span>
-            </div>
-
-            <!-- Quick Category Pills -->
-            <div class="flex flex-wrap gap-2 text-xs">
-              <button onclick="filterLostByCat('กระเป๋า')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-gold-500/20 hover:text-gold-500 transition">🎒 กระเป๋า</button>
-              <button onclick="filterLostByCat('ไอที/มือถือ')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-gold-500/20 hover:text-gold-500 transition">📱 มือถือ/ไอที</button>
-              <button onclick="filterLostByCat('อุปกรณ์การเรียน')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-gold-500/20 hover:text-gold-500 transition">✏️ เครื่องเขียน</button>
-              <button onclick="filterLostByCat('กุญแจ')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-gold-500/20 hover:text-gold-500 transition">🔑 กุญแจ</button>
-              <button onclick="filterLostByCat('เสื้อผ้า/เครื่องแต่งกาย')" class="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-gold-500/20 hover:text-gold-500 transition">👕 เสื้อผ้า</button>
-            </div>
-
-            <!-- Recent Found Items Preview (Cards) -->
-            <div id="portal-recent-lost" class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/60 border border-slate-200 dark:border-portal-800 flex items-center gap-3">
-                <span class="text-2xl">⏳</span>
-                <div class="text-xs">
-                  <p class="font-bold">กำลังโหลดรายการ...</p>
-                  <p class="text-[10px] text-slate-400">ระบบของหายได้คืน</p>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="pt-4 mt-4 border-t border-slate-100 dark:border-portal-800 flex items-center justify-between">
-            <span class="text-xs text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
-              <span>📍</span> รับของคืนได้ที่: <b>ห้องสารวัตรนักเรียน อาคาร 1</b>
-            </span>
-            <button onclick="openReportLostModal()" class="px-3.5 py-2 rounded-xl bg-gold-500 hover:bg-gold-400 text-portal-950 text-xs font-bold transition flex items-center gap-1.5 shadow">
-              <span>+</span> แจ้งพบของหาย
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 2: ☀️ สารวัตรปฏิบัติการวันนี้ (Col Span 1) -->
-        <div class="bento-card rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 shadow-sm flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-2xl bg-portal-500/15 text-portal-500 flex items-center justify-center text-xl font-bold">
-                  👮
-                </div>
-                <div>
-                  <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">สารวัตรเวรประจำวัน</h3>
-                  <p class="text-xs text-slate-500 dark:text-slate-400" id="portal-today-shift-text">กำลังโหลดผลัดเวร...</p>
-                </div>
-              </div>
-              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            </div>
-
-            <!-- Leadership Team Today -->
-            <div id="portal-today-commanders" class="space-y-2.5">
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-gold-500/20 text-gold-500 flex items-center justify-center font-bold text-sm">👑</div>
-                  <div>
-                    <p class="text-xs font-bold text-slate-800 dark:text-white" id="portal-head-name">กำลังตรวจสอบ...</p>
-                    <p class="text-[10px] text-slate-400">หัวหน้าเวรประจำวัน</p>
-                  </div>
-                </div>
-                <span class="px-2 py-0.5 rounded-lg bg-portal-600/20 text-portal-600 dark:text-portal-300 font-mono text-[10px] font-bold" id="portal-head-id">-</span>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-blue-500/20 text-blue-500 flex items-center justify-center font-bold text-sm">🎖️</div>
-                  <div>
-                    <p class="text-xs font-bold text-slate-800 dark:text-white" id="portal-deputy-name">กำลังตรวจสอบ...</p>
-                    <p class="text-[10px] text-slate-400">รองหัวหน้าเวร</p>
-                  </div>
-                </div>
-                <span class="px-2 py-0.5 rounded-lg bg-portal-600/20 text-portal-600 dark:text-portal-300 font-mono text-[10px] font-bold" id="portal-deputy-id">-</span>
-              </div>
-            </div>
-
-            <div class="p-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-[11px] text-emerald-700 dark:text-emerald-300">
-              🛡️ สารวัตรนักเรียนพร้อมเข้าช่วยเหลือ และตรวจตรารอบโรงเรียนตลอด 3 ช่วงเวลา
-            </div>
-          </div>
-
-          <div class="pt-4 mt-4 border-t border-slate-100 dark:border-portal-800">
-            <button onclick="switchTab('duty')" class="w-full py-2.5 rounded-xl bg-slate-100 dark:bg-portal-800 hover:bg-slate-200 dark:hover:bg-portal-700 text-xs font-bold text-slate-700 dark:text-slate-200 transition text-center">
-              ดูรายชื่อสารวัตรทั้งหมดวันนี้ →
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 3: 🚨 แจ้งเหตุด่วน SOS (Col Span 1) -->
-        <div class="bento-card rounded-3xl bg-white dark:bg-portal-900/90 border border-rose-200 dark:border-rose-900/40 p-6 shadow-sm flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center gap-2.5">
-              <div class="w-10 h-10 rounded-2xl bg-rose-500/15 text-rose-500 flex items-center justify-center text-xl font-bold animate-pulse">
-                🚨
-              </div>
-              <div>
-                <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">แจ้งเหตุด่วน SOS</h3>
-                <p class="text-xs text-rose-600 dark:text-rose-400">ส่งตรงเข้า Discord สารวัตรทันที</p>
-              </div>
-            </div>
-
-            <!-- 1-Click Incident Types -->
-            <div class="space-y-2">
-              <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">เลือกลักษณะเหตุการณ์:</label>
-              <div class="grid grid-cols-2 gap-1.5 text-xs">
-                <button type="button" onclick="selectQuickIncidentType('ก่อวิวาท')" class="quick-inc-btn p-2 rounded-xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-rose-500 text-left font-medium">💥 ก่อวิวาท</button>
-                <button type="button" onclick="selectQuickIncidentType('มั่วสุม/สิ่งผิดระเบียบ')" class="quick-inc-btn p-2 rounded-xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-rose-500 text-left font-medium">🚬 มั่วสุม</button>
-                <button type="button" onclick="selectQuickIncidentType('เหตุน่าสงสัย')" class="quick-inc-btn p-2 rounded-xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-rose-500 text-left font-medium">👁️ น่าสงสัย</button>
-                <button type="button" onclick="selectQuickIncidentType('ขอความช่วยเหลือ')" class="quick-inc-btn p-2 rounded-xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-rose-500 text-left font-medium">🩹 ช่วยเหลือ</button>
-              </div>
-            </div>
-
-            <!-- Preset Campus Location -->
-            <div class="space-y-1.5">
-              <label class="text-[11px] font-semibold text-slate-500 dark:text-slate-400">จุดเกิดเหตุในโรงเรียน:</label>
-              <select id="quick-incident-location" class="w-full px-3 py-2 rounded-xl bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
-                <option value="หลังอาคาร 3">หลังอาคาร 3</option>
-                <option value="โรงอาหาร & อาคารกิจกรรม">โรงอาหาร & อาคารกิจกรรม</option>
-                <option value="ห้องน้ำชายชั้น 2 อาคาร 2">ห้องน้ำชายชั้น 2</option>
-                <option value="บริเวณลานเสาธง">บริเวณลานเสาธง</option>
-                <option value="ลานจอดรถมอเตอร์ไซค์">ลานจอดรถมอเตอร์ไซค์</option>
-                <option value="อื่นๆ (ระบุในฟอร์ม)">อื่นๆ...</option>
-              </select>
-            </div>
-
-            <!-- Anonymous Option -->
-            <label class="flex items-center gap-2 text-xs text-slate-600 dark:text-slate-300 cursor-pointer">
-              <input type="checkbox" id="quick-incident-anon" checked class="rounded text-rose-600 focus:ring-rose-500">
-              <span>แจ้งแบบไม่เปิดเผยตัวตน (ปกป้องผู้แจ้ง)</span>
-            </label>
-          </div>
-
-          <div class="pt-4 mt-4 border-t border-slate-100 dark:border-portal-800">
-            <button onclick="submitQuickIncident()" class="w-full py-2.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-bold transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 active:scale-95">
-              <span>🚨</span> ส่งเหตุแจ้งเตือนทันที
-            </button>
-          </div>
-        </div>
-
-        <!-- Card 4: 📍 ผังจุดตรวจความปลอดภัยโรงเรียน (Col Span 2) -->
-        <div class="md:col-span-2 bento-card rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 shadow-sm flex flex-col justify-between">
-          <div class="space-y-4">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2.5">
-                <div class="w-10 h-10 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center text-xl font-bold">
-                  📍
-                </div>
-                <div>
-                  <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">สถานะจุดตรวจความปลอดภัยรอบโรงเรียน</h3>
-                  <p class="text-xs text-slate-500 dark:text-slate-400">อัปเดตสถานะการประจำการและตรวจตรารอบรั้วพระนารายณ์</p>
-                </div>
-              </div>
-              <span class="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                🟢 ปกติ 5 จุด
-              </span>
-            </div>
-
-            <!-- Campus Checkpoints Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">ประตู 1 (หน้าโรงเรียน)</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">ตรวจเครื่องแบบ การเข้าแถว รถรับส่ง</p>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">ประตู 2 (ประตูข้าง/หลัง)</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">ตรวจตรารถจักรยานยนต์ และนักเรียนเข้าออก</p>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">ลานหน้าเสาธง & สนาม</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">จัดระเบียบแถวเคารพธงชาติและกิจกรรมเช้า</p>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">โรงอาหาร & สหกรณ์</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">ดูแลความสงบเรียบร้อยช่วงพักกลางวัน</p>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">หลังอาคาร 3 & พื้นที่เสี่ยง</span>
-                  <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">ตรวจตราพิเศษ ป้องกันการมั่วสุมและวิวาท</p>
-              </div>
-
-              <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/70 border border-slate-200 dark:border-portal-800 space-y-1">
-                <div class="flex items-center justify-between">
-                  <span class="font-bold text-xs text-slate-800 dark:text-white">ห้องสารวัตร (อาคาร 1)</span>
-                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                </div>
-                <p class="text-[10px] text-slate-500 dark:text-slate-400">ศูนย์ประสานงาน รับของหาย และไกล่เกลี่ย</p>
-              </div>
-            </div>
-          </div>
-
-          <div class="pt-4 mt-4 border-t border-slate-100 dark:border-portal-800 flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
-            <span>⏰ รอบเวร: เช้า 07:00-08:00 • กลางวัน 11:30-13:00 • เย็น 15:30-17:00 น.</span>
-            <span class="font-mono text-portal-600 dark:text-gold-400 font-bold">โรงเรียนพระนารายณ์</span>
-          </div>
-        </div>
-
+      <div class="tac-box p-3 bg-zinc-950">
+        <p class="text-[10px] text-zinc-500 uppercase">TOTAL INCIDENTS</p>
+        <p class="text-xl font-bold text-zinc-200 num-tabular mt-0.5" id="telemetry-cases">--</p>
+        <p class="text-[9px] text-amber-500 mt-0.5" id="telemetry-pending">PENDING: 0</p>
       </div>
+
+      <div class="tac-box p-3 bg-zinc-950">
+        <p class="text-[10px] text-zinc-500 uppercase">RESOLVED CASES</p>
+        <p class="text-xl font-bold text-cyan-400 num-tabular mt-0.5" id="telemetry-resolved">--</p>
+        <p class="text-[9px] text-zinc-500 mt-0.5">ACTION COMPLETED</p>
+      </div>
+
+      <div class="tac-box p-3 bg-zinc-950">
+        <p class="text-[10px] text-zinc-500 uppercase">EVIDENCE / VAULT</p>
+        <p class="text-xl font-bold text-amber-400 num-tabular mt-0.5" id="telemetry-lost">--</p>
+        <p class="text-[9px] text-zinc-500 mt-0.5" id="telemetry-lost-wait">WAITING CLAIM</p>
+      </div>
+
+      <!-- Quick A4 Sheet Export Commands -->
+      <div class="col-span-2 sm:col-span-4 lg:col-span-3 tac-box p-3 bg-zinc-950 flex flex-col justify-between">
+        <div class="flex items-center justify-between text-[10px] text-zinc-400">
+          <span class="font-bold text-zinc-300">ATTENDANCE SHEET A4 EXPORT // 12-WEEK SYSTEM</span>
+          <span class="text-zinc-600">DIRECT PRINT</span>
+        </div>
+        <div class="grid grid-cols-6 gap-1.5 mt-2">
+          <button onclick="triggerSheet('M')" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-blue-400 rounded text-center transition font-bold">MON [M]</button>
+          <button onclick="triggerSheet('T')" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-purple-400 rounded text-center transition font-bold">TUE [T]</button>
+          <button onclick="triggerSheet('W')" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-emerald-400 rounded text-center transition font-bold">WED [W]</button>
+          <button onclick="triggerSheet('Ts')" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-amber-400 rounded text-center transition font-bold">THU [Ts]</button>
+          <button onclick="triggerSheet('F')" class="px-2 py-1 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-[10px] text-rose-400 rounded text-center transition font-bold">FRI [F]</button>
+          <button onclick="triggerSheet('ALL')" class="px-2 py-1 bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-700 text-[10px] text-emerald-300 rounded text-center transition font-bold">ALL [12W]</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAIN DUAL HIGH-DENSITY DATA DISPLAY: ROSTER + INCIDENT VAULT -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+      <!-- ===================================================== -->
+      <!-- 👮 MODULE 1: OPERATIONAL FORCE & DUTY ROSTER -->
+      <!-- ===================================================== -->
+      <section class="tac-box p-3.5 flex flex-col justify-between">
+        <div class="space-y-2.5">
+          <!-- Section Command Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-zinc-800">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 bg-cyan-500 rounded-sm"></span>
+              <h2 class="font-mono font-bold text-xs tracking-wider text-zinc-100 uppercase">
+                MODULE 01 // OPERATIONAL ROSTER
+              </h2>
+              <span class="text-[10px] text-zinc-500 font-mono" id="roster-active-day-tag">[TODAY: -]</span>
+            </div>
+
+            <!-- Shift Filters -->
+            <div class="flex items-center gap-1 font-mono text-[10px]">
+              <button onclick="filterRoster('ALL')" id="flt-shift-all" class="px-2 py-0.5 bg-zinc-800 text-white rounded font-bold">ALL</button>
+              <button onclick="filterRoster('M')" id="flt-shift-M" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">M</button>
+              <button onclick="filterRoster('T')" id="flt-shift-T" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">T</button>
+              <button onclick="filterRoster('W')" id="flt-shift-W" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">W</button>
+              <button onclick="filterRoster('Ts')" id="flt-shift-Ts" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">Ts</button>
+              <button onclick="filterRoster('F')" id="flt-shift-F" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">F</button>
+              <button onclick="filterRoster('S')" id="flt-shift-S" class="px-1.5 py-0.5 text-zinc-400 hover:text-white">S</button>
+            </div>
+          </div>
+
+          <!-- Roster Search Filter -->
+          <div class="flex items-center gap-2 text-xs">
+            <input type="text" id="roster-search" placeholder="SEARCH OFFICER: CODE, NAME, OR PHONE..." 
+                   onkeyup="renderRosterTable()"
+                   class="w-full bg-black border border-zinc-800 px-3 py-1.5 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-cyan-500">
+          </div>
+
+          <!-- High-Density Officer Table -->
+          <div class="overflow-x-auto max-h-[480px]">
+            <table class="w-full text-left font-mono text-xs">
+              <thead class="text-[10px] text-zinc-500 bg-zinc-950/80 sticky top-0 border-b border-zinc-800">
+                <tr>
+                  <th class="py-2 px-2.5">DUTY_ID</th>
+                  <th class="py-2 px-2">CALLSIGN / NAME</th>
+                  <th class="py-2 px-2">SHIFT</th>
+                  <th class="py-2 px-2">RANK / ROLE</th>
+                  <th class="py-2 px-2 text-right">ACTION</th>
+                </tr>
+              </thead>
+              <tbody id="roster-tbody" class="divide-y divide-zinc-900 font-medium">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pt-2.5 mt-2 border-t border-zinc-900 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+          <span>DATA SOURCE: SUPABASE DB</span>
+          <span id="roster-count-footer">OFFICERS LISTED: 0</span>
+        </div>
+      </section>
+
+      <!-- ===================================================== -->
+      <!-- 🚨 MODULE 2: INCIDENT DISPATCH & CASE VAULT -->
+      <!-- ===================================================== -->
+      <section class="tac-box p-3.5 flex flex-col justify-between">
+        <div class="space-y-2.5">
+          <!-- Section Command Bar -->
+          <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-zinc-800">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 bg-rose-500 rounded-sm"></span>
+              <h2 class="font-mono font-bold text-xs tracking-wider text-zinc-100 uppercase">
+                MODULE 02 // INCIDENT DISPATCH & VAULT
+              </h2>
+            </div>
+
+            <!-- Quick Action: Dispatch Incident -->
+            <button onclick="openDispatchModal()" class="px-2.5 py-1 bg-rose-950/80 hover:bg-rose-900 border border-rose-700 text-rose-300 text-[10px] font-mono font-bold rounded flex items-center gap-1 transition">
+              <span>+</span> <span>NEW INCIDENT DISPATCH</span>
+            </button>
+          </div>
+
+          <!-- Case Filter Selector -->
+          <div class="flex items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-1 font-mono text-[10px]">
+              <button onclick="filterCases('ALL')" id="flt-case-all" class="px-2 py-0.5 bg-zinc-800 text-white rounded font-bold">ALL</button>
+              <button onclick="filterCases('PENDING')" id="flt-case-pending" class="px-2 py-0.5 text-zinc-400 hover:text-white">PENDING</button>
+              <button onclick="filterCases('INVESTIGATING')" id="flt-case-investigating" class="px-2 py-0.5 text-zinc-400 hover:text-white">ACTIVE</button>
+              <button onclick="filterCases('RESOLVED')" id="flt-case-resolved" class="px-2 py-0.5 text-zinc-400 hover:text-white">RESOLVED</button>
+            </div>
+
+            <input type="text" id="case-search" placeholder="SEARCH CASE ID / LOCATION..." 
+                   onkeyup="renderCasesTable()"
+                   class="bg-black border border-zinc-800 px-3 py-1 text-xs font-mono text-zinc-200 placeholder-zinc-600 focus:outline-none focus:border-rose-500 w-44">
+          </div>
+
+          <!-- High-Density Case Table -->
+          <div class="overflow-x-auto max-h-[480px]">
+            <table class="w-full text-left font-mono text-xs">
+              <thead class="text-[10px] text-zinc-500 bg-zinc-950/80 sticky top-0 border-b border-zinc-800">
+                <tr>
+                  <th class="py-2 px-2.5">CASE_ID</th>
+                  <th class="py-2 px-2">CATEGORY</th>
+                  <th class="py-2 px-2">LOCATION</th>
+                  <th class="py-2 px-2">STATUS</th>
+                  <th class="py-2 px-2 text-right">COMMAND</th>
+                </tr>
+              </thead>
+              <tbody id="cases-tbody" class="divide-y divide-zinc-900 font-medium">
+                <!-- Injected via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="pt-2.5 mt-2 border-t border-zinc-900 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+          <span>DISPATCH TARGET: DISCORD #แจ้งเหตุใหม่</span>
+          <span id="cases-count-footer">CASES: 0</span>
+        </div>
+      </section>
 
     </div>
 
-    <!-- ======================================================= -->
-    <!-- 📦 TAB 2: กระดานของหายได้คืน (LOST & FOUND SHOWCASE) -->
-    <!-- ======================================================= -->
-    <div id="tab-lostfound" class="tab-pane hidden space-y-6 animate-fade-in">
-
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">📦</span>
-            <h2 class="text-xl sm:text-2xl font-display font-bold text-slate-900 dark:text-white">กระดานของหายได้คืน (Lost & Found)</h2>
-          </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">รายการสิ่งของที่พบในโรงเรียนพระนารายณ์ ติดต่อรับคืนได้ที่ห้องสารวัตรนักเรียน</p>
+    <!-- LOWER SECTION: EVIDENCE & LOST VAULT (FULL-WIDTH HIGH-DENSITY TABLE) -->
+    <section class="tac-box p-3.5 space-y-2.5">
+      <!-- Section Command Bar -->
+      <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-zinc-800">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 bg-amber-500 rounded-sm"></span>
+          <h2 class="font-mono font-bold text-xs tracking-wider text-zinc-100 uppercase">
+            MODULE 03 // EVIDENCE & LOST ITEMS VAULT
+          </h2>
+          <span class="text-[10px] text-zinc-500 font-mono">[STORAGE: SARAWAT RM 1]</span>
         </div>
 
         <div class="flex items-center gap-2">
-          <button onclick="openReportLostModal()" class="px-4 py-2.5 rounded-2xl bg-gold-500 hover:bg-gold-400 text-portal-950 font-bold text-xs transition flex items-center gap-2 shadow">
-            <span>+</span> แจ้งพบของหาย
+          <!-- Filter Buttons -->
+          <div class="flex items-center gap-1 font-mono text-[10px]">
+            <button onclick="filterLostItems('ALL')" id="flt-lost-all" class="px-2 py-0.5 bg-zinc-800 text-white rounded font-bold">ALL</button>
+            <button onclick="filterLostItems('WAITING_OWNER')" id="flt-lost-wait" class="px-2 py-0.5 text-zinc-400 hover:text-white">WAITING_OWNER</button>
+            <button onclick="filterLostItems('CLAIMED')" id="flt-lost-claimed" class="px-2 py-0.5 text-zinc-400 hover:text-white">CLAIMED</button>
+          </div>
+
+          <!-- Add Item Button -->
+          <button onclick="openLogItemModal()" class="px-2.5 py-1 bg-amber-950/80 hover:bg-amber-900 border border-amber-700 text-amber-300 text-[10px] font-mono font-bold rounded flex items-center gap-1 transition">
+            <span>+</span> <span>LOG NEW ITEM</span>
           </button>
         </div>
       </div>
 
-      <!-- Filters & Counter Bar -->
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <!-- Status Filter Tabs -->
-        <div class="sm:col-span-3 flex flex-wrap items-center gap-2">
-          <button onclick="setLostFilterStatus('ALL')" id="lost-flt-all" class="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-portal-600 text-white shadow-sm transition">
-            ทั้งหมด (<span id="dash-lost-cnt-all">0</span>)
-          </button>
-          <button onclick="setLostFilterStatus('WAITING_OWNER')" id="lost-flt-wait" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
-            ⏳ รอเจ้าของมารับ (<span id="dash-lost-cnt-wait">0</span>)
-          </button>
-          <button onclick="setLostFilterStatus('CLAIMED')" id="lost-flt-claim" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 transition">
-            ✅ รับคืนแล้ว (<span id="dash-lost-cnt-claim">0</span>)
-          </button>
-        </div>
-
-        <!-- Search input -->
-        <div class="relative">
-          <input type="text" id="lost-search-input" placeholder="ค้นหาของหาย..." onkeyup="onLostSearchChange(event)"
-                 class="w-full pl-9 pr-3 py-1.5 rounded-xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
-          <span class="absolute left-3 top-2 text-slate-400 text-xs">🔍</span>
-        </div>
+      <!-- High-Density Lost Items Table -->
+      <div class="overflow-x-auto max-h-[380px]">
+        <table class="w-full text-left font-mono text-xs">
+          <thead class="text-[10px] text-zinc-500 bg-zinc-950/80 sticky top-0 border-b border-zinc-800">
+            <tr>
+              <th class="py-2 px-2.5">ITEM_CODE</th>
+              <th class="py-2 px-2">DESCRIPTION</th>
+              <th class="py-2 px-2">CATEGORY</th>
+              <th class="py-2 px-2">LOCATION_FOUND</th>
+              <th class="py-2 px-2">LOGGED_DATE</th>
+              <th class="py-2 px-2">STATUS</th>
+              <th class="py-2 px-2 text-right">ACTION</th>
+            </tr>
+          </thead>
+          <tbody id="lost-tbody" class="divide-y divide-zinc-900 font-medium">
+            <!-- Injected via JS -->
+          </tbody>
+        </table>
       </div>
 
-      <!-- Items Grid -->
-      <div id="dash-lost-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-        <!-- Rendered by JS -->
+      <div class="pt-2 border-t border-zinc-900 flex items-center justify-between text-[10px] font-mono text-zinc-500">
+        <span>SECURITY PROTOCOL: PHOTO VERIFICATION REQUIRED FOR RELEASE</span>
+        <span id="lost-count-footer">ITEMS IN VAULT: 0</span>
       </div>
-
-      <!-- Empty State -->
-      <div id="dash-lost-empty" class="hidden text-center py-16 bg-white dark:bg-portal-900/50 rounded-3xl border border-dashed border-slate-300 dark:border-portal-800 space-y-3">
-        <span class="text-4xl">🔍</span>
-        <h4 class="font-bold text-slate-700 dark:text-slate-200 text-base">ไม่พบรายการของหายที่ตรงกับเงื่อนไข</h4>
-        <p class="text-xs text-slate-400">ลองเปลี่ยนคำค้นหา หรือกดแจ้งพบของหายเพื่อบันทึกรายการใหม่</p>
-      </div>
-
-    </div>
-
-    <!-- ======================================================= -->
-    <!-- 🚨 TAB 3: แจ้งเหตุด่วนและติดตามสถานะคดี (INCIDENT HUB) -->
-    <!-- ======================================================= -->
-    <div id="tab-incident" class="tab-pane hidden space-y-6 animate-fade-in">
-
-      <div class="bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm space-y-2">
-        <div class="flex items-center gap-2">
-          <span class="text-2xl">🚨</span>
-          <h2 class="text-xl sm:text-2xl font-display font-bold text-slate-900 dark:text-white">ศูนย์รับแจ้งเหตุฉุกเฉินและติดตามคดี</h2>
-        </div>
-        <p class="text-xs text-slate-500 dark:text-slate-400">หากพบเหตุการณ์ความไม่ปลอดภัย สามารถรายงานเรื่องตรงไปยังสารวัตรนักเรียนได้ทันที ข้อมูลของคุณสามารถเลือกปกปิดเป็นความลับได้</p>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        <!-- Incident Report Form (Col span 2) -->
-        <div class="lg:col-span-2 bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm space-y-5">
-          <h3 class="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-            <span>📝</span> แบบฟอร์มแจ้งเหตุด่วน
-          </h3>
-
-          <form id="incident-form" onsubmit="handleFullIncidentSubmit(event)" class="space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">หมวดหมู่เหตุการณ์ *</label>
-                <select id="inc-category" required class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100">
-                  <option value="เกิดเหตุก่อวิวาท">💥 เกิดเหตุก่อวิวาท / ทะเลาะวิวาท</option>
-                  <option value="มั่วสุม/พกพาสิ่งผิดระเบียบ">🚬 มั่วสุม / พกพาสิ่งผิดระเบียบ / บุหรี่</option>
-                  <option value="เหตุน่าสงสัย">👁️ พบบุคคลน่าสงสัย / พฤติกรรมเสี่ยง</option>
-                  <option value="ขอความช่วยเหลือนักเรียน">🩹 ขอความช่วยเหลือนักเรียน / อุบัติเหตุ</option>
-                  <option value="ทรัพย์สินเสียหาย">⚠️ ทรัพย์สินโรงเรียนเสียหาย</option>
-                  <option value="อื่นๆ">📌 เหตุการณ์อื่นๆ</option>
-                </select>
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">สถานที่เกิดเหตุ *</label>
-                <input type="text" id="inc-location" required placeholder="เช่น หลังอาคาร 3, ห้องน้ำชายชั้น 2, โรงอาหาร" 
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100">
-              </div>
-            </div>
-
-            <div>
-              <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">รายละเอียดเหตุการณ์ *</label>
-              <textarea id="inc-description" required rows="3" placeholder="ระบุสิ่งที่พบเห็น เช่น มีกลุ่มนักเรียนประมาณ 4-5 คน กำลังรวมตัว..." 
-                        class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100"></textarea>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">ชื่อผู้แจ้ง (เลือกปกปิดได้)</label>
-                <input type="text" id="inc-reporter-name" placeholder="ระบุชื่อ หรือเว้นว่างเพื่อไม่เปิดเผยตัวตน" 
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100">
-              </div>
-
-              <div>
-                <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">เบอร์โทรติดต่อ (ถ้าต้องการให้ติดต่อกลับ)</label>
-                <input type="text" id="inc-reporter-phone" placeholder="เช่น 081-234-5678" 
-                       class="w-full px-3.5 py-2.5 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs focus:ring-2 focus:ring-portal-500 text-slate-800 dark:text-slate-100">
-              </div>
-            </div>
-
-            <div class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs text-slate-500 dark:text-slate-400 flex items-center gap-2">
-              <span>🔒</span> ข้อมูลผู้แจ้งและรายงานจะถูกส่งตรงเข้าห้องแจ้งเหตุสารวัตรนักเรียนแบบเข้ารหัสทันที
-            </div>
-
-            <button type="submit" id="btn-submit-inc" class="w-full py-3 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-rose-600/20 active:scale-95">
-              <span>🚨</span> ยืนยันการส่งรายงานเหตุด่วน
-            </button>
-          </form>
-        </div>
-
-        <!-- Track Incident by Case ID -->
-        <div class="space-y-6">
-          <div class="bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm space-y-4">
-            <h3 class="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-              <span>🔍</span> ตรวจสอบสถานะคดีของฉัน
-            </h3>
-            <p class="text-xs text-slate-500 dark:text-slate-400">กรอกหมายเลขคดี เช่น <b>CASE-2113</b> เพื่อดูผลการตรวจสอบของสารวัตร</p>
-            
-            <div class="flex gap-2">
-              <input type="text" id="track-case-input" placeholder="ระบุเลขคดี CASE-XXXX" 
-                     class="w-full px-3.5 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs font-mono uppercase focus:outline-none focus:ring-2 focus:ring-portal-500">
-              <button onclick="trackCaseStatus()" class="px-4 py-2 rounded-xl bg-portal-600 hover:bg-portal-500 text-white text-xs font-bold transition flex-shrink-0">
-                ค้นหา
-              </button>
-            </div>
-
-            <div id="track-result-box" class="hidden p-4 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 space-y-2 text-xs">
-              <!-- Rendered via JS -->
-            </div>
-          </div>
-
-          <div class="bg-gradient-to-br from-portal-800 to-portal-950 text-white p-6 rounded-3xl border border-portal-700/50 shadow space-y-3">
-            <h4 class="font-bold text-sm text-gold-400">📹 สารวัตร Bodycam Evidence</h4>
-            <p class="text-xs text-slate-300 leading-relaxed">
-              สารวัตรนักเรียนปฏิบัติหน้าที่พร้อมบันทึกหลักฐานวิดีโอ Bodycam เพื่อความโปร่งใสและเป็นธรรม
-            </p>
-            <a href="/bodycam-upload" class="inline-flex items-center gap-1.5 text-xs font-bold text-gold-400 hover:underline">
-              ไปยังหน้าอัปโหลดคลิปหลักฐาน Bodycam →
-            </a>
-          </div>
-        </div>
-
-      </div>
-
-    </div>
-
-    <!-- ======================================================= -->
-    <!-- 👮 TAB 4: สารวัตรและจุดตรวจ (DUTY & CHECKPOINTS) -->
-    <!-- ======================================================= -->
-    <div id="tab-duty" class="tab-pane hidden space-y-6 animate-fade-in">
-
-      <div class="bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">👮</span>
-            <h2 class="text-xl sm:text-2xl font-display font-bold text-slate-900 dark:text-white">ตารางเวรและสารวัตรประจำจุด</h2>
-          </div>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">ตรวจสอบรายชื่อสารวัตรนักเรียนที่ปฏิบัติหน้าที่ประจำแต่ละวัน</p>
-        </div>
-
-        <!-- Shift Selector Pills -->
-        <div class="flex flex-wrap gap-1.5 text-xs font-bold">
-          <button onclick="renderDutyTabDay('M')" id="duty-btn-M" class="duty-day-pill px-3 py-1.5 rounded-xl bg-blue-500/20 text-blue-600 dark:text-blue-400 border border-blue-500/30">จันทร์ (M)</button>
-          <button onclick="renderDutyTabDay('T')" id="duty-btn-T" class="duty-day-pill px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300">อังคาร (T)</button>
-          <button onclick="renderDutyTabDay('W')" id="duty-btn-W" class="duty-day-pill px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300">พุธ (W)</button>
-          <button onclick="renderDutyTabDay('Ts')" id="duty-btn-Ts" class="duty-day-pill px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300">พฤหัสฯ (Ts)</button>
-          <button onclick="renderDutyTabDay('F')" id="duty-btn-F" class="duty-day-pill px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300">ศุกร์ (F)</button>
-          <button onclick="renderDutyTabDay('S')" id="duty-btn-S" class="duty-day-pill px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-600 dark:text-slate-300">เวรพิเศษ (S)</button>
-        </div>
-      </div>
-
-      <!-- Active Day Header -->
-      <div id="duty-day-header" class="p-4 rounded-2xl bg-portal-50 dark:bg-portal-900 border border-portal-200 dark:border-portal-800 flex items-center justify-between text-xs">
-        <span class="font-bold text-portal-800 dark:text-portal-200" id="duty-day-title">เวรวันจันทร์ (M)</span>
-        <span class="text-slate-500 dark:text-slate-400" id="duty-day-count">กำลังโหลด...</span>
-      </div>
-
-      <!-- Officers Grid for the day -->
-      <div id="duty-officers-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Rendered via JS -->
-      </div>
-
-    </div>
-
-    <!-- ======================================================= -->
-    <!-- 🛡️ TAB 5: โหมดสารวัตรและงานบริหาร (STAFF MODE) -->
-    <!-- ======================================================= -->
-    <div id="tab-staff" class="tab-pane hidden space-y-6 animate-fade-in">
-
-      <!-- Staff Header -->
-      <div class="bg-gradient-to-r from-portal-900 via-portal-800 to-portal-950 text-white p-6 rounded-3xl border border-portal-700/50 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="space-y-1">
-          <div class="flex items-center gap-2">
-            <span class="text-2xl">🛡️</span>
-            <h2 class="text-xl sm:text-2xl font-display font-bold">ระบบงานสารวัตรและผู้บริหาร (Staff Mode)</h2>
-          </div>
-          <p class="text-xs text-slate-300">สารบบสารวัตร, บัตรดิจิทัล CR80, ตารางเช็คชื่อ A4 และสถิติภาพรวม</p>
-        </div>
-
-        <!-- Staff Sub-tabs -->
-        <div class="flex flex-wrap gap-1.5 text-xs font-semibold bg-portal-950/80 p-1.5 rounded-2xl border border-portal-700/40">
-          <button onclick="switchStaffSubTab('roster')" id="staff-tab-roster" class="staff-subtab px-3 py-1.5 rounded-xl bg-gold-500 text-portal-950 font-bold transition">สารบบ & บัตร</button>
-          <button onclick="switchStaffSubTab('attendance')" id="staff-tab-attendance" class="staff-subtab px-3 py-1.5 rounded-xl text-slate-300 hover:text-white transition">ตารางเช็คชื่อ A4</button>
-          <button onclick="switchStaffSubTab('cases')" id="staff-tab-cases" class="staff-subtab px-3 py-1.5 rounded-xl text-slate-300 hover:text-white transition">คดีทั้งหมด</button>
-          <button onclick="switchStaffSubTab('kpi')" id="staff-tab-kpi" class="staff-subtab px-3 py-1.5 rounded-xl text-slate-300 hover:text-white transition">สถิติ KPI</button>
-        </div>
-      </div>
-
-      <!-- Staff Subtab 1: สารบบสารวัตร & บัตรดิจิทัล -->
-      <div id="staff-pane-roster" class="staff-pane space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div class="relative flex-grow max-w-md">
-            <input type="text" id="staff-roster-search" placeholder="ค้นหาชื่อ, รหัสเวร หรือเบอร์โทร..." onkeyup="filterStaffRoster(event)"
-                   class="w-full pl-9 pr-3 py-2 rounded-xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
-            <span class="absolute left-3 top-2.5 text-slate-400 text-xs">🔍</span>
-          </div>
-
-          <div class="flex items-center gap-2">
-            <select id="staff-roster-day-filter" onchange="filterStaffRoster(event)" class="px-3 py-2 rounded-xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 text-xs text-slate-800 dark:text-slate-100">
-              <option value="ALL">ทุกรอบเวร (M, T, W, Ts, F, S)</option>
-              <option value="M">วันจันทร์ (M)</option>
-              <option value="T">วันอังคาร (T)</option>
-              <option value="W">วันพุธ (W)</option>
-              <option value="Ts">วันพฤหัสบดี (Ts)</option>
-              <option value="F">วันศุกร์ (F)</option>
-              <option value="S">เวรพิเศษ (S)</option>
-            </select>
-          </div>
-        </div>
-
-        <!-- Roster Grid -->
-        <div id="staff-roster-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          <!-- Rendered via JS -->
-        </div>
-      </div>
-
-      <!-- Staff Subtab 2: ใบตารางเช็คชื่อ A4 -->
-      <div id="staff-pane-attendance" class="staff-pane hidden space-y-4">
-        <div class="bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">📄 สร้างและพิมพ์ใบตารางเช็คชื่อ A4 (12 สัปดาห์)</h3>
-              <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">ดึงชื่อหัวหน้าเวรและรองหัวหน้าเวรมาแสดงบนหัวกระดาษอัตโนมัติ สั่งพิมพ์ได้ทันที</p>
-            </div>
-            <a href="/sheet/all" target="_blank" class="px-4 py-2 rounded-xl bg-portal-600 hover:bg-portal-500 text-white font-bold text-xs transition flex items-center gap-2">
-              <span>📑</span> พิมพ์รวมทุกรอบเวร
-            </a>
-          </div>
-
-          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 pt-2">
-            <button onclick="openAttendanceSheet('M')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-blue-500 font-bold text-xs block">วันจันทร์</span>
-              <span class="text-[11px] text-slate-400">เวร M & MS</span>
-            </button>
-            <button onclick="openAttendanceSheet('T')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-purple-500 font-bold text-xs block">วันอังคาร</span>
-              <span class="text-[11px] text-slate-400">เวร T & TS</span>
-            </button>
-            <button onclick="openAttendanceSheet('W')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-emerald-500 font-bold text-xs block">วันพุธ</span>
-              <span class="text-[11px] text-slate-400">เวร W & WS</span>
-            </button>
-            <button onclick="openAttendanceSheet('Ts')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-amber-500 font-bold text-xs block">วันพฤหัสบดี</span>
-              <span class="text-[11px] text-slate-400">เวร Ts & TSS</span>
-            </button>
-            <button onclick="openAttendanceSheet('F')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-rose-500 font-bold text-xs block">วันศุกร์</span>
-              <span class="text-[11px] text-slate-400">เวร F & FS</span>
-            </button>
-            <button onclick="openAttendanceSheet('S')" class="p-3.5 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 hover:border-portal-500 text-left transition">
-              <span class="text-gold-500 font-bold text-xs block">เวรพิเศษ</span>
-              <span class="text-[11px] text-slate-400">เวรทุกวัน (S)</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Staff Subtab 3: คดีทั้งหมด -->
-      <div id="staff-pane-cases" class="staff-pane hidden space-y-4">
-        <div class="bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 p-6 rounded-3xl shadow-sm space-y-4">
-          <div class="flex items-center justify-between">
-            <h3 class="font-display font-bold text-base text-slate-900 dark:text-white">🚨 สารบบคดีและการดำเนินการ</h3>
-            <span class="text-xs text-slate-500 dark:text-slate-400" id="staff-cases-count">กำลังโหลด...</span>
-          </div>
-
-          <div id="staff-cases-table" class="overflow-x-auto">
-            <!-- Rendered via JS -->
-          </div>
-        </div>
-      </div>
-
-      <!-- Staff Subtab 4: สถิติ KPI -->
-      <div id="staff-pane-kpi" class="staff-pane hidden space-y-4">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="p-5 rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 shadow-sm space-y-1">
-            <p class="text-xs text-slate-400 font-semibold">สารวัตรนักเรียนทั้งหมด</p>
-            <h4 class="text-2xl font-display font-extrabold text-slate-900 dark:text-white counter-value" id="kpi-total-members">0</h4>
-            <p class="text-[10px] text-emerald-500">สถานะ Active ในระบบ</p>
-          </div>
-
-          <div class="p-5 rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 shadow-sm space-y-1">
-            <p class="text-xs text-slate-400 font-semibold">คดีที่ได้รับแจ้งทั้งหมด</p>
-            <h4 class="text-2xl font-display font-extrabold text-slate-900 dark:text-white counter-value" id="kpi-total-cases">0</h4>
-            <p class="text-[10px] text-portal-500" id="kpi-cases-pending">รอดำเนินการ 0 คดี</p>
-          </div>
-
-          <div class="p-5 rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 shadow-sm space-y-1">
-            <p class="text-xs text-slate-400 font-semibold">คดีที่แก้ไขเสร็จสิ้นแล้ว</p>
-            <h4 class="text-2xl font-display font-extrabold text-emerald-600 dark:text-emerald-400 counter-value" id="kpi-resolved-cases">0</h4>
-            <p class="text-[10px] text-emerald-500">ปิดคดีเรียบร้อย</p>
-          </div>
-
-          <div class="p-5 rounded-3xl bg-white dark:bg-portal-900/90 border border-slate-200 dark:border-portal-800 shadow-sm space-y-1">
-            <p class="text-xs text-slate-400 font-semibold">บันทึกการลาเวรสะสม</p>
-            <h4 class="text-2xl font-display font-extrabold text-amber-500 counter-value" id="kpi-leave-count">0</h4>
-            <p class="text-[10px] text-slate-400" id="kpi-leave-label">ไม่มีการลาวันนี้</p>
-          </div>
-        </div>
-      </div>
-
-    </div>
+    </section>
 
   </main>
 
   <!-- ========================================================= -->
-  <!-- 📱 MOBILE BOTTOM NAV BAR -->
+  <!-- 📇 TACTICAL MODAL: CR80 CREDENTIAL INSPECTOR -->
   <!-- ========================================================= -->
-  <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-portal-900/95 backdrop-blur-lg border-t border-slate-200 dark:border-portal-800 px-2 py-1.5 flex justify-around items-center shadow-lg">
-    <button onclick="switchTab('portal')" id="nav-mobile-portal" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-portal-600 dark:text-gold-400 transition">
-      <span class="text-base">🏠</span>
-      <span class="text-[10px] font-bold mt-0.5">บริการ</span>
-    </button>
-    <button onclick="switchTab('lostfound')" id="nav-mobile-lostfound" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">
-      <span class="text-base">📦</span>
-      <span class="text-[10px] font-medium mt-0.5">ของหาย</span>
-    </button>
-    <button onclick="switchTab('incident')" id="nav-mobile-incident" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">
-      <span class="text-base">🚨</span>
-      <span class="text-[10px] font-medium mt-0.5">แจ้งเหตุ</span>
-    </button>
-    <button onclick="switchTab('duty')" id="nav-mobile-duty" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">
-      <span class="text-base">👮</span>
-      <span class="text-[10px] font-medium mt-0.5">เวรวันนี้</span>
-    </button>
-    <button onclick="switchTab('staff')" id="nav-mobile-staff" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-2.5 rounded-xl text-slate-500 dark:text-slate-400 transition">
-      <span class="text-base">🛡️</span>
-      <span class="text-[10px] font-medium mt-0.5">สารวัตร</span>
-    </button>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- 📇 OFFICIAL CR80 DIGITAL ID CARD MODAL (NO FLIP) -->
-  <!-- ========================================================= -->
-  <div id="card-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-5 animate-slide-up">
-      <div class="flex items-center justify-between">
-        <h3 class="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <span>📇</span> บัตรประจำตัวสารวัตรนักเรียนดิจิทัล
-        </h3>
-        <button onclick="closeCardModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-portal-800 text-slate-500 hover:text-white flex items-center justify-center text-sm">✕</button>
+  <div id="modal-card" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-zinc-950 border border-zinc-800 rounded-lg max-w-lg w-full p-5 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+        <span class="font-mono text-xs text-emerald-400 font-bold tracking-wider">// OFFICER CREDENTIAL VERIFICATION</span>
+        <button onclick="closeCardModal()" class="text-zinc-500 hover:text-white font-mono text-xs">[CLOSE X]</button>
       </div>
 
-      <!-- CR80 Direct Official Layout (No 3D Flip) -->
       <div class="flex justify-center py-2">
-        <div id="modal-cr80-card" class="w-[340px] h-[215px] sm:w-[400px] sm:h-[252px] rounded-2xl relative overflow-hidden text-white shadow-2xl border border-white/20 select-none bg-gradient-to-br from-portal-950 via-portal-900 to-portal-850 p-4 flex flex-col justify-between">
-          <!-- Background Shield Emblem -->
-          <div class="absolute -right-6 -bottom-6 w-36 h-36 opacity-10 pointer-events-none">
-            <img src="/assets/school_emblem.png" alt="" class="w-full h-full object-contain">
-          </div>
-
-          <!-- Card Header -->
-          <div class="flex items-center justify-between border-b border-white/15 pb-2">
+        <div id="cr80-card-view" class="w-[340px] h-[215px] sm:w-[380px] sm:h-[240px] rounded-xl relative overflow-hidden bg-black border border-zinc-700 p-4 flex flex-col justify-between shadow-2xl select-none">
+          <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
             <div class="flex items-center gap-2">
-              <img src="/assets/school_emblem.png" alt="" class="w-8 h-8 object-contain">
+              <img src="/assets/school_emblem.png" class="w-7 h-7 object-contain" alt="">
               <div>
-                <p class="text-[10px] font-extrabold tracking-wider text-gold-400">โรงเรียนพระนารายณ์</p>
-                <p class="text-[8px] text-slate-300">กลุ่มงานสารวัตรนักเรียน</p>
+                <p class="font-mono font-bold text-[10px] text-zinc-200">PRANARAI STUDENT INSPECTOR</p>
+                <p class="text-[8px] text-zinc-500">OFFICIAL SECURITY FORCE</p>
               </div>
             </div>
-            <div class="text-right">
-              <span id="modal-card-duty-id" class="px-2 py-0.5 rounded-lg bg-gold-500 text-portal-950 font-mono text-[11px] font-extrabold">FS1</span>
-            </div>
+            <span class="px-2 py-0.5 bg-zinc-900 border border-zinc-700 text-cyan-400 font-mono text-xs font-bold" id="card-duty-id">FS1</span>
           </div>
 
-          <!-- Card Body -->
           <div class="flex items-center gap-3.5 my-auto">
-            <div class="w-16 h-20 sm:w-20 sm:h-24 rounded-xl overflow-hidden border-2 border-gold-400/80 bg-portal-950 flex-shrink-0 shadow">
-              <img id="modal-card-photo" src="/assets/logo.png" alt="รูปสารวัตร" class="w-full h-full object-cover">
+            <div class="w-16 h-20 rounded border border-zinc-700 bg-zinc-950 overflow-hidden flex-shrink-0">
+              <img id="card-photo" src="/assets/logo.png" class="w-full h-full object-cover" alt="">
             </div>
-
-            <div class="space-y-1 text-xs">
-              <p class="text-[10px] text-slate-400">สารวัตรนักเรียน</p>
-              <h4 id="modal-card-name" class="font-display font-extrabold text-sm sm:text-base text-white">นายภัทรพล (ภีมะ)</h4>
-              <p class="text-[10px] text-slate-300" id="modal-card-role">🛡️ สารวัตรเวรวันศุกร์ (FS)</p>
-              <p class="text-[9px] text-slate-400 font-mono" id="modal-card-phone">📞 081-xxx-xxxx</p>
+            <div class="space-y-1 font-mono text-xs">
+              <h4 id="card-name" class="font-bold text-zinc-100 text-sm">--</h4>
+              <p id="card-role" class="text-[10px] text-emerald-400">ROLE: --</p>
+              <p id="card-phone" class="text-[10px] text-zinc-400">COMMS: --</p>
             </div>
           </div>
 
-          <!-- Card Footer -->
-          <div class="flex items-center justify-between border-t border-white/15 pt-2 text-[8px] text-slate-400">
-            <span>OFFICIAL STUDENT INSPECTOR ID</span>
-            <span class="font-mono text-gold-400">PRANARAI SCHOOL</span>
+          <div class="flex items-center justify-between border-t border-zinc-800 pt-1.5 text-[8px] font-mono text-zinc-500">
+            <span>AUTHENTICATED VIA SUPABASE</span>
+            <span class="text-emerald-500 font-bold">ACTIVE CREDENTIAL</span>
           </div>
         </div>
       </div>
 
-      <div class="flex items-center justify-between gap-3 pt-2">
-        <button onclick="downloadCardPNG()" class="flex-grow py-2.5 rounded-xl bg-portal-600 hover:bg-portal-500 text-white font-bold text-xs transition flex items-center justify-center gap-2 shadow">
-          <span>📥</span> บันทึกรูปบัตร (PNG)
+      <div class="flex items-center justify-between gap-2 pt-2 border-t border-zinc-900 font-mono text-xs">
+        <button onclick="downloadCardPNG()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-200 rounded font-bold">
+          [EXPORT CARD PNG]
         </button>
-        <button onclick="copyCardVerificationLink()" class="px-4 py-2.5 rounded-xl bg-slate-100 dark:bg-portal-800 text-slate-700 dark:text-slate-200 font-semibold text-xs transition">
-          คัดลอกลิงก์
+        <button onclick="copyVerifyUrl()" class="px-3 py-1.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-400 rounded">
+          [COPY LINK]
         </button>
       </div>
     </div>
   </div>
 
   <!-- ========================================================= -->
-  <!-- 📦 REPORT LOST ITEM MODAL -->
+  <!-- 🚨 TACTICAL MODAL: DISPATCH INCIDENT -->
   <!-- ========================================================= -->
-  <div id="report-lost-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-700 rounded-3xl max-w-lg w-full p-6 shadow-2xl space-y-4 animate-slide-up">
-      <div class="flex items-center justify-between">
-        <h3 class="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <span>📦</span> แจ้งพบของหาย (บันทึกเข้าระบบ)
-        </h3>
-        <button onclick="closeReportLostModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-portal-800 text-slate-500 hover:text-white flex items-center justify-center text-sm">✕</button>
+  <div id="modal-dispatch" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-zinc-950 border border-rose-900/60 rounded-lg max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+        <span class="font-mono text-xs text-rose-500 font-bold tracking-wider">// NEW INCIDENT DISPATCH</span>
+        <button onclick="closeDispatchModal()" class="text-zinc-500 hover:text-white font-mono text-xs">[CLOSE X]</button>
       </div>
 
-      <form id="lost-report-form" onsubmit="handleReportLostSubmit(event)" class="space-y-3.5 text-xs">
+      <form onsubmit="handleDispatchSubmit(event)" class="space-y-3 font-mono text-xs">
         <div>
-          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">ชื่อสิ่งของที่พบ *</label>
-          <input type="text" id="modal-lost-title" required placeholder="เช่น กระเป๋าสตางค์สีดำ, พวงกุญแจรถมอเตอร์ไซค์" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
+          <label class="block text-zinc-400 mb-1">INCIDENT CATEGORY *</label>
+          <select id="disp-category" required class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-rose-500 focus:outline-none">
+            <option value="เกิดเหตุก่อวิวาท">💥 BRAWL // การก่อวิวาท</option>
+            <option value="มั่วสุม/พกพาสิ่งผิดระเบียบ">🚬 CONTRABAND // สิ่งผิดระเบียบ/มั่วสุม</option>
+            <option value="เหตุน่าสงสัย">👁️ SUSPICIOUS // พฤติกรรมเสี่ยง</option>
+            <option value="ขอความช่วยเหลือนักเรียน">🩹 STUDENT AID // ช่วยเหลือนักเรียน</option>
+            <option value="อื่นๆ">📌 OTHER // กรณีพิเศษ</option>
+          </select>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div>
+          <label class="block text-zinc-400 mb-1">LOCATION / PRESET *</label>
+          <input type="text" id="disp-location" required placeholder="e.g. หลังอาคาร 3, โรงอาหาร, ห้องน้ำชาย" 
+                 class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-rose-500 focus:outline-none">
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 mb-1">INCIDENT DETAILS *</label>
+          <textarea id="disp-desc" required rows="3" placeholder="ระบุสิ่งที่พบเห็นอย่างกระชับ..." 
+                    class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-rose-500 focus:outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-zinc-400 mb-1">REPORTER CALLSIGN / NAME (OPTIONAL)</label>
+          <input type="text" id="disp-reporter" placeholder="เว้นว่างเพื่อแจ้งแบบไม่ระบุตัวตน" 
+                 class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-rose-500 focus:outline-none">
+        </div>
+
+        <button type="submit" id="btn-disp-submit" class="w-full py-2.5 bg-rose-950 hover:bg-rose-900 border border-rose-700 text-rose-300 font-bold rounded transition">
+          [TRANSMIT TO DISCORD #แจ้งเหตุใหม่]
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- 📦 TACTICAL MODAL: LOG VAULT ITEM -->
+  <!-- ========================================================= -->
+  <div id="modal-log-item" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-zinc-950 border border-amber-900/60 rounded-lg max-w-md w-full p-5 space-y-4 shadow-2xl relative">
+      <div class="flex items-center justify-between border-b border-zinc-800 pb-2">
+        <span class="font-mono text-xs text-amber-500 font-bold tracking-wider">// LOG EVIDENCE / VAULT ITEM</span>
+        <button onclick="closeLogItemModal()" class="text-zinc-500 hover:text-white font-mono text-xs">[CLOSE X]</button>
+      </div>
+
+      <form onsubmit="handleLogItemSubmit(event)" class="space-y-3 font-mono text-xs">
+        <div>
+          <label class="block text-zinc-400 mb-1">ITEM TITLE / DESCRIPTION *</label>
+          <input type="text" id="log-title" required placeholder="e.g. กระเป๋าสตางค์สีดำ, พวงกุญแจรถ" 
+                 class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-amber-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
           <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">หมวดหมู่ *</label>
-            <select id="modal-lost-cat" required class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
+            <label class="block text-zinc-400 mb-1">CATEGORY *</label>
+            <select id="log-cat" required class="w-full bg-black border border-zinc-800 px-2 py-2 text-zinc-100 rounded focus:border-amber-500 focus:outline-none">
               <option value="กระเป๋า">🎒 กระเป๋า</option>
               <option value="ไอที/มือถือ">📱 ไอที/มือถือ</option>
-              <option value="อุปกรณ์การเรียน">✏️ เครื่องเขียน/หนังสือ</option>
+              <option value="อุปกรณ์การเรียน">✏️ เครื่องเขียน</option>
               <option value="กุญแจ">🔑 กุญแจ</option>
-              <option value="เสื้อผ้า/เครื่องแต่งกาย">👕 เสื้อผ้า/หมวก</option>
-              <option value="บัตร/เอกสาร">📇 บัตร/เอกสาร</option>
+              <option value="เสื้อผ้า/เครื่องแต่งกาย">👕 เสื้อผ้า</option>
               <option value="อื่นๆ">📌 อื่นๆ</option>
             </select>
           </div>
           <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">สถานที่พบ *</label>
-            <input type="text" id="modal-lost-location" required placeholder="เช่น โรงอาหาร โต๊ะแถว 4" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
+            <label class="block text-zinc-400 mb-1">FOUND LOCATION *</label>
+            <input type="text" id="log-loc" required placeholder="e.g. โรงอาหาร โต๊ะ 4" 
+                   class="w-full bg-black border border-zinc-800 px-2 py-2 text-zinc-100 rounded focus:border-amber-500 focus:outline-none">
           </div>
         </div>
 
         <div>
-          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">รูปถ่ายสิ่งของที่พบ (ถ้ามี)</label>
-          <input type="file" id="modal-lost-image" accept="image/*" onchange="handleLostImageSelect(event)" class="w-full text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-portal-600 file:text-white">
-          <div id="lost-image-preview-box" class="hidden mt-2 w-24 h-24 rounded-xl overflow-hidden border border-slate-300 dark:border-portal-700">
-            <img id="lost-image-preview" src="" alt="preview" class="w-full h-full object-cover">
-          </div>
+          <label class="block text-zinc-400 mb-1">FINDER CALLSIGN / NAME</label>
+          <input type="text" id="log-finder" placeholder="e.g. สารวัตร TS1 หรือ พลเมืองดี" 
+                 class="w-full bg-black border border-zinc-800 px-3 py-2 text-zinc-100 rounded focus:border-amber-500 focus:outline-none">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">ชื่อผู้พบ</label>
-            <input type="text" id="modal-lost-finder" placeholder="ระบุชื่อ หรือเว้นว่างได้" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">จุดรับคืน</label>
-            <input type="text" id="modal-lost-storage" value="ห้องสารวัตรนักเรียน อาคาร 1" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-          </div>
-        </div>
-
-        <button type="submit" id="btn-submit-lost" class="w-full py-2.5 rounded-xl bg-gold-500 hover:bg-gold-400 text-portal-950 font-bold transition flex items-center justify-center gap-2 shadow">
-          <span>+</span> บันทึกและเผยแพร่บนกระดาน
+        <button type="submit" id="btn-log-submit" class="w-full py-2.5 bg-amber-950 hover:bg-amber-900 border border-amber-700 text-amber-300 font-bold rounded transition">
+          [SAVE ITEM TO VAULT]
         </button>
       </form>
     </div>
   </div>
 
   <!-- ========================================================= -->
-  <!-- 🙋‍♂️ CLAIM LOST ITEM MODAL -->
-  <!-- ========================================================= -->
-  <div id="claim-modal" class="fixed inset-0 z-50 hidden bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-    <div class="relative bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-700 rounded-3xl max-w-md w-full p-6 shadow-2xl space-y-4 animate-slide-up">
-      <div class="flex items-center justify-between">
-        <h3 class="font-display font-bold text-base text-slate-900 dark:text-white flex items-center gap-2">
-          <span>🙋‍♂️</span> แจ้งขอรับของคืน
-        </h3>
-        <button onclick="closeClaimModal()" class="w-8 h-8 rounded-full bg-slate-100 dark:bg-portal-800 text-slate-500 hover:text-white flex items-center justify-center text-sm">✕</button>
-      </div>
-
-      <div class="p-3 rounded-2xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-xs">
-        <p class="font-bold text-slate-800 dark:text-white" id="claim-item-title">-</p>
-        <p class="text-[10px] text-slate-400" id="claim-item-code">-</p>
-      </div>
-
-      <form id="claim-form" onsubmit="handleClaimSubmit(event)" class="space-y-3.5 text-xs">
-        <input type="hidden" id="claim-item-id">
-        <div>
-          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">ชื่อ-นามสกุล ของเจ้าของ *</label>
-          <input type="text" id="claim-name" required placeholder="เช่น เด็กชายภัทรพล ยอดเยี่ยม" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">ชั้น/ห้อง หรือเลขประจำตัว</label>
-            <input type="text" id="claim-student-no" placeholder="เช่น ม.4/2 หรือ 45210" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">เบอร์โทรติดต่อกลับ *</label>
-            <input type="text" id="claim-phone" required placeholder="เช่น 089-xxx-xxxx" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-          </div>
-        </div>
-
-        <div>
-          <label class="block font-semibold text-slate-600 dark:text-slate-300 mb-1">หลักฐานหรือจุดสังเกตว่าเป็นของท่าน</label>
-          <input type="text" id="claim-notes" placeholder="เช่น มีรอยสติกเกอร์ที่ด้านหลัง, มีพวงกุญแจรูปดาว" class="w-full px-3 py-2 rounded-xl bg-slate-50 dark:bg-portal-950 border border-slate-200 dark:border-portal-800 text-slate-800 dark:text-slate-100">
-        </div>
-
-        <div class="p-3 rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-300 text-[11px]">
-          📍 กรุณานำบัตรนักเรียนมารับของได้ที่ <b>ห้องสารวัตรนักเรียน อาคาร 1</b> ในเวลาทำการ
-        </div>
-
-        <button type="submit" id="btn-submit-claim" class="w-full py-2.5 rounded-xl bg-portal-600 hover:bg-portal-500 text-white font-bold transition flex items-center justify-center gap-2 shadow">
-          <span>✓</span> ส่งคำขอรับของคืน
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <!-- Toast Notification -->
-  <div id="toast" class="fixed bottom-20 sm:bottom-6 right-6 z-50 transform translate-y-24 opacity-0 transition-all duration-300 pointer-events-none px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-2xl flex items-center gap-2 text-xs font-bold border border-slate-700 dark:border-slate-200">
-    <span id="toast-icon">✅</span>
-    <span id="toast-msg">ดำเนินการสำเร็จ</span>
-  </div>
-
-  <!-- ========================================================= -->
-  <!-- 📜 JAVASCRIPT APPLICATION CORE -->
+  <!-- 📜 TACTICAL JAVASCRIPT CORE -->
   <!-- ========================================================= -->
   <script>
-    // Global State
+    // Audio FX Synthesizer (Web Audio API)
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playBeep(freq = 880, type = 'sine', duration = 0.035, vol = 0.05) {
+      try {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+        gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start();
+        osc.stop(audioCtx.currentTime + duration);
+      } catch (e) {}
+    }
+
+    function playTacticalClick() { playBeep(1200, 'sine', 0.02, 0.04); }
+    function playAlertPing() {
+      playBeep(440, 'triangle', 0.08, 0.08);
+      setTimeout(() => playBeep(880, 'triangle', 0.12, 0.08), 80);
+    }
+
+    // State Store
     let allMembers = [];
     let allCases = [];
     let allLostItems = [];
-    let activeDutyDay = 'M';
-    let currentLostStatusFilter = 'ALL';
-    let currentLostCategoryFilter = 'ALL';
-    let uploadedLostImageBase64 = null;
+    let activeRosterFilter = 'ALL';
+    let activeCaseFilter = 'ALL';
+    let activeLostFilter = 'ALL';
     let activeCardMember = null;
+    let syncTimer = 30;
 
-    // Toast Utility
-    function showToast(msg, icon = '✅') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      const toastIcon = document.getElementById('toast-icon');
-      if (!toast) return;
-      toastMsg.textContent = msg;
-      toastIcon.textContent = icon;
-      toast.classList.remove('translate-y-24', 'opacity-0');
-      toast.classList.add('translate-y-0', 'opacity-100');
-      setTimeout(() => {
-        toast.classList.remove('translate-y-0', 'opacity-100');
-        toast.classList.add('translate-y-24', 'opacity-0');
-      }, 3500);
-    }
-
-    // Tab Switching
-    function switchTab(tabId) {
-      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(`tab-${tabId}`);
-      if (target) target.classList.remove('hidden');
-
-      // Update Desktop Nav
-      document.querySelectorAll('.nav-tab-btn').forEach(btn => {
-        btn.classList.remove('bg-portal-600', 'text-white', 'shadow-sm', 'font-bold');
-        btn.classList.add('text-slate-600', 'dark:text-slate-300');
-      });
-      const activeNav = document.getElementById(`nav-desktop-${tabId}`);
-      if (activeNav) {
-        activeNav.classList.add('bg-portal-600', 'text-white', 'shadow-sm', 'font-bold');
-        activeNav.classList.remove('text-slate-600', 'dark:text-slate-300');
+    // Realtime Clock HUD
+    function initClock() {
+      const clock = document.getElementById('tac-clock');
+      function update() {
+        const d = new Date();
+        const time = d.toLocaleTimeString('en-GB', { hour12: false });
+        if (clock) clock.textContent = `${time} UTC+7`;
       }
-
-      // Update Mobile Nav
-      document.querySelectorAll('.mobile-nav-btn').forEach(btn => {
-        btn.classList.remove('text-portal-600', 'dark:text-gold-400');
-        btn.classList.add('text-slate-500', 'dark:text-slate-400');
-      });
-      const activeMobNav = document.getElementById(`nav-mobile-${tabId}`);
-      if (activeMobNav) {
-        activeMobNav.classList.add('text-portal-600', 'dark:text-gold-400');
-        activeMobNav.classList.remove('text-slate-500', 'dark:text-slate-400');
-      }
-
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      setInterval(update, 1000);
+      update();
     }
 
-    // Staff Sub-tab switching
-    function switchStaffSubTab(paneId) {
-      document.querySelectorAll('.staff-pane').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(`staff-pane-${paneId}`);
-      if (target) target.classList.remove('hidden');
-
-      document.querySelectorAll('.staff-subtab').forEach(btn => {
-        btn.classList.remove('bg-gold-500', 'text-portal-950', 'font-bold');
-        btn.classList.add('text-slate-300');
-      });
-      const activeBtn = document.getElementById(`staff-tab-${paneId}`);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-gold-500', 'text-portal-950', 'font-bold');
-        activeBtn.classList.remove('text-slate-300');
-      }
-    }
-
-    // Dark Mode Toggle
-    function toggleDarkMode() {
-      const html = document.documentElement;
-      const isDark = html.classList.toggle('dark');
-      localStorage.setItem('sarawat-theme', isDark ? 'dark' : 'light');
-      updateThemeUI(isDark);
-    }
-
-    function updateThemeUI(isDark) {
-      const icon = document.getElementById('theme-icon');
-      const text = document.getElementById('theme-text');
-      if (icon) icon.textContent = isDark ? '☀️' : '🌙';
-      if (text) text.textContent = isDark ? 'โหมดสว่าง' : 'โหมดมืด';
-    }
-
-    // Live Clock HUD
-    function initLiveClock() {
-      const clockEl = document.getElementById('hud-live-clock');
-      const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
-      const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
-
-      function tick() {
-        const now = new Date();
-        const dName = thaiDays[now.getDay()];
-        const dNum = now.getDate();
-        const mName = thaiMonths[now.getMonth()];
-        const yNum = now.getFullYear() + 543;
-        const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        if (clockEl) {
-          clockEl.textContent = `วัน${dName}ที่ ${dNum} ${mName} ${yNum} • ${timeStr} น.`;
+    // Auto Refresh Countdown Ticker
+    function initCountdown() {
+      const el = document.getElementById('tac-countdown');
+      setInterval(() => {
+        syncTimer--;
+        if (syncTimer <= 0) {
+          syncTimer = 30;
+          fetchTerminalData(false);
         }
-      }
-      setInterval(tick, 1000);
-      tick();
+        if (el) el.textContent = `${syncTimer}s`;
+      }, 1000);
     }
 
-    // Animated Counter
-    function animateCounter(id, end) {
-      const el = document.getElementById(id);
-      if (!el) return;
-      let start = 0;
-      const duration = 600;
-      const startTime = performance.now();
-      function update(now) {
-        const progress = Math.min((now - startTime) / duration, 1);
-        el.textContent = Math.floor(progress * end).toLocaleString('th-TH');
-        if (progress < 1) requestAnimationFrame(update);
-      }
-      requestAnimationFrame(update);
+    function manualRefresh() {
+      playTacticalClick();
+      syncTimer = 30;
+      fetchTerminalData(true);
     }
 
-    // =========================================================
-    // DATA FETCHING & RENDERING
-    // =========================================================
-    async function fetchData(isUser = false) {
-      const refIcon = document.getElementById('refresh-icon');
-      if (refIcon) refIcon.classList.add('rotate-180');
-
+    // Core Fetch Handler
+    async function fetchTerminalData(manual = false) {
       try {
-        // 1. Stats
-        const statsRes = await fetch('/api/stats');
-        const stats = await statsRes.json();
+        // 1. Stats Telemetry
+        const sRes = await fetch('/api/stats');
+        const stats = await sRes.json();
         if (stats.success) {
-          animateCounter('kpi-total-members', stats.members.active);
-          animateCounter('kpi-total-cases', stats.cases.total);
-          animateCounter('kpi-resolved-cases', stats.cases.resolved);
-          const pendingEl = document.getElementById('kpi-cases-pending');
-          if (pendingEl) pendingEl.textContent = `รอดำเนินการ ${stats.cases.pending} คดี`;
-
-          const leavesTotal = stats.leaves?.total || 0;
-          animateCounter('kpi-leave-count', leavesTotal);
+          document.getElementById('telemetry-officers').textContent = stats.members?.active || 0;
+          document.getElementById('tac-cnt-force').textContent = stats.members?.active || 0;
+          document.getElementById('telemetry-cases').textContent = stats.cases?.total || 0;
+          document.getElementById('tac-cnt-cases').textContent = stats.cases?.pending || 0;
+          document.getElementById('telemetry-pending').textContent = `PENDING: ${stats.cases?.pending || 0}`;
+          document.getElementById('telemetry-resolved').textContent = stats.cases?.resolved || 0;
         }
 
-        // 2. Members
-        const memRes = await fetch('/api/members');
-        const memData = await memRes.json();
-        if (memData.success) {
-          allMembers = memData.data || [];
-          renderTodayDutyCard(allMembers);
-          renderDutyTabDay(activeDutyDay);
-          renderStaffRoster(allMembers);
+        // 2. Members Roster
+        const mRes = await fetch('/api/members');
+        const mData = await mRes.json();
+        if (mData.success) {
+          allMembers = mData.data || [];
+          renderRosterTable();
+          updateShiftStatus();
         }
 
         // 3. Cases
-        const casesRes = await fetch('/api/cases');
-        const casesData = await casesRes.json();
-        if (casesData.success) {
-          allCases = casesData.data || [];
-          renderStaffCases(allCases);
+        const cRes = await fetch('/api/cases');
+        const cData = await cRes.json();
+        if (cData.success) {
+          allCases = cData.data || [];
+          renderCasesTable();
         }
 
         // 4. Lost Items
-        await fetchLostItems();
-
-        if (isUser) showToast('รีเฟรชข้อมูลล่าสุดเรียบร้อยแล้ว', '🔄');
-
-      } catch (err) {
-        console.error('Fetch error:', err);
-      } finally {
-        if (refIcon) setTimeout(() => refIcon.classList.remove('rotate-180'), 500);
-      }
-    }
-
-    // Today's Duty Calculation
-    function getTodayShiftCode() {
-      const day = new Date().getDay();
-      switch (day) {
-        case 1: return 'M';
-        case 2: return 'T';
-        case 3: return 'W';
-        case 4: return 'Ts';
-        case 5: return 'F';
-        default: return 'S';
-      }
-    }
-
-    function renderTodayDutyCard(members) {
-      const dayCode = getTodayShiftCode();
-      const dayNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Ts: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
-      const dayText = dayNames[dayCode] || 'วันปฏิบัติหน้าที่';
-
-      const shiftLabel = document.getElementById('portal-today-shift-text');
-      const hudDutyLabel = document.getElementById('hud-duty-day-label');
-      if (shiftLabel) shiftLabel.textContent = `เวรประจำ${dayText} (${dayCode})`;
-      if (hudDutyLabel) hudDutyLabel.textContent = `เวรประจำ${dayText} (${dayCode}) • พร้อมปฏิบัติการ`;
-
-      // Filter commanders for today
-      const targetDays = [dayCode, `${dayCode}S`, dayCode === 'Ts' ? 'TSS' : ''];
-      const todayMembers = members.filter(m => targetDays.includes(m.duty_day) || m.duty_day === 'S');
-
-      const head = todayMembers.find(m => m.shift_role === 'SHIFT_HEAD');
-      const deputy = todayMembers.find(m => m.shift_role === 'SHIFT_DEPUTY');
-
-      const headNameEl = document.getElementById('portal-head-name');
-      const headIdEl = document.getElementById('portal-head-id');
-      const deputyNameEl = document.getElementById('portal-deputy-name');
-      const deputyIdEl = document.getElementById('portal-deputy-id');
-
-      if (headNameEl) headNameEl.textContent = head ? `${head.first_name} (${head.nickname})` : 'ยังไม่ได้แต่งตั้ง';
-      if (headIdEl) headIdEl.textContent = head?.duty_id || '-';
-
-      if (deputyNameEl) deputyNameEl.textContent = deputy ? `${deputy.first_name} (${deputy.nickname})` : 'ยังไม่ได้แต่งตั้ง';
-      if (deputyIdEl) deputyIdEl.textContent = deputy?.duty_id || '-';
-    }
-
-    // =========================================================
-    // 📦 LOST & FOUND LOGIC
-    // =========================================================
-    async function fetchLostItems() {
-      try {
-        const res = await fetch('/api/lost-items');
-        const json = await res.json();
-        if (json.success && json.data) {
-          allLostItems = json.data;
-          renderLostItems();
-          renderPortalRecentLostPreview();
-          updateLostCounters();
+        const lRes = await fetch('/api/lost-items');
+        const lData = await lRes.json();
+        if (lData.success) {
+          allLostItems = lData.data || [];
+          renderLostTable();
+          document.getElementById('telemetry-lost').textContent = allLostItems.length;
+          document.getElementById('telemetry-lost-wait').textContent = `WAITING: ${allLostItems.filter(i => i.status === 'WAITING_OWNER').length}`;
         }
+
+        if (manual) playBeep(900, 'sine', 0.05, 0.06);
+
       } catch (err) {
-        console.error('Fetch lost items error:', err);
+        console.error('Terminal Sync Error:', err);
       }
     }
 
-    function updateLostCounters() {
-      const all = allLostItems.length;
-      const wait = allLostItems.filter(i => i.status === 'WAITING_OWNER').length;
-      const claim = allLostItems.filter(i => i.status === 'CLAIMED').length;
-
-      const elAll = document.getElementById('dash-lost-cnt-all');
-      const elWait = document.getElementById('dash-lost-cnt-wait');
-      const elClaim = document.getElementById('dash-lost-cnt-claim');
-      if (elAll) elAll.textContent = all;
-      if (elWait) elWait.textContent = wait;
-      if (elClaim) elClaim.textContent = claim;
+    function updateShiftStatus() {
+      const day = new Date().getDay();
+      const dayMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F' };
+      const currentCode = dayMap[day] || 'S';
+      const statusEl = document.getElementById('tac-shift-status');
+      const tagEl = document.getElementById('roster-active-day-tag');
+      if (statusEl) statusEl.textContent = `SHIFT: ${currentCode} [ACTIVE]`;
+      if (tagEl) tagEl.textContent = `[ACTIVE SHIFT: ${currentCode}]`;
     }
 
-    function renderPortalRecentLostPreview() {
-      const container = document.getElementById('portal-recent-lost');
-      if (!container) return;
+    // =========================================================
+    // 👮 MODULE 1: ROSTER TABLE
+    // =========================================================
+    function renderRosterTable() {
+      const tbody = document.getElementById('roster-tbody');
+      const search = (document.getElementById('roster-search')?.value || '').toLowerCase();
+      if (!tbody) return;
 
-      const waitingItems = allLostItems.filter(i => i.status === 'WAITING_OWNER').slice(0, 3);
-      if (waitingItems.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-3 p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/60 text-slate-400 text-xs text-center border border-slate-200 dark:border-portal-800">
-            ✓ ขณะนี้ยังไม่มีของหายค้างในระบบ
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = waitingItems.map(item => `
-        <div onclick="openClaimModal('${item.id || item.item_code}')" class="cursor-pointer p-3 rounded-2xl bg-slate-50 dark:bg-portal-950/80 border border-slate-200 dark:border-portal-800 hover:border-gold-500 flex items-center gap-3 transition">
-          <img src="${item.image_url || '/assets/logo.png'}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 dark:border-portal-700 flex-shrink-0">
-          <div class="overflow-hidden">
-            <p class="font-bold text-xs text-slate-800 dark:text-white truncate">${item.title}</p>
-            <p class="text-[10px] text-slate-400 truncate">📍 ${item.location_found || 'ในโรงเรียน'}</p>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function renderLostItems() {
-      const grid = document.getElementById('dash-lost-grid');
-      const empty = document.getElementById('dash-lost-empty');
-      if (!grid) return;
-
-      const search = (document.getElementById('lost-search-input')?.value || '').toLowerCase();
-
-      const filtered = allLostItems.filter(item => {
-        if (currentLostStatusFilter !== 'ALL' && item.status !== currentLostStatusFilter) return false;
-        if (currentLostCategoryFilter !== 'ALL' && item.category !== currentLostCategoryFilter) return false;
+      const filtered = allMembers.filter(m => {
+        if (activeRosterFilter !== 'ALL' && !m.duty_day.startsWith(activeRosterFilter)) return false;
         if (search) {
-          const matchTitle = item.title?.toLowerCase().includes(search);
-          const matchLoc = item.location_found?.toLowerCase().includes(search);
-          const matchCode = item.item_code?.toLowerCase().includes(search);
-          if (!matchTitle && !matchLoc && !matchCode) return false;
+          const matchId = (m.duty_id || '').toLowerCase().includes(search);
+          const matchName = `${m.first_name} ${m.last_name} ${m.nickname}`.toLowerCase().includes(search);
+          const matchPhone = (m.phone_number || '').includes(search);
+          if (!matchId && !matchName && !matchPhone) return false;
         }
         return true;
       });
 
+      document.getElementById('roster-count-footer').textContent = `OFFICERS LISTED: ${filtered.length}`;
+
       if (filtered.length === 0) {
-        grid.innerHTML = '';
-        if (empty) empty.classList.remove('hidden');
+        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-600 font-mono">// NO RECORDS MATCHING QUERY</td></tr>';
         return;
       }
-      if (empty) empty.classList.add('hidden');
 
-      grid.innerHTML = filtered.map(item => {
-        const isWaiting = item.status === 'WAITING_OWNER';
-        const badge = isWaiting
-          ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/20 text-amber-500 border border-amber-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> รอเจ้าของ</span>`
-          : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> รับคืนแล้ว</span>`;
+      tbody.innerHTML = filtered.map(m => {
+        const isHead = m.shift_role === 'SHIFT_HEAD';
+        const isDeputy = m.shift_role === 'SHIFT_DEPUTY';
+        const rankBadge = isHead 
+          ? '<span class="text-amber-400 font-bold">👑 HEAD</span>' 
+          : isDeputy 
+          ? '<span class="text-cyan-400 font-bold">🎖️ DEPUTY</span>' 
+          : '<span class="text-zinc-500">MEMBER</span>';
 
         return `
-          <div class="bento-card rounded-3xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 p-4 shadow-sm flex flex-col justify-between space-y-3">
-            <div class="space-y-3">
-              <div class="relative w-full h-44 rounded-2xl overflow-hidden bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-800">
-                <img src="${item.image_url || '/assets/logo.png'}" alt="${item.title}" class="w-full h-full object-cover">
-                <div class="absolute top-2.5 right-2.5">${badge}</div>
-                <div class="absolute bottom-2.5 left-2.5 px-2 py-0.5 rounded-lg bg-black/60 backdrop-blur-md text-white font-mono text-[10px]">
-                  ${item.item_code || 'LF-ITEM'}
-                </div>
-              </div>
-
-              <div>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded bg-portal-500/10 text-portal-500">${item.category || 'ของหาย'}</span>
-                <h4 class="font-display font-bold text-sm text-slate-900 dark:text-white mt-1">${item.title}</h4>
-                <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5 flex items-center gap-1">
-                  <span>📍</span> ${item.location_found || 'ไม่ระบุพิกัด'}
-                </p>
-                <p class="text-[11px] text-slate-400 mt-0.5">
-                  📅 พบเมื่อ: ${item.found_date || '-'} (${item.found_time || ''})
-                </p>
-              </div>
-            </div>
-
-            <div class="pt-3 border-t border-slate-100 dark:border-portal-800 flex items-center justify-between">
-              <span class="text-[10px] text-slate-400">เก็บที่: ${item.storage_location || 'ห้องสารวัตร'}</span>
-              ${isWaiting 
-                ? `<button onclick="openClaimModal('${item.id || item.item_code}')" class="px-3 py-1.5 rounded-xl bg-gold-500 hover:bg-gold-400 text-portal-950 font-bold text-xs transition shadow-sm active:scale-95">🙋‍♂️ ขอรับคืน</button>`
-                : `<span class="text-xs text-emerald-500 font-semibold">ส่งคืนแล้ว ✓</span>`
-              }
-            </div>
-          </div>
+          <tr class="hover:bg-zinc-950/90 transition-colors">
+            <td class="py-2 px-2.5 font-bold text-cyan-400">${m.duty_id || '-'}</td>
+            <td class="py-2 px-2 text-zinc-200">
+              <span class="font-bold">${m.nickname}</span> 
+              <span class="text-zinc-500 text-[11px]">(${m.first_name})</span>
+            </td>
+            <td class="py-2 px-2 text-zinc-400 font-bold">${m.duty_day}</td>
+            <td class="py-2 px-2">${rankBadge}</td>
+            <td class="py-2 px-2 text-right">
+              <button onclick="inspectCard('${m.id}')" class="px-2 py-0.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 text-zinc-300 rounded text-[10px] font-bold">
+                [INSPECT ID]
+              </button>
+            </td>
+          </tr>
         `;
       }).join('');
     }
 
-    function setLostFilterStatus(status) {
-      currentLostStatusFilter = status;
-      ['all', 'wait', 'claim'].forEach(id => {
-        const btn = document.getElementById(`lost-flt-${id}`);
-        if (!btn) return;
-        btn.classList.remove('bg-portal-600', 'text-white', 'shadow-sm', 'font-bold');
-        btn.classList.add('bg-slate-100', 'dark:bg-portal-800', 'text-slate-600', 'dark:text-slate-300');
-      });
-      const activeBtn = document.getElementById(status === 'ALL' ? 'lost-flt-all' : status === 'WAITING_OWNER' ? 'lost-flt-wait' : 'lost-flt-claim');
-      if (activeBtn) {
-        activeBtn.classList.add('bg-portal-600', 'text-white', 'shadow-sm', 'font-bold');
-        activeBtn.classList.remove('bg-slate-100', 'dark:bg-portal-800', 'text-slate-600', 'dark:text-slate-300');
-      }
-      renderLostItems();
-    }
-
-    function filterLostByCat(cat) {
-      currentLostCategoryFilter = cat;
-      switchTab('lostfound');
-      renderLostItems();
-    }
-
-    function handlePortalSearch(e) {
-      if (e.key === 'Enter') {
-        const query = e.target.value.trim();
-        const searchInput = document.getElementById('lost-search-input');
-        if (searchInput) searchInput.value = query;
-        switchTab('lostfound');
-        renderLostItems();
-      }
-    }
-
-    function onLostSearchChange() {
-      renderLostItems();
-    }
-
-    // Report Lost Item Modal
-    function openReportLostModal() {
-      document.getElementById('report-lost-modal')?.classList.remove('hidden');
-    }
-    function closeReportLostModal() {
-      document.getElementById('report-lost-modal')?.classList.add('hidden');
-    }
-
-    function handleLostImageSelect(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        uploadedLostImageBase64 = evt.target.result;
-        const preview = document.getElementById('lost-image-preview');
-        const box = document.getElementById('lost-image-preview-box');
-        if (preview && box) {
-          preview.src = uploadedLostImageBase64;
-          box.classList.remove('hidden');
+    function filterRoster(shift) {
+      playTacticalClick();
+      activeRosterFilter = shift;
+      ['ALL', 'M', 'T', 'W', 'Ts', 'F', 'S'].forEach(s => {
+        const btn = document.getElementById(`flt-shift-${s.toLowerCase()}`) || document.getElementById(`flt-shift-${s}`);
+        if (btn) {
+          if (s === shift) {
+            btn.className = 'px-2 py-0.5 bg-zinc-800 text-white rounded font-bold';
+          } else {
+            btn.className = 'px-1.5 py-0.5 text-zinc-400 hover:text-white';
+          }
         }
-      };
-      reader.readAsDataURL(file);
+      });
+      renderRosterTable();
     }
 
-    async function handleReportLostSubmit(e) {
+    // =========================================================
+    // 🚨 MODULE 2: CASES TABLE & INLINE ACTIONS
+    // =========================================================
+    function renderCasesTable() {
+      const tbody = document.getElementById('cases-tbody');
+      const search = (document.getElementById('case-search')?.value || '').toLowerCase();
+      if (!tbody) return;
+
+      const filtered = allCases.filter(c => {
+        if (activeCaseFilter !== 'ALL' && c.status !== activeCaseFilter) return false;
+        if (search) {
+          const matchId = (c.case_id || '').toLowerCase().includes(search);
+          const matchLoc = (c.location || '').toLowerCase().includes(search);
+          const matchCat = (c.category || '').toLowerCase().includes(search);
+          if (!matchId && !matchLoc && !matchCat) return false;
+        }
+        return true;
+      });
+
+      document.getElementById('cases-count-footer').textContent = `CASES: ${filtered.length}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" class="py-6 text-center text-zinc-600 font-mono">// NO INCIDENT LOGS FOUND</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(c => {
+        const isResolved = c.status === 'RESOLVED';
+        const isInvestigating = c.status === 'INVESTIGATING';
+        const statusBadge = isResolved
+          ? '<span class="text-emerald-400 font-bold">RESOLVED</span>'
+          : isInvestigating
+          ? '<span class="text-cyan-400 font-bold">ACTIVE</span>'
+          : '<span class="text-rose-400 font-bold animate-pulse">PENDING</span>';
+
+        return `
+          <tr class="hover:bg-zinc-950/90 transition-colors">
+            <td class="py-2 px-2.5 font-bold text-rose-400">${c.case_id}</td>
+            <td class="py-2 px-2 text-zinc-300">${c.category}</td>
+            <td class="py-2 px-2 text-zinc-400">${c.location}</td>
+            <td class="py-2 px-2">${statusBadge}</td>
+            <td class="py-2 px-2 text-right">
+              ${isResolved 
+                ? '<span class="text-zinc-600 text-[10px]">// CLOSED</span>'
+                : `<button onclick="resolveCase('${c.case_id}')" class="px-2 py-0.5 bg-emerald-950 hover:bg-emerald-900 border border-emerald-700 text-emerald-300 rounded text-[10px] font-bold">
+                    [RESOLVE]
+                  </button>`
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterCases(status) {
+      playTacticalClick();
+      activeCaseFilter = status;
+      ['ALL', 'PENDING', 'INVESTIGATING', 'RESOLVED'].forEach(s => {
+        const btn = document.getElementById(`flt-case-${s.toLowerCase()}`);
+        if (btn) {
+          if (s === status) {
+            btn.className = 'px-2 py-0.5 bg-zinc-800 text-white rounded font-bold';
+          } else {
+            btn.className = 'px-2 py-0.5 text-zinc-400 hover:text-white';
+          }
+        }
+      });
+      renderCasesTable();
+    }
+
+    async function resolveCase(caseId) {
+      playTacticalClick();
+      const notes = prompt(`ระบุบันทึกการแก้ไข / การลงพื้นที่สำหรับคดี ${caseId}:`, 'สารวัตรลงพื้นที่ตรวจสอบและระงับเหตุเรียบร้อย');
+      if (!notes) return;
+
+      try {
+        const res = await fetch(`/api/cases/${caseId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'RESOLVED', resolution_notes: notes })
+        });
+        const json = await res.json();
+        if (json.success) {
+          playAlertPing();
+          fetchTerminalData(false);
+        }
+      } catch (e) {
+        alert('เกิดข้อผิดพลาดในการปิดคดี');
+      }
+    }
+
+    // =========================================================
+    // 📦 MODULE 3: LOST VAULT TABLE & INLINE ACTIONS
+    // =========================================================
+    function renderLostTable() {
+      const tbody = document.getElementById('lost-tbody');
+      if (!tbody) return;
+
+      const filtered = allLostItems.filter(item => {
+        if (activeLostFilter !== 'ALL' && item.status !== activeLostFilter) return false;
+        return true;
+      });
+
+      document.getElementById('lost-count-footer').textContent = `ITEMS IN VAULT: ${filtered.length}`;
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="py-6 text-center text-zinc-600 font-mono">// NO VAULT ITEMS RECORDED</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(it => {
+        const isWaiting = it.status === 'WAITING_OWNER';
+        const statusBadge = isWaiting
+          ? '<span class="text-amber-400 font-bold">WAITING_OWNER</span>'
+          : '<span class="text-emerald-400 font-bold">RELEASED</span>';
+
+        return `
+          <tr class="hover:bg-zinc-950/90 transition-colors">
+            <td class="py-2 px-2.5 font-bold text-amber-400">${it.item_code || '-'}</td>
+            <td class="py-2 px-2 text-zinc-200">${it.title}</td>
+            <td class="py-2 px-2 text-zinc-400">${it.category || 'GENERAL'}</td>
+            <td class="py-2 px-2 text-zinc-400">${it.location_found || '-'}</td>
+            <td class="py-2 px-2 text-zinc-500">${it.found_date || '-'}</td>
+            <td class="py-2 px-2">${statusBadge}</td>
+            <td class="py-2 px-2 text-right">
+              ${isWaiting 
+                ? `<button onclick="releaseItem('${it.id || it.item_code}')" class="px-2 py-0.5 bg-amber-950 hover:bg-amber-900 border border-amber-700 text-amber-300 rounded text-[10px] font-bold">
+                    [RETURN ITEM]
+                  </button>`
+                : '<span class="text-zinc-600 text-[10px]">// CLAIMED</span>'
+              }
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterLostItems(status) {
+      playTacticalClick();
+      activeLostFilter = status;
+      ['all', 'wait', 'claimed'].forEach(s => {
+        const btn = document.getElementById(`flt-lost-${s}`);
+        if (btn) {
+          const match = (s === 'all' && status === 'ALL') || (s === 'wait' && status === 'WAITING_OWNER') || (s === 'claimed' && status === 'CLAIMED');
+          btn.className = match ? 'px-2 py-0.5 bg-zinc-800 text-white rounded font-bold' : 'px-2 py-0.5 text-zinc-400 hover:text-white';
+        }
+      });
+      renderLostTable();
+    }
+
+    async function releaseItem(itemId) {
+      playTacticalClick();
+      const claimant = prompt('ระบุชื่อ-นามสกุล และเลขประจำตัวของผู้รับของคืน:');
+      if (!claimant) return;
+
+      try {
+        const res = await fetch(`/api/lost-items/${itemId}/claim`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ claimant_name: claimant, claimant_student_no: '-', notes: 'ส่งมอบที่ห้องสารวัตร' })
+        });
+        const json = await res.json();
+        if (json.success) {
+          playAlertPing();
+          fetchTerminalData(false);
+        }
+      } catch (e) {
+        alert('เกิดข้อผิดพลาดในการบันทึกการส่งมอบ');
+      }
+    }
+
+    // =========================================================
+    // 📇 MODALS & ACTION SUBMIT HANDLERS
+    // =========================================================
+    function inspectCard(memberId) {
+      playTacticalClick();
+      const m = allMembers.find(mem => mem.id === memberId);
+      if (!m) return;
+      activeCardMember = m;
+
+      document.getElementById('card-duty-id').textContent = m.duty_id || 'SARAWAT';
+      document.getElementById('card-name').textContent = `${m.first_name} ${m.last_name} (${m.nickname})`;
+      document.getElementById('card-role').textContent = `ROLE: ${m.duty_day} // ${m.shift_role}`;
+      document.getElementById('card-phone').textContent = `COMMS: ${m.phone_number || 'N/A'}`;
+      document.getElementById('card-photo').src = m.photo_url || '/assets/logo.png';
+      document.getElementById('modal-card').classList.remove('hidden');
+    }
+    function closeCardModal() {
+      playTacticalClick();
+      document.getElementById('modal-card').classList.add('hidden');
+    }
+
+    async function downloadCardPNG() {
+      playTacticalClick();
+      const card = document.getElementById('cr80-card-view');
+      if (!card || !activeCardMember) return;
+      const canvas = await html2canvas(card, { scale: 3, backgroundColor: '#000000' });
+      const a = document.createElement('a');
+      a.download = `ID_${activeCardMember.duty_id}_${activeCardMember.nickname}.png`;
+      a.href = canvas.toDataURL();
+      a.click();
+    }
+
+    function copyVerifyUrl() {
+      playTacticalClick();
+      if (!activeCardMember) return;
+      navigator.clipboard.writeText(`${window.location.origin}/verify/${activeCardMember.id}`);
+      alert('LINK COPIED TO CLIPBOARD');
+    }
+
+    // Dispatch Modal
+    function openDispatchModal() {
+      playTacticalClick();
+      document.getElementById('modal-dispatch').classList.remove('hidden');
+    }
+    function closeDispatchModal() {
+      playTacticalClick();
+      document.getElementById('modal-dispatch').classList.add('hidden');
+    }
+
+    async function handleDispatchSubmit(e) {
       e.preventDefault();
-      const btn = document.getElementById('btn-submit-lost');
+      playTacticalClick();
+      const btn = document.getElementById('btn-disp-submit');
       btn.disabled = true;
-      btn.textContent = 'กำลังบันทึก...';
 
       const payload = {
-        title: document.getElementById('modal-lost-title').value.trim(),
-        category: document.getElementById('modal-lost-cat').value,
-        location_found: document.getElementById('modal-lost-location').value.trim(),
-        finder_name: document.getElementById('modal-lost-finder').value.trim() || 'พลเมืองดี',
-        storage_location: document.getElementById('modal-lost-storage').value.trim() || 'ห้องสารวัตรนักเรียน อาคาร 1',
-        base64Image: uploadedLostImageBase64,
-        filename: 'lost_photo.jpg'
+        category: document.getElementById('disp-category').value,
+        location: document.getElementById('disp-location').value.trim(),
+        description: document.getElementById('disp-desc').value.trim(),
+        reporter_name: document.getElementById('disp-reporter').value.trim() || 'พลเมืองดี (ไม่เปิดเผยตัวตน)'
+      };
+
+      try {
+        const res = await fetch('/api/cases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          playAlertPing();
+          closeDispatchModal();
+          document.getElementById('disp-desc').value = '';
+          fetchTerminalData(false);
+        }
+      } catch (err) {
+        alert('DISPATCH FAILED');
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    // Log Item Modal
+    function openLogItemModal() {
+      playTacticalClick();
+      document.getElementById('modal-log-item').classList.remove('hidden');
+    }
+    function closeLogItemModal() {
+      playTacticalClick();
+      document.getElementById('modal-log-item').classList.add('hidden');
+    }
+
+    async function handleLogItemSubmit(e) {
+      e.preventDefault();
+      playTacticalClick();
+      const btn = document.getElementById('btn-log-submit');
+      btn.disabled = true;
+
+      const payload = {
+        title: document.getElementById('log-title').value.trim(),
+        category: document.getElementById('log-cat').value,
+        location_found: document.getElementById('log-loc').value.trim(),
+        finder_name: document.getElementById('log-finder').value.trim() || 'สารวัตรเวร',
+        storage_location: 'ห้องสารวัตรนักเรียน อาคาร 1'
       };
 
       try {
@@ -1450,401 +1001,29 @@
         });
         const json = await res.json();
         if (json.success) {
-          showToast('บันทึกของหายขึ้นกระดานเรียบร้อยแล้ว!', '📦');
-          closeReportLostModal();
-          document.getElementById('lost-report-form').reset();
-          uploadedLostImageBase64 = null;
-          document.getElementById('lost-image-preview-box')?.classList.add('hidden');
-          await fetchLostItems();
-        } else {
-          alert('ข้อผิดพลาด: ' + (json.error || 'บันทึกไม่สำเร็จ'));
+          playAlertPing();
+          closeLogItemModal();
+          document.getElementById('log-title').value = '';
+          fetchTerminalData(false);
         }
       } catch (err) {
-        alert('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+        alert('FAILED TO LOG ITEM');
       } finally {
         btn.disabled = false;
-        btn.textContent = '+ บันทึกและเผยแพร่บนกระดาน';
       }
     }
 
-    // Claim Lost Item Modal
-    function openClaimModal(itemId) {
-      const item = allLostItems.find(i => (i.id === itemId || i.item_code === itemId));
-      if (!item) return;
-
-      document.getElementById('claim-item-id').value = item.id || item.item_code;
-      document.getElementById('claim-item-title').textContent = item.title;
-      document.getElementById('claim-item-code').textContent = `รหัส: ${item.item_code || '-'} • พบที่: ${item.location_found || '-'}`;
-      document.getElementById('claim-modal')?.classList.remove('hidden');
-    }
-    function closeClaimModal() {
-      document.getElementById('claim-modal')?.classList.add('hidden');
-    }
-
-    async function handleClaimSubmit(e) {
-      e.preventDefault();
-      const itemId = document.getElementById('claim-item-id').value;
-      const btn = document.getElementById('btn-submit-claim');
-      btn.disabled = true;
-      btn.textContent = 'กำลังส่งคำขอ...';
-
-      const payload = {
-        claimant_name: document.getElementById('claim-name').value.trim(),
-        claimant_student_no: document.getElementById('claim-student-no').value.trim() || '-',
-        notes: `เบอร์โทร: ${document.getElementById('claim-phone').value.trim()} | จุดสังเกต: ${document.getElementById('claim-notes').value.trim()}`
-      };
-
-      try {
-        const res = await fetch(`/api/lost-items/${itemId}/claim`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.success) {
-          showToast('ส่งคำขอรับของคืนสำเร็จ! โปรดติดต่อรับของที่ห้องสารวัตร', '✅');
-          closeClaimModal();
-          await fetchLostItems();
-        }
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการส่งคำขอรับของคืน');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '✓ ส่งคำขอรับของคืน';
-      }
-    }
-
-    // =========================================================
-    // 🚨 INCIDENT & CASE REPORTING LOGIC
-    // =========================================================
-    let selectedQuickType = 'เกิดเหตุก่อวิวาท';
-
-    function selectQuickIncidentType(type) {
-      selectedQuickType = type;
-      document.querySelectorAll('.quick-inc-btn').forEach(btn => {
-        btn.classList.remove('border-rose-500', 'bg-rose-500/10', 'text-rose-500');
-      });
-      event.target.classList.add('border-rose-500', 'bg-rose-500/10', 'text-rose-500');
-    }
-
-    async function submitQuickIncident() {
-      const loc = document.getElementById('quick-incident-location').value;
-      const isAnon = document.getElementById('quick-incident-anon').checked;
-
-      const payload = {
-        category: selectedQuickType,
-        location: loc,
-        description: `แจ้งเหตุด่วนผ่านหน้าเว็บ SARAWAT Portal: ${selectedQuickType} บริเวณ ${loc}`,
-        reporter_name: isAnon ? 'พลเมืองดี (ไม่เปิดเผยตัวตน)' : 'นักเรียนแจ้งเหตุด่วน',
-        reporter_grade: '-'
-      };
-
-      try {
-        const res = await fetch('/api/cases', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.success) {
-          showToast(`ส่งรายงานเหตุด่วนสำเร็จ! หมายเลข ${json.case_id}`, '🚨');
-          alert(`✅ รายงานเหตุสำเร็จ!\nหมายเลขคดีของคุณคือ: ${json.case_id}\nระบบได้ส่งการแจ้งเตือนไปยังสารวัตรนักเรียนเพื่อลงพื้นที่ตรวจสอบทันที`);
-        }
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการส่งข้อมูลแจ้งเหตุ');
-      }
-    }
-
-    async function handleFullIncidentSubmit(e) {
-      e.preventDefault();
-      const btn = document.getElementById('btn-submit-inc');
-      btn.disabled = true;
-      btn.textContent = 'กำลังส่งรายงาน...';
-
-      const payload = {
-        category: document.getElementById('inc-category').value,
-        location: document.getElementById('inc-location').value.trim(),
-        description: document.getElementById('inc-description').value.trim(),
-        reporter_name: document.getElementById('inc-reporter-name').value.trim() || 'พลเมืองดี (ไม่เปิดเผยตัวตน)',
-        contact_info: document.getElementById('inc-reporter-phone').value.trim() || '-'
-      };
-
-      try {
-        const res = await fetch('/api/cases', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const json = await res.json();
-        if (json.success) {
-          showToast(`บันทึกเหตุการณ์เรียบร้อย หมายเลข ${json.case_id}`, '🚨');
-          alert(`✅ บันทึกรายงานเหตุด่วนเรียบร้อยแล้ว!\nหมายเลขคดีของคุณคือ: ${json.case_id}\nคุณสามารถนำเลขนี้มาตรวจสอบสถานะการดำเนินการได้ที่หน้านี้`);
-          document.getElementById('incident-form').reset();
-        }
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการส่งรายงาน');
-      } finally {
-        btn.disabled = false;
-        btn.textContent = '🚨 ยืนยันการส่งรายงานเหตุด่วน';
-      }
-    }
-
-    async function trackCaseStatus() {
-      const caseId = (document.getElementById('track-case-input')?.value || '').trim().toUpperCase();
-      const resultBox = document.getElementById('track-result-box');
-      if (!caseId || !resultBox) return;
-
-      const found = allCases.find(c => c.case_id === caseId);
-      resultBox.classList.remove('hidden');
-
-      if (!found) {
-        resultBox.innerHTML = `
-          <div class="text-rose-500 font-bold">❌ ไม่พบข้อมูลคดี ${caseId} ในระบบ</div>
-          <p class="text-slate-400">โปรดตรวจสอบหมายเลขคดีอีกครั้ง หรือติดต่อห้องสารวัตรนักเรียน</p>
-        `;
-        return;
-      }
-
-      const statusMap = {
-        PENDING: '<span class="text-amber-500 font-bold">⏳ รอดำเนินการ / สารวัตรกำลังเข้าตรวจสอบ</span>',
-        INVESTIGATING: '<span class="text-blue-500 font-bold">🔍 กำลังตรวจสอบ / ลงพื้นที่</span>',
-        RESOLVED: '<span class="text-emerald-500 font-bold">✅ ดำเนินการแก้ไขเสร็จสิ้นแล้ว</span>'
-      };
-
-      resultBox.innerHTML = `
-        <div class="border-b border-slate-200 dark:border-portal-800 pb-2">
-          <p class="font-bold text-slate-800 dark:text-white text-sm">${found.case_id}: ${found.category}</p>
-          <p class="text-[11px] text-slate-400">สถานที่: ${found.location} • แจ้งเมื่อ: ${new Date(found.incident_date_time || found.created_at).toLocaleString('th-TH')}</p>
-        </div>
-        <div class="space-y-1">
-          <p><b>สถานะปัจจุบัน:</b> ${statusMap[found.status] || found.status}</p>
-          <p><b>บันทึกการแก้ไข:</b> ${found.resolution_notes || 'อยู่ระหว่างการปฏิบัติหน้าที่'}</p>
-        </div>
-      `;
-    }
-
-    // =========================================================
-    // 👮 DUTY & CHECKPOINTS TAB LOGIC
-    // =========================================================
-    function renderDutyTabDay(day) {
-      activeDutyDay = day;
-      const dayNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Ts: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
-      
-      document.querySelectorAll('.duty-day-pill').forEach(btn => {
-        btn.classList.remove('bg-blue-500/20', 'text-blue-600', 'dark:text-blue-400', 'border-blue-500/30', 'font-bold');
-        btn.classList.add('bg-slate-100', 'dark:bg-portal-800', 'text-slate-600', 'dark:text-slate-300');
-      });
-      const activeBtn = document.getElementById(`duty-btn-${day}`);
-      if (activeBtn) {
-        activeBtn.classList.add('bg-blue-500/20', 'text-blue-600', 'dark:text-blue-400', 'border-blue-500/30', 'font-bold');
-        activeBtn.classList.remove('bg-slate-100', 'dark:bg-portal-800', 'text-slate-600', 'dark:text-slate-300');
-      }
-
-      const titleEl = document.getElementById('duty-day-title');
-      const countEl = document.getElementById('duty-day-count');
-      const grid = document.getElementById('duty-officers-grid');
-      if (!grid) return;
-
-      const targetDays = day === 'S' 
-        ? ['S', 'MS', 'TS', 'WS', 'TSS', 'FS'] 
-        : [day, `${day}S`, day === 'Ts' ? 'TSS' : ''];
-
-      const dayMembers = allMembers.filter(m => targetDays.includes(m.duty_day));
-
-      if (titleEl) titleEl.textContent = `ตารางเวร${dayNames[day] || day} (${day})`;
-      if (countEl) countEl.textContent = `จำนวนสารวัตร: ${dayMembers.length} นาย`;
-
-      if (dayMembers.length === 0) {
-        grid.innerHTML = '<div class="col-span-4 py-12 text-center text-slate-400 text-xs">ไม่พบรายชื่อสารวัตรในรอบเวรนี้</div>';
-        return;
-      }
-
-      grid.innerHTML = dayMembers.map(m => {
-        const isHead = m.shift_role === 'SHIFT_HEAD';
-        const isDeputy = m.shift_role === 'SHIFT_DEPUTY';
-        const roleBadge = isHead 
-          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gold-500/20 text-gold-500 border border-gold-500/30">👑 หัวหน้าเวร</span>'
-          : isDeputy
-          ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/20 text-blue-500 border border-blue-500/30">🎖️ รองหัวหน้าเวร</span>'
-          : '<span class="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 dark:bg-portal-800 text-slate-400">🛡️ สารวัตรนักเรียน</span>';
-
-        return `
-          <div class="bento-card p-4 rounded-3xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 shadow-sm flex items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-              <div class="w-12 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-700 flex-shrink-0">
-                <img src="${m.photo_url || '/assets/logo.png'}" class="w-full h-full object-cover">
-              </div>
-              <div class="space-y-0.5">
-                <div class="flex items-center gap-1.5">${roleBadge}</div>
-                <h4 class="font-display font-bold text-xs text-slate-900 dark:text-white mt-1">${m.first_name} (${m.nickname})</h4>
-                <p class="text-[10px] font-mono text-gold-500 font-bold">${m.duty_id || '-'}</p>
-              </div>
-            </div>
-            <button onclick="openCardModal('${m.id}')" class="p-2 rounded-xl bg-slate-100 dark:bg-portal-800 hover:bg-portal-600 hover:text-white text-slate-500 transition text-xs" title="ดูบัตรดิจิทัล">
-              📇
-            </button>
-          </div>
-        `;
-      }).join('');
-    }
-
-    // =========================================================
-    // 🛡️ STAFF MODE & ROSTER LOGIC
-    // =========================================================
-    function renderStaffRoster(members) {
-      const grid = document.getElementById('staff-roster-grid');
-      if (!grid) return;
-
-      const search = (document.getElementById('staff-roster-search')?.value || '').toLowerCase();
-      const dayFilter = document.getElementById('staff-roster-day-filter')?.value || 'ALL';
-
-      const filtered = members.filter(m => {
-        if (dayFilter !== 'ALL' && m.duty_day !== dayFilter && !m.duty_day.startsWith(dayFilter)) return false;
-        if (search) {
-          const matchName = `${m.first_name} ${m.last_name} ${m.nickname}`.toLowerCase().includes(search);
-          const matchId = (m.duty_id || '').toLowerCase().includes(search);
-          const matchPhone = (m.phone_number || '').includes(search);
-          if (!matchName && !matchId && !matchPhone) return false;
-        }
-        return true;
-      });
-
-      grid.innerHTML = filtered.map(m => `
-        <div class="bento-card p-4 rounded-3xl bg-white dark:bg-portal-900 border border-slate-200 dark:border-portal-800 shadow-sm flex flex-col justify-between space-y-3">
-          <div class="flex items-center gap-3">
-            <div class="w-12 h-14 rounded-2xl overflow-hidden bg-slate-100 dark:bg-portal-950 border border-slate-200 dark:border-portal-700 flex-shrink-0">
-              <img src="${m.photo_url || '/assets/logo.png'}" class="w-full h-full object-cover">
-            </div>
-            <div class="space-y-0.5 overflow-hidden">
-              <div class="flex items-center gap-1.5">
-                <span class="px-2 py-0.5 rounded-lg bg-portal-500/10 text-portal-500 font-mono text-[10px] font-bold">${m.duty_id || '-'}</span>
-                <span class="text-[10px] text-slate-400">เวร ${m.duty_day}</span>
-              </div>
-              <h4 class="font-display font-bold text-xs text-slate-900 dark:text-white truncate">${m.first_name} (${m.nickname})</h4>
-              <p class="text-[10px] text-slate-400 font-mono">📞 ${m.phone_number || '-'}</p>
-            </div>
-          </div>
-
-          <div class="pt-2 border-t border-slate-100 dark:border-portal-800 flex items-center justify-between">
-            <span class="text-[10px] text-slate-400">${m.shift_role === 'SHIFT_HEAD' ? '👑 หัวหน้าเวร' : m.shift_role === 'SHIFT_DEPUTY' ? '🎖️ รองหัวหน้าเวร' : '🛡️ สารวัตร'}</span>
-            <button onclick="openCardModal('${m.id}')" class="px-3 py-1.5 rounded-xl bg-portal-600 hover:bg-portal-500 text-white font-bold text-xs transition">
-              ดูบัตร CR80
-            </button>
-          </div>
-        </div>
-      `).join('');
-    }
-
-    function filterStaffRoster() {
-      renderStaffRoster(allMembers);
-    }
-
-    function renderStaffCases(cases) {
-      const container = document.getElementById('staff-cases-table');
-      const countEl = document.getElementById('staff-cases-count');
-      if (!container) return;
-
-      if (countEl) countEl.textContent = `ทั้งหมด ${cases.length} คดี`;
-
-      if (cases.length === 0) {
-        container.innerHTML = '<div class="py-8 text-center text-slate-400 text-xs">ยังไม่มีรายการคดีในระบบ</div>';
-        return;
-      }
-
-      container.innerHTML = `
-        <table class="w-full text-left text-xs text-slate-600 dark:text-slate-300">
-          <thead class="text-[11px] font-bold text-slate-400 border-b border-slate-200 dark:border-portal-800">
-            <tr>
-              <th class="py-2.5">รหัสคดี</th>
-              <th class="py-2.5">หมวดหมู่</th>
-              <th class="py-2.5">สถานที่</th>
-              <th class="py-2.5">สถานะ</th>
-              <th class="py-2.5">วันที่</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100 dark:divide-portal-800/60 font-medium">
-            ${cases.map(c => `
-              <tr>
-                <td class="py-2.5 font-mono font-bold text-portal-600 dark:text-gold-400">${c.case_id}</td>
-                <td class="py-2.5">${c.category}</td>
-                <td class="py-2.5">${c.location}</td>
-                <td class="py-2.5">${c.status === 'RESOLVED' ? '<span class="text-emerald-500 font-bold">✅ ปิดคดี</span>' : '<span class="text-amber-500 font-bold">⏳ ดำเนินการ</span>'}</td>
-                <td class="py-2.5 text-slate-400 font-mono text-[11px]">${new Date(c.created_at || c.incident_date_time).toLocaleDateString('th-TH')}</td>
-              </tr>
-            `).join('')}
-          </tbody>
-        </table>
-      `;
-    }
-
-    // Attendance Sheet Online Link
-    function openAttendanceSheet(day) {
+    // A4 Sheet Export Command
+    function triggerSheet(day) {
+      playTacticalClick();
       window.open(`/sheet/${day}`, '_blank');
     }
 
-    // =========================================================
-    // 📇 CR80 DIGITAL CARD MODAL LOGIC
-    // =========================================================
-    function openCardModal(memberId) {
-      const member = allMembers.find(m => m.id === memberId);
-      if (!member) return;
-      activeCardMember = member;
-
-      document.getElementById('modal-card-duty-id').textContent = member.duty_id || 'SARAWAT';
-      document.getElementById('modal-card-name').textContent = `${member.first_name} ${member.last_name} (${member.nickname})`;
-      document.getElementById('modal-card-role').textContent = `🛡️ สารวัตรเวร${member.duty_day} • ${member.shift_role === 'SHIFT_HEAD' ? 'หัวหน้าเวร' : member.shift_role === 'SHIFT_DEPUTY' ? 'รองหัวหน้าเวร' : 'สมาชิก'}`;
-      document.getElementById('modal-card-phone').textContent = `📞 ${member.phone_number || '-'}`;
-      document.getElementById('modal-card-photo').src = member.photo_url || '/assets/logo.png';
-
-      document.getElementById('card-modal')?.classList.remove('hidden');
-    }
-
-    function closeCardModal() {
-      document.getElementById('card-modal')?.classList.add('hidden');
-    }
-
-    async function downloadCardPNG() {
-      const cardEl = document.getElementById('modal-cr80-card');
-      if (!cardEl || !activeCardMember) return;
-      try {
-        const canvas = await html2canvas(cardEl, { scale: 3, useCORS: true, backgroundColor: null });
-        const link = document.createElement('a');
-        link.download = `CARD_${activeCardMember.duty_id || 'SARAWAT'}_${activeCardMember.nickname}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        showToast('ดาวน์โหลดรูปบัตรความละเอียดสูงสำเร็จ!', '📥');
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการบันทึกภาพบัตร');
-      }
-    }
-
-    function copyCardVerificationLink() {
-      if (!activeCardMember) return;
-      const url = `${window.location.origin}/verify/${activeCardMember.id}`;
-      navigator.clipboard.writeText(url).then(() => {
-        showToast('คัดลอกลิงก์ตรวจสอบบัตรแล้ว!', '🔗');
-      });
-    }
-
-    // =========================================================
-    // 🚀 INITIALIZATION
-    // =========================================================
+    // Launch Terminal
     document.addEventListener('DOMContentLoaded', () => {
-      // 1. Theme restoration
-      const savedTheme = localStorage.getItem('sarawat-theme');
-      if (savedTheme === 'light') {
-        document.documentElement.classList.remove('dark');
-        updateThemeUI(false);
-      } else {
-        document.documentElement.classList.add('dark');
-        updateThemeUI(true);
-      }
-
-      // 2. Start Live Clock
-      initLiveClock();
-
-      // 3. Initial Data Load
-      fetchData();
+      initClock();
+      initCountdown();
+      fetchTerminalData(false);
     });
   </script>
 </body>
