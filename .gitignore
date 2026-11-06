@@ -6,11 +6,16 @@
 # Dependencies
 node_modules/
 
-# Logs
+# Logs & Cache
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 *.log
+lost_items_cache.json
+
+# Uploads
+public/uploads/*
+!public/uploads/.gitkeep
 
 # OS & Editor
 .DS_Store

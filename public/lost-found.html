@@ -1,0 +1,752 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ศูนย์รวมทรัพย์สินสูญหายและของหาย | สารวัตรนักเรียน โรงเรียนพระนารายณ์</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@700&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+            display: ['Syncopate', 'sans-serif'],
+          },
+          colors: {
+            navy: {
+              700: '#1e293b',
+              800: '#0f172a',
+              850: '#0b1120',
+              900: '#060a12',
+              950: '#030509',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    body {
+      background-color: #030509;
+      color: #f1f5f9;
+      font-family: 'Prompt', sans-serif;
+    }
+    .glass-card {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+    }
+    .glass-card:hover {
+      border-color: rgba(245, 158, 11, 0.4);
+    }
+    .badge-amber {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.35);
+    }
+    .badge-emerald {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.35);
+    }
+    .badge-cyan {
+      background: rgba(6, 182, 212, 0.15);
+      color: #22d3ee;
+      border: 1px solid rgba(6, 182, 212, 0.35);
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-track {
+      background: #060a12;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 3px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-500/30 selection:text-amber-200">
+
+  <!-- ========================================================= -->
+  <!-- HEADER / NAVBAR -->
+  <!-- ========================================================= -->
+  <header class="sticky top-0 z-40 bg-navy-900/90 backdrop-blur-md border-b border-navy-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo -->
+      <a href="/" class="flex items-center gap-3 group">
+        <div class="w-10 h-10 rounded-xl overflow-hidden border border-amber-500/40 p-0.5 bg-navy-950 shadow-lg group-hover:scale-105 transition-transform">
+          <img src="/assets/logo.jpg" alt="Logo" class="w-full h-full object-cover rounded-lg" onerror="this.src='/assets/logo.png'">
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="font-display text-sm tracking-wider font-extrabold text-amber-400">SARAWAT</span>
+            <span class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">LOST & FOUND</span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium leading-none mt-0.5">ศูนย์รวมทรัพย์สินสูญหาย โรงเรียนพระนารายณ์</p>
+        </div>
+      </a>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/" class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 border border-navy-700 transition">
+          <span>🏛️</span> แดชบอร์ดศูนย์บัญชาการ
+        </a>
+        <button onclick="openNewItemModal()" class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold text-navy-950 bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 shadow-md shadow-amber-500/20 active:scale-95 transition">
+          <span>➕</span> แจ้งเก็บของได้
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================= -->
+  <!-- HERO BANNER -->
+  <!-- ========================================================= -->
+  <section class="border-b border-navy-800/80 bg-gradient-to-b from-navy-900/80 via-navy-950 to-navy-950 py-8 sm:py-12 relative overflow-hidden">
+    <!-- Ambient glow decoration -->
+    <div class="absolute -top-24 left-1/2 -translate-x-1/2 w-96 h-96 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 text-center">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 text-xs font-mono font-bold mb-3">
+        <span>🔍</span> SMART LOST & FOUND CATALOG
+      </div>
+      <h1 class="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
+        ศูนย์รวมข้อมูล<span class="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 to-amber-200">ของหายและทรัพย์สินที่เก็บได้</span>
+      </h1>
+      <p class="max-w-2xl mx-auto text-xs sm:text-sm text-slate-400 mt-2">
+        รวบรวมทรัพย์สินที่พบในโรงเรียนพระนารายณ์โดยทีมงานสารวัตรนักเรียน ตรวจสอบรูปภาพ ประเภท และลักษณะเด่นเพื่อติดต่อขอรับคืนได้ตลอดเวลา
+      </p>
+
+      <!-- KPI Summary Cards -->
+      <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto mt-6">
+        <div class="glass-card p-3 rounded-xl text-center">
+          <div class="text-[11px] text-slate-400">ทรัพย์สินทั้งหมด</div>
+          <div id="stat-total" class="font-mono text-xl sm:text-2xl font-bold text-white mt-0.5">0</div>
+        </div>
+        <div class="glass-card p-3 rounded-xl text-center border-amber-500/30 bg-amber-500/5">
+          <div class="text-[11px] text-amber-300">🟡 รอเจ้าของติดต่อ</div>
+          <div id="stat-waiting" class="font-mono text-xl sm:text-2xl font-bold text-amber-400 mt-0.5">0</div>
+        </div>
+        <div class="glass-card p-3 rounded-xl text-center border-emerald-500/30 bg-emerald-500/5">
+          <div class="text-[11px] text-emerald-300">🟢 ส่งคืนสำเร็จแล้ว</div>
+          <div id="stat-claimed" class="font-mono text-xl sm:text-2xl font-bold text-emerald-400 mt-0.5">0</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================= -->
+  <!-- MAIN CONTENT AREA -->
+  <!-- ========================================================= -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-1 w-full space-y-6">
+
+    <!-- Search & Filter Bar -->
+    <div class="glass-card p-4 sm:p-5 rounded-2xl space-y-4 shadow-xl">
+      <div class="flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
+        
+        <!-- Live Search Input -->
+        <div class="relative flex-1">
+          <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 text-sm">
+            🔍
+          </span>
+          <input 
+            type="text" 
+            id="search-input" 
+            oninput="handleSearch(this.value)"
+            placeholder="ค้นหาชื่อสิ่งของ, ลักษณะเด่น (เช่น สีกระเป๋า, พวงกุญแจ, ยี่ห้อ), สถานที่พบ หรือรหัส LF..." 
+            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-navy-950 border border-navy-700 focus:border-amber-500 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-amber-500 transition font-sans">
+        </div>
+
+        <!-- Status Filter Tabs -->
+        <div class="flex items-center gap-1.5 overflow-x-auto pb-1 md:pb-0">
+          <button onclick="setStatusFilter('ALL')" id="status-btn-ALL" class="status-btn px-3 py-1.5 rounded-lg text-xs font-bold transition bg-amber-500 text-navy-950">
+            ทั้งหมด
+          </button>
+          <button onclick="setStatusFilter('WAITING_OWNER')" id="status-btn-WAITING_OWNER" class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-navy-950 hover:bg-navy-800 border border-navy-700 transition">
+            🟡 รอเจ้าของมารับ
+          </button>
+          <button onclick="setStatusFilter('CLAIMED')" id="status-btn-CLAIMED" class="status-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white bg-navy-950 hover:bg-navy-800 border border-navy-700 transition">
+            🟢 ส่งมอบคืนแล้ว
+          </button>
+        </div>
+
+      </div>
+
+      <!-- Category Filter Pills -->
+      <div class="flex items-center gap-1.5 overflow-x-auto pt-2 border-t border-navy-800/80 custom-scroll text-xs">
+        <span class="text-slate-400 font-medium flex-shrink-0 mr-1">หมวดหมู่:</span>
+        <button onclick="setCategoryFilter('ALL')" id="cat-btn-ALL" class="cat-btn px-3 py-1 rounded-full text-xs font-bold transition bg-amber-500/20 text-amber-300 border border-amber-500/40 flex-shrink-0">
+          ทั้งหมด
+        </button>
+        <button onclick="setCategoryFilter('กระเป๋า / กระเป๋าสตางค์')" id="cat-btn-bag" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          🎒 กระเป๋า / กระเป๋าสตางค์
+        </button>
+        <button onclick="setCategoryFilter('อุปกรณ์ไอที / มือถือ')" id="cat-btn-tech" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          📱 อุปกรณ์ไอที / มือถือ
+        </button>
+        <button onclick="setCategoryFilter('กุญแจ / ยานพาหนะ')" id="cat-btn-key" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          🔑 กุญแจ / ยานพาหนะ
+        </button>
+        <button onclick="setCategoryFilter('เครื่องแต่งกาย')" id="cat-btn-cloth" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          👕 เครื่องแต่งกาย
+        </button>
+        <button onclick="setCategoryFilter('อุปกรณ์การเรียน')" id="cat-btn-study" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          ✏️ อุปกรณ์การเรียน
+        </button>
+        <button onclick="setCategoryFilter('เอกสาร / บัตรสำคัญ')" id="cat-btn-card" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          💳 บัตร / เอกสาร
+        </button>
+        <button onclick="setCategoryFilter('อื่นๆ')" id="cat-btn-other" class="cat-btn px-3 py-1 rounded-full text-xs font-medium text-slate-400 hover:text-slate-200 bg-navy-950 hover:bg-navy-850 border border-navy-800 flex-shrink-0 transition">
+          📦 อื่นๆ
+        </button>
+      </div>
+    </div>
+
+    <!-- Instructions / Guide Note -->
+    <div class="p-4 rounded-xl bg-gradient-to-r from-amber-500/10 via-navy-900 to-navy-900 border border-amber-500/20 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+      <div class="flex items-start gap-3">
+        <span class="text-2xl">📢</span>
+        <div>
+          <span class="font-bold text-amber-300">ขั้นตอนการขอรับทรัพย์สินคืน:</span>
+          <p class="text-slate-300 mt-0.5">
+            หากพบสิ่งของที่เป็นของท่าน กรุณาจด <span class="font-mono text-amber-400 font-bold">รหัสสิ่งของ (LF-XXXX)</span> และนำหลักฐาน เช่น บัตรนักเรียน หรือการบอกลักษณะเฉพาะภายใน ไปติดต่อที่ <strong>ห้องสารวัตรนักเรียน อาคาร 1</strong>
+          </p>
+        </div>
+      </div>
+      <div class="text-[11px] text-slate-400 font-mono flex-shrink-0 bg-navy-950 px-3 py-1.5 rounded-lg border border-navy-800">
+        🕒 เวลาทำการ: 07:30 - 16:30 น.
+      </div>
+    </div>
+
+    <!-- Items Grid Container -->
+    <div id="items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-5">
+      <!-- Dynamic Item Cards inserted by JS -->
+    </div>
+
+    <!-- Loading / Empty State -->
+    <div id="empty-state" class="hidden py-16 text-center space-y-3">
+      <div class="text-4xl">🔎</div>
+      <p class="text-slate-400 text-sm">ไม่พบข้อมูลของหายที่ตรงกับเงื่อนไขการค้นหา</p>
+      <button onclick="resetFilters()" class="px-3.5 py-1.5 rounded-lg bg-navy-850 hover:bg-navy-800 text-amber-400 border border-navy-700 text-xs font-semibold">
+        ล้างตัวกรองทั้งหมด
+      </button>
+    </div>
+
+  </main>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: ITEM FULL DETAIL & IMAGE ZOOM -->
+  <!-- ========================================================= -->
+  <div id="modal-detail" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-2xl w-full rounded-2xl overflow-hidden border border-navy-700 shadow-2xl flex flex-col max-h-[90vh]">
+      
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-navy-800 flex items-center justify-between bg-navy-950/80">
+        <div class="flex items-center gap-2">
+          <span id="detail-code-badge" class="px-2 py-0.5 rounded font-mono text-xs font-bold badge-amber">LF-XXXX</span>
+          <span id="detail-category-badge" class="px-2 py-0.5 rounded text-xs font-medium bg-navy-800 text-slate-300">หมวดหมู่</span>
+        </div>
+        <button onclick="closeDetailModal()" class="w-8 h-8 rounded-lg bg-navy-850 hover:bg-navy-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Body -->
+      <div class="p-5 overflow-y-auto custom-scroll space-y-4">
+        
+        <!-- Big Photo Container -->
+        <div class="w-full h-64 sm:h-80 rounded-xl overflow-hidden bg-navy-950 border border-navy-800 relative group">
+          <img id="detail-img" src="" alt="Lost Item" class="w-full h-full object-contain bg-black/50">
+        </div>
+
+        <div>
+          <h2 id="detail-title" class="text-lg sm:text-xl font-bold text-white">ชื่อสิ่งของ</h2>
+          <div id="detail-status-badge" class="mt-1 inline-block"></div>
+        </div>
+
+        <!-- Highlight: Characteristics & Details -->
+        <div class="p-4 rounded-xl bg-navy-950/90 border border-amber-500/30 space-y-2">
+          <div class="flex items-center gap-2 text-amber-400 text-xs font-bold">
+            <span>✨</span> ลักษณะเด่นและจุดสังเกตเฉพาะ (Characteristics)
+          </div>
+          <p id="detail-characteristics" class="text-xs sm:text-sm text-slate-200 leading-relaxed font-sans">
+            -
+          </p>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="p-3 rounded-xl bg-navy-900 border border-navy-800 space-y-1">
+            <span class="text-slate-400">📍 สถานที่พบ:</span>
+            <p id="detail-location" class="font-medium text-white">-</p>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-900 border border-navy-800 space-y-1">
+            <span class="text-slate-400">📅 วันเวลาที่พบ:</span>
+            <p id="detail-datetime" class="font-medium text-white">-</p>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-900 border border-navy-800 space-y-1">
+            <span class="text-slate-400">🏢 จุดเก็บรักษา / ติดต่อรับคืน:</span>
+            <p id="detail-storage" class="font-medium text-emerald-400 font-semibold">-</p>
+          </div>
+          <div class="p-3 rounded-xl bg-navy-900 border border-navy-800 space-y-1">
+            <span class="text-slate-400">👤 ผู้พบ / ผู้ส่งมอบ:</span>
+            <p id="detail-finder" class="font-medium text-slate-200">-</p>
+          </div>
+        </div>
+
+        <!-- Return claim info if claimed -->
+        <div id="detail-claim-info" class="hidden p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs space-y-1">
+          <span class="text-emerald-300 font-bold">✅ รายละเอียดการส่งมอบคืน:</span>
+          <p id="detail-claimant-text" class="text-slate-300">-</p>
+        </div>
+
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 border-t border-navy-800 bg-navy-950 flex items-center justify-between">
+        <span class="text-xs text-slate-500">ติดต่อห้องสารวัตร อาคาร 1</span>
+        <button onclick="closeDetailModal()" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-white font-semibold text-xs transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- MODAL: ADD NEW FOUND ITEM -->
+  <!-- ========================================================= -->
+  <div id="modal-new" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="glass-card max-w-lg w-full rounded-2xl overflow-hidden border border-navy-700 shadow-2xl flex flex-col max-h-[90vh]">
+      
+      <div class="p-4 border-b border-navy-800 flex items-center justify-between bg-navy-950">
+        <h3 class="font-bold text-white text-sm flex items-center gap-2">
+          <span>➕</span> บันทึกทรัพย์สินที่เก็บได้ / แจ้งของหาย
+        </h3>
+        <button onclick="closeNewItemModal()" class="w-8 h-8 rounded-lg bg-navy-850 hover:bg-navy-800 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">
+          ✕
+        </button>
+      </div>
+
+      <form id="form-new-item" onsubmit="handleNewItemSubmit(event)" class="p-5 overflow-y-auto custom-scroll space-y-3.5 text-xs">
+        
+        <!-- Title -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">ชื่อสิ่งของ / รายการ <span class="text-rose-400">*</span></label>
+          <input type="text" id="new-title" required placeholder="เช่น กระเป๋าสตางค์, หูฟังไร้สาย, กุญแจรถ" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+        </div>
+
+        <!-- Category -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">หมวดหมู่ / ประเภท <span class="text-rose-400">*</span></label>
+          <select id="new-category" required class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+            <option value="กระเป๋า / กระเป๋าสตางค์">🎒 กระเป๋า / กระเป๋าสตางค์</option>
+            <option value="อุปกรณ์ไอที / มือถือ">📱 อุปกรณ์ไอที / มือถือ</option>
+            <option value="กุญแจ / ยานพาหนะ">🔑 กุญแจ / ยานพาหนะ</option>
+            <option value="เครื่องแต่งกาย">👕 เครื่องแต่งกาย</option>
+            <option value="อุปกรณ์การเรียน">✏️ อุปกรณ์การเรียน</option>
+            <option value="เอกสาร / บัตรสำคัญ">💳 เอกสาร / บัตรสำคัญ</option>
+            <option value="อื่นๆ">📦 อื่นๆ</option>
+          </select>
+        </div>
+
+        <!-- Characteristics (Core Requirement) -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">
+            ลักษณะเด่น / สี / ตำหนิ / จุดสังเกตเฉพาะ <span class="text-rose-400">*</span>
+          </label>
+          <textarea id="new-characteristics" required rows="3" placeholder="เช่น สีน้ำเงินเข้ม มีพวงกุญแจตุ๊กตาหมีห้อยอยู่ รอยขีดข่วนด้านหลัง ยี่ห้อ CASIO มีสติกเกอร์ติดที่ฝา" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none"></textarea>
+          <span class="text-[11px] text-slate-500">ระบุรายละเอียดให้ชัดเจนเพื่อให้เจ้าของตัวจริงยืนยันได้ถูกต้อง</span>
+        </div>
+
+        <!-- Image URL or Upload -->
+        <div>
+          <label class="block text-slate-300 font-medium mb-1">รูปถ่ายสิ่งของ</label>
+          <div class="space-y-2">
+            <input type="file" id="new-file" accept="image/*" onchange="previewUploadImage(this)" class="block w-full text-[11px] text-slate-400 file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-semibold file:bg-navy-800 file:text-amber-300 hover:file:bg-navy-700 cursor-pointer">
+            <input type="url" id="new-image-url" placeholder="หรือระบุ URL รูปภาพ (https://...)" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none text-xs">
+          </div>
+          <!-- Preview container -->
+          <div id="image-preview-box" class="hidden mt-2 w-full h-32 rounded-lg bg-navy-950 border border-navy-800 overflow-hidden relative">
+            <img id="image-preview" src="" alt="Preview" class="w-full h-full object-contain">
+          </div>
+        </div>
+
+        <!-- Location & Date -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">สถานที่พบ <span class="text-rose-400">*</span></label>
+            <input type="text" id="new-location" required placeholder="เช่น หน้าอาคาร 3, โรงอาหาร" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">วันที่พบ</label>
+            <input type="date" id="new-date" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+          </div>
+        </div>
+
+        <!-- Finder Name & Contact -->
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">ชื่อผู้พบ / ผู้ส่งมอบ</label>
+            <input type="text" id="new-finder-name" placeholder="เช่น สารวัตรเวรประจำวัน หรือ นาย..." class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-medium mb-1">เบอร์ติดต่อ / ห้องเรียน</label>
+            <input type="text" id="new-finder-contact" placeholder="เช่น 08X-XXX-XXXX หรือ ม.5/7" class="w-full px-3 py-2 rounded-lg bg-navy-950 border border-navy-700 focus:border-amber-500 text-slate-100 outline-none">
+          </div>
+        </div>
+
+        <div class="pt-2 flex items-center justify-end gap-2 border-t border-navy-800">
+          <button type="button" onclick="closeNewItemModal()" class="px-4 py-2 rounded-xl bg-navy-850 hover:bg-navy-800 text-slate-300 font-semibold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-submit-new" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-navy-950 font-bold transition shadow">
+            บันทึกข้อมูล
+          </button>
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
+  <!-- FOOTER -->
+  <!-- ========================================================= -->
+  <footer class="mt-auto border-t border-navy-800/80 bg-navy-950/80 py-6 text-center text-xs text-slate-500">
+    <div class="max-w-7xl mx-auto px-4 space-y-1">
+      <p class="font-medium text-slate-400">ฝ่ายกิจการนักเรียน & สารวัตรนักเรียน โรงเรียนพระนารายณ์</p>
+      <p class="font-mono text-[11px] text-slate-600">SARAWAT PRANARAI LOST & FOUND PORTAL • VERSION 6.0</p>
+    </div>
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- JAVASCRIPT LOGIC -->
+  <!-- ========================================================= -->
+  <script>
+    let allLostItems = [];
+    let currentStatusFilter = 'ALL';
+    let currentCategoryFilter = 'ALL';
+    let currentSearchKeyword = '';
+    let uploadedBase64 = null;
+    let uploadedFilename = null;
+
+    // Load Items on Mount
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('new-date').value = new Date().toISOString().slice(0, 10);
+      fetchLostItems();
+    });
+
+    async function fetchLostItems() {
+      try {
+        const res = await fetch('/api/lost-items');
+        const json = await res.json();
+        if (json.success && json.data) {
+          allLostItems = json.data;
+          updateKPIStats(allLostItems);
+          renderLostItems();
+        }
+      } catch (err) {
+        console.error('Fetch Lost Items Error:', err);
+      }
+    }
+
+    function updateKPIStats(items) {
+      const total = items.length;
+      const waiting = items.filter(it => it.status === 'WAITING_OWNER').length;
+      const claimed = items.filter(it => it.status === 'CLAIMED').length;
+
+      document.getElementById('stat-total').textContent = total;
+      document.getElementById('stat-waiting').textContent = waiting;
+      document.getElementById('stat-claimed').textContent = claimed;
+    }
+
+    function renderLostItems() {
+      const grid = document.getElementById('items-grid');
+      const emptyState = document.getElementById('empty-state');
+      if (!grid) return;
+
+      // Filter
+      let filtered = allLostItems.filter(item => {
+        // Status filter
+        if (currentStatusFilter !== 'ALL' && item.status !== currentStatusFilter) return false;
+        // Category filter
+        if (currentCategoryFilter !== 'ALL' && item.category !== currentCategoryFilter) return false;
+        // Search filter
+        if (currentSearchKeyword) {
+          const s = currentSearchKeyword.toLowerCase();
+          const matchTitle = item.title && item.title.toLowerCase().includes(s);
+          const matchChar = item.characteristics && item.characteristics.toLowerCase().includes(s);
+          const matchLoc = item.location_found && item.location_found.toLowerCase().includes(s);
+          const matchCode = item.item_code && item.item_code.toLowerCase().includes(s);
+          const matchCat = item.category && item.category.toLowerCase().includes(s);
+          if (!matchTitle && !matchChar && !matchLoc && !matchCode && !matchCat) return false;
+        }
+        return true;
+      });
+
+      if (filtered.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+
+      grid.innerHTML = filtered.map(item => {
+        const isWaiting = item.status === 'WAITING_OWNER';
+        const statusBadge = isWaiting
+          ? `<span class="badge-amber px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse"></span> รอเจ้าของมารับ</span>`
+          : `<span class="badge-emerald px-2.5 py-0.5 rounded-full text-[11px] font-bold flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span> ส่งมอบคืนแล้ว</span>`;
+
+        const imgUrl = item.image_url || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80';
+
+        // Format Date
+        const dateStr = item.found_date ? new Date(item.found_date).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '-';
+
+        return `
+          <div class="glass-card rounded-2xl overflow-hidden flex flex-col group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-amber-500/5">
+            
+            <!-- Image Area with Badges -->
+            <div class="relative w-full h-48 bg-navy-950 overflow-hidden cursor-pointer" onclick="openDetailModal('${item.id || item.item_code}')">
+              <img 
+                src="${imgUrl}" 
+                alt="${item.title}" 
+                class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" 
+                onerror="this.src='https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80'"
+              >
+              <!-- Gradient Overlay -->
+              <div class="absolute inset-0 bg-gradient-to-t from-navy-950 via-transparent to-transparent opacity-80"></div>
+              
+              <!-- Badges on Image -->
+              <div class="absolute top-3 left-3">
+                <span class="px-2 py-0.5 rounded-md bg-navy-950/90 border border-amber-500/40 text-amber-300 font-mono text-[10px] font-bold tracking-wider">
+                  ${item.item_code}
+                </span>
+              </div>
+              <div class="absolute top-3 right-3">
+                ${statusBadge}
+              </div>
+
+              <!-- Category Badge Bottom Left of Image -->
+              <div class="absolute bottom-2.5 left-3">
+                <span class="px-2 py-0.5 rounded-md bg-navy-900/90 text-slate-300 text-[11px] font-medium border border-navy-700">
+                  ${item.category}
+                </span>
+              </div>
+            </div>
+
+            <!-- Content Area -->
+            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+              <div>
+                <h3 class="text-sm font-bold text-white group-hover:text-amber-300 transition-colors line-clamp-1" title="${item.title}">
+                  ${item.title}
+                </h3>
+
+                <!-- Key Feature / Characteristics Box -->
+                <div class="mt-2 p-2.5 rounded-xl bg-navy-950 border border-navy-800 text-xs text-slate-300 line-clamp-2 leading-relaxed">
+                  <span class="text-amber-400 font-semibold">🔍 ลักษณะเด่น:</span> ${item.characteristics || 'ไม่มีข้อมูล'}
+                </div>
+              </div>
+
+              <!-- Metadata -->
+              <div class="pt-2 border-t border-navy-800/80 space-y-1 text-[11px] text-slate-400">
+                <div class="flex items-center justify-between">
+                  <span>📍 พบที่:</span>
+                  <span class="font-medium text-slate-200 truncate max-w-[150px]">${item.location_found || '-'}</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>📅 วันที่พบ:</span>
+                  <span class="font-mono text-slate-300">${dateStr} (${item.found_time || 'ไม่ระบุ'})</span>
+                </div>
+              </div>
+
+              <!-- Action Button -->
+              <button 
+                onclick="openDetailModal('${item.id || item.item_code}')"
+                class="w-full mt-2 py-2 rounded-xl bg-navy-800 hover:bg-amber-500 hover:text-navy-950 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1.5 active:scale-95"
+              >
+                <span>🔍</span> ดูรูป & รายละเอียด
+              </button>
+
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Filter Actions
+    function setStatusFilter(status) {
+      currentStatusFilter = status;
+      document.querySelectorAll('.status-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-500', 'text-navy-950', 'font-bold');
+        btn.classList.add('bg-navy-950', 'text-slate-300', 'font-semibold');
+      });
+      const activeBtn = document.getElementById(`status-btn-${status}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-navy-950', 'text-slate-300', 'font-semibold');
+        activeBtn.classList.add('bg-amber-500', 'text-navy-950', 'font-bold');
+      }
+      renderLostItems();
+    }
+
+    function setCategoryFilter(category) {
+      currentCategoryFilter = category;
+      document.querySelectorAll('.cat-btn').forEach(btn => {
+        btn.classList.remove('bg-amber-500/20', 'text-amber-300', 'border-amber-500/40', 'font-bold');
+        btn.classList.add('text-slate-400', 'font-medium');
+      });
+      const targetId = category === 'ALL' ? 'cat-btn-ALL' : (
+        category.includes('กระเป๋า') ? 'cat-btn-bag' :
+        category.includes('ไอที') ? 'cat-btn-tech' :
+        category.includes('กุญแจ') ? 'cat-btn-key' :
+        category.includes('เครื่องแต่งกาย') ? 'cat-btn-cloth' :
+        category.includes('การเรียน') ? 'cat-btn-study' :
+        category.includes('เอกสาร') ? 'cat-btn-card' : 'cat-btn-other'
+      );
+      const activeBtn = document.getElementById(targetId);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-slate-400', 'font-medium');
+        activeBtn.classList.add('bg-amber-500/20', 'text-amber-300', 'border-amber-500/40', 'font-bold');
+      }
+      renderLostItems();
+    }
+
+    function handleSearch(val) {
+      currentSearchKeyword = val.trim();
+      renderLostItems();
+    }
+
+    function resetFilters() {
+      currentStatusFilter = 'ALL';
+      currentCategoryFilter = 'ALL';
+      currentSearchKeyword = '';
+      document.getElementById('search-input').value = '';
+      setStatusFilter('ALL');
+      setCategoryFilter('ALL');
+    }
+
+    // Modal: Detail
+    function openDetailModal(id) {
+      const item = allLostItems.find(it => it.id === id || it.item_code === id);
+      if (!item) return;
+
+      document.getElementById('detail-code-badge').textContent = item.item_code;
+      document.getElementById('detail-category-badge').textContent = item.category;
+      document.getElementById('detail-title').textContent = item.title;
+      document.getElementById('detail-img').src = item.image_url || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80';
+      document.getElementById('detail-characteristics').textContent = item.characteristics || '-';
+      document.getElementById('detail-location').textContent = item.location_found || '-';
+      document.getElementById('detail-datetime').textContent = `${item.found_date || '-'} (${item.found_time || '-'})`;
+      document.getElementById('detail-storage').textContent = item.storage_location || 'ห้องสารวัตรนักเรียน อาคาร 1';
+      document.getElementById('detail-finder').textContent = `${item.finder_name || 'ไม่ประสงค์ออกนาม'} ${item.finder_contact ? `(${item.finder_contact})` : ''}`;
+
+      const statusBadgeContainer = document.getElementById('detail-status-badge');
+      if (item.status === 'WAITING_OWNER') {
+        statusBadgeContainer.innerHTML = `<span class="badge-amber px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span> อยู่ระหว่างรอเจ้าของติดต่อรับคืน</span>`;
+      } else {
+        statusBadgeContainer.innerHTML = `<span class="badge-emerald px-3 py-1 rounded-full text-xs font-bold inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> ส่งมอบคืนเจ้าของเรียบร้อยแล้ว</span>`;
+      }
+
+      const claimBox = document.getElementById('detail-claim-info');
+      if (item.status === 'CLAIMED' && (item.claimant_name || item.claimed_at)) {
+        claimBox.classList.remove('hidden');
+        document.getElementById('detail-claimant-text').textContent = `ผู้รับคืน: ${item.claimant_name || '-'} (เลขประจำตัว: ${item.claimant_student_no || '-'}) • เมื่อ: ${item.claimed_at ? new Date(item.claimed_at).toLocaleString('th-TH') : '-'}`;
+      } else {
+        claimBox.classList.add('hidden');
+      }
+
+      document.getElementById('modal-detail').classList.remove('hidden');
+    }
+
+    function closeDetailModal() {
+      document.getElementById('modal-detail').classList.add('hidden');
+    }
+
+    // Modal: New Item
+    function openNewItemModal() {
+      document.getElementById('form-new-item').reset();
+      document.getElementById('new-date').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('image-preview-box').classList.add('hidden');
+      uploadedBase64 = null;
+      uploadedFilename = null;
+      document.getElementById('modal-new').classList.remove('hidden');
+    }
+
+    function closeNewItemModal() {
+      document.getElementById('modal-new').classList.add('hidden');
+    }
+
+    function previewUploadImage(input) {
+      if (input.files && input.files[0]) {
+        const file = input.files[0];
+        uploadedFilename = file.name;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          uploadedBase64 = e.target.result;
+          document.getElementById('image-preview').src = uploadedBase64;
+          document.getElementById('image-preview-box').classList.remove('hidden');
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+
+    async function handleNewItemSubmit(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-new');
+      btn.disabled = true;
+      btn.textContent = 'กำลังบันทึก...';
+
+      const payload = {
+        title: document.getElementById('new-title').value.trim(),
+        category: document.getElementById('new-category').value,
+        characteristics: document.getElementById('new-characteristics').value.trim(),
+        location_found: document.getElementById('new-location').value.trim(),
+        found_date: document.getElementById('new-date').value,
+        image_url: document.getElementById('new-image-url').value.trim(),
+        finder_name: document.getElementById('new-finder-name').value.trim(),
+        finder_contact: document.getElementById('new-finder-contact').value.trim(),
+        base64Image: uploadedBase64,
+        filename: uploadedFilename
+      };
+
+      try {
+        const res = await fetch('/api/lost-items', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (json.success) {
+          alert('✅ บันทึกข้อมูลทรัพย์สินสำเร็จ รหัส: ' + (json.data?.item_code || 'LF'));
+          closeNewItemModal();
+          fetchLostItems();
+        } else {
+          alert('เกิดข้อผิดพลาด: ' + (json.error || 'ไม่สามารถบันทึกได้'));
+        }
+      } catch (err) {
+        alert('เชื่อมต่อเซิร์ฟเวอร์ล้มเหลว: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'บันทึกข้อมูล';
+      }
+    }
+  </script>
+</body>
+</html>

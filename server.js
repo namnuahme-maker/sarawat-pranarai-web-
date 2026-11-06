@@ -105,6 +105,24 @@ app.get('/api/stats', async (req, res) => {
       console.warn('[WEB] Cannot query leave_requests:', e.message);
     }
 
+    // สถิติทรัพย์สินสูญหายและของหาย (Lost & Found)
+    let totalLost = 0;
+    let waitingLost = 0;
+    let claimedLost = 0;
+    try {
+      const { count: cTotal } = await supabase.from('lost_items').select('*', { count: 'exact', head: true });
+      totalLost = cTotal || 0;
+      const { count: cWait } = await supabase.from('lost_items').select('*', { count: 'exact', head: true }).eq('status', 'WAITING_OWNER');
+      waitingLost = cWait || 0;
+      const { count: cClaim } = await supabase.from('lost_items').select('*', { count: 'exact', head: true }).eq('status', 'CLAIMED');
+      claimedLost = cClaim || 0;
+    } catch (e) {
+      const cached = getLocalLostItems();
+      totalLost = cached.length;
+      waitingLost = cached.filter(i => i.status === 'WAITING_OWNER').length;
+      claimedLost = cached.filter(i => i.status === 'CLAIMED').length;
+    }
+
     res.json({
       success: true,
       members: {
@@ -122,6 +140,11 @@ app.get('/api/stats', async (req, res) => {
         total: totalLeaves,
         today: todayLeavesCount,
         pending: pendingLeaves
+      },
+      lost_items: {
+        total: totalLost,
+        waiting: waitingLost,
+        claimed: claimedLost
       },
       shifts: shiftCounts
     });
@@ -403,6 +426,261 @@ app.post('/api/card-template', (req, res) => {
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
+});
+
+// -------------------------------------------------------------
+// 6.2 ระบบของหายและทรัพย์สินสูญหาย (Lost & Found System)
+// -------------------------------------------------------------
+const LOST_CACHE_FILE = path.join(__dirname, 'lost_items_cache.json');
+
+const SEED_LOST_ITEMS = [
+  {
+    id: 'lf-001',
+    item_code: 'LF-2026-001',
+    title: 'กระเป๋าสตางค์หนังสีน้ำตาลเข้ม Tough',
+    category: 'กระเป๋า / กระเป๋าสตางค์',
+    characteristics: 'กระเป๋าหนังแท้พับสองตอนสีน้ำตาลเข้ม ยี่ห้อ Tough มีรอยขีดข่วนเล็กน้อยที่มุมขวาล่าง ภายในมีบัตรประจำตัวประชาชนและรูปถ่าย สภาพดี',
+    image_url: 'https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&auto=format&fit=crop&q=80',
+    location_found: 'โต๊ะม้าหินอ่อนหน้าอาคาร 3 (ใกล้ตู้กดน้ำ)',
+    found_date: new Date().toISOString().slice(0, 10),
+    found_time: '12:15 น.',
+    status: 'WAITING_OWNER',
+    storage_location: 'ห้องสารวัตรนักเรียน อาคาร 1 (ชั้น 1)',
+    finder_name: 'นายกิตติศักดิ์ (นักเรียน ม.4/2)',
+    finder_contact: '081-234-5678',
+    created_at: new Date(Date.now() - 3600000 * 4).toISOString()
+  },
+  {
+    id: 'lf-002',
+    item_code: 'LF-2026-002',
+    title: 'หูฟังบลูทูธ AirPods Pro 2 พร้อมเคสแคร์แบร์',
+    category: 'อุปกรณ์ไอที / มือถือ',
+    characteristics: 'ตัวเคสหูฟังสีขาว สวมเคสซิลิโคนสีเขียวขี้ม้า มีพวงกุญแจตุ๊กตา Care Bear สีชมพูห้อยอยู่ ฝาปิดด้านบนมีสติกเกอร์รูปหัวใจ',
+    image_url: 'https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&auto=format&fit=crop&q=80',
+    location_found: 'อัฒจันทร์โดมกิจกรรม หน้าเวทีกลาง',
+    found_date: new Date().toISOString().slice(0, 10),
+    found_time: '08:30 น.',
+    status: 'WAITING_OWNER',
+    storage_location: 'ห้องสารวัตรนักเรียน อาคาร 1 (ตู้เซฟเก็บอุปกรณ์อิเล็กทรอนิกส์)',
+    finder_name: 'สารวัตรเวรวันศุกร์ (ผลัด F)',
+    finder_contact: 'โต๊ะเวรประจำวัน',
+    created_at: new Date(Date.now() - 3600000 * 8).toISOString()
+  },
+  {
+    id: 'lf-003',
+    item_code: 'LF-2026-003',
+    title: 'กุญแจรถจักรยานยนต์ Honda Wave 110i',
+    category: 'กุญแจ / ยานพาหนะ',
+    characteristics: 'ลูกกุญแจแท้ฮอนด้า พร้อมสายคล้องคอสีแดงสกรีนอักษรขาว HONDA RACING มีพวงลูกกุญแจบ้านอีก 2 ดอก และป้ายทะเบียนจิ๋วสีขาว',
+    image_url: 'https://images.unsplash.com/photo-1582139329536-e7284fece509?w=600&auto=format&fit=crop&q=80',
+    location_found: 'โรงจอดรถจักรยานยนต์นักเรียน โซน C แถวที่ 4',
+    found_date: new Date(Date.now() - 86400000).toISOString().slice(0, 10),
+    found_time: '16:45 น.',
+    status: 'WAITING_OWNER',
+    storage_location: 'ห้องสารวัตรนักเรียน อาคาร 1',
+    finder_name: 'รปภ. ประตูหน้าโรงเรียน',
+    finder_contact: 'ป้อมยามหน้าประตู 1',
+    created_at: new Date(Date.now() - 3600000 * 24).toISOString()
+  },
+  {
+    id: 'lf-004',
+    item_code: 'LF-2026-004',
+    title: 'เสื้อกันหนาวมีฮู้ดสีดำ Champion ไซส์ L',
+    category: 'เครื่องแต่งกาย',
+    characteristics: 'เสื้อแจ็คเก็ตฮู้ดดี้ผ้าหนาสีดำล้วน มีโลโก้ปักตัว C ที่แขนซ้าย ชายเสื้อมีป้ายผ้า Champion ป้ายคอด้านในมีเขียนชื่อด้วยปากกาเคมีว่า "นนท์ 5/7"',
+    image_url: 'https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80',
+    location_found: 'ม้านั่งข้างสนามฟุตบอล ใต้ต้นจามจุรี',
+    found_date: new Date(Date.now() - 86400000).toISOString().slice(0, 10),
+    found_time: '17:20 น.',
+    status: 'WAITING_OWNER',
+    storage_location: 'ห้องสารวัตรนักเรียน อาคาร 1 (ราวแขวนเครื่องแบบ)',
+    finder_name: 'สารวัตรเวรพิเศษ (ผลัด S)',
+    finder_contact: 'เวรสารวัตร',
+    created_at: new Date(Date.now() - 3600000 * 28).toISOString()
+  },
+  {
+    id: 'lf-005',
+    item_code: 'LF-2026-005',
+    title: 'สมุดบันทึกและกล่องดินสอ Kuromi สีม่วง',
+    category: 'อุปกรณ์การเรียน',
+    characteristics: 'กล่องดินสอผ้าทรงกระบอกลายคุโรมิสีม่วง ภายในมีปากกาลูกลื่นหลากสี ลิควิดเปเป้อร์ และสมุดจดบันทึกวิชาคณิตศาสตร์',
+    image_url: 'https://images.unsplash.com/photo-1583485088034-697b5bc54ccd?w=600&auto=format&fit=crop&q=80',
+    location_found: 'ห้องสมุดเฉลิมพระเกียรติ โต๊ะอ่านหนังสือเบอร์ 8',
+    found_date: new Date(Date.now() - 86400000 * 2).toISOString().slice(0, 10),
+    found_time: '15:10 น.',
+    status: 'CLAIMED',
+    storage_location: 'ส่งมอบคืนเจ้าของแล้ว',
+    finder_name: 'เจ้าหน้าที่ห้องสมุด',
+    finder_contact: 'เคาน์เตอร์ยืม-คืน',
+    claimant_name: 'ด.ญ. กัญญารัตน์ ม.2/4',
+    claimant_student_no: '69421',
+    claimed_at: new Date(Date.now() - 3600000 * 12).toISOString(),
+    created_at: new Date(Date.now() - 3600000 * 48).toISOString()
+  }
+];
+
+function getLocalLostItems() {
+  if (fs.existsSync(LOST_CACHE_FILE)) {
+    try {
+      const data = JSON.parse(fs.readFileSync(LOST_CACHE_FILE, 'utf8'));
+      if (Array.isArray(data) && data.length > 0) return data;
+    } catch (e) {}
+  }
+  try {
+    fs.writeFileSync(LOST_CACHE_FILE, JSON.stringify(SEED_LOST_ITEMS, null, 2), 'utf8');
+  } catch (e) {}
+  return SEED_LOST_ITEMS;
+}
+
+function saveLocalLostItems(items) {
+  try {
+    fs.writeFileSync(LOST_CACHE_FILE, JSON.stringify(items, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[WEB] Failed to write lost items cache:', e.message);
+  }
+}
+
+// API: รายการของหายทั้งหมด (Lost Items List)
+app.get('/api/lost-items', async (req, res) => {
+  try {
+    const { category, status, search } = req.query;
+    let items = [];
+    let fromDb = false;
+
+    if (supabase) {
+      try {
+        let query = supabase.from('lost_items').select('*').order('created_at', { ascending: false });
+        if (status && status !== 'ALL') query = query.eq('status', status);
+        if (category && category !== 'ALL') query = query.eq('category', category);
+        const { data, error } = await query;
+        if (!error && Array.isArray(data) && data.length > 0) {
+          items = data;
+          fromDb = true;
+        }
+      } catch (err) {}
+    }
+
+    if (!fromDb) {
+      items = getLocalLostItems();
+      if (status && status !== 'ALL') {
+        items = items.filter(it => it.status === status);
+      }
+      if (category && category !== 'ALL') {
+        items = items.filter(it => it.category === category);
+      }
+    }
+
+    if (search) {
+      const s = String(search).toLowerCase();
+      items = items.filter(it =>
+        (it.title && it.title.toLowerCase().includes(s)) ||
+        (it.characteristics && it.characteristics.toLowerCase().includes(s)) ||
+        (it.location_found && it.location_found.toLowerCase().includes(s)) ||
+        (it.item_code && it.item_code.toLowerCase().includes(s)) ||
+        (it.category && it.category.toLowerCase().includes(s))
+      );
+    }
+
+    res.json({ success: true, count: items.length, source: fromDb ? 'database' : 'cache', data: items });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: บันทึกรับแจ้งของหาย / ส่งมอบของเก็บได้ใหม่
+app.post('/api/lost-items', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const localItems = getLocalLostItems();
+    const countCode = String(localItems.length + 1).padStart(3, '0');
+    const itemCode = payload.item_code || `LF-${new Date().getFullYear()}-${countCode}`;
+
+    let imageUrl = payload.image_url || '';
+    if (payload.base64Image && payload.filename) {
+      const uploadDir = path.join(__dirname, 'public', 'uploads');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const safeName = `LOST_${Date.now()}_${payload.filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+      const filePath = path.join(uploadDir, safeName);
+      const buffer = Buffer.from(payload.base64Image.split(',').pop(), 'base64');
+      fs.writeFileSync(filePath, buffer);
+      imageUrl = `/uploads/${safeName}`;
+    }
+
+    const newItem = {
+      id: payload.id || ('lf-' + Date.now()),
+      item_code: itemCode,
+      title: payload.title || 'ทรัพย์สินไม่ระบุชื่อ',
+      category: payload.category || 'อื่นๆ',
+      characteristics: payload.characteristics || 'ไม่มีรายละเอียดลักษณะเด่น',
+      image_url: imageUrl || 'https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80',
+      location_found: payload.location_found || 'ไม่ระบุสถานที่',
+      found_date: payload.found_date || new Date().toISOString().slice(0, 10),
+      found_time: payload.found_time || (new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.'),
+      status: 'WAITING_OWNER',
+      storage_location: payload.storage_location || 'ห้องสารวัตรนักเรียน อาคาร 1',
+      finder_name: payload.finder_name || 'ไม่ประสงค์ออกนาม',
+      finder_contact: payload.finder_contact || '-',
+      notes: payload.notes || '',
+      created_at: new Date().toISOString()
+    };
+
+    if (supabase) {
+      try {
+        await supabase.from('lost_items').insert(newItem);
+      } catch (dbErr) {
+        console.warn('[WEB] Supabase insert lost_item fallback:', dbErr.message);
+      }
+    }
+
+    localItems.unshift(newItem);
+    saveLocalLostItems(localItems);
+
+    res.status(201).json({ success: true, message: 'บันทึกข้อมูลของหายสำเร็จ', data: newItem });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: ส่งมอบคืนเจ้าของ (Claim Item)
+app.patch('/api/lost-items/:id/claim', async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const { claimant_name, claimant_student_no, notes } = req.body || {};
+    const updates = {
+      status: 'CLAIMED',
+      claimant_name: claimant_name || 'เจ้าของมารับคืน',
+      claimant_student_no: claimant_student_no || '-',
+      claimed_at: new Date().toISOString(),
+      storage_location: 'ส่งมอบคืนเจ้าของเรียบร้อยแล้ว'
+    };
+    if (notes) updates.notes = notes;
+
+    if (supabase) {
+      try {
+        await supabase.from('lost_items').update(updates).or(`id.eq.${itemId},item_code.eq.${itemId}`);
+      } catch (dbErr) {
+        console.warn('[WEB] Supabase claim lost_item fallback:', dbErr.message);
+      }
+    }
+
+    const localItems = getLocalLostItems();
+    const idx = localItems.findIndex(it => it.id === itemId || it.item_code === itemId);
+    if (idx !== -1) {
+      localItems[idx] = { ...localItems[idx], ...updates };
+      saveLocalLostItems(localItems);
+    }
+
+    res.json({ success: true, message: 'บันทึกการส่งมอบคืนเจ้าของสำเร็จ', data: updates });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// 6.3 หน้าเว็บสาธารณะระบบของหาย (/lost-found)
+// -------------------------------------------------------------
+app.get('/lost-found', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'lost-found.html'));
 });
 
 // -------------------------------------------------------------
