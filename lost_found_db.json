@@ -113,6 +113,26 @@
       "delivered_by_duty_id": "TS1",
       "delivered_at": "2026-11-06T16:10:29.426Z",
       "created_at": "2026-11-06T16:10:29.272Z"
+    },
+    {
+      "id": "lf-confiscated-001",
+      "item_code": "LF-2026-000",
+      "title": "นาฬิกาดิจิทัล Casio G-Shock สีดำด้าน",
+      "category": "ของมีค่า / เครื่องประดับ",
+      "characteristics": "สายเรซินสีดำ มีรอยขีดข่วนเล็กน้อยที่ขอบหน้าปัด พบตกอยู่ริมสระว่ายน้ำ ไม่มีผู้มารับเกิน 30 วัน",
+      "secret_traits": "ฝาหลังมีสลักชื่อย่อ K.T. และตั้งปลุกไว้เวลา 06:00 น.",
+      "image_url": "https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=600&auto=format&fit=crop&q=80",
+      "location_found": "ข้างสระว่ายน้ำ โรงเรียนพระนารายณ์",
+      "found_date": "2026-10-01",
+      "found_time": "16:00 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ฐานหลักสารวัตรนักเรียน หน้าห้องกิจการ (ตู้ของกลาง)",
+      "finder_name": "ครูเวรพลศึกษา",
+      "finder_duty_id": "TS1",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "หมวดพลศึกษา",
+      "created_at": "2026-10-01T09:00:00.000Z",
+      "updated_at": "2026-10-01T09:00:00.000Z"
     }
   ],
   "claims": [],

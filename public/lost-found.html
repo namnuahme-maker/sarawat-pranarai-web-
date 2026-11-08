@@ -576,8 +576,8 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           <label class="block text-xs font-bold text-slate-300">
             สเต็ป 1: รูปถ่ายสิ่งของ (PHOTO) *
           </label>
-          <div onclick="document.getElementById('in-file-input').click()" class="border-2 border-dashed border-midnight-700 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer bg-midnight-950 transition">
-            <input type="file" id="in-file-input" accept="image/*" class="hidden" onchange="handleIntakeFile(event)">
+          <div onclick="triggerIntakeFileInput(event)" class="border-2 border-dashed border-midnight-700 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer bg-midnight-950 transition">
+            <input type="file" id="in-file-input" accept="image/*" class="hidden" onclick="event.stopPropagation()" onchange="handleIntakeFile(event)">
             <div id="in-photo-preview-box" class="space-y-1">
               <span class="text-3xl block">📷</span>
               <p class="text-xs font-semibold text-slate-200">คลิกเพื่อถ่ายรูป หรือเลือกรูปภาพจากเครื่อง</p>
@@ -681,8 +681,8 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           <label class="block text-xs font-bold text-slate-300">
             1. ถ่ายรูปหรือเลือกรูปหลักฐาน (รูปคนคู่กับสิ่งของ) *
           </label>
-          <div onclick="document.getElementById('ho-file-input').click()" class="border-2 border-dashed border-midnight-700 hover:border-emerald-500 rounded-xl p-3.5 text-center cursor-pointer bg-midnight-950 transition">
-            <input type="file" id="ho-file-input" accept="image/*" class="hidden" onchange="handleHandoverFile(event)">
+          <div onclick="triggerHandoverFileInput(event)" class="border-2 border-dashed border-midnight-700 hover:border-emerald-500 rounded-xl p-3.5 text-center cursor-pointer bg-midnight-950 transition">
+            <input type="file" id="ho-file-input" accept="image/*" class="hidden" onclick="event.stopPropagation()" onchange="handleHandoverFile(event)">
             <div id="ho-preview-box" class="space-y-1">
               <span class="text-2xl block">📸</span>
               <p class="text-xs font-semibold text-slate-200">กดเพื่อถ่ายรูปหรือเลือกภาพหลักฐาน</p>
@@ -1423,6 +1423,12 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       if (modal && typeof modal.close === 'function') modal.close();
     }
 
+    function triggerIntakeFileInput(e) {
+      if (e) e.stopPropagation();
+      const input = document.getElementById('in-file-input');
+      if (input) input.click();
+    }
+
     function handleIntakeFile(e) {
       const file = e.target.files[0];
       if (!file) return;
@@ -1598,6 +1604,12 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         okBtn.disabled = false;
         okBtn.innerHTML = `<span>ตรวจสอบข้อมูล (OK)</span> <span>➡️</span>`;
       }
+    }
+
+    function triggerHandoverFileInput(e) {
+      if (e) e.stopPropagation();
+      const input = document.getElementById('ho-file-input');
+      if (input) input.click();
     }
 
     function handleHandoverFile(e) {
@@ -1785,11 +1797,15 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       }
     });
 
-    // Close on click outside (Light Dismiss fallback)
+    // Close on click outside (Light Dismiss fallback เฉพาะเมื่อคลิกที่พื้นหลังมืด Backdrop นอกกล่อง)
     ['modal-quick-view', 'modal-intake', 'modal-handover', 'modal-add-category', 'modal-tag-print'].forEach(id => {
       const dialog = document.getElementById(id);
       if (dialog) {
         dialog.addEventListener('click', (event) => {
+          // หากคลิกโดนองค์ประกอบภายใน Dialog (ไม่ใช่คลิกที่พื้นหลัง backdrop โดยตรง) หรือเป็น programmatic click ให้ข้าม
+          if (event.target !== dialog) return;
+          if (!event.isTrusted) return;
+
           const rect = dialog.getBoundingClientRect();
           const isInDialog = (
             rect.top <= event.clientY &&
