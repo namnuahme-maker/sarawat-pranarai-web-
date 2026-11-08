@@ -258,7 +258,10 @@
           <span>📅</span> ตารางผลัดเวรประจำสัปดาห์
         </button>
         <button onclick="switchTab('studio')" id="nav-desktop-studio" class="desktop-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-navy-800 transition flex items-center gap-2">
-          <span>🎨</span> สตูดิโอออกแบบบัตร (Card Studio)
+          <span>🎨</span> สตูดิโอออกแบบบัตร
+        </button>
+        <button onclick="switchTab('lost-found')" id="nav-desktop-lost-found" class="desktop-tab-btn px-4 py-2 rounded-lg text-xs font-semibold text-slate-400 hover:text-slate-200 hover:bg-navy-800 transition flex items-center gap-2">
+          <span>📦</span> ของหาย / ส่งมอบคืน
         </button>
       </nav>
     </div>
@@ -958,6 +961,167 @@
 
     </section>
 
+    <!-- ========================================================= -->
+    <!-- TAB 5: LOST & FOUND HUB (รับแจ้งของหาย & ส่งมอบคืนเจ้าของ) -->
+    <!-- ========================================================= -->
+    <section id="tab-lost-found" class="tab-pane hidden animate-fade-in space-y-6">
+      
+      <!-- Visual Flow Guide with User Assets -->
+      <div class="bg-navy-900 border border-navy-700/80 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 pb-4 border-b border-navy-800">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
+                DISCORD CDN INTEGRATION
+              </span>
+              <span class="text-xs text-slate-400">ระบบคลังของหายและส่งมอบคืน</span>
+            </div>
+            <h2 class="text-xl sm:text-2xl font-black text-white mt-1 flex items-center gap-2">
+              <span>📦</span> ศูนย์รับแจ้งและส่งมอบของหาย (Lost & Found Command)
+            </h2>
+            <p class="text-xs sm:text-sm text-slate-300 mt-0.5">
+              เชื่อมต่อบอท Discord จัดเก็บรูปภาพถาวร ค้นหาสารวัตรตามรหัส และบันทึกหลักฐานส่งมอบของคืน
+            </p>
+          </div>
+          <div class="flex items-center gap-2 self-stretch sm:self-auto">
+            <a href="/lost-found" target="_blank" class="px-3.5 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 border border-navy-700 text-xs font-semibold text-slate-200 transition flex items-center gap-1.5 shadow-sm">
+              <span>↗️</span>
+              <span>เปิดหน้าเต็ม (Full Hub)</span>
+            </a>
+            <button onclick="loadLostFoundData()" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-navy-950 text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-amber-500/20">
+              <span id="lf-refresh-icon">🔄</span>
+              <span>รีเฟรชข้อมูล</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 3 Visual Steps Cards using User-uploaded Assets -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+          <div class="bg-navy-950/70 border border-navy-800 rounded-xl overflow-hidden shadow group hover:border-amber-500/40 transition">
+            <div class="h-28 overflow-hidden bg-navy-900 relative">
+              <img src="/assets/panel_send_photo.jpg" alt="ส่งรูปเข้าฐานข้อมูล" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-950/80 text-amber-400 border border-amber-500/30 backdrop-blur-sm">ขั้นตอน 1</span>
+            </div>
+            <div class="p-3 text-left">
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📸</span> ส่งรูปเข้าห้อง Discord
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">
+                ถ่ายรูปสิ่งของแล้วส่งลงห้อง <code class="text-amber-300 bg-navy-900 px-1 py-0.5 rounded">📦│แจ้งพบของหาย</code> ใน Discord
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-navy-950/70 border border-navy-800 rounded-xl overflow-hidden shadow group hover:border-blue-500/40 transition">
+            <div class="h-28 overflow-hidden bg-navy-900 relative">
+              <img src="/assets/panel_input_data.jpg" alt="ใส่ข้อมูลเข้าระบบ" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-950/80 text-blue-400 border border-blue-500/30 backdrop-blur-sm">ขั้นตอน 2</span>
+            </div>
+            <div class="p-3 text-left">
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>📝</span> บอทถามหมวดหมู่ & ชื่อของ
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">
+                เลือกหมวดหมู่สิ่งของ และกรอกชื่อของ/สถานที่พบ บอทจะบันทึกลงเว็บทันที
+              </p>
+            </div>
+          </div>
+
+          <div class="bg-navy-950/70 border border-navy-800 rounded-xl overflow-hidden shadow group hover:border-emerald-500/40 transition">
+            <div class="h-28 overflow-hidden bg-navy-900 relative">
+              <img src="/assets/panel_all_in_one.jpg" alt="ALL IN ONE ส่งมอบของ" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+              <span class="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-bold bg-navy-950/80 text-emerald-400 border border-emerald-500/30 backdrop-blur-sm">ขั้นตอน 3</span>
+            </div>
+            <div class="p-3 text-left">
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>🤝</span> ตรวจสอบ & ส่งมอบคืน
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">
+                กดส่งมอบ ถ่ายรูปคู่คนรับ และใส่รหัสสารวัตร (เช่น <code class="text-emerald-300 font-mono">MS1</code>) ยืนยันบันทึก
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- KPI Summary Row -->
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        <div class="bg-navy-900 border border-navy-700/80 rounded-xl p-3.5 shadow flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xl">📦</div>
+          <div>
+            <span class="text-[11px] text-slate-400 block">สิ่งของทั้งหมด</span>
+            <span id="lf-kpi-total" class="text-xl font-black text-white font-mono">0</span>
+          </div>
+        </div>
+
+        <div class="bg-navy-900 border border-amber-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl">⏳</div>
+          <div>
+            <span class="text-[11px] text-amber-300/80 block">รอเจ้าของมารับ</span>
+            <span id="lf-kpi-waiting" class="text-xl font-black text-amber-400 font-mono">0</span>
+          </div>
+        </div>
+
+        <div class="bg-navy-900 border border-emerald-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl">✅</div>
+          <div>
+            <span class="text-[11px] text-emerald-300/80 block">ส่งมอบคืนแล้ว</span>
+            <span id="lf-kpi-delivered" class="text-xl font-black text-emerald-400 font-mono">0</span>
+          </div>
+        </div>
+
+        <div class="bg-navy-900 border border-purple-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">🏷️</div>
+          <div>
+            <span class="text-[11px] text-purple-300/80 block">หมวดหมู่สิ่งของ</span>
+            <span id="lf-kpi-categories" class="text-xl font-black text-purple-400 font-mono">0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Controls & Filter Toolbar -->
+      <div class="bg-navy-900 border border-navy-700/80 rounded-2xl p-4 shadow-xl space-y-3">
+        <div class="flex flex-col md:flex-row items-stretch md:items-center justify-between gap-3">
+          <!-- Search Input -->
+          <div class="relative flex-1">
+            <span class="absolute left-3.5 top-2.5 text-slate-400 text-sm">🔍</span>
+            <input type="text" id="lf-search-input" oninput="filterLostFoundItems()" placeholder="ค้นหาชื่อสิ่งของ, รหัส, สถานที่พบ, หรือชื่อสารวัตรผู้เก็บได้..." class="w-full bg-navy-950 border border-navy-700 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
+          </div>
+
+          <!-- Status Filters -->
+          <div class="flex items-center gap-1.5 bg-navy-950 p-1 rounded-xl border border-navy-750">
+            <button onclick="setLostFoundFilter('ALL')" id="lf-btn-filter-all" class="lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition">
+              ทั้งหมด
+            </button>
+            <button onclick="setLostFoundFilter('WAITING')" id="lf-btn-filter-waiting" class="lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+              ⏳ รอรับ
+            </button>
+            <button onclick="setLostFoundFilter('DELIVERED')" id="lf-btn-filter-delivered" class="lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition">
+              ✅ ส่งมอบแล้ว
+            </button>
+          </div>
+
+          <!-- Category Dropdown -->
+          <select id="lf-category-select" onchange="filterLostFoundItems()" class="bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-amber-500 transition">
+            <option value="">ทุกหมวดหมู่ (All Categories)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Items Grid Display -->
+      <div id="lf-items-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Empty State Indicator -->
+      <div id="lf-empty-state" class="hidden bg-navy-900 border border-navy-800 rounded-2xl p-10 text-center space-y-2">
+        <span class="text-4xl block">📦</span>
+        <h3 class="text-sm font-bold text-white">ไม่พบรายการสิ่งของที่ตรงกับเงื่อนไข</h3>
+        <p class="text-xs text-slate-400">เมื่อมีสารวัตรส่งรูปสิ่งของลงห้อง Discord ระบบจะนำมาแสดงที่นี่โดยอัตโนมัติ</p>
+      </div>
+
+    </section>
+
   </main>
 
   <!-- ========================================================= -->
@@ -1147,6 +1311,137 @@
   <div id="a4-print-sheet" class="hidden"></div>
 
   <!-- ========================================================= -->
+  <!-- MODAL: 2-STEP LOST & FOUND HANDOVER (ส่งมอบของคืน & ยืนยันตัวตน) -->
+  <!-- ========================================================= -->
+  <div id="lf-modal-handover" class="fixed inset-0 z-50 bg-navy-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
+    <div class="bg-navy-900 border border-navy-700/90 rounded-3xl max-w-lg w-full p-5 sm:p-6 shadow-2xl relative max-h-[92vh] overflow-y-auto text-slate-100">
+      
+      <!-- Close Button -->
+      <button onclick="closeLfHandoverModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">
+        ✕
+      </button>
+
+      <!-- Header -->
+      <div class="pb-3 border-b border-navy-800 mb-4">
+        <span class="text-[10px] font-bold text-amber-400 uppercase tracking-wider">LOST & FOUND // HANDOVER</span>
+        <h3 class="text-base sm:text-lg font-bold text-white mt-0.5 flex items-center gap-2">
+          <span>🤝</span> บันทึกการส่งมอบของคืนเจ้าของ
+        </h3>
+      </div>
+
+      <!-- STEP 1: FORM INPUTS -->
+      <div id="lf-ho-step-1" class="space-y-4">
+        <!-- Item Target Box -->
+        <div class="p-3 rounded-xl bg-navy-950 border border-navy-800 flex items-center gap-3">
+          <img id="lf-ho-item-thumb" src="/assets/logo.png" alt="item" class="w-12 h-12 rounded-lg object-cover border border-navy-700 flex-shrink-0">
+          <div class="text-xs min-w-0 flex-1">
+            <span class="text-[10px] text-amber-400 font-mono font-bold block" id="lf-ho-item-code">ITEM-CODE</span>
+            <strong id="lf-ho-item-title" class="text-white truncate block">ชื่อสิ่งของ</strong>
+            <span id="lf-ho-item-location" class="text-[11px] text-slate-400 truncate block">📍 สถานที่พบ: -</span>
+          </div>
+        </div>
+
+        <!-- 1. Evidence Photo -->
+        <div class="space-y-1.5">
+          <label class="block text-xs font-bold text-slate-300">
+            1. ถ่ายรูปหรือเลือกรูปหลักฐาน (รูปคนคู่กับสิ่งของ) *
+          </label>
+          <div onclick="document.getElementById('lf-ho-file').click()" class="border-2 border-dashed border-navy-700 hover:border-amber-500/70 rounded-2xl p-4 text-center cursor-pointer bg-navy-950/70 transition">
+            <input type="file" id="lf-ho-file" accept="image/*" class="hidden" onchange="handleLfHandoverFile(event)">
+            <div id="lf-ho-preview-box" class="space-y-1">
+              <span class="text-3xl block">📸</span>
+              <p class="text-xs font-semibold text-slate-200">กดเพื่อถ่ายรูป หรือเลือกไฟล์ภาพ</p>
+              <p class="text-[10px] text-slate-400">รูปถ่ายจะถูกนำไปฝากบน Discord CDN และเป็นหลักฐานถาวร</p>
+            </div>
+            <img id="lf-ho-preview-img" src="" alt="พรีวิวหลักฐาน" class="hidden max-h-40 mx-auto rounded-xl object-contain mt-2 shadow-md border border-navy-700">
+          </div>
+        </div>
+
+        <!-- 2. Claimant Name & Contact -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">2. ชื่อ ผู้รับ *</label>
+            <input type="text" id="lf-ho-claimant-name" placeholder="เช่น นายศราวุธ สมบัติ (ม.5/3)" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-300 mb-1">ข้อมูลติดต่อ (เบอร์โทร/FB)</label>
+            <input type="text" id="lf-ho-claimant-phone" placeholder="เช่น 081-234-5678" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500">
+          </div>
+        </div>
+
+        <!-- 3. Inspector Duty ID -->
+        <div>
+          <label class="block text-xs font-bold text-slate-300 mb-1">
+            3. รหัสประจำตัวสารวัตร (เช่น MS1, TS4, T2, F3) *
+          </label>
+          <div class="relative">
+            <input type="text" id="lf-ho-duty-id" placeholder="พิมพ์รหัส เช่น MS1, TS4, T2, F3" class="w-full uppercase font-mono tracking-wider bg-navy-950 border border-amber-500/50 rounded-xl px-3.5 py-2 text-xs text-amber-300 placeholder-slate-500 focus:outline-none focus:border-amber-400">
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1">💡 เมื่อกด OK ระบบจะค้นหารูปถ่ายและข้อมูลสารวัตรมาแสดงให้ตรวจสอบ</p>
+        </div>
+
+        <input type="hidden" id="lf-ho-item-id">
+
+        <!-- Step 1 Footer -->
+        <div class="pt-3 border-t border-navy-800 flex justify-end gap-2">
+          <button type="button" onclick="closeLfHandoverModal()" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold transition">
+            ยกเลิก
+          </button>
+          <button type="button" id="lf-ho-btn-ok" onclick="goToLfHandoverStep2()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-1.5">
+            <span>ตรวจสอบข้อมูล (OK)</span>
+            <span>➡️</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP 2: VERIFICATION PREVIEW -->
+      <div id="lf-ho-step-2" class="hidden space-y-4">
+        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
+          <span class="text-base">🛡️</span>
+          <span>ตรวจสอบรูปหลักฐานและข้อมูลสารวัตรให้ถูกต้องก่อนยืนยัน</span>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <!-- Evidence Photo Card -->
+          <div class="bg-navy-950 border border-navy-800 rounded-2xl p-3 text-center space-y-2">
+            <span class="text-[11px] font-bold text-slate-300 block">📸 ภาพหลักฐานส่งมอบ</span>
+            <img id="lf-ho-step2-evidence-img" src="" alt="หลักฐาน" class="max-h-40 mx-auto rounded-xl object-contain border border-navy-700 shadow">
+            <div class="text-[11px] text-slate-300 pt-1">
+              ผู้รับ: <strong id="lf-ho-step2-name" class="text-amber-400"></strong>
+              <div id="lf-ho-step2-phone" class="text-[10px] text-slate-400"></div>
+            </div>
+          </div>
+
+          <!-- Official Inspector Profile Card -->
+          <div class="bg-navy-950 border border-amber-500/40 rounded-2xl p-3 text-center space-y-2">
+            <span class="text-[11px] font-bold text-amber-300 block">👮 สารวัตรนักเรียนผู้ส่งมอบ</span>
+            <img id="lf-ho-step2-inspector-img" src="/assets/logo.png" alt="สารวัตร" class="w-24 h-24 mx-auto rounded-full object-cover border-2 border-amber-500 shadow-md">
+            <div>
+              <div id="lf-ho-step2-inspector-name" class="text-xs font-bold text-white"></div>
+              <div class="flex items-center justify-center gap-1.5 mt-1.5">
+                <span id="lf-ho-step2-inspector-badge" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold"></span>
+                <span id="lf-ho-step2-inspector-role" class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px]"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 2 Actions -->
+        <div class="pt-3 border-t border-navy-800 flex justify-between items-center">
+          <button type="button" onclick="goToLfHandoverStep1()" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5 transition">
+            <span>⬅️</span>
+            <span>ย้อนกลับแก้ไข</span>
+          </button>
+          <button type="button" id="lf-ho-btn-confirm" onclick="confirmLfHandoverSubmission()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-emerald-500/30 transition flex items-center gap-1.5">
+            <span>✅ ยืนยันการส่งมอบ</span>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
   <!-- MOBILE BOTTOM NAVIGATION DOCK (iOS / Android Style) -->
   <!-- ========================================================= -->
   <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-navy-900/95 backdrop-blur-lg border-t border-navy-800 px-2 py-1.5 flex justify-around items-center">
@@ -1169,6 +1464,10 @@
     <button onclick="switchTab('studio')" id="nav-mobile-studio" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 transition">
       <span class="text-lg">🎨</span>
       <span class="text-[10px] font-medium mt-0.5">สตูดิโอ</span>
+    </button>
+    <button onclick="switchTab('lost-found')" id="nav-mobile-lost-found" class="mobile-nav-btn flex flex-col items-center justify-center py-1 px-3 rounded-xl text-slate-400 transition">
+      <span class="text-lg">📦</span>
+      <span class="text-[10px] font-medium mt-0.5">ของหาย</span>
     </button>
   </div>
 
@@ -1394,6 +1693,24 @@
           allMembers = membersData.data || [];
           renderRoster(allMembers);
           renderShiftsColumns(allMembers);
+
+          // ตรวจสอบพารามิเตอร์ URL เพื่อเปิดบัตรประจำตัว 3D ทันที (เช่น /card?id=... หรือ ?id=... หรือ ?duty_id=...)
+          try {
+            const urlParams = new URLSearchParams(window.location.search);
+            const queryTarget = urlParams.get('id') || urlParams.get('card') || urlParams.get('member') || urlParams.get('duty_id');
+            if (queryTarget && allMembers.length > 0 && !activeCardMemberId) {
+              const matchedMember = allMembers.find(m => 
+                m.id === queryTarget || 
+                m.duty_id === queryTarget || 
+                m.discord_id === queryTarget
+              );
+              if (matchedMember) {
+                openCardModal(matchedMember.id);
+              }
+            }
+          } catch (urlErr) {
+            console.warn('URL auto-open card notice:', urlErr);
+          }
         }
 
         // 3. Fetch Cases
@@ -1513,7 +1830,7 @@
               <!-- Compact Avatar -->
               <div class="w-9 h-9 rounded-md bg-navy-950 border border-amber-500/40 overflow-hidden flex-shrink-0 flex items-center justify-center shadow">
                 ${m.profile_image_url 
-                  ? `<img src="${m.profile_image_url}" class="w-full h-full object-cover">` 
+                  ? `<img src="${m.profile_image_url}" class="w-full h-full object-cover" onerror="this.onerror=null; this.parentElement.innerHTML='<span class=\'text-sm text-slate-500\'>👤</span>';">` 
                   : `<span class="text-sm text-slate-500">👤</span>`}
               </div>
               
@@ -1770,7 +2087,7 @@
         } else if (el.type === 'photo') {
           html += `
             <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 5; pointer-events: none;">
-              <img src="${photoUrl}" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);" alt="Photo">
+              <img src="${photoUrl}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);" alt="Photo">
             </div>
           `;
         } else if (el.type === 'text') {
@@ -1907,6 +2224,9 @@
 
       if (tabName === 'studio') {
         initStudioCanvas();
+      }
+      if (tabName === 'lost-found') {
+        loadLostFoundData();
       }
     }
 
@@ -2319,10 +2639,20 @@
             }, { crossOrigin: 'anonymous' });
           });
         } else if (el.type === 'photo') {
-          const photoUrl = member.profile_image_url || '/assets/logo.png';
+          const photoUrl = member.profile_image_url || '/assets/sample_student.jpg';
           fObj = await new Promise((resolve) => {
             fabric.Image.fromURL(photoUrl, (img) => {
-              if (!img) return resolve(null);
+              if (!img || !img.width) {
+                // Fallback to sample photo if custom image fails to load
+                fabric.Image.fromURL('/assets/sample_student.jpg', (fallbackImg) => {
+                  if (fallbackImg) {
+                    fallbackImg.set({ left: el.left, top: el.top, angle: el.angle || 0 });
+                    fallbackImg.scaleToWidth(el.width || 350);
+                  }
+                  resolve(fallbackImg || null);
+                });
+                return;
+              }
               img.set({
                 left: el.left,
                 top: el.top,
@@ -3102,7 +3432,7 @@
         const nick = m.nickname || 'SARAWAT';
         const fullname = m.full_name || 'สารวัตรนักเรียน พระนารายณ์';
         const shiftBadge = m.shift || 'M';
-        const photo = m.photo_url || '/assets/logo.png';
+        const photo = m.profile_image_url || m.photo_url || '/assets/sample_student.jpg';
 
         return `
           <div class="relative w-[340px] h-[538px] bg-slate-900 border border-dashed border-slate-700 rounded-xl overflow-hidden shadow p-3 flex flex-col justify-between text-white" style="page-break-inside: avoid;">
@@ -3127,7 +3457,7 @@
             <!-- Card Photo & ID -->
             <div class="my-auto flex flex-col items-center text-center">
               <div class="w-24 h-32 rounded-lg border-2 border-sky-500/50 overflow-hidden mb-2 shadow">
-                <img src="${photo}" class="w-full h-full object-cover" alt="${fullname}">
+                <img src="${photo}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" class="w-full h-full object-cover" alt="${fullname}">
               </div>
               <div class="text-base font-black tracking-wider text-white">${nick}</div>
               <div class="text-[11px] text-slate-300 font-medium">${fullname}</div>
@@ -3148,12 +3478,398 @@
       window.print();
     }
 
+    // =========================================================
+    // LOST & FOUND MANAGEMENT LOGIC (2-STEP HANDOVER + DISCORD CDN)
+    // =========================================================
+    let lostFoundItems = [];
+    let lostFoundCategories = [];
+    let lfFilterMode = 'ALL';
+    let currentLfHandoverBase64 = null;
+    let currentLfInspector = null;
+    let currentLfItem = null;
+
+    async function loadLostFoundData() {
+      const refreshIcon = document.getElementById('lf-refresh-icon');
+      if (refreshIcon) refreshIcon.classList.add('animate-spin');
+
+      try {
+        const [itemsRes, catRes] = await Promise.allSettled([
+          fetch('/api/lost-found/items').then(r => r.json()).catch(() => fetch('/api/lost-items').then(r => r.json())),
+          fetch('/api/lost-found/categories').then(r => r.json()).catch(() => fetch('/api/lost-categories').then(r => r.json()))
+        ]);
+
+        if (itemsRes.status === 'fulfilled' && itemsRes.value && itemsRes.value.success) {
+          lostFoundItems = itemsRes.value.items || [];
+        } else if (itemsRes.status === 'fulfilled' && Array.isArray(itemsRes.value)) {
+          lostFoundItems = itemsRes.value;
+        }
+
+        if (catRes.status === 'fulfilled' && catRes.value && catRes.value.success) {
+          lostFoundCategories = catRes.value.categories || [];
+        }
+
+        // Update KPIs
+        const total = lostFoundItems.length;
+        const waiting = lostFoundItems.filter(i => (i.status || '').toUpperCase() !== 'DELIVERED').length;
+        const delivered = lostFoundItems.filter(i => (i.status || '').toUpperCase() === 'DELIVERED').length;
+        const cats = lostFoundCategories.length || new Set(lostFoundItems.map(i => i.category || i.category_id)).size;
+
+        document.getElementById('lf-kpi-total').textContent = total;
+        document.getElementById('lf-kpi-waiting').textContent = waiting;
+        document.getElementById('lf-kpi-delivered').textContent = delivered;
+        document.getElementById('lf-kpi-categories').textContent = cats;
+
+        // Populate Category Select
+        const catSelect = document.getElementById('lf-category-select');
+        if (catSelect) {
+          const currentVal = catSelect.value;
+          let optsHtml = '<option value="">ทุกหมวดหมู่ (All Categories)</option>';
+          const uniqueCats = new Map();
+          lostFoundCategories.forEach(c => uniqueCats.set(c.id || c.name, c.name || c.title));
+          lostFoundItems.forEach(i => {
+            if (i.category && !uniqueCats.has(i.category)) uniqueCats.set(i.category, i.category);
+          });
+          uniqueCats.forEach((title, id) => {
+            optsHtml += `<option value="${id}">${title}</option>`;
+          });
+          catSelect.innerHTML = optsHtml;
+          if (currentVal) catSelect.value = currentVal;
+        }
+
+        filterLostFoundItems();
+      } catch (err) {
+        console.warn('[LOST FOUND LOAD ERROR]:', err);
+      } finally {
+        if (refreshIcon) refreshIcon.classList.remove('animate-spin');
+      }
+    }
+
+    function setLostFoundFilter(mode) {
+      lfFilterMode = mode;
+      const modes = ['ALL', 'WAITING', 'DELIVERED'];
+      modes.forEach(m => {
+        const btn = document.getElementById(`lf-btn-filter-${m.toLowerCase()}`);
+        if (!btn) return;
+        if (m === mode) {
+          btn.className = 'lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition';
+        } else {
+          btn.className = 'lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white transition';
+        }
+      });
+      filterLostFoundItems();
+    }
+
+    function filterLostFoundItems() {
+      const query = (document.getElementById('lf-search-input')?.value || '').toLowerCase().trim();
+      const selectedCat = (document.getElementById('lf-category-select')?.value || '').toLowerCase().trim();
+
+      const filtered = lostFoundItems.filter(item => {
+        // Status filter
+        const isDelivered = (item.status || '').toUpperCase() === 'DELIVERED';
+        if (lfFilterMode === 'WAITING' && isDelivered) return false;
+        if (lfFilterMode === 'DELIVERED' && !isDelivered) return false;
+
+        // Category filter
+        if (selectedCat) {
+          const cat = ((item.category_id || item.category || '')).toLowerCase();
+          if (cat !== selectedCat) return false;
+        }
+
+        // Query filter
+        if (query) {
+          const target = [
+            item.title,
+            item.item_code,
+            item.location_found,
+            item.finder_name,
+            item.finder_duty_id,
+            item.claimant_name,
+            item.delivered_by,
+            item.delivered_by_duty_id
+          ].filter(Boolean).join(' ').toLowerCase();
+          if (!target.includes(query)) return false;
+        }
+
+        return true;
+      });
+
+      renderLostFoundGrid(filtered);
+    }
+
+    function renderLostFoundGrid(items) {
+      const container = document.getElementById('lf-items-grid');
+      const emptyState = document.getElementById('lf-empty-state');
+      if (!container) return;
+
+      if (!items || items.length === 0) {
+        container.innerHTML = '';
+        if (emptyState) emptyState.classList.remove('hidden');
+        return;
+      }
+      if (emptyState) emptyState.classList.add('hidden');
+
+      container.innerHTML = items.map(item => {
+        const isDelivered = (item.status || '').toUpperCase() === 'DELIVERED';
+        const imgUrl = item.image_url || '/assets/logo.png';
+        const itemCode = item.item_code || `LF-${(item.id || '').substring(0, 6)}`;
+        const dateStr = item.created_at ? new Date(item.created_at).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' }) : '-';
+        const categoryLabel = item.category || 'สิ่งของทั่วไป';
+
+        return `
+          <div class="bg-navy-900 border ${isDelivered ? 'border-emerald-500/30' : 'border-navy-700/80 hover:border-amber-500/40'} rounded-2xl p-4 shadow-xl flex flex-col justify-between transition group">
+            
+            <div class="space-y-3">
+              <!-- Card Image & Status Badge -->
+              <div class="relative h-44 rounded-xl overflow-hidden bg-navy-950 border border-navy-800">
+                <img src="${imgUrl}" alt="${item.title || 'ของหาย'}" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                
+                <div class="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
+                  ${isDelivered 
+                    ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/90 text-white shadow-md backdrop-blur-sm">✅ ส่งมอบสำเร็จ</span>`
+                    : `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-amber-500/90 text-navy-950 shadow-md backdrop-blur-sm">⏳ รอเจ้าของมารับ</span>`
+                  }
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-navy-950/80 text-blue-300 border border-blue-500/30 backdrop-blur-sm">
+                    ${categoryLabel}
+                  </span>
+                </div>
+
+                <span class="absolute bottom-2 right-2 px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-navy-950/80 text-slate-300 border border-navy-700">
+                  ${itemCode}
+                </span>
+              </div>
+
+              <!-- Item Details -->
+              <div>
+                <h4 class="text-sm font-bold text-white group-hover:text-amber-400 transition line-clamp-1">
+                  ${item.title || 'สิ่งของไม่ระบุชื่อ'}
+                </h4>
+                <div class="text-[11px] text-slate-400 flex items-center gap-1 mt-1">
+                  <span>📍</span>
+                  <span class="truncate">สถานที่พบ: <strong class="text-slate-300">${item.location_found || '-'}</strong></span>
+                </div>
+              </div>
+
+              <!-- Submitting Inspector Badge (Who found it) -->
+              <div class="p-2.5 rounded-xl bg-navy-950/70 border border-navy-800 flex items-center justify-between text-xs">
+                <div class="flex items-center gap-2 min-w-0">
+                  <img src="${item.finder_avatar_url || '/assets/logo.png'}" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-6 h-6 rounded-full object-cover border border-amber-500/50 flex-shrink-0" alt="Finder">
+                  <div class="truncate">
+                    <span class="text-[10px] text-slate-400 block leading-tight">ผู้บันทึกเก็บได้</span>
+                    <strong class="text-slate-200 text-[11px] truncate">${item.finder_name || 'สารวัตรนักเรียน'}</strong>
+                  </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">
+                    ${item.finder_duty_id || 'SARAWAT'}
+                  </span>
+                  <span class="text-[10px] text-slate-500 block mt-0.5">${dateStr}</span>
+                </div>
+              </div>
+
+              ${isDelivered ? `
+                <!-- Handover Evidence Details -->
+                <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/25 space-y-1.5 text-xs text-left">
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-emerald-400">หลักฐานการส่งมอบ</span>
+                    <span class="text-[10px] text-slate-400">${item.delivered_at ? new Date(item.delivered_at).toLocaleDateString('th-TH') : ''}</span>
+                  </div>
+                  <div class="text-[11px] text-slate-200">
+                    ผู้รับ: <strong class="text-white">${item.claimant_name || '-'}</strong>
+                    ${item.claimant_contact ? `<span class="text-slate-400 text-[10px]"> (${item.claimant_contact})</span>` : ''}
+                  </div>
+                  <div class="text-[11px] text-slate-300 flex items-center justify-between">
+                    <span>สารวัตร: <strong>${item.delivered_by || '-'}</strong></span>
+                    <span class="px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 font-mono text-[10px]">${item.delivered_by_duty_id || ''}</span>
+                  </div>
+                  ${item.handover_photo_url ? `
+                    <div class="pt-1">
+                      <a href="${item.handover_photo_url}" target="_blank" class="inline-flex items-center gap-1 text-[10px] text-emerald-300 hover:text-white underline">
+                        <span>📸</span> ดูรูปหลักฐาน (Discord CDN)
+                      </a>
+                    </div>
+                  ` : ''}
+                </div>
+              ` : ''}
+
+            </div>
+
+            <!-- Footer Action Button -->
+            ${!isDelivered ? `
+              <div class="pt-3 mt-3 border-t border-navy-800">
+                <button onclick="openLfHandoverModal('${item.id}')" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 active:scale-95 text-navy-950 font-bold text-xs shadow-md shadow-amber-500/20 transition flex items-center justify-center gap-1.5">
+                  <span>📦</span>
+                  <span>ส่งมอบของ</span>
+                </button>
+              </div>
+            ` : ''}
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function openLfHandoverModal(itemId) {
+      const item = lostFoundItems.find(i => String(i.id) === String(itemId) || String(i.item_code) === String(itemId));
+      if (!item) return;
+
+      currentLfItem = item;
+      currentLfHandoverBase64 = null;
+      currentLfInspector = null;
+
+      document.getElementById('lf-ho-item-id').value = item.id;
+      document.getElementById('lf-ho-item-title').textContent = item.title || 'สิ่งของ';
+      document.getElementById('lf-ho-item-code').textContent = item.item_code || item.id;
+      document.getElementById('lf-ho-item-location').textContent = `📍 สถานที่พบ: ${item.location_found || '-'}`;
+      document.getElementById('lf-ho-item-thumb').src = item.image_url || '/assets/logo.png';
+
+      document.getElementById('lf-ho-claimant-name').value = '';
+      document.getElementById('lf-ho-claimant-phone').value = '';
+      document.getElementById('lf-ho-duty-id').value = '';
+      document.getElementById('lf-ho-preview-img').classList.add('hidden');
+      document.getElementById('lf-ho-preview-box').classList.remove('hidden');
+
+      goToLfHandoverStep1();
+      document.getElementById('lf-modal-handover')?.classList.remove('hidden');
+    }
+
+    function closeLfHandoverModal() {
+      document.getElementById('lf-modal-handover')?.classList.add('hidden');
+    }
+
+    function goToLfHandoverStep1() {
+      document.getElementById('lf-ho-step-1')?.classList.remove('hidden');
+      document.getElementById('lf-ho-step-2')?.classList.add('hidden');
+    }
+
+    function handleLfHandoverFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        currentLfHandoverBase64 = e.target.result;
+        const img = document.getElementById('lf-ho-preview-img');
+        if (img) {
+          img.src = currentLfHandoverBase64;
+          img.classList.remove('hidden');
+        }
+        document.getElementById('lf-ho-preview-box')?.classList.add('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function goToLfHandoverStep2() {
+      const name = document.getElementById('lf-ho-claimant-name').value.trim();
+      const phone = document.getElementById('lf-ho-claimant-phone').value.trim();
+      const dutyId = document.getElementById('lf-ho-duty-id').value.trim();
+
+      if (!currentLfHandoverBase64) {
+        alert('📸 กรุณาถ่ายรูปหรือเลือกรูปหลักฐาน (รูปคนคู่กับสิ่งของ) ก่อนกด OK');
+        return;
+      }
+      if (!name) {
+        alert('กรุณาระบุชื่อ-นามสกุลของผู้รับมอบ');
+        document.getElementById('lf-ho-claimant-name').focus();
+        return;
+      }
+      if (!dutyId) {
+        alert('กรุณาระบุรหัสประจำตัวสารวัตร (เช่น MS1, TS4, T2, F3)');
+        document.getElementById('lf-ho-duty-id').focus();
+        return;
+      }
+
+      const okBtn = document.getElementById('lf-ho-btn-ok');
+      okBtn.disabled = true;
+      okBtn.innerHTML = `<span>กำลังค้นหาข้อมูล...</span>`;
+
+      try {
+        const res = await fetch(`/api/inspectors/lookup/${encodeURIComponent(dutyId)}`);
+        const json = await res.json();
+        if (json.success && json.found && json.member) {
+          currentLfInspector = json.member;
+        } else {
+          currentLfInspector = {
+            duty_id: dutyId.toUpperCase(),
+            full_name: `สารวัตรเวรประจำรหัส [${dutyId.toUpperCase()}]`,
+            nickname: dutyId.toUpperCase(),
+            displayName: `สารวัตร [${dutyId.toUpperCase()}]`,
+            shift_role: 'สารวัตรเวร',
+            photo_url: '/assets/logo.png'
+          };
+        }
+
+        // Render Step 2 Preview
+        document.getElementById('lf-ho-step2-evidence-img').src = currentLfHandoverBase64;
+        document.getElementById('lf-ho-step2-name').textContent = name;
+        document.getElementById('lf-ho-step2-phone').textContent = phone ? `เบอร์ติดต่อ: ${phone}` : 'ไม่มีข้อมูลติดต่อเพิ่มเติม';
+
+        document.getElementById('lf-ho-step2-inspector-img').src = currentLfInspector.photo_url || '/assets/logo.png';
+        document.getElementById('lf-ho-step2-inspector-name').textContent = currentLfInspector.displayName || currentLfInspector.full_name;
+        document.getElementById('lf-ho-step2-inspector-badge').textContent = `รหัส: ${currentLfInspector.duty_id}`;
+        document.getElementById('lf-ho-step2-inspector-role').textContent = currentLfInspector.shift_role || 'สารวัตรนักเรียน';
+
+        document.getElementById('lf-ho-step-1')?.classList.add('hidden');
+        document.getElementById('lf-ho-step-2')?.classList.remove('hidden');
+      } catch (err) {
+        alert('⚠️ ไม่สามารถค้นหาข้อมูลสารวัตรได้: ' + err.message);
+      } finally {
+        okBtn.disabled = false;
+        okBtn.innerHTML = `<span>ตรวจสอบข้อมูล (OK)</span> <span>➡️</span>`;
+      }
+    }
+
+    async function confirmLfHandoverSubmission() {
+      if (!currentLfItem) return;
+      const claimant_name = document.getElementById('lf-ho-claimant-name').value.trim();
+      const claimant_contact = document.getElementById('lf-ho-claimant-phone').value.trim();
+      const dutyId = document.getElementById('lf-ho-duty-id').value.trim();
+
+      const btn = document.getElementById('lf-ho-btn-confirm');
+      btn.disabled = true;
+      btn.textContent = 'กำลังอัปโหลดรูปขึ้น Discord และบันทึกข้อมูล...';
+
+      try {
+        const payload = {
+          claimant_name,
+          claimant_contact,
+          delivered_by: currentLfInspector ? currentLfInspector.displayName : dutyId,
+          delivered_by_duty_id: currentLfInspector ? currentLfInspector.duty_id : dutyId,
+          delivered_by_photo_url: currentLfInspector ? currentLfInspector.photo_url : null,
+          handover_image_base64: currentLfHandoverBase64
+        };
+
+        const res = await fetch(`/api/lost-found/items/${encodeURIComponent(currentLfItem.id)}/handover`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.success) {
+          closeLfHandoverModal();
+          await loadLostFoundData();
+          alert(`✨ ส่งมอบสิ่งของคืนสำเร็จเรียบร้อย!\nผู้รับมอบ: ${claimant_name}\nผู้ส่งมอบ: ${payload.delivered_by}`);
+        } else {
+          alert('⚠️ ' + (data.error || 'ไม่สามารถบันทึกการส่งมอบได้'));
+        }
+      } catch (err) {
+        alert('⚠️ ข้อผิดพลาด: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '✅ ยืนยันการส่งมอบ';
+      }
+    }
+
     // Initial Load
     initLiveClock();
     initDisciplineCharts();
     initSupabaseRealtime();
     fetchData();
-    setInterval(() => fetchData(), 30000); // Background refresh every 30s
+    loadLostFoundData();
+    setInterval(() => {
+      fetchData();
+      if (!document.getElementById('tab-lost-found')?.classList.contains('hidden')) {
+        loadLostFoundData();
+      }
+    }, 30000); // Background refresh every 30s
   </script>
 
 </body>

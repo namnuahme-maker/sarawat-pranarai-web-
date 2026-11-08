@@ -342,6 +342,10 @@
           
           if (m.profile_image_url) {
             const photoEl = document.getElementById('v-photo');
+            photoEl.onerror = () => {
+              photoEl.classList.add('hidden');
+              document.getElementById('v-photo-placeholder').classList.remove('hidden');
+            };
             photoEl.src = m.profile_image_url;
             photoEl.classList.remove('hidden');
             document.getElementById('v-photo-placeholder').classList.add('hidden');

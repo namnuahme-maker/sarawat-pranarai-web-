@@ -381,11 +381,17 @@ app.post('/api/cases/:id/evidence', async (req, res) => {
 app.get('/api/verify/:id', async (req, res) => {
   try {
     const memberId = req.params.id;
-    const { data: member, error } = await supabase
+    let query = supabase
       .from('members')
-      .select('id, first_name, last_name, nickname, grade_class, student_no, duty_day, duty_id, role, shift_role, status, profile_image_url, approved_at')
-      .eq('id', memberId)
-      .single();
+      .select('id, first_name, last_name, nickname, grade_class, student_no, duty_day, duty_id, role, shift_role, status, profile_image_url, approved_at');
+
+    if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(memberId)) {
+      query = query.eq('id', memberId);
+    } else {
+      query = query.or(`duty_id.eq.${memberId},id.eq.${memberId}`);
+    }
+
+    const { data: member, error } = await query.maybeSingle();
 
     if (error || !member) {
       return res.status(404).json({ valid: false, message: 'ไม่พบบัตรหรือรหัสสมาชิกนี้ในระบบสารวัตรนักเรียน' });
@@ -461,7 +467,752 @@ app.post('/api/card-template', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7. หน้าเว็บอัปโหลด Bodycam และหลักฐาน (/bodycam-upload)
+// 6. ระบบคลังของหายและส่งมอบคืน (Lost & Found System)
+// -------------------------------------------------------------
+const LOST_FOUND_DB_FILE = path.join(__dirname, '..', 'data', 'lost_found_db.json');
+
+function getLostFoundData() {
+  try {
+    if (fs.existsSync(LOST_FOUND_DB_FILE)) {
+      const parsed = JSON.parse(fs.readFileSync(LOST_FOUND_DB_FILE, 'utf8'));
+      if (!parsed.categories) parsed.categories = [];
+      return parsed;
+    }
+  } catch (e) {
+    console.error('[LOST-FOUND DB ERROR]:', e);
+  }
+  return { items: [], claims: [], categories: [] };
+}
+
+function saveLostFoundData(data) {
+  try {
+    fs.writeFileSync(LOST_FOUND_DB_FILE, JSON.stringify(data, null, 2), 'utf8');
+  } catch (e) {
+    console.error('[LOST-FOUND SAVE ERROR]:', e);
+  }
+}
+
+// 6.0 ตรวจสอบสถานะการเชื่อมต่อฐานข้อมูล Supabase
+app.get('/api/lost-found/schema-status', async (req, res) => {
+  try {
+    let itemsTable = false;
+    let claimsTable = false;
+    let categoriesTable = false;
+
+    try {
+      const { error: e1 } = await supabase.from('lost_items').select('id').limit(1);
+      if (!e1) itemsTable = true;
+    } catch (e) {}
+
+    try {
+      const { error: e2 } = await supabase.from('lost_claims').select('id').limit(1);
+      if (!e2) claimsTable = true;
+    } catch (e) {}
+
+    try {
+      const { error: e3 } = await supabase.from('lost_categories').select('id').limit(1);
+      if (!e3) categoriesTable = true;
+    } catch (e) {}
+
+    res.json({
+      success: true,
+      supabase_url: process.env.SUPABASE_URL ? 'CONFIGURED' : 'MISSING',
+      tables: {
+        lost_items: itemsTable,
+        lost_claims: claimsTable,
+        lost_categories: categoriesTable
+      },
+      mode: (itemsTable && claimsTable) ? 'SUPABASE_POSTGRES' : 'HYBRID_MIRROR_FALLBACK'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.0.1 หมวดหมู่สิ่งของ (Lost & Found Categories - Configured by Sarawat)
+app.get('/api/lost-found/categories', async (req, res) => {
+  try {
+    let categories = [];
+    let isDbConnected = false;
+
+    try {
+      const { data, error } = await supabase.from('lost_categories').select('*').order('created_at', { ascending: true });
+      if (!error && Array.isArray(data) && data.length > 0) {
+        categories = data;
+        isDbConnected = true;
+      }
+    } catch (e) {}
+
+    if (!isDbConnected || categories.length === 0) {
+      const db = getLostFoundData();
+      categories = db.categories || [];
+    }
+
+    res.json({ success: true, count: categories.length, categories, isDbConnected });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.post('/api/lost-found/categories', async (req, res) => {
+  try {
+    const { name, icon, description } = req.body || {};
+    if (!name || !name.trim()) {
+      return res.status(400).json({ success: false, error: 'กรุณาระบุชื่อหมวดหมู่' });
+    }
+
+    const trimmedName = name.trim();
+    const cleanIcon = (icon && icon.trim()) ? icon.trim() : '📦';
+    const cleanDesc = (description && description.trim()) ? description.trim() : '';
+
+    const db = getLostFoundData();
+    if (!Array.isArray(db.categories)) db.categories = [];
+
+    // ตรวจสอบชื่อหมวดหมู่ซ้ำ
+    const exists = db.categories.some(c => c.name.toLowerCase() === trimmedName.toLowerCase());
+    if (exists) {
+      return res.status(400).json({ success: false, error: 'หมวดหมู่นี้มีอยู่ในระบบแล้ว' });
+    }
+
+    const code = 'CAT-' + Date.now().toString(36).toUpperCase();
+    const newCategory = {
+      id: `cat-${Date.now()}`,
+      code,
+      name: trimmedName,
+      icon: cleanIcon,
+      description: cleanDesc,
+      created_at: new Date().toISOString()
+    };
+
+    // บันทึกลง Supabase PostgreSQL
+    try {
+      const { data, error } = await supabase.from('lost_categories').insert([{
+        code,
+        name: trimmedName,
+        icon: cleanIcon,
+        description: cleanDesc
+      }]).select().single();
+      if (!error && data) {
+        newCategory.id = data.id;
+      }
+    } catch (e) {
+      console.warn('[SUPABASE CATEGORY INSERT WARN]:', e.message);
+    }
+
+    db.categories.push(newCategory);
+    saveLostFoundData(db);
+
+    res.json({ success: true, category: newCategory });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.delete('/api/lost-found/categories/:id', async (req, res) => {
+  try {
+    const catId = req.params.id;
+    const db = getLostFoundData();
+    const catIndex = (db.categories || []).findIndex(c => c.id === catId || c.code === catId);
+
+    if (catIndex === -1) {
+      return res.status(404).json({ success: false, error: 'ไม่พบหมวดหมู่ที่ต้องการลบ' });
+    }
+
+    const targetCat = db.categories[catIndex];
+
+    // ตรวจสอบว่าหมวดหมู่นี้มีการใช้งานในสิ่งของหรือคำร้องหรือไม่
+    const isUsedInItems = (db.items || []).some(it => it.category === targetCat.name);
+    const isUsedInClaims = (db.claims || []).some(cl => cl.category === targetCat.name);
+
+    if (isUsedInItems || isUsedInClaims) {
+      return res.status(400).json({
+        success: false,
+        error: `ไม่สามารถลบหมวดหมู่ "${targetCat.name}" ได้ เนื่องจากมีรายการสิ่งของหรือคำร้องใช้งานอยู่`
+      });
+    }
+
+    // ลบจาก Supabase
+    try {
+      await supabase.from('lost_categories').delete().or(`id.eq.${catId},code.eq.${catId}`);
+    } catch (e) {
+      console.warn('[SUPABASE CATEGORY DELETE WARN]:', e.message);
+    }
+
+    db.categories.splice(catIndex, 1);
+    saveLostFoundData(db);
+
+    res.json({ success: true, message: `ลบหมวดหมู่ "${targetCat.name}" เรียบร้อยแล้ว` });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.1 ดึงรายการสิ่งของที่พบเจอ (Found Items)
+app.get('/api/lost-found/items', async (req, res) => {
+  try {
+    const { category, status, search } = req.query;
+    let items = [];
+    let isDbConnected = false;
+
+    // ตรวจสอบข้อมูลจาก Supabase PostgreSQL ก่อนเสมอ
+    try {
+      let query = supabase.from('lost_items').select('*').order('created_at', { ascending: false });
+      if (status && status !== 'ALL') query = query.eq('status', status);
+      if (category && category !== 'ALL') {
+        if (category === 'ของกลาง' || category.includes('ของกลาง')) {
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
+          query = query.or(`category.ilike.%ของกลาง%,found_date.lte.${thirtyDaysAgoStr}`);
+        } else {
+          query = query.ilike('category', `%${category}%`);
+        }
+      }
+      const { data, error } = await query;
+      if (!error && Array.isArray(data)) {
+        items = data;
+        isDbConnected = true;
+      }
+    } catch (e) {}
+
+    // หากยังไม่ได้รัน SQL Migration ใน Supabase ให้สลับไปใช้ Local DB File อัตโนมัติ
+    if (!isDbConnected) {
+      const db = getLostFoundData();
+      items = db.items || [];
+      if (status && status !== 'ALL') {
+        items = items.filter(it => it.status === status);
+      }
+      if (category && category !== 'ALL') {
+        if (category === 'ของกลาง' || category.includes('ของกลาง')) {
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
+          items = items.filter(it => {
+            const isCatOfKlang = it.category && it.category.includes('ของกลาง');
+            const isOldDate = it.found_date && it.found_date <= thirtyDaysAgoStr;
+            const isOldCreated = it.created_at && new Date(it.created_at) <= thirtyDaysAgo;
+            return isCatOfKlang || isOldDate || isOldCreated;
+          });
+        } else {
+          items = items.filter(it => it.category && it.category.includes(category));
+        }
+      }
+    }
+
+    if (search) {
+      const q = search.toLowerCase();
+      items = items.filter(it =>
+        (it.title && it.title.toLowerCase().includes(q)) ||
+        (it.item_code && it.item_code.toLowerCase().includes(q)) ||
+        (it.characteristics && it.characteristics.toLowerCase().includes(q)) ||
+        (it.location_found && it.location_found.toLowerCase().includes(q))
+      );
+    }
+
+    const waitingCount = items.filter(i => i.status === 'WAITING_OWNER').length;
+    const deliveredCount = items.filter(i => i.status === 'DELIVERED').length;
+
+    res.json({
+      success: true,
+      source: isDbConnected ? 'supabase_database' : 'local_database_fallback',
+      count: items.length,
+      data: items,
+      stats: {
+        total: items.length,
+        waiting: waitingCount,
+        delivered: deliveredCount
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.2 บันทึกสิ่งของพบเจอใหม่ (Intake New Found Item)
+app.post('/api/lost-found/items', async (req, res) => {
+  try {
+    const {
+      title,
+      category,
+      characteristics,
+      secret_traits,
+      location_found,
+      found_date,
+      found_time,
+      storage_location,
+      finder_name,
+      finder_contact,
+      image_base64,
+      image_url
+    } = req.body || {};
+
+    if (!title || !category || !characteristics) {
+      return res.status(400).json({ success: false, error: 'กรุณากรอกชื่อสิ่งของ หมวดหมู่ และลักษณะเฉพาะตัวให้ครบถ้วน' });
+    }
+
+    let finalImageUrl = image_url || '/assets/sample_student.jpg';
+    if (image_base64) {
+      const uploadDir = path.join(__dirname, 'public', 'uploads');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const filename = `lost_item_${Date.now()}.jpg`;
+      const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
+      fs.writeFileSync(path.join(uploadDir, filename), buf);
+      finalImageUrl = `/uploads/${filename}`;
+
+      // อัปโหลดเข้าสู่ Supabase Storage sarawat-photos ถาวร
+      try {
+        const storagePath = `lost-found/${filename}`;
+        const { error: sErr } = await supabase.storage
+          .from('sarawat-photos')
+          .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
+        if (!sErr) {
+          const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+          finalImageUrl = publicUrl;
+        }
+      } catch (e) {}
+    }
+
+    const currentYear = new Date().getFullYear();
+    const db = getLostFoundData();
+    const itemNum = String((db.items?.length || 0) + 1).padStart(3, '0');
+    const itemCode = `LF-${currentYear}-${itemNum}`;
+
+    const newItem = {
+      item_code: itemCode,
+      title: title.trim(),
+      category: category.trim(),
+      characteristics: characteristics.trim(),
+      secret_traits: (secret_traits && secret_traits.trim()) ? secret_traits.trim() : null,
+      image_url: finalImageUrl,
+      location_found: location_found || 'ไม่ระบุสถานที่',
+      found_date: found_date || new Date().toISOString().slice(0, 10),
+      found_time: found_time || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
+      status: 'WAITING_OWNER',
+      storage_location: storage_location || 'ฐานหลักสารวัตรนักเรียน หน้าห้องกิจการ',
+      finder_name: finder_name || 'สารวัตรเวร',
+      finder_contact: finder_contact || '-',
+      created_at: new Date().toISOString()
+    };
+
+    let savedItem = newItem;
+    let isDbSaved = false;
+
+    // บันทึกเข้า Supabase PostgreSQL Database
+    try {
+      const { data, error } = await supabase.from('lost_items').insert(newItem).select().single();
+      if (!error && data) {
+        savedItem = data;
+        isDbSaved = true;
+      }
+    } catch (e) {}
+
+    // บันทึกสำเนาลง Local JSON เสมอเพื่อความเสถียร
+    db.items = db.items || [];
+    db.items.unshift(savedItem);
+    saveLostFoundData(db);
+
+    res.status(201).json({
+      success: true,
+      storage: isDbSaved ? 'supabase_database' : 'local_mirror_file',
+      item: savedItem,
+      message: `บันทึกของพบเจอสำเร็จ รหัส: ${itemCode}`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.3 ดึงรายการคำร้องขอรับของ / แจ้งของหาย (Claims from Google Form / Web)
+app.get('/api/lost-found/claims', async (req, res) => {
+  try {
+    let claims = [];
+    let isDbConnected = false;
+
+    try {
+      const { data, error } = await supabase.from('lost_claims').select('*').order('created_at', { ascending: false });
+      if (!error && Array.isArray(data)) {
+        claims = data;
+        isDbConnected = true;
+      }
+    } catch (e) {}
+
+    if (!isDbConnected) {
+      const db = getLostFoundData();
+      claims = db.claims || [];
+    }
+
+    res.json({
+      success: true,
+      source: isDbConnected ? 'supabase_database' : 'local_database_fallback',
+      count: claims.length,
+      data: claims
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.4 รับคำร้องแจ้งของหายใหม่ (จาก Google Form Webhook หรือผ่านหน้าเว็บ)
+app.post('/api/lost-found/claims', async (req, res) => {
+  try {
+    const payload = req.body || {};
+    const db = getLostFoundData();
+    const currentYear = new Date().getFullYear();
+    const claimNum = String((db.claims?.length || 0) + 1).padStart(3, '0');
+    const claimCode = `CLM-${currentYear}-${claimNum}`;
+
+    const newClaim = {
+      claim_code: claimCode,
+      category: payload.category || payload.item_category || 'อื่นๆ',
+      item_type: payload.item_type || payload.type || payload.title || 'ไม่ระบุ',
+      characteristics: payload.characteristics || payload.description || 'ไม่มีรายละเอียด',
+      lost_location: payload.lost_location || payload.location || 'ไม่ระบุ',
+      lost_date: payload.lost_date || new Date().toISOString().slice(0, 10),
+      claimant_name: payload.claimant_name || payload.name || 'ไม่ประสงค์ออกนาม',
+      claimant_class: payload.claimant_class || payload.class || '-',
+      claimant_contact: payload.claimant_contact || payload.phone || payload.contact || '-',
+      status: 'PENDING',
+      matched_item_id: null,
+      created_at: new Date().toISOString()
+    };
+
+    let savedClaim = newClaim;
+    let isDbSaved = false;
+
+    try {
+      const { data, error } = await supabase.from('lost_claims').insert(newClaim).select().single();
+      if (!error && data) {
+        savedClaim = data;
+        isDbSaved = true;
+      }
+    } catch (e) {}
+
+    db.claims = db.claims || [];
+    db.claims.unshift(savedClaim);
+    saveLostFoundData(db);
+
+    res.status(201).json({
+      success: true,
+      storage: isDbSaved ? 'supabase_database' : 'local_mirror_file',
+      claim: savedClaim,
+      message: `บันทึกคำร้องสำเร็จ รหัส: ${claimCode}`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.5 ตรวจสอบและจับคู่ของในหมวดหมู่ที่ใกล้เคียงกับคำร้อง (Smart Matching Engine)
+app.get('/api/lost-found/claims/:id/matches', async (req, res) => {
+  try {
+    const claimId = req.params.id;
+    let claim = null;
+    let allItems = [];
+
+    // ดึงข้อมูลคำร้อง
+    try {
+      const { data: cData, error: cErr } = await supabase.from('lost_claims').select('*').or(`id.eq.${claimId},claim_code.eq.${claimId}`).maybeSingle();
+      if (!cErr && cData) claim = cData;
+    } catch (e) {}
+
+    // ดึงสิ่งของในคลัง
+    try {
+      const { data: iData, error: iErr } = await supabase.from('lost_items').select('*').eq('status', 'WAITING_OWNER');
+      if (!iErr && Array.isArray(iData)) allItems = iData;
+    } catch (e) {}
+
+    // Fallback ถ้า Supabase ยังไม่ได้รัน
+    if (!claim || allItems.length === 0) {
+      const db = getLostFoundData();
+      if (!claim) claim = (db.claims || []).find(c => c.id === claimId || c.claim_code === claimId);
+      if (allItems.length === 0) allItems = (db.items || []).filter(item => item.status === 'WAITING_OWNER');
+    }
+
+    if (!claim) {
+      return res.status(404).json({ success: false, message: 'ไม่พบคำร้องที่ระบุ' });
+    }
+
+    const claimKeywords = `${claim.category || ''} ${claim.item_type || ''} ${claim.characteristics || ''}`
+      .toLowerCase()
+      .split(/[\s,./-]+/)
+      .filter(w => w.length > 1);
+
+    const matches = allItems
+      .map(item => {
+        let score = 0;
+        // คะแนนหมวดหมู่เดียวกัน
+        if (item.category && claim.category && (item.category.includes(claim.category) || claim.category.includes(item.category))) {
+          score += 45;
+        }
+        // คะแนนคำตรงกันในชื่อและลักษณะเฉพาะ
+        const itemText = `${item.title || ''} ${item.characteristics || ''} ${item.location_found || ''}`.toLowerCase();
+        let matchedWords = [];
+        claimKeywords.forEach(kw => {
+          if (itemText.includes(kw)) {
+            score += 15;
+            matchedWords.push(kw);
+          }
+        });
+
+        return {
+          item,
+          match_score: Math.min(score, 98),
+          matched_keywords: matchedWords
+        };
+      })
+      .filter(m => m.match_score >= 25)
+      .sort((a, b) => b.match_score - a.match_score);
+
+    res.json({ success: true, claim, matches });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.5.1 ค้นหาข้อมูลสารวัตรนักเรียนด้วยรหัสประจำตัว (เช่น MS1, TS4, T2, F3)
+app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
+  try {
+    const rawDutyId = (req.params.dutyId || '').trim();
+    if (!rawDutyId) return res.status(400).json({ success: false, error: 'กรุณาระบุรหัสประจำตัวสารวัตร' });
+
+    let member = null;
+    try {
+      const { data, error } = await supabase
+        .from('members')
+        .select('id, duty_id, first_name, last_name, full_name, nickname, shift, shift_role, photo_url, grade_class, student_no')
+        .ilike('duty_id', rawDutyId)
+        .limit(1)
+        .maybeSingle();
+      if (!error && data) member = data;
+    } catch (e) {}
+
+    // ค้นหาเพิ่มเติมกรณีพิมพ์ตัวพิมพ์เล็กหรือชื่อเล่น
+    if (!member) {
+      try {
+        const { data: allM } = await supabase.from('members').select('*');
+        if (allM) {
+          member = allM.find(m => 
+            (m.duty_id && m.duty_id.toLowerCase() === rawDutyId.toLowerCase()) ||
+            (m.nickname && m.nickname.toLowerCase() === rawDutyId.toLowerCase()) ||
+            (m.full_name && m.full_name.includes(rawDutyId))
+          );
+        }
+      } catch (e) {}
+    }
+
+    if (!member) {
+      return res.json({ success: true, found: false, message: `ไม่พบข้อมูลสารวัตรสำหรับรหัส [${rawDutyId}]` });
+    }
+
+    const fullName = member.full_name || `${member.first_name || ''} ${member.last_name || ''}`.trim();
+    const roleTitle = member.shift_role === 'SHIFT_HEAD' ? 'หัวหน้าเวร' : (member.shift_role === 'SHIFT_DEPUTY' ? 'รองหัวหน้าเวร' : 'สารวัตรนักเรียน');
+
+    res.json({
+      success: true,
+      found: true,
+      member: {
+        id: member.id,
+        duty_id: member.duty_id || rawDutyId.toUpperCase(),
+        full_name: fullName,
+        nickname: member.nickname || '',
+        displayName: member.nickname ? `${fullName} (${member.nickname})` : fullName,
+        shift: member.shift || member.duty_day || '',
+        shift_role: roleTitle,
+        photo_url: member.photo_url || '/assets/logo.png',
+        grade_class: member.grade_class || '',
+        student_no: member.student_no || ''
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ฟังก์ชันประกาศส่งมอบของหายไปยัง Discord และดึงลิงก์รูป Discord CDN
+async function announceHandoverToDiscord(payload) {
+  // 1. ลองเรียก Bot HTTP Server ก่อน
+  const botBase = process.env.RENDER_EXTERNAL_URL || 'http://localhost:10000';
+  try {
+    const res = await fetch(`${botBase}/api/discord/announce-handover`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await res.json();
+    if (d.success && d.discord_photo_url) return d.discord_photo_url;
+  } catch (e) {}
+
+  // 2. Fallback: ส่งผ่าน Discord REST API โดยตรง
+  try {
+    const token = process.env.DISCORD_TOKEN;
+    const guildId = process.env.GUILD_ID || '1567547042207895664';
+    if (!token) return null;
+
+    const chRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
+      headers: { Authorization: `Bot ${token}` }
+    });
+    const channels = await chRes.json();
+    const chTarget = Array.isArray(channels) ? (channels.find(c => c.name.includes('ของหาย')) || channels.find(c => c.name.includes('บริการ'))) : null;
+    if (!chTarget) return null;
+
+    if (payload.handover_photo_base64) {
+      const buf = Buffer.from(payload.handover_photo_base64.split(',').pop(), 'base64');
+      const filename = `handover_${(payload.item_code || Date.now()).toString().replace(/[^a-zA-Z0-9_-]/g, '_')}.jpg`;
+      const formData = new FormData();
+      formData.append('files[0]', new Blob([buf], { type: 'image/jpeg' }), filename);
+      formData.append('payload_json', JSON.stringify({
+        embeds: [{
+          title: `🎉 ส่งมอบสิ่งของคืนเจ้าของเรียบร้อยแล้ว! [${payload.item_code || ''}]`,
+          description:
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `🏷️ **สิ่งของ:** ${payload.title || '-'}\n` +
+            `👤 **ผู้รับคืน:** ${payload.claimant_name || '-'} (${payload.claimant_contact || '-'})\n` +
+            `🛡️ **สารวัตรผู้ส่งมอบ:** ${payload.delivered_by || '-'} \`[${payload.delivered_by_duty_id || '-'}]\`\n` +
+            `📅 **วันเวลา:** ${new Date().toLocaleDateString('th-TH')} (${new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' })})\n` +
+            `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+            `*✅ บันทึกรูปหลักฐาน (Discord CDN) และปิดเคสลงระบบสารสนเทศเรียบร้อยแล้ว*`,
+          color: 0x2ECC71,
+          image: { url: `attachment://${filename}` },
+          timestamp: new Date().toISOString()
+        }]
+      }));
+
+      const postRes = await fetch(`https://discord.com/api/v10/channels/${chTarget.id}/messages`, {
+        method: 'POST',
+        headers: { Authorization: `Bot ${token}` },
+        body: formData
+      });
+      const msgData = await postRes.json();
+      if (msgData.attachments && msgData.attachments[0]) {
+        return msgData.attachments[0].url;
+      }
+    }
+  } catch (err) {
+    console.warn('[ANNOUNCE HANDOVER DISCORD WARN]:', err.message);
+  }
+  return null;
+}
+
+// 6.6 ส่งมอบของ + ถ่ายรูปเก็บหลักฐานบน Discord + ปิดสถานะ (Handover & Delivery)
+app.post(['/api/lost-found/items/:id/handover', '/api/lost-items/:id/deliver'], async (req, res) => {
+  try {
+    const itemId = req.params.id;
+    const {
+      claimant_name,
+      claimant_contact,
+      delivered_by,
+      delivered_by_duty_id,
+      delivered_by_photo_url,
+      handover_image_base64,
+      handover_photo_base64,
+      handover_photo_url,
+      claim_id,
+      notes
+    } = req.body || {};
+
+    const rawPhotoBase64 = handover_image_base64 || handover_photo_base64;
+    let finalHandoverPhoto = handover_photo_url || null;
+
+    // หาข้อมูลสิ่งของเดิมเพื่อเอาชื่อและรหัส
+    const db = getLostFoundData();
+    const existingItem = (db.items || []).find(i => i.id === itemId || i.item_code === itemId) || {};
+    const itemCode = existingItem.item_code || itemId;
+    const itemTitle = existingItem.title || 'สิ่งของ';
+
+    // 1. บันทึกรูปภาพลง Local File สำรอง
+    if (rawPhotoBase64) {
+      const uploadDir = path.join(__dirname, 'public', 'uploads');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const filename = `handover_${itemCode.replace(/[^a-zA-Z0-9_-]/g, '_')}_${Date.now()}.jpg`;
+      const buf = Buffer.from(rawPhotoBase64.split(',').pop(), 'base64');
+      fs.writeFileSync(path.join(uploadDir, filename), buf);
+      finalHandoverPhoto = `/uploads/${filename}`;
+
+      // 2. อัปโหลดรูปภาพไปยัง Discord เพื่อให้ Discord เป็น Host รูปหลักถาวร และประกาศลงห้อง
+      try {
+        const discordCdnUrl = await announceHandoverToDiscord({
+          item_code: itemCode,
+          title: itemTitle,
+          claimant_name,
+          claimant_contact,
+          delivered_by,
+          delivered_by_duty_id,
+          handover_photo_base64: rawPhotoBase64
+        });
+        if (discordCdnUrl) {
+          finalHandoverPhoto = discordCdnUrl; // ใช้ URL จาก Discord ตามที่ผู้ใช้ระบุ!
+        }
+      } catch (discErr) {
+        console.warn('[DISCORD HANDOVER SYNC WARN]:', discErr.message);
+      }
+    }
+
+    const updates = {
+      status: 'DELIVERED',
+      claimant_name: claimant_name || 'ผู้รับมอบสิทธิ์',
+      claimant_contact: claimant_contact || '-',
+      delivered_by: delivered_by || 'สารวัตรนักเรียนเวร',
+      delivered_by_duty_id: delivered_by_duty_id || '-',
+      delivered_by_photo_url: delivered_by_photo_url || null,
+      handover_photo_url: finalHandoverPhoto,
+      delivered_at: new Date().toISOString(),
+      handover_notes: notes || '',
+      updated_at: new Date().toISOString()
+    };
+
+    let isDbUpdated = false;
+    try {
+      const { data, error } = await supabase
+        .from('lost_items')
+        .update(updates)
+        .or(`id.eq.${itemId},item_code.eq.${itemId}`)
+        .select()
+        .single();
+      if (!error && data) isDbUpdated = true;
+
+      if (claim_id) {
+        await supabase
+          .from('lost_claims')
+          .update({ status: 'RESOLVED', resolved_at: new Date().toISOString() })
+          .or(`id.eq.${claim_id},claim_code.eq.${claim_id}`);
+      }
+    } catch (e) {}
+
+    // อัปเดตสำเนาใน Local JSON
+    const item = (db.items || []).find(i => i.id === itemId || i.item_code === itemId);
+    if (item) {
+      Object.assign(item, updates);
+    }
+    if (claim_id) {
+      const claim = (db.claims || []).find(c => c.id === claim_id || c.claim_code === claim_id);
+      if (claim) {
+        claim.status = 'RESOLVED';
+        claim.resolved_at = new Date().toISOString();
+      }
+    }
+    saveLostFoundData(db);
+
+    res.json({
+      success: true,
+      storage: isDbUpdated ? 'supabase_database' : 'local_mirror_file',
+      discord_hosted: finalHandoverPhoto && finalHandoverPhoto.includes('discordapp'),
+      message: `ส่งมอบสิ่งของสำเร็จ บันทึกรูปหลักฐานและส่งประกาศไปยัง Discord เรียบร้อยแล้ว`,
+      item: item || updates
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// 7. หน้าเว็บระบบของหาย (/lost-found)
+// -------------------------------------------------------------
+app.get(['/lost-found', '/lost-found.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'lost-found.html'));
+});
+
+// -------------------------------------------------------------
+// 7.1 หน้าเว็บอัปโหลด Bodycam และหลักฐาน (/bodycam-upload)
 // -------------------------------------------------------------
 app.get('/bodycam-upload', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'bodycam-upload.html'));
@@ -472,6 +1223,13 @@ app.get('/bodycam-upload', (req, res) => {
 // -------------------------------------------------------------
 app.get('/verify', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'verify.html'));
+});
+
+// -------------------------------------------------------------
+// 7.2 หน้าเว็บบัตรประจำตัวดิจิทัล (/card?id=...)
+// -------------------------------------------------------------
+app.get(['/card', '/card.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // หน้าแดชบอร์ดหลัก
