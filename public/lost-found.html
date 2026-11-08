@@ -46,6 +46,9 @@
     }
 
     /* Dialog Backdrop & Scroll Containment (Modern Web Guidance) */
+    dialog:not([open]) {
+      display: none !important;
+    }
     dialog:modal {
       overscroll-behavior: contain;
     }
@@ -1495,7 +1498,6 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       }
     }
 
-    let currentHandoverBase64 = null;
     let currentInspector = null;
 
     function setupHandoverForm(item, claim) {
