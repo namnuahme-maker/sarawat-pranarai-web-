@@ -470,26 +470,53 @@ app.post('/api/card-template', (req, res) => {
 // 6. ระบบคลังของหายและส่งมอบคืน (Lost & Found System)
 // -------------------------------------------------------------
 const LOST_FOUND_DB_FILE = path.join(__dirname, '..', 'data', 'lost_found_db.json');
+const LOST_FOUND_LOCAL_DB = path.join(__dirname, 'lost_found_db.json');
+const LOST_FOUND_CACHE_FILE = path.join(__dirname, 'lost_items_cache.json');
 
 function getLostFoundData() {
-  try {
-    if (fs.existsSync(LOST_FOUND_DB_FILE)) {
-      const parsed = JSON.parse(fs.readFileSync(LOST_FOUND_DB_FILE, 'utf8'));
-      if (!parsed.categories) parsed.categories = [];
-      return parsed;
+  let db = { items: [], claims: [], categories: [] };
+  const candidateFiles = [LOST_FOUND_DB_FILE, LOST_FOUND_LOCAL_DB];
+  for (const f of candidateFiles) {
+    try {
+      if (fs.existsSync(f)) {
+        const parsed = JSON.parse(fs.readFileSync(f, 'utf8'));
+        if (parsed && typeof parsed === 'object') {
+          if (Array.isArray(parsed.items) && parsed.items.length > 0) db.items = parsed.items;
+          if (Array.isArray(parsed.claims) && parsed.claims.length > 0) db.claims = parsed.claims;
+          if (Array.isArray(parsed.categories) && parsed.categories.length > 0) db.categories = parsed.categories;
+        }
+      }
+    } catch (e) {
+      console.error('[LOST-FOUND DB ERROR]:', e);
     }
-  } catch (e) {
-    console.error('[LOST-FOUND DB ERROR]:', e);
   }
-  return { items: [], claims: [], categories: [] };
+
+  // Fallback: หากรายการ items ยังว่างอยู่ ให้ดึงจาก lost_items_cache.json
+  if (db.items.length === 0 && fs.existsSync(LOST_FOUND_CACHE_FILE)) {
+    try {
+      const cacheParsed = JSON.parse(fs.readFileSync(LOST_FOUND_CACHE_FILE, 'utf8'));
+      if (Array.isArray(cacheParsed) && cacheParsed.length > 0) {
+        db.items = cacheParsed;
+      }
+    } catch (e) {}
+  }
+  return db;
 }
 
 function saveLostFoundData(data) {
-  try {
-    fs.writeFileSync(LOST_FOUND_DB_FILE, JSON.stringify(data, null, 2), 'utf8');
-  } catch (e) {
-    console.error('[LOST-FOUND SAVE ERROR]:', e);
+  const targets = [LOST_FOUND_DB_FILE, LOST_FOUND_LOCAL_DB];
+  for (const t of targets) {
+    try {
+      const dir = path.dirname(t);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(t, JSON.stringify(data, null, 2), 'utf8');
+    } catch (e) {
+      console.error('[LOST-FOUND SAVE ERROR]:', e);
+    }
   }
+  try {
+    fs.writeFileSync(LOST_FOUND_CACHE_FILE, JSON.stringify(data.items || [], null, 2), 'utf8');
+  } catch (e) {}
 }
 
 // 6.0 ตรวจสอบสถานะการเชื่อมต่อฐานข้อมูล Supabase
@@ -753,7 +780,8 @@ app.post('/api/lost-found/items', async (req, res) => {
       image_url
     } = req.body || {};
 
-    if (!title || !category || !characteristics) {
+    const reqCharacteristics = (characteristics || title || '').trim();
+    if (!title || !category || !reqCharacteristics) {
       return res.status(400).json({ success: false, error: 'กรุณากรอกชื่อสิ่งของ หมวดหมู่ และลักษณะเฉพาะตัวให้ครบถ้วน' });
     }
 
@@ -782,29 +810,33 @@ app.post('/api/lost-found/items', async (req, res) => {
     const currentYear = new Date().getFullYear();
     const db = getLostFoundData();
     const itemNum = String((db.items?.length || 0) + 1).padStart(3, '0');
-    const itemCode = `LF-${currentYear}-${itemNum}`;
+    const itemCode = req.body.item_code || `LF-${currentYear}-${itemNum}`;
 
     const newItem = {
+      id: req.body.id || `lf-${Date.now()}`,
       item_code: itemCode,
       title: title.trim(),
       category: category.trim(),
-      characteristics: characteristics.trim(),
+      characteristics: reqCharacteristics,
       secret_traits: (secret_traits && secret_traits.trim()) ? secret_traits.trim() : null,
       image_url: finalImageUrl,
       location_found: location_found || 'ไม่ระบุสถานที่',
       found_date: found_date || new Date().toISOString().slice(0, 10),
-      found_time: found_time || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }),
-      status: 'WAITING_OWNER',
-      storage_location: storage_location || 'ฐานหลักสารวัตรนักเรียน หน้าห้องกิจการ',
+      found_time: found_time || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.',
+      status: req.body.status || 'WAITING_OWNER',
+      storage_location: storage_location || 'ห้องสารวัตรนักเรียน อาคาร 1',
       finder_name: finder_name || 'สารวัตรเวร',
+      finder_duty_id: req.body.finder_duty_id || null,
+      finder_avatar_url: req.body.finder_avatar_url || null,
       finder_contact: finder_contact || '-',
-      created_at: new Date().toISOString()
+      created_at: req.body.created_at || new Date().toISOString(),
+      updated_at: req.body.updated_at || new Date().toISOString()
     };
 
     let savedItem = newItem;
     let isDbSaved = false;
 
-    // บันทึกเข้า Supabase PostgreSQL Database
+    // บันทึกเข้า Supabase PostgreSQL Database (หากมีตาราง)
     try {
       const { data, error } = await supabase.from('lost_items').insert(newItem).select().single();
       if (!error && data) {
@@ -813,9 +845,14 @@ app.post('/api/lost-found/items', async (req, res) => {
       }
     } catch (e) {}
 
-    // บันทึกสำเนาลง Local JSON เสมอเพื่อความเสถียร
+    // บันทึกสำเนาลง Local JSON เสมอเพื่อความเสถียร (ป้องกัน duplicate item_code)
     db.items = db.items || [];
-    db.items.unshift(savedItem);
+    const existIdx = db.items.findIndex(i => i.item_code === itemCode);
+    if (existIdx >= 0) {
+      db.items[existIdx] = { ...db.items[existIdx], ...savedItem };
+    } else {
+      db.items.unshift(savedItem);
+    }
     saveLostFoundData(db);
 
     res.status(201).json({

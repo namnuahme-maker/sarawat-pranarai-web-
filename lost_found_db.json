@@ -1,0 +1,193 @@
+{
+  "items": [
+    {
+      "id": "lf-2026-6435",
+      "item_code": "LF-2026-6435",
+      "title": "แว่นตา",
+      "category": "กกกก",
+      "characteristics": "แว่นตาสายตา กรอบสีดำ สภาพดี พบวางลืมไว้",
+      "location_found": "กกก",
+      "found_date": "2026-11-08",
+      "found_time": "11:04 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ห้องสารวัตรนักเรียน อาคาร 1",
+      "image_url": "https://images.unsplash.com/photo-1574258495973-f010dfbb5371?w=600&auto=format&fit=crop&q=80",
+      "finder_name": "นายณิชกานต์ คำไชย (น้ำเหนือ)",
+      "finder_duty_id": "TS1",
+      "finder_avatar_url": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop&q=80",
+      "finder_contact": "0634125121",
+      "created_at": "2026-11-08T04:04:00.000Z",
+      "updated_at": "2026-11-08T04:04:00.000Z"
+    },
+    {
+      "id": "lf-001",
+      "item_code": "LF-2026-001",
+      "title": "กระเป๋าสตางค์หนังสีน้ำตาลเข้ม Tough",
+      "category": "กระเป๋า / กระเป๋าสตางค์",
+      "characteristics": "กระเป๋าหนังแท้พับสองตอนสีน้ำตาลเข้ม ยี่ห้อ Tough มีรอยขีดข่วนเล็กน้อยที่มุมขวาล่าง ภายในมีบัตรประจำตัวประชาชนและรูปถ่าย สภาพดี",
+      "image_url": "https://images.unsplash.com/photo-1627123424574-724758594e93?w=600&auto=format&fit=crop&q=80",
+      "location_found": "โต๊ะม้าหินอ่อนหน้าอาคาร 3 (ใกล้ตู้กดน้ำ)",
+      "found_date": "2026-11-06",
+      "found_time": "12:15 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ห้องสารวัตรนักเรียน อาคาร 1 (ชั้น 1)",
+      "finder_name": "นายกิตติศักดิ์ (นักเรียน ม.4/2)",
+      "finder_duty_id": "MS1",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "081-234-5678",
+      "created_at": "2026-11-06T12:10:17.192Z"
+    },
+    {
+      "id": "lf-002",
+      "item_code": "LF-2026-002",
+      "title": "หูฟังบลูทูธ AirPods Pro 2 พร้อมเคสแคร์แบร์",
+      "category": "อุปกรณ์ไอที / มือถือ",
+      "characteristics": "ตัวเคสหูฟังสีขาว สวมเคสซิลิโคนสีเขียวขี้ม้า มีพวงกุญแจตุ๊กตา Care Bear สีชมพูห้อยอยู่ ฝาปิดด้านบนมีสติกเกอร์รูปหัวใจ",
+      "image_url": "https://images.unsplash.com/photo-1600294037681-c80b4cb5b434?w=600&auto=format&fit=crop&q=80",
+      "location_found": "อัฒจันทร์โดมกิจกรรม หน้าเวทีกลาง",
+      "found_date": "2026-11-06",
+      "found_time": "08:30 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ห้องสารวัตรนักเรียน อาคาร 1 (ตู้เซฟเก็บอุปกรณ์อิเล็กทรอนิกส์)",
+      "finder_name": "สารวัตรเวรวันศุกร์ (ผลัด F)",
+      "finder_duty_id": "F3",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "โต๊ะเวรประจำวัน",
+      "created_at": "2026-11-06T08:10:17.192Z"
+    },
+    {
+      "id": "lf-003",
+      "item_code": "LF-2026-003",
+      "title": "กุญแจรถจักรยานยนต์ Honda Wave 110i",
+      "category": "กุญแจ / ยานพาหนะ",
+      "characteristics": "ลูกกุญแจแท้ฮอนด้า พร้อมสายคล้องคอสีแดงสกรีนอักษรขาว HONDA RACING มีพวงลูกกุญแจบ้านอีก 2 ดอก และป้ายทะเบียนจิ๋วสีขาว",
+      "image_url": "https://images.unsplash.com/photo-1582139329536-e7284fece509?w=600&auto=format&fit=crop&q=80",
+      "location_found": "โรงจอดรถจักรยานยนต์นักเรียน โซน C แถวที่ 4",
+      "found_date": "2026-11-05",
+      "found_time": "16:45 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ห้องสารวัตรนักเรียน อาคาร 1",
+      "finder_name": "รปภ. ประตูหน้าโรงเรียน",
+      "finder_duty_id": "T2",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "ป้อมยามหน้าประตู 1",
+      "created_at": "2026-11-05T16:10:17.192Z"
+    },
+    {
+      "id": "lf-004",
+      "item_code": "LF-2026-004",
+      "title": "เสื้อกันหนาวมีฮู้ดสีดำ Champion ไซส์ L",
+      "category": "เครื่องแต่งกาย / หมวก",
+      "characteristics": "เสื้อแจ็คเก็ตฮู้ดดี้ผ้าหนาสีดำล้วน มีโลโก้ปักตัว C ที่แขนซ้าย ชายเสื้อมีป้ายผ้า Champion ป้ายคอด้านในมีเขียนชื่อด้วยปากกาเคมีว่า \"นนท์ 5/7\"",
+      "image_url": "https://images.unsplash.com/photo-1556905055-8f358a7a47b2?w=600&auto=format&fit=crop&q=80",
+      "location_found": "ม้านั่งข้างสนามฟุตบอล ใต้ต้นจามจุรี",
+      "found_date": "2026-11-05",
+      "found_time": "17:20 น.",
+      "status": "WAITING_OWNER",
+      "storage_location": "ห้องสารวัตรนักเรียน อาคาร 1 (ราวแขวนเครื่องแบบ)",
+      "finder_name": "สารวัตรเวรพิเศษ (ผลัด S)",
+      "finder_duty_id": "TS4",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "เวรสารวัตร",
+      "created_at": "2026-11-05T12:10:17.192Z"
+    },
+    {
+      "id": "lf-1793981429260",
+      "item_code": "LF-2026-006",
+      "title": "นาฬิกาข้อมือ G-Shock สีดำ",
+      "category": "อุปกรณ์ไอที / มือถือ",
+      "characteristics": "สายเรซินสีดำ กรอบเหลี่ยม มีไฟ Backlight สีเขียว มีรอยขีดข่วนที่ฝาหลัง",
+      "image_url": "https://images.unsplash.com/photo-1584438784894-089d6a62b8fa?w=600&auto=format&fit=crop&q=80",
+      "location_found": "สนามบาสเกตบอล",
+      "found_date": "2026-11-06",
+      "found_time": "23:10 น.",
+      "status": "DELIVERED",
+      "storage_location": "ส่งมอบคืนเจ้าของเรียบร้อยแล้ว",
+      "finder_name": "สารวัตรเวรวันพุธ",
+      "finder_duty_id": "W1",
+      "finder_avatar_url": "/assets/sarawat_logo.png",
+      "finder_contact": "-",
+      "claimant_name": "นายสมชาย ใจดี",
+      "claimant_contact": "089-999-8888",
+      "delivered_by": "นายณิชกานต์ คำไชย (น้ำเหนือ)",
+      "delivered_by_duty_id": "TS1",
+      "delivered_at": "2026-11-06T16:10:29.426Z",
+      "created_at": "2026-11-06T16:10:29.272Z"
+    }
+  ],
+  "claims": [],
+  "categories": [
+    {
+      "id": "cat-000",
+      "code": "CAT-TEST",
+      "name": "กกกก",
+      "icon": "👓",
+      "description": "หมวดหมู่ทดสอบโดยสารวัตร",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-001",
+      "code": "CAT-BAG",
+      "name": "กระเป๋า / กระเป๋าสตางค์",
+      "icon": "👛",
+      "description": "กระเป๋าสะพาย กระเป๋าตังค์ เป้ กระเป๋าเคียง",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-002",
+      "code": "CAT-TECH",
+      "name": "อุปกรณ์ไอที / มือถือ",
+      "icon": "📱",
+      "description": "สมาร์ตโฟน แท็บเล็ต หูฟัง สายชาร์จ พาวเวอร์แบงก์",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-003",
+      "code": "CAT-KEY",
+      "name": "กุญแจ / ยานพาหนะ",
+      "icon": "🔑",
+      "description": "กุญแจรถ กุญแจบ้าน คีย์การ์ด หมวกกันน็อก",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-004",
+      "code": "CAT-CLOTH",
+      "name": "เครื่องแต่งกาย / หมวก",
+      "icon": "👕",
+      "description": "เสื้อกันหนาว หมวก เนกไท เข็มขัด รองเท้า",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-005",
+      "code": "CAT-STUDY",
+      "name": "อุปกรณ์การเรียน / หนังสือ",
+      "icon": "📚",
+      "description": "กล่องดินสอ สมุด หนังสือ เครื่องคิดเลข ไม้บรรทัด",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-006",
+      "code": "CAT-VALUABLE",
+      "name": "ของมีค่า / เครื่องประดับ",
+      "icon": "💎",
+      "description": "เงินสด นาฬิกา แหวน สร้อย แว่นตา",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-007",
+      "code": "CAT-OTHER",
+      "name": "อื่นๆ",
+      "icon": "📦",
+      "description": "สิ่งของเบ็ดเตล็ด กระติกน้ำ ร่ม ฯลฯ",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    },
+    {
+      "id": "cat-008",
+      "code": "CAT-CONFISCATED",
+      "name": "ของกลาง",
+      "icon": "⚖️",
+      "description": "ของที่ไม่มารับเกิน 30 วัน หรือสิ่งของตรวจยึด",
+      "created_at": "2026-11-08T00:00:00.000Z"
+    }
+  ]
+}
