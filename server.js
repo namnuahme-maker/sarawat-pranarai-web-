@@ -1211,6 +1211,60 @@ app.post(['/api/lost-found/items/:id/handover', '/api/lost-items/:id/deliver'], 
   }
 });
 
+// 6.7 ล้างข้อมูลสิ่งของและคำร้องของหายทั้งหมด (KillFile - Reset to 0)
+app.post(['/api/lost-found/killfile', '/api/lost-found/reset'], async (req, res) => {
+  try {
+    let deletedItemsCount = 0;
+    let deletedClaimsCount = 0;
+
+    // 1. ลบจาก Supabase Database
+    try {
+      const { data: itData, error: itErr } = await supabase.from('lost_items').delete().gte('created_at', '1970-01-01').select('id');
+      if (!itErr && itData) deletedItemsCount = itData.length;
+    } catch (e) {}
+
+    try {
+      const { data: clData, error: clErr } = await supabase.from('lost_claims').delete().gte('created_at', '1970-01-01').select('id');
+      if (!clErr && clData) deletedClaimsCount = clData.length;
+    } catch (e) {}
+
+    // 2. ล้างข้อมูลใน Local Cache
+    const db = getLostFoundData();
+    const localItemsLen = (db.items || []).length;
+    const localClaimsLen = (db.claims || []).length;
+    db.items = [];
+    db.claims = [];
+    saveLostFoundData(db);
+
+    deletedItemsCount = Math.max(deletedItemsCount, localItemsLen);
+    deletedClaimsCount = Math.max(deletedClaimsCount, localClaimsLen);
+
+    // 3. ลบไฟล์ภาพอัปโหลดสำรองใน public/uploads ถ้ามี
+    try {
+      const uploadDir = path.join(__dirname, 'public', 'uploads');
+      if (fs.existsSync(uploadDir)) {
+        const files = fs.readdirSync(uploadDir);
+        for (const file of files) {
+          if (file.startsWith('handover_') || file.startsWith('lost_item_')) {
+            try { fs.unlinkSync(path.join(uploadDir, file)); } catch (e) {}
+          }
+        }
+      }
+    } catch (e) {}
+
+    console.log(`[KILLFILE] 🗑️ ล้างข้อมูลระบบของหายสำเร็จ: สิ่งของ ${deletedItemsCount} ชิ้น, คำร้อง ${deletedClaimsCount} รายการ`);
+
+    res.json({
+      success: true,
+      deleted_items: deletedItemsCount,
+      deleted_claims: deletedClaimsCount,
+      message: `ล้างข้อมูลระบบของหายทั้งหมดเรียบร้อยแล้ว (เริ่มใหม่แต่ 0)`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // 7. หน้าเว็บระบบของหาย (/lost-found)
 // -------------------------------------------------------------
