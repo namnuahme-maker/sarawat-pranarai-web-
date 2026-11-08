@@ -545,7 +545,14 @@ app.get('/api/lost-found/categories', async (req, res) => {
 
     if (!isDbConnected || categories.length === 0) {
       const db = getLostFoundData();
-      categories = db.categories || [];
+      categories = (db.categories && db.categories.length > 0) ? db.categories : [
+        { id: 'cat-wallet', name: 'กระเป๋า / กระเป๋าสตางค์', icon: '👛', description: 'กระเป๋าเงิน เป้ กระเป๋าสะพาย' },
+        { id: 'cat-it', name: 'อุปกรณ์ไอที / มือถือ', icon: '📱', description: 'โทรศัพท์มือถือ หูฟัง พาวเวอร์แบงก์' },
+        { id: 'cat-key', name: 'กุญแจ / ยานพาหนะ', icon: '🔑', description: 'กุญแจรถ กุญแจบ้าน คีย์การ์ด' },
+        { id: 'cat-clothes', name: 'เครื่องแต่งกาย / หมวก', icon: '👕', description: 'เสื้อคลุม หมวก เข็มขัด รองเท้า' },
+        { id: 'cat-stationery', name: 'เครื่องเขียน / หนังสือ', icon: '📚', description: 'สมุด หนังสือ ปากกา อุปกรณ์เรียน' },
+        { id: 'cat-general', name: 'สิ่งของทั่วไป / อื่นๆ', icon: '📦', description: 'สิ่งของอื่นๆ ที่เก็บได้' }
+      ];
     }
 
     res.json({ success: true, count: categories.length, categories, isDbConnected });
@@ -979,7 +986,7 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
     try {
       const { data, error } = await supabase
         .from('members')
-        .select('id, duty_id, first_name, last_name, full_name, nickname, shift, shift_role, photo_url, grade_class, student_no')
+        .select('id, duty_id, first_name, last_name, nickname, duty_day, shift_role, profile_image_url, grade_class, student_no')
         .ilike('duty_id', rawDutyId)
         .limit(1)
         .maybeSingle();
@@ -994,7 +1001,7 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
           member = allM.find(m => 
             (m.duty_id && m.duty_id.toLowerCase() === rawDutyId.toLowerCase()) ||
             (m.nickname && m.nickname.toLowerCase() === rawDutyId.toLowerCase()) ||
-            (m.full_name && m.full_name.includes(rawDutyId))
+            (`${m.first_name || ''} ${m.last_name || ''}`.toLowerCase().includes(rawDutyId.toLowerCase()))
           );
         }
       } catch (e) {}
@@ -1004,7 +1011,7 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
       return res.json({ success: true, found: false, message: `ไม่พบข้อมูลสารวัตรสำหรับรหัส [${rawDutyId}]` });
     }
 
-    const fullName = member.full_name || `${member.first_name || ''} ${member.last_name || ''}`.trim();
+    const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'สารวัตรนักเรียน';
     const roleTitle = member.shift_role === 'SHIFT_HEAD' ? 'หัวหน้าเวร' : (member.shift_role === 'SHIFT_DEPUTY' ? 'รองหัวหน้าเวร' : 'สารวัตรนักเรียน');
 
     res.json({
@@ -1016,9 +1023,9 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
         full_name: fullName,
         nickname: member.nickname || '',
         displayName: member.nickname ? `${fullName} (${member.nickname})` : fullName,
-        shift: member.shift || member.duty_day || '',
+        shift: member.duty_day || '',
         shift_role: roleTitle,
-        photo_url: member.photo_url || '/assets/logo.png',
+        photo_url: member.profile_image_url || '/assets/logo.png',
         grade_class: member.grade_class || '',
         student_no: member.student_no || ''
       }
