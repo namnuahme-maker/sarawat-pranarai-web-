@@ -107,7 +107,7 @@
       <!-- Brand & School Logo -->
       <div class="flex items-center gap-3">
         <div class="relative flex-shrink-0">
-          <img src="/assets/school_emblem.png" alt="ตราโรงเรียนพระนารายณ์" class="w-9 h-9 object-contain drop-shadow-[0_0_8px_rgba(245,158,11,0.4)]" onerror="this.src='/assets/logo.png'">
+          <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-9 h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)]" onerror="this.src='/assets/school_emblem.png'">
           <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
         </div>
         <div class="leading-tight">
@@ -397,14 +397,15 @@
       <div id="modal-card-render-zone" class="id-card-cr80 bg-gradient-to-b from-[#001738] via-[#040c1a] to-[#000000] border-2 border-amber-500/50 p-4 flex flex-col justify-between text-white relative">
         
         <!-- Security Watermark Pattern -->
-        <div class="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
-          <img src="/assets/school_emblem.png" class="w-64 h-64 object-contain rotate-12" alt="Watermark">
+        <div class="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
+          <img src="/assets/logo.png" class="w-64 h-64 object-contain rotate-12 drop-shadow" alt="Watermark">
         </div>
 
-        <!-- Card Top Bar: School Emblem & Titles -->
+        <!-- Card Top Bar: School Emblem, Logo & Titles -->
         <div class="relative z-10 flex items-center justify-between border-b border-amber-500/30 pb-2">
           <div class="flex items-center gap-2">
-            <img src="/assets/school_emblem.png" class="w-9 h-9 object-contain" alt="Emblem">
+            <img src="/assets/school_emblem.png" class="w-8 h-8 object-contain" alt="School Emblem">
+            <img src="/assets/logo.png" class="w-8 h-8 object-contain" alt="Sarawat Emblem">
             <div class="leading-tight text-left">
               <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">PRANARAI SCHOOL</div>
               <div class="text-[9px] text-slate-300">กลุ่มงานสารวัตรนักเรียน</div>
@@ -650,7 +651,7 @@
       container.innerHTML = mems.map(m => `
         <div onclick="openCardModal('${m.id}')" class="p-2 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/40 cursor-pointer transition flex items-center justify-between">
           <div class="flex items-center gap-2 min-w-0">
-            <img src="${m.profile_image_url || '/assets/school_emblem.png'}" class="w-6 h-6 rounded-md object-cover border border-slate-700 flex-shrink-0" onerror="this.src='/assets/school_emblem.png'">
+            <img src="${m.profile_image_url || '/assets/logo.png'}" class="w-6 h-6 rounded-md object-cover border border-slate-700 flex-shrink-0" onerror="this.src='/assets/logo.png'">
             <div class="truncate text-xs">
               <span class="font-bold text-slate-200">${m.nickname || m.first_name}</span>
               <span class="text-[10px] text-slate-400 ml-1">ม.${m.grade_class || '-'}</span>
@@ -698,7 +699,7 @@
           <div onclick="openCardModal('${m.id}')" class="p-3 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5 cursor-pointer transition shadow-md group">
             <div class="flex items-center gap-3">
               <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black">
-                <img src="${m.profile_image_url || '/assets/school_emblem.png'}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
+                <img src="${m.profile_image_url || '/assets/logo.png'}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
               </div>
               <div class="min-w-0 flex-1">
                 <div class="flex items-center justify-between gap-1">
@@ -802,7 +803,7 @@
       document.getElementById('card-student-id').textContent = `CODE: ${m.duty_id || 'MARSHALL'}-${m.student_no || '000'}`;
       
       const photoEl = document.getElementById('card-photo-img');
-      photoEl.src = m.profile_image_url || '/assets/school_emblem.png';
+      photoEl.src = m.profile_image_url || '/assets/logo.png';
 
       // Generate Barcode Code128
       try {

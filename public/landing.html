@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" data-type="software" data-radius="soft" data-buttons="solid" data-motion="on" class="dark scroll-smooth antialiased">
+<html lang="th" data-type="software" data-radius="soft" data-buttons="solid" class="dark scroll-smooth antialiased">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -140,14 +140,14 @@
 
       <!-- Desktop Nav Links -->
       <nav class="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
-        <a href="#features" class="whitespace-nowrap hover:text-white transition-colors">ระบบปฏิบัติการ</a>
-        <a href="#radar" class="whitespace-nowrap hover:text-white transition-colors">Smart Match Radar</a>
-        <a href="#architecture" class="whitespace-nowrap hover:text-white transition-colors">สถาปัตยกรรมข้อมูล</a>
-        <a href="#security" class="whitespace-nowrap hover:text-white transition-colors">ความปลอดภัย & RLS</a>
+        <a href="#features" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">ระบบปฏิบัติการ</a>
+        <a href="#radar" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">Smart Match Radar</a>
+        <a href="#architecture" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">สถาปัตยกรรมข้อมูล</a>
+        <a href="#security" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">ความปลอดภัย & RLS</a>
       </nav>
 
       <!-- Right Header Actions -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+      <div class="flex items-center gap-3 sm:gap-2 flex-shrink-0">
         
         <!-- Live Station Ping -->
         <div class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-midnight-900 border border-midnight-800 text-[11px] font-mono text-emerald-400 whitespace-nowrap">
@@ -156,19 +156,19 @@
         </div>
 
         <!-- Light / Dark Toggle -->
-        <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg bg-midnight-850 border border-midnight-700 hover:border-slate-500 text-slate-400 hover:text-white flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-blue-500" title="สลับโหมดสี">
+        <button onclick="toggleTheme()" class="w-9 h-9 sm:w-8 sm:h-8 rounded-lg bg-midnight-850 border border-midnight-700 hover:border-slate-500 text-slate-400 hover:text-white flex items-center justify-center transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none" title="สลับโหมดสี">
           <svg id="theme-icon-dark" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
           <svg id="theme-icon-light" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
         </button>
 
         <!-- Secondary: Lost & Found Portal -->
-        <a href="/lost-found" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-xs font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500">
+        <a href="/lost-found" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-xs font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none">
           <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
           <span>คลังของหาย</span>
         </a>
 
         <!-- Primary CTA: Launch Terminal -->
-        <a href="/" class="inline-flex items-center gap-1 px-2.5 sm:px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-medium transition-all shadow-tactical-glow whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500">
+        <a href="/" class="inline-flex items-center gap-1.5 px-3 sm:px-3.5 py-2 sm:py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-medium transition-all shadow-tactical-glow whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none min-h-[36px] sm:min-h-0">
           <span class="hidden sm:inline">เข้าสู่เทอร์มินัล</span>
           <span class="sm:hidden">เทอร์มินัล</span>
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
@@ -196,7 +196,7 @@
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-midnight-900 border border-midnight-700/90 text-xs font-mono text-slate-300">
           <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
           <span>RELEASE 2.4 // PRODUCTION GRADE</span>
-          <span class="text-slate-600">•</span>
+          <span class="text-slate-400">•</span>
           <span class="text-slate-400">โรงเรียนพระนารายณ์ • ฝ่ายกิจการนักเรียน</span>
         </div>
 
@@ -454,7 +454,7 @@
             <div class="w-10 h-10 rounded-lg bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
-            <h3 class="text-xl font-tactical font-bold text-white">ระบบจัดเวรอัตโนมัติ & แจกจ่ายยศผ่าน Discord Bot</h3>
+            <h3 class="text-base font-tactical font-bold text-white">ระบบจัดเวรอัตโนมัติ & แจกจ่ายยศผ่าน Discord Bot</h3>
             <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
               เครื่องมือบริหารผลัดเวรประจำสัปดาห์ (MS, TS, FS, TSS) ที่ประสานงานตรงกับ Discord Server โรงเรียน 
               ปรับบทบาท (Roles) และแจกเหรียญสารวัตรเวรตามเวรจริง พร้อมเช็กชื่อรายวันส่งออกสู่อาร์เรย์ 12 สัปดาห์อัตโนมัติ
@@ -480,7 +480,7 @@
             <div class="w-10 h-10 rounded-lg bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
             </div>
-            <h3 class="text-xl font-tactical font-bold text-white">บัตรดิจิทัลมาตรฐาน ISO/IEC CR80</h3>
+            <h3 class="text-base font-tactical font-bold text-white">บัตรดิจิทัลมาตรฐาน ISO/IEC CR80</h3>
             <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
               สร้างบัตรสารวัตรนักเรียนแบบพลิก 3D ระบุรหัสประจำตัว QR ตรวจสอบย้อนกลับ และเลย์เอาต์พิมพ์แผ่น A4 อัตโนมัติ (8 ใบต่อแผ่น)
             </p>
@@ -498,7 +498,7 @@
             <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-800 flex items-center justify-center text-amber-400">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
             </div>
-            <h3 class="text-xl font-tactical font-bold text-white">Smart Match Radar & ทะเบียนคุม</h3>
+            <h3 class="text-base font-tactical font-bold text-white">Smart Match Radar & ทะเบียนคุม</h3>
             <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
               สแกนจับคู่สิ่งของที่พบกับคำร้อง Google Form ของนักเรียนแบบเรดาร์ พร้อมคำนวณคะแนนความใกล้เคียง (%) ทันที
             </p>
@@ -516,7 +516,7 @@
             <div class="w-10 h-10 rounded-lg bg-rose-950 border border-rose-800 flex items-center justify-center text-rose-400">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2" ry="2"/></svg>
             </div>
-            <h3 class="text-xl font-tactical font-bold text-white">Bodycam Evidence & Vault Telemetry</h3>
+            <h3 class="text-base font-tactical font-bold text-white">Bodycam Evidence & Vault Telemetry</h3>
             <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
               คลังจัดเก็บไฟล์วิดีโอจากกล้องติดตัวสารวัตรขณะออกตรวจตรา อัปโหลดผ่านหน้าเว็บ `/bodycam-upload` พร้อมระบบคำนวณ Checksum 
               และส่งการแจ้งเตือนลงช่องหลักฐานลับของคณะกรรมการนักเรียน
@@ -580,7 +580,7 @@
               <p class="text-slate-400 text-xs mt-1">ยี่ห้อ Tough มีรอยขูดขีดเล็กน้อย ลืมไว้ที่โต๊ะม้าหินอ่อนหน้าอาคาร 3 ช่วงพักกลางวัน</p>
             </div>
             <div class="pt-2 border-t border-midnight-800 text-[11px] text-slate-400 font-mono">
-              ผู้แจ้ง: ด.ช. ธนกร (ม.3/2) • 089-514-8821
+              ผู้แจ้ง: ด.ช. ธนกร (ม.3/2) • บันทึกผ่านห้องกิจการ
             </div>
           </div>
 
@@ -608,7 +608,7 @@
       <!-- Tab 2: 3D Digital ID Specimen -->
       <div id="demo-panel-card" class="hidden p-8 rounded-xl bg-midnight-900 border border-midnight-700 flex flex-col items-center justify-center space-y-6">
         <div class="text-center space-y-1">
-          <h3 class="text-sm font-tactical font-bold text-white uppercase tracking-wider">ตัวอย่างบัตรประจำตัวสารวัตรนักเรียน 3D</h3>
+          <h3 class="text-base font-tactical font-bold text-white uppercase tracking-wider">ตัวอย่างบัตรประจำตัวสารวัตรนักเรียน 3D</h3>
           <p class="text-xs text-slate-400">คลิกที่บัตรเพื่อพลิกดูด้านหน้าและด้านหลัง</p>
         </div>
 
@@ -713,10 +713,11 @@
       <!-- Pipeline Steps (4-stage flow) -->
       <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
         
-        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui>
+        <!-- Stage 1: Field Ingestion (Fragment Top) -->
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
+          <div class="h-28 rounded-lg bg-cyan-950/40 border border-cyan-800/80 p-3 flex flex-col justify-between" data-ui>
             <div class="flex items-center justify-between">
-              <span class="text-[9px] font-mono text-cyan-400 bg-cyan-950 px-1.5 py-0.5 rounded border border-cyan-800">STAGE 01</span>
+              <span class="text-[9px] font-mono text-cyan-300 bg-cyan-900/80 px-1.5 py-0.5 rounded border border-cyan-700">STAGE 01</span>
               <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
             </div>
             <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-300">
@@ -724,16 +725,25 @@
               <span>GOOGLE FORMS & DISCORD</span>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">รับข้อมูลจากผู้ใช้ & ภาคสนาม</h3>
-          <p class="text-xs text-slate-400">
-            คำร้อง Google Form จากนักเรียน ภาพถ่ายหลักฐานจากสารวัตรเวร และคลิปวิดีโอ Bodycam
-          </p>
+          <div class="space-y-1">
+            <h3 class="text-base font-tactical font-bold text-white">รับข้อมูลจากผู้ใช้ & ภาคสนาม</h3>
+            <p class="text-xs text-slate-400">
+              คำร้อง Google Form จากนักเรียน ภาพถ่ายหลักฐานจากสารวัตรเวร และคลิปวิดีโอ Bodycam
+            </p>
+          </div>
         </div>
 
-        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative hover:-translate-y-0.5 transition-transform">
+        <!-- Stage 2: Security Verification (Heading Top, Fragment Bottom) -->
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
+          <div class="space-y-1">
+            <h3 class="text-base font-tactical font-bold text-white">ตรวจสอบสิทธิ์ & HMAC</h3>
+            <p class="text-xs text-slate-400">
+              ตรวจลายเซ็น Discord Webhook ยืนยันรหัสประจำตัวสารวัตร (Duty ID) และคัดกรองจุดลับ
+            </p>
+          </div>
           <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui>
             <div class="flex items-center justify-between">
-              <span class="text-[9px] font-mono text-blue-400 bg-blue-950 px-1.5 py-0.5 rounded border border-blue-800">STAGE 02</span>
+              <span class="text-[9px] font-mono text-blue-300 bg-blue-900/80 px-1.5 py-0.5 rounded border border-blue-700">STAGE 02</span>
               <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             </div>
             <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-300">
@@ -741,16 +751,19 @@
               <span>HMAC-SHA256 SIGNED</span>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">ตรวจสอบสิทธิ์ & HMAC</h3>
-          <p class="text-xs text-slate-400">
-            ตรวจลายเซ็น Discord Webhook ยืนยันรหัสประจำตัวสารวัตร (Duty ID) และคัดกรองจุดลับ
-          </p>
         </div>
 
-        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui>
+        <!-- Stage 3: Dual Persistence (Heading Top, Fragment Bottom) -->
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
+          <div class="space-y-1">
+            <h3 class="text-base font-tactical font-bold text-white">บันทึกลง Supabase & Mirror</h3>
+            <p class="text-xs text-slate-400">
+              จัดเก็บแบบ Dual Mirror บน Supabase PostgreSQL พร้อมสำรองไฟล์ JSON ออฟไลน์
+            </p>
+          </div>
+          <div class="h-28 rounded-lg bg-amber-950/30 border border-amber-800/70 p-3 flex flex-col justify-between" data-ui>
             <div class="flex items-center justify-between">
-              <span class="text-[9px] font-mono text-amber-400 bg-amber-950 px-1.5 py-0.5 rounded border border-amber-800">STAGE 03</span>
+              <span class="text-[9px] font-mono text-amber-300 bg-amber-900/80 px-1.5 py-0.5 rounded border border-amber-700">STAGE 03</span>
               <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
             </div>
             <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-300">
@@ -758,16 +771,13 @@
               <span>SUPABASE POSTGRESQL</span>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">บันทึกลง Supabase & Mirror</h3>
-          <p class="text-xs text-slate-400">
-            จัดเก็บแบบ Dual Mirror บน Supabase PostgreSQL พร้อมสำรองไฟล์ JSON ออฟไลน์
-          </p>
         </div>
 
-        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui>
+        <!-- Stage 4: Chain of Custody Handover (Fragment Top) -->
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
+          <div class="h-28 rounded-lg bg-emerald-950/40 border border-emerald-800/80 p-3 flex flex-col justify-between" data-ui>
             <div class="flex items-center justify-between">
-              <span class="text-[9px] font-mono text-emerald-400 bg-emerald-950 px-1.5 py-0.5 rounded border border-emerald-800">STAGE 04</span>
+              <span class="text-[9px] font-mono text-emerald-300 bg-emerald-900/80 px-1.5 py-0.5 rounded border border-emerald-700">STAGE 04</span>
               <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="12"/><line x1="15" y1="15" x2="15" y2="16"/></svg>
             </div>
             <div class="flex items-center gap-1.5 font-mono text-[10px] text-slate-300">
@@ -775,10 +785,12 @@
               <span>PRINT & DISPATCH OK</span>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">ส่งมอบ & พิมพ์ป้ายบาร์โค้ด</h3>
-          <p class="text-xs text-slate-400">
-            พิมพ์ป้าย CODE128 ติดถุงของกลาง ถ่ายภาพหลักฐานส่งมอบคู่สารวัตร และปิดเคสลงระบบ
-          </p>
+          <div class="space-y-1">
+            <h3 class="text-base font-tactical font-bold text-white">ส่งมอบ & พิมพ์ป้ายบาร์โค้ด</h3>
+            <p class="text-xs text-slate-400">
+              พิมพ์ป้าย CODE128 ติดถุงของกลาง ถ่ายภาพหลักฐานส่งมอบคู่สารวัตร และปิดเคสลงระบบ
+            </p>
+          </div>
         </div>
 
       </div>
@@ -823,7 +835,7 @@
               </div>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">Row-Level Security (RLS)</h3>
+          <h3 class="text-base font-tactical font-bold text-white">Row-Level Security (RLS)</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             กำหนดสิทธิ์การเข้าถึงข้อมูลแบบรายบรรทัด แยกส่วนจุดสังเกตลับออกจากสาธารณะเพื่อป้องกันการสวมรอย
           </p>
@@ -849,7 +861,7 @@
               </div>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">Webhook HMAC-SHA256</h3>
+          <h3 class="text-base font-tactical font-bold text-white">Webhook HMAC-SHA256</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             เข้ารหัสทุกคำร้องและสัญญาณแจ้งเตือนระหว่าง Discord Bot, Google Apps Script และ Server ป้องกันการปลอมแปลง
           </p>
@@ -867,7 +879,7 @@
             <div class="space-y-1 font-mono text-[10px]">
               <div class="flex items-center justify-between text-slate-300">
                 <span>PHONE FIELD:</span>
-                <span class="text-slate-300 font-mono">081-492-5678 (PDPA ENCRYPTED)</span>
+                <span class="text-slate-300 font-mono">PDPA-MASKED (ENCRYPTED)</span>
               </div>
               <div class="flex items-center justify-between text-slate-300">
                 <span>HANDOVER PROOF:</span>
@@ -875,7 +887,7 @@
               </div>
             </div>
           </div>
-          <h3 class="text-sm font-tactical font-bold text-white">PDPA & Student Privacy</h3>
+          <h3 class="text-base font-tactical font-bold text-white">PDPA & Student Privacy</h3>
           <p class="text-xs text-slate-400 leading-relaxed">
             เบลอข้อมูลติดต่อส่วนบุคคลบนหน้าแสดงผลสาธารณะ และบันทึกประวัติผู้ส่งมอบและผู้รับมอบพร้อมรูปถ่ายหลักฐานทุกครั้ง
           </p>
@@ -919,24 +931,24 @@
   <!-- ========================================================== -->
   <!-- TACTICAL COMMAND FOOTER -->
   <!-- ========================================================== -->
-  <footer class="border-t border-midnight-800 bg-midnight-950 py-10 text-xs text-slate-500 font-mono">
+  <footer class="border-t border-midnight-800 bg-midnight-950 py-10 text-xs text-slate-400 font-mono">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
       
       <div class="flex items-center gap-2">
         <img src="/assets/logo.png" alt="Logo" class="w-5 h-5 rounded">
-        <span class="text-slate-300 font-tactical font-bold">SARAWAT PRANARAI // TACTICAL-OS</span>
-        <span>•</span>
-        <span>โรงเรียนพระนารายณ์</span>
+        <span class="text-slate-200 font-tactical font-bold">SARAWAT PRANARAI // TACTICAL-OS</span>
+        <span class="text-slate-400">•</span>
+        <span class="text-slate-300">โรงเรียนพระนารายณ์</span>
       </div>
 
-      <div class="flex items-center gap-4 text-[11px]">
-        <a href="/" class="hover:text-slate-300 transition-colors">ศูนย์กลาง</a>
-        <a href="/lost-found" class="hover:text-slate-300 transition-colors">คลังของหาย</a>
-        <a href="/verify" class="hover:text-slate-300 transition-colors">ตรวจบัตร</a>
-        <a href="/bodycam-upload" class="hover:text-slate-300 transition-colors">บอดี้แคม</a>
+      <div class="flex items-center gap-4 text-xs text-slate-300">
+        <a href="/" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 py-1">ศูนย์กลาง</a>
+        <a href="/lost-found" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 py-1">คลังของหาย</a>
+        <a href="/verify" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 py-1">ตรวจบัตร</a>
+        <a href="/bodycam-upload" class="hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-blue-500 py-1">บอดี้แคม</a>
       </div>
 
-      <div class="text-[10px] text-slate-600">
+      <div class="text-xs text-slate-400 font-mono">
         BUILD: v2.4.0-STATION01 • SECURE PROTOCOL
       </div>
 
