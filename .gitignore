@@ -22,3 +22,5 @@ public/uploads/*
 Thumbs.db
 .vscode/
 .idea/
+.taste-skill/
+public/.taste-skill/
