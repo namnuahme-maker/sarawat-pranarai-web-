@@ -401,8 +401,8 @@
       </div>
 
       <!-- Live Shift Distribution Matrix -->
-      <div class="glass-panel rounded-2xl p-5 sm:p-6">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-5">
+      <div class="space-y-3">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 pb-2 border-b border-navy-800">
           <div>
             <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
               <span class="text-amber-400">⚡</span> อัตรากำลังพลจำแนกตามผลัดเวร (SHIFT ROSTER MATRIX)
@@ -419,8 +419,8 @@
       </div>
 
       <!-- 📊 PERSONNEL MANAGEMENT & SHIFT DISCIPLINE DASHBOARD -->
-      <div class="glass-panel rounded-2xl p-5 sm:p-6 space-y-5">
-        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-navy-800 pb-4">
+      <div class="space-y-4">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 border-b border-navy-800 pb-3">
           <div>
             <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
               <span class="text-emerald-400">📊</span> แดชบอร์ดวินัยเวรและความพร้อมกำลังพล (DISCIPLINE & READINESS ANALYTICS)
@@ -431,7 +431,7 @@
           </div>
           <div class="flex items-center gap-2">
             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
-              <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+              <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
               REALTIME SYNC ACTIVE
             </span>
           </div>
@@ -540,7 +540,7 @@
         <!-- Card 1: ลิ้งก์เปิดดูบัตรสารวัตร -->
         <div class="glass-panel p-5 rounded-2xl flex items-center justify-between">
           <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-2xl flex-shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-amber-500/15 flex items-center justify-center text-2xl flex-shrink-0">
               🪪
             </div>
             <div>
@@ -556,7 +556,7 @@
         <!-- Card 2: ตรวจสอบคดีล่าสุด -->
         <div class="glass-panel p-5 rounded-2xl flex items-center justify-between">
           <div class="flex items-center space-x-3.5">
-            <div class="w-12 h-12 rounded-xl bg-blue-500/15 border border-blue-500/30 flex items-center justify-center text-2xl flex-shrink-0">
+            <div class="w-12 h-12 rounded-xl bg-blue-500/15 flex items-center justify-center text-2xl flex-shrink-0">
               📂
             </div>
             <div>
@@ -640,9 +640,9 @@
     <!-- TAB 4: SHIFT SCHEDULE -->
     <!-- ========================================================= -->
     <section id="tab-shifts" class="tab-pane hidden animate-fade-in space-y-6">
-      <div class="glass-panel rounded-2xl p-5 sm:p-6">
+      <div class="space-y-4">
         
-        <div class="mb-6">
+        <div class="border-b border-navy-800 pb-3">
           <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
             <span>📅</span> ตารางปฏิบัติหน้าที่สารวัตรนักเรียนประจำสัปดาห์
           </h2>
@@ -732,7 +732,7 @@
 
         <div class="flex flex-wrap items-center gap-2.5">
           <!-- Member Selector for Preview -->
-          <div class="flex items-center gap-1.5 bg-navy-950 border border-navy-700 rounded-xl px-2.5 py-1">
+          <div class="flex items-center gap-1.5 bg-navy-950 rounded-xl px-2.5 py-1">
             <span class="text-xs text-slate-400">พรีวิว:</span>
             <select id="studio-member-select" onchange="loadMemberToStudio(this.value)" class="bg-transparent text-xs text-amber-400 font-bold outline-none cursor-pointer">
               <option value="SAMPLE" class="bg-navy-900 text-white">นายณิชกานต์ (NAMNUAH) - ตัวอย่าง</option>
@@ -813,7 +813,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         
         <!-- Canvas Workspace (Col 7) -->
-        <div class="lg:col-span-7 bg-navy-950/70 border border-navy-800 rounded-3xl p-6 flex flex-col items-center justify-center relative shadow-inner overflow-hidden min-h-[740px]">
+        <div class="lg:col-span-7 p-6 flex flex-col items-center justify-center relative min-h-[740px]">
           <div class="text-[11px] font-mono text-slate-400 mb-3 flex items-center gap-3">
             <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Canvas Active</span>
             <span>•</span>
@@ -967,8 +967,8 @@
     <section id="tab-lost-found" class="tab-pane hidden animate-fade-in space-y-6">
       
       <!-- Visual Flow Guide with User Assets -->
-      <div class="bg-navy-900 border border-navy-700/80 rounded-2xl p-4 sm:p-6 shadow-xl relative overflow-hidden">
-        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-4 pb-4 border-b border-navy-800">
+      <div class="space-y-4">
+        <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 pb-4 border-b border-navy-800">
           <div>
             <div class="flex items-center gap-2">
               <span class="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-500/20 text-amber-400 border border-amber-500/30">
@@ -1047,7 +1047,7 @@
       <!-- KPI Summary Row -->
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div class="bg-navy-900 border border-navy-700/80 rounded-xl p-3.5 shadow flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-blue-500/15 border border-blue-500/30 text-blue-400 flex items-center justify-center text-xl">📦</div>
+          <div class="w-10 h-10 rounded-xl bg-blue-500/15 text-blue-400 flex items-center justify-center text-xl">📦</div>
           <div>
             <span class="text-[11px] text-slate-400 block">สิ่งของทั้งหมด</span>
             <span id="lf-kpi-total" class="text-xl font-black text-white font-mono">0</span>
@@ -1055,7 +1055,7 @@
         </div>
 
         <div class="bg-navy-900 border border-amber-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 flex items-center justify-center text-xl">⏳</div>
+          <div class="w-10 h-10 rounded-xl bg-amber-500/15 text-amber-400 flex items-center justify-center text-xl">⏳</div>
           <div>
             <span class="text-[11px] text-amber-300/80 block">รอเจ้าของมารับ</span>
             <span id="lf-kpi-waiting" class="text-xl font-black text-amber-400 font-mono">0</span>
@@ -1063,7 +1063,7 @@
         </div>
 
         <div class="bg-navy-900 border border-emerald-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 flex items-center justify-center text-xl">✅</div>
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center text-xl">✅</div>
           <div>
             <span class="text-[11px] text-emerald-300/80 block">ส่งมอบคืนแล้ว</span>
             <span id="lf-kpi-delivered" class="text-xl font-black text-emerald-400 font-mono">0</span>
@@ -1071,7 +1071,7 @@
         </div>
 
         <div class="bg-navy-900 border border-purple-500/30 rounded-xl p-3.5 shadow flex items-center gap-3">
-          <div class="w-10 h-10 rounded-xl bg-purple-500/15 border border-purple-500/30 text-purple-400 flex items-center justify-center text-xl">🏷️</div>
+          <div class="w-10 h-10 rounded-xl bg-purple-500/15 text-purple-400 flex items-center justify-center text-xl">🏷️</div>
           <div>
             <span class="text-[11px] text-purple-300/80 block">หมวดหมู่สิ่งของ</span>
             <span id="lf-kpi-categories" class="text-xl font-black text-purple-400 font-mono">0</span>
@@ -1089,7 +1089,7 @@
           </div>
 
           <!-- Status Filters -->
-          <div class="flex items-center gap-1.5 bg-navy-950 p-1 rounded-xl border border-navy-750">
+          <div class="flex items-center gap-1.5 bg-navy-950 p-1 rounded-xl">
             <button onclick="setLostFoundFilter('ALL')" id="lf-btn-filter-all" class="lf-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 transition">
               ทั้งหมด
             </button>
@@ -1129,7 +1129,7 @@
   <!-- ========================================================= -->
   <div id="card-modal" class="fixed inset-0 z-50 bg-navy-950/80 backdrop-blur-md hidden flex items-end sm:items-center justify-center p-0 sm:p-4 transition-all">
     
-    <div class="bg-navy-900 border-t sm:border border-navy-700/80 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-slide-up max-h-[90vh] overflow-y-auto">
+    <div class="bg-navy-900 rounded-t-3xl sm:rounded-3xl max-w-md w-full p-6 shadow-2xl relative animate-slide-up max-h-[90vh] overflow-y-auto">
       
       <!-- Mobile Pull Bar -->
       <div class="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-4 sm:hidden"></div>
@@ -1148,10 +1148,10 @@
 
       <!-- 3D Flipping Card Container -->
       <div class="perspective-1000 flex justify-center my-4 cursor-pointer" onclick="toggleCardFlip()">
-        <div id="modal-card-3d" class="card-3d-inner id-card-cr80">
+        <div id="modal-card-3d" class="card-3d-inner id-card-cr80 shadow-2xl rounded-2xl">
           
           <!-- FRONT FACE (แนวตั้ง SARAWAT CR80 PREVIEW - EXACT MOCKUP) -->
-          <div id="modal-card-front" class="card-face relative bg-white text-neutral-900 border border-slate-300 shadow-2xl overflow-hidden select-none" style="width: 280px; height: 442px;">
+          <div id="modal-card-front" class="card-face relative bg-white text-neutral-900 rounded-2xl overflow-hidden select-none" style="width: 280px; height: 442px;">
             
             <!-- Dynamic Template Elements will be rendered here directly matching Card Studio -->
             <div id="modal-card-dynamic-container" class="w-full h-full relative"></div>
@@ -1163,7 +1163,7 @@
           </div>
 
           <!-- BACK FACE (แนวตั้ง / PORTRAIT) -->
-          <div class="card-face card-back relative flex flex-col justify-between bg-neutral-900 text-white border border-slate-700 shadow-2xl p-4 overflow-hidden text-left select-none">
+          <div class="card-face card-back relative flex flex-col justify-between bg-neutral-900 text-white rounded-2xl p-4 overflow-hidden text-left select-none">
             
             <!-- Left Blue Stripe / Right Red Stripe -->
             <div class="absolute left-0 top-0 bottom-0 w-2.5 bg-[#002b80] z-20"></div>
@@ -1201,7 +1201,7 @@
       </div>
 
       <!-- Member Detailed Info Panel (Tactical Dossier) -->
-      <div id="modal-member-dossier" class="mt-4 p-3.5 rounded-xl bg-navy-950/90 border border-navy-700/80 text-left font-mono text-xs space-y-2">
+      <div id="modal-member-dossier" class="mt-4 pt-3 border-t border-navy-800 text-left font-mono text-xs space-y-2">
         <div class="flex items-center justify-between border-b border-navy-800 pb-1.5">
           <span class="text-amber-400 font-bold flex items-center gap-1.5">
             <span>📋</span> ข้อมูลสารวัตร (OFFICER DOSSIER)
@@ -1332,7 +1332,7 @@
       <!-- STEP 1: FORM INPUTS -->
       <div id="lf-ho-step-1" class="space-y-4">
         <!-- Item Target Box -->
-        <div class="p-3 rounded-xl bg-navy-950 border border-navy-800 flex items-center gap-3">
+        <div class="p-3 rounded-xl bg-navy-950/60 flex items-center gap-3">
           <img id="lf-ho-item-thumb" src="/assets/logo.png" alt="item" class="w-12 h-12 rounded-lg object-cover border border-navy-700 flex-shrink-0">
           <div class="text-xs min-w-0 flex-1">
             <span class="text-[10px] text-amber-400 font-mono font-bold block" id="lf-ho-item-code">ITEM-CODE</span>
@@ -1346,14 +1346,14 @@
           <label class="block text-xs font-bold text-slate-300">
             1. ถ่ายรูปหรือเลือกรูปหลักฐาน (รูปคนคู่กับสิ่งของ) *
           </label>
-          <div onclick="document.getElementById('lf-ho-file').click()" class="border-2 border-dashed border-navy-700 hover:border-amber-500/70 rounded-2xl p-4 text-center cursor-pointer bg-navy-950/70 transition">
+          <div onclick="document.getElementById('lf-ho-file').click()" class="border-2 border-dashed border-navy-700 hover:border-amber-500/70 rounded-2xl p-4 text-center cursor-pointer hover:bg-navy-950/50 transition">
             <input type="file" id="lf-ho-file" accept="image/*" class="hidden" onchange="handleLfHandoverFile(event)">
             <div id="lf-ho-preview-box" class="space-y-1">
               <span class="text-3xl block">📸</span>
               <p class="text-xs font-semibold text-slate-200">กดเพื่อถ่ายรูป หรือเลือกไฟล์ภาพ</p>
               <p class="text-[10px] text-slate-400">รูปถ่ายจะถูกนำไปฝากบน Discord CDN และเป็นหลักฐานถาวร</p>
             </div>
-            <img id="lf-ho-preview-img" src="" alt="พรีวิวหลักฐาน" class="hidden max-h-40 mx-auto rounded-xl object-contain mt-2 shadow-md border border-navy-700">
+            <img id="lf-ho-preview-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="พรีวิวหลักฐาน" class="hidden max-h-40 mx-auto rounded-xl object-contain mt-2 shadow-md border border-navy-700">
           </div>
         </div>
 
@@ -1401,19 +1401,19 @@
           <span>ตรวจสอบรูปหลักฐานและข้อมูลสารวัตรให้ถูกต้องก่อนยืนยัน</span>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Evidence Photo Card -->
-          <div class="bg-navy-950 border border-navy-800 rounded-2xl p-3 text-center space-y-2">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 divide-y sm:divide-y-0 sm:divide-x divide-navy-800 p-2">
+          <!-- Evidence Photo Preview -->
+          <div class="p-2 text-center space-y-2">
             <span class="text-[11px] font-bold text-slate-300 block">📸 ภาพหลักฐานส่งมอบ</span>
-            <img id="lf-ho-step2-evidence-img" src="" alt="หลักฐาน" class="max-h-40 mx-auto rounded-xl object-contain border border-navy-700 shadow">
+            <img id="lf-ho-step2-evidence-img" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'/%3E" alt="หลักฐาน" class="max-h-40 mx-auto rounded-xl object-contain border border-navy-700 shadow">
             <div class="text-[11px] text-slate-300 pt-1">
               ผู้รับ: <strong id="lf-ho-step2-name" class="text-amber-400"></strong>
               <div id="lf-ho-step2-phone" class="text-[10px] text-slate-400"></div>
             </div>
           </div>
 
-          <!-- Official Inspector Profile Card -->
-          <div class="bg-navy-950 border border-amber-500/40 rounded-2xl p-3 text-center space-y-2">
+          <!-- Official Inspector Profile -->
+          <div class="p-2 text-center space-y-2">
             <span class="text-[11px] font-bold text-amber-300 block">👮 สารวัตรนักเรียนผู้ส่งมอบ</span>
             <img id="lf-ho-step2-inspector-img" src="/assets/logo.png" alt="สารวัตร" class="w-24 h-24 mx-auto rounded-full object-cover border-2 border-amber-500 shadow-md">
             <div>

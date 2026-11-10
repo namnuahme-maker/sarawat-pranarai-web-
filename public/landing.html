@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>SARAWAT PRANARAI // TACTICAL-OS — Operational Command Unit</title>
+  <meta name="description" content="Next-Generation Operational Command Unit & Student Police Tactical Operating System. โรงเรียนพระนารายณ์">
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+
+  <!-- Typography: Syncopate, Chakra Petch, Prompt, Michroma, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;500;600;700&family=Michroma&family=Prompt:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            tactical: ['Chakra Petch', 'Prompt', 'sans-serif'],
+            mono: ['JetBrains Mono', 'Chakra Petch', 'monospace'],
+            display: ['Michroma', 'Syncopate', 'sans-serif']
+          },
+          colors: {
+            midnight: {
+              950: '#030712',
+              900: '#070f1e',
+              850: '#0b162c',
+              800: '#112244',
+              750: '#162b55',
+              700: '#1e3866',
+              600: '#2b4d88'
+            },
+            tactical: {
+              blue: '#2563eb',
+              cyan: '#06b6d4',
+              emerald: '#10b981',
+              amber: '#f59e0b',
+              rose: '#f43f5e'
+            }
+          },
+          boxShadow: {
+            'tactical-glow': '0 0 25px -5px rgba(37, 99, 235, 0.25)',
+            'emerald-glow': '0 0 20px -5px rgba(16, 185, 129, 0.3)',
+            'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)'
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* Custom High-Precision Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #030712; }
+    ::-webkit-scrollbar-thumb { background: #1e3866; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #3b82f6; }
+
+    /* Tactical Precision Grid Background */
+    .bg-tactical-grid {
+      background-size: 36px 36px;
+      background-image: 
+        linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+    }
+    .light .bg-tactical-grid {
+      background-image: 
+        linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+    }
+
+    /* 3D Interactive Card Flipping */
+    .perspective-1000 { perspective: 1000px; -webkit-perspective: 1000px; }
+    .card-3d-inner {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      -webkit-transform-style: preserve-3d;
+      transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .card-3d-inner.flipped {
+      transform: rotateY(180deg);
+    }
+    .card-face {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+    .card-back {
+      transform: rotateY(180deg);
+    }
+
+    /* Subtle Scanline Overlay */
+    .scanline-overlay {
+      background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.15) 50%);
+      background-size: 100% 4px;
+      pointer-events: none;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, ::before, ::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-midnight-950 text-slate-100 font-sans transition-colors duration-200 selection:bg-blue-600 selection:text-white">
+
+  <!-- ========================================================== -->
+  <!-- TOP GLOBAL COMMAND NAVIGATION -->
+  <!-- ========================================================== -->
+  <header class="sticky top-0 z-50 bg-midnight-950/90 backdrop-blur-md border-b border-midnight-800 transition-colors">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+      
+      <!-- Brand Identity -->
+      <a href="/landing" class="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-blue-500 rounded-lg p-1">
+        <div class="w-9 h-9 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center justify-center overflow-hidden flex-shrink-0 group-hover:border-blue-500 transition-colors">
+          <img src="/assets/logo.png" alt="SARAWAT PRANARAI" class="w-full h-full object-cover">
+        </div>
+        <div class="flex flex-col">
+          <div class="flex items-center gap-2">
+            <span class="font-tactical font-bold text-sm tracking-wider text-white">SARAWAT PRANARAI</span>
+            <span class="px-1.5 py-0.5 rounded text-[9px] font-mono font-medium text-cyan-400 bg-cyan-950/70 border border-cyan-800/80">TACTICAL-OS</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-400 tracking-wider uppercase">OPERATIONAL COMMAND UNIT</span>
+        </div>
+      </a>
+
+      <!-- Desktop Nav Links -->
+      <nav class="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
+        <a href="#features" class="hover:text-white transition-colors">ระบบปฏิบัติการ</a>
+        <a href="#radar" class="hover:text-white transition-colors">Smart Match Radar</a>
+        <a href="#credentials" class="hover:text-white transition-colors">บัตรดิจิทัล CR80</a>
+        <a href="#architecture" class="hover:text-white transition-colors">สถาปัตยกรรมข้อมูล</a>
+        <a href="#security" class="hover:text-white transition-colors">ความปลอดภัย & RLS</a>
+      </nav>
+
+      <!-- Right Header Actions -->
+      <div class="flex items-center gap-2.5">
+        
+        <!-- Live Station Ping -->
+        <div class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-midnight-900 border border-midnight-800 text-[11px] font-mono text-emerald-400">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          <span>STATION 01 // ONLINE</span>
+        </div>
+
+        <!-- Light / Dark Toggle -->
+        <button onclick="toggleTheme()" class="w-8 h-8 rounded-lg bg-midnight-850 border border-midnight-700 hover:border-slate-500 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="สลับโหมดสี">
+          <svg id="theme-icon-dark" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+          <svg id="theme-icon-light" class="w-4 h-4 hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+        </button>
+
+        <!-- Secondary: Lost & Found Portal -->
+        <a href="/lost-found" class="hidden md:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-xs font-medium text-slate-300 hover:text-white transition-colors">
+          <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          <span>คลังของหาย</span>
+        </a>
+
+        <!-- Primary CTA: Launch Terminal -->
+        <a href="/" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium transition-colors shadow-tactical-glow">
+          <span>เข้าสู่เทอร์มินัล</span>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
+        </a>
+
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ========================================================== -->
+  <!-- HERO SECTION: THE COMMAND OPERATING SYSTEM -->
+  <!-- ========================================================== -->
+  <section class="relative bg-tactical-grid border-b border-midnight-800/80 pt-16 pb-20 overflow-hidden">
+    
+    <!-- Ambient Precision Glow (Subtle, Not AI Slop Blobs) -->
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-3/4 max-w-4xl h-80 bg-blue-600/10 blur-[120px] pointer-events-none rounded-full"></div>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-12">
+      
+      <!-- Headline & Value Proposition -->
+      <div class="max-w-3xl space-y-5">
+        
+        <!-- Eyebrow Badge -->
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-midnight-900 border border-midnight-700/90 text-xs font-mono text-slate-300">
+          <span class="w-2 h-2 rounded-full bg-cyan-400"></span>
+          <span>RELEASE 2.4 // PRODUCTION GRADE</span>
+          <span class="text-slate-600">•</span>
+          <span class="text-slate-400">โรงเรียนพระนารายณ์ • ฝ่ายกิจการนักเรียน</span>
+        </div>
+
+        <!-- Main Title -->
+        <h1 class="text-3xl sm:text-5xl lg:text-6xl font-tactical font-bold text-white tracking-tight leading-[1.15]">
+          The Operating System for Campus Security & Tactical Command.
+        </h1>
+
+        <!-- Subheading -->
+        <p class="text-base sm:text-lg text-slate-300 font-sans leading-relaxed">
+          ระบบปฏิบัติการบริหารจัดการสารวัตรนักเรียนเต็มรูปแบบ บันทึกและจ่ายงานเวรตรวจตราอัตโนมัติด้วยบอท 
+          ทะเบียนคุมวัตถุพยานไร้กระดาษพร้อมการตรวจจุดลับ และบัตรประจำตัวดิจิทัลมาตรฐาน ISO/IEC CR80 เข้ารหัสยืนยันตัวตนแบบเรียลไทม์
+        </p>
+
+        <!-- CTA Button Group -->
+        <div class="flex items-center flex-wrap gap-3 pt-2">
+          
+          <a href="/" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-sm font-medium transition-colors shadow-tactical-glow">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+            <span>เปิดศูนย์บัญชาการ (Terminal)</span>
+          </a>
+
+          <a href="/lost-found" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-midnight-900 hover:bg-midnight-850 border border-midnight-700 text-slate-200 hover:text-white text-sm font-medium transition-colors">
+            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            <span>คลังวัตถุพยาน & ของหาย</span>
+          </a>
+
+          <a href="/verify" class="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-midnight-900 hover:bg-midnight-850 border border-midnight-700 text-slate-200 hover:text-white text-sm font-medium transition-colors">
+            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><rect x="7" y="7" width="3" height="3"/><rect x="14" y="7" width="3" height="3"/><rect x="7" y="14" width="3" height="3"/><line x1="14" y1="14" x2="17" y2="17"/></svg>
+            <span>ระบบสแกนตรวจบัตร QR</span>
+          </a>
+
+        </div>
+
+        <div class="text-xs font-mono text-slate-500 pt-1 flex items-center gap-2">
+          <span>กด <kbd class="px-1.5 py-0.5 rounded bg-midnight-900 border border-midnight-700 text-slate-400 font-mono">/</kbd> เพื่อค้นหา</span>
+          <span>•</span>
+          <span>ฐานหลัก: หน้าห้องกิจการ • เซิร์ฟเวอร์พอร์ต 10001</span>
+        </div>
+
+      </div>
+
+      <!-- Tactical Hero Viewport (Simulated Live Terminal HUD) -->
+      <div class="rounded-xl border border-midnight-700/80 bg-midnight-900 shadow-2xl overflow-hidden">
+        
+        <!-- Window Chrome Title Bar -->
+        <div class="px-4 py-2.5 bg-midnight-950 border-b border-midnight-800 flex items-center justify-between text-xs font-mono">
+          <div class="flex items-center gap-2">
+            <div class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-rose-500/80 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-500/80 inline-block"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500/80 inline-block"></span>
+            </div>
+            <span class="text-slate-400 ml-2">STATION-01 // TELEMETRY CONSOLE</span>
+          </div>
+
+          <div class="flex items-center gap-4 text-slate-400">
+            <span class="hidden sm:inline">NODE_ENV: production</span>
+            <span>PORT: 10001</span>
+            <span id="hero-clock" class="text-cyan-400 font-bold">12:00:00</span>
+          </div>
+        </div>
+
+        <!-- 3-Column Tactical Telemetry Body -->
+        <div class="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-5 text-xs font-mono">
+          
+          <!-- Column 1: On-Duty Squad Telemetry (4 Cols) -->
+          <div class="lg:col-span-4 space-y-3 border-b lg:border-b-0 lg:border-r border-midnight-800 pb-4 lg:pb-0 lg:pr-5">
+            <div class="flex items-center justify-between text-slate-400 pb-1 border-b border-midnight-800">
+              <span class="font-bold text-slate-200">สถานะเวรประจำวัน</span>
+              <span class="text-emerald-400">[ACTIVE]</span>
+            </div>
+
+            <!-- Active Shift Badges -->
+            <div class="space-y-2">
+              
+              <div class="p-2.5 rounded-lg bg-midnight-950 border border-midnight-800 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-blue-400 font-bold">[MS1] สารวัตรเวรเช้า</span>
+                  <span class="text-[10px] text-slate-500">07:00 - 08:00</span>
+                </div>
+                <div class="text-[11px] text-slate-300">จุดรับผิดชอบ: ประตู 1 • โรงเรียนพระนารายณ์</div>
+                <div class="text-[10px] text-emerald-400">● ภารกิจ: สแกนตรวจระเบียบและทรงผม</div>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-midnight-950 border border-midnight-800 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-amber-400 font-bold">[TS4] สารวัตรเวรพิเศษ</span>
+                  <span class="text-[10px] text-slate-500">12:00 - 13:00</span>
+                </div>
+                <div class="text-[11px] text-slate-300">จุดรับผิดชอบ: โรงอาหารกลาง & โดมกิจกรรม</div>
+                <div class="text-[10px] text-amber-400">● ภารกิจ: สแตนด์บายรับแจ้งของหายหน้าห้องกิจการ</div>
+              </div>
+
+              <div class="p-2.5 rounded-lg bg-midnight-950 border border-midnight-800 space-y-1">
+                <div class="flex items-center justify-between">
+                  <span class="text-cyan-400 font-bold">[FS] สารวัตรเวรเย็น</span>
+                  <span class="text-[10px] text-slate-500">16:00 - 17:00</span>
+                </div>
+                <div class="text-[11px] text-slate-300">จุดรับผิดชอบ: ลานจอดรถจักรยานยนต์</div>
+                <div class="text-[10px] text-slate-400">○ เตรียมเข้าประจำการ</div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Column 2: Live Dispatch Event Stream (5 Cols) -->
+          <div class="lg:col-span-5 space-y-3 border-b lg:border-b-0 lg:border-r border-midnight-800 pb-4 lg:pb-0 lg:pr-5">
+            <div class="flex items-center justify-between text-slate-400 pb-1 border-b border-midnight-800">
+              <span class="font-bold text-slate-200">บันทึกเหตุการณ์ (EVENT FEED)</span>
+              <span class="text-slate-500">POLL: 1s</span>
+            </div>
+
+            <div class="space-y-2 text-[11px]">
+              
+              <div class="p-2 rounded bg-midnight-950/60 border border-midnight-800/80 flex items-start gap-2">
+                <span class="text-cyan-400 flex-shrink-0">15:42:01</span>
+                <div>
+                  <span class="text-slate-200 font-bold">[AUTH]</span>
+                  <span class="text-slate-400">Discord Webhook HMAC-SHA256 signature verified cleanly</span>
+                </div>
+              </div>
+
+              <div class="p-2 rounded bg-midnight-950/60 border border-midnight-800/80 flex items-start gap-2">
+                <span class="text-cyan-400 flex-shrink-0">15:42:08</span>
+                <div>
+                  <span class="text-emerald-400 font-bold">[EVIDENCE]</span>
+                  <span class="text-slate-400">Intake LF-2026-001 (กระเป๋าสตางค์ Tough) stored in Locker 01</span>
+                </div>
+              </div>
+
+              <div class="p-2 rounded bg-midnight-950/60 border border-midnight-800/80 flex items-start gap-2">
+                <span class="text-cyan-400 flex-shrink-0">15:42:15</span>
+                <div>
+                  <span class="text-blue-400 font-bold">[RADAR]</span>
+                  <span class="text-slate-400">Smart Match Engine matched Claim CLM-01 with 92% similarity</span>
+                </div>
+              </div>
+
+              <div class="p-2 rounded bg-midnight-950/60 border border-midnight-800/80 flex items-start gap-2">
+                <span class="text-cyan-400 flex-shrink-0">15:42:30</span>
+                <div>
+                  <span class="text-rose-400 font-bold">[CONFISCATED]</span>
+                  <span class="text-slate-400">Item LF-2026-000 passed 30-day threshold, routed to ของกลาง</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Column 3: Storage & Health Telemetry (3 Cols) -->
+          <div class="lg:col-span-3 space-y-3">
+            <div class="flex items-center justify-between text-slate-400 pb-1 border-b border-midnight-800">
+              <span class="font-bold text-slate-200">สถานะเครือข่าย</span>
+              <span class="text-emerald-400">100% NOMINAL</span>
+            </div>
+
+            <div class="space-y-3 pt-1">
+              
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px]">
+                  <span class="text-slate-400">การเข้าเวรปฏิบัติหน้าที่</span>
+                  <span class="text-emerald-400 font-bold">98.4%</span>
+                </div>
+                <div class="w-full bg-midnight-950 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-emerald-500 h-full rounded-full" style="width: 98.4%"></div>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px]">
+                  <span class="text-slate-400">อัตราส่งคืนวัตถุพยาน</span>
+                  <span class="text-blue-400 font-bold">92.0%</span>
+                </div>
+                <div class="w-full bg-midnight-950 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-blue-500 h-full rounded-full" style="width: 92%"></div>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex justify-between text-[11px]">
+                  <span class="text-slate-400">เวลาตอบสนอง API (Latency)</span>
+                  <span class="text-cyan-400 font-bold">18 ms</span>
+                </div>
+                <div class="w-full bg-midnight-950 rounded-full h-1.5 overflow-hidden">
+                  <div class="bg-cyan-500 h-full rounded-full" style="width: 15%"></div>
+                </div>
+              </div>
+
+              <div class="pt-2 border-t border-midnight-800 text-[10px] text-slate-500">
+                ฐานข้อมูล: Supabase PostgreSQL (Local Mirror Active)
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- GROUND-TRUTH TELEMETRY STRIP (NO INVENTED METRICS) -->
+  <!-- ========================================================== -->
+  <section class="border-b border-midnight-800 bg-midnight-900/60 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-6 text-center divide-y md:divide-y-0 md:divide-x divide-midnight-800">
+        
+        <div class="pt-4 md:pt-0">
+          <div class="text-2xl sm:text-3xl font-tactical font-bold text-white tracking-tight">6 ผลัดเวร</div>
+          <div class="text-xs text-slate-400 mt-1">จันทร์ - ศุกร์ + ผลัดพิเศษเสาร์ (S)</div>
+        </div>
+
+        <div class="pt-4 md:pt-0">
+          <div class="text-2xl sm:text-3xl font-tactical font-bold text-cyan-400 tracking-tight">&lt; 1.5 วินาที</div>
+          <div class="text-xs text-slate-400 mt-1">ซิงค์คำร้อง Discord Webhook สด</div>
+        </div>
+
+        <div class="pt-4 md:pt-0">
+          <div class="text-2xl sm:text-3xl font-tactical font-bold text-emerald-400 tracking-tight">ISO/IEC CR80</div>
+          <div class="text-xs text-slate-400 mt-1">สเปกบัตรสารวัตรมาตรฐานสากล</div>
+        </div>
+
+        <div class="pt-4 md:pt-0">
+          <div class="text-2xl sm:text-3xl font-tactical font-bold text-amber-400 tracking-tight">100% Blind Test</div>
+          <div class="text-xs text-slate-400 mt-1">ตรวจจุดสังเกตลับป้องกันสวมรอย</div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- BENTO PILLARS: 4 DEEP ARCHITECTURAL CAPABILITIES -->
+  <!-- ========================================================== -->
+  <section id="features" class="py-20 border-b border-midnight-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <!-- Section Header -->
+      <div class="max-w-2xl space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono text-blue-400 bg-blue-950/60 border border-blue-800/80">
+          ARCHITECTURAL PILLARS
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-tactical font-bold text-white tracking-tight">
+          วิศวกรรมระบบที่ออกแบบเพื่อการปฏิบัติการจริง
+        </h2>
+        <p class="text-sm sm:text-base text-slate-400">
+          ขจัดปัญหาเอกสารสูญหาย การสวมรอยรับของ และการขาดเวร ด้วยสถาปัตยกรรมดิจิทัลที่เชื่อมต่อฐานสารวัตรนักเรียนเข้ากับเทคโนโลยีคลาวด์
+        </p>
+      </div>
+
+      <!-- Bento Grid (2x2 Layout with Asymmetric Hierarchy) -->
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+        
+        <!-- Pillar 1: Shift Rostering & Bot Dispatch (7 Cols) -->
+        <div class="md:col-span-7 p-6 sm:p-8 rounded-xl bg-midnight-900 border border-midnight-700/80 flex flex-col justify-between space-y-6">
+          <div class="space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-950 border border-blue-800 flex items-center justify-center text-blue-400">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <h3 class="text-xl font-tactical font-bold text-white">ระบบจัดเวรอัตโนมัติ & แจกจ่ายยศผ่าน Discord Bot</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              เครื่องมือบริหารผลัดเวรประจำสัปดาห์ (MS, TS, FS, TSS) ที่ประสานงานตรงกับ Discord Server โรงเรียน 
+              ปรับบทบาท (Roles) และแจกเหรียญสารวัตรเวรตามเวรจริง พร้อมเช็กชื่อรายวันส่งออกสู่อาร์เรย์ 12 สัปดาห์อัตโนมัติ
+            </p>
+          </div>
+
+          <!-- Feature Detail Snippet -->
+          <div class="p-3.5 rounded-lg bg-midnight-950 border border-midnight-800 font-mono text-xs space-y-2">
+            <div class="flex items-center justify-between text-slate-400 text-[11px]">
+              <span>ROSTER ENGINE // D-DAY PROOF</span>
+              <span class="text-emerald-400">AUTO-APPOINT OK</span>
+            </div>
+            <div class="text-slate-300">
+              <span class="text-blue-400">&gt; /duty-start</span> [TS4 // สารวัตรเวรพิเศษประจำวันอังคาร]<br>
+              <span class="text-slate-500">&gt; Provisioning:</span> Granted Role [สารวัตรเวร] + [Tuesday Shift]
+            </div>
+          </div>
+        </div>
+
+        <!-- Pillar 2: Holographic Digital Credentials (5 Cols) -->
+        <div class="md:col-span-5 p-6 sm:p-8 rounded-xl bg-midnight-900 border border-midnight-700/80 flex flex-col justify-between space-y-6">
+          <div class="space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-emerald-950 border border-emerald-800 flex items-center justify-center text-emerald-400">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+            </div>
+            <h3 class="text-xl font-tactical font-bold text-white">บัตรดิจิทัลมาตรฐาน ISO/IEC CR80</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              สร้างบัตรสารวัตรนักเรียนแบบพลิก 3D ระบุรหัสประจำตัว QR ตรวจสอบย้อนกลับ และเลย์เอาต์พิมพ์แผ่น A4 อัตโนมัติ (8 ใบต่อแผ่น)
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-midnight-950 border border-midnight-800 text-center">
+            <span class="text-xs font-mono text-cyan-400">QR LINK: /verify?id=STU-2026-TS4</span>
+            <div class="text-[10px] text-slate-500 mt-0.5">รองรับการสแกนด้วยกล้องมือถือทุกรุ่นโดยไม่ต้องลงแอป</div>
+          </div>
+        </div>
+
+        <!-- Pillar 3: Chain of Custody & Smart Match (5 Cols) -->
+        <div class="md:col-span-5 p-6 sm:p-8 rounded-xl bg-midnight-900 border border-midnight-700/80 flex flex-col justify-between space-y-6">
+          <div class="space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-amber-950 border border-amber-800 flex items-center justify-center text-amber-400">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24"/><path d="m14.83 9.17 4.24-4.24"/><path d="m14.83 14.83 4.24 4.24"/><path d="m9.17 14.83-4.24 4.24"/></svg>
+            </div>
+            <h3 class="text-xl font-tactical font-bold text-white">Smart Match Radar & ทะเบียนคุม</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              สแกนจับคู่สิ่งของที่พบกับคำร้อง Google Form ของนักเรียนแบบเรดาร์ พร้อมคำนวณคะแนนความใกล้เคียง (%) ทันที
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-midnight-950 border border-midnight-800 text-xs font-mono text-slate-300 flex items-center justify-between">
+            <span>วงจร 30 วัน:</span>
+            <span class="text-rose-400 font-bold">จัดเข้าหมวดของกลางอัตโนมัติ</span>
+          </div>
+        </div>
+
+        <!-- Pillar 4: Bodycam Field Ingestion Vault (7 Cols) -->
+        <div class="md:col-span-7 p-6 sm:p-8 rounded-xl bg-midnight-900 border border-midnight-700/80 flex flex-col justify-between space-y-6">
+          <div class="space-y-3">
+            <div class="w-10 h-10 rounded-lg bg-rose-950 border border-rose-800 flex items-center justify-center text-rose-400">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m22 8-6 4 6 4V8Z"/><rect x="2" y="6" width="14" height="12" rx="2" ry="2"/></svg>
+            </div>
+            <h3 class="text-xl font-tactical font-bold text-white">Bodycam Evidence & Vault Telemetry</h3>
+            <p class="text-xs sm:text-sm text-slate-400 leading-relaxed">
+              คลังจัดเก็บไฟล์วิดีโอจากกล้องติดตัวสารวัตรขณะออกตรวจตรา อัปโหลดผ่านหน้าเว็บ `/bodycam-upload` พร้อมระบบคำนวณ Checksum 
+              และส่งการแจ้งเตือนลงช่องหลักฐานลับของคณะกรรมการนักเรียน
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-lg bg-midnight-950 border border-midnight-800 font-mono text-xs space-y-1">
+            <div class="text-slate-300">INCIDENT ARCHIVAL // CASE-2113</div>
+            <div class="text-[10px] text-slate-500">Video Payload: 48.2 MB • SHA-256 Verified • Retention: Permanent</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- INTERACTIVE HUD DEMO WORKSPACE -->
+  <!-- ========================================================== -->
+  <section id="radar" class="py-20 border-b border-midnight-800 bg-midnight-900/40">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      
+      <div class="flex items-center justify-between flex-wrap gap-4">
+        <div>
+          <div class="text-xs font-mono text-cyan-400 uppercase tracking-wider">LIVE INTERACTIVE HUD</div>
+          <h2 class="text-2xl sm:text-3xl font-tactical font-bold text-white mt-1">ทดลองสัมผัสเทคโนโลยี TACTICAL-OS</h2>
+        </div>
+
+        <!-- Segmented Tab Switcher -->
+        <div class="inline-flex p-1 rounded-xl bg-midnight-900 border border-midnight-700 text-xs font-medium">
+          <button onclick="switchDemoTab('radar')" id="demo-tab-radar" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors shadow-sm">
+            Smart Match Radar
+          </button>
+          <button onclick="switchDemoTab('card')" id="demo-tab-card" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+            3D Digital ID Specimen
+          </button>
+          <button onclick="switchDemoTab('terminal')" id="demo-tab-terminal" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors">
+            Terminal Console
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab 1: Smart Match Radar Simulator -->
+      <div id="demo-panel-radar" class="p-6 rounded-xl bg-midnight-900 border border-midnight-700 space-y-5">
+        <div class="flex items-center justify-between flex-wrap gap-2 text-xs font-mono text-slate-400 pb-2 border-b border-midnight-800">
+          <span>จำลองการตรวจจับคู่สิ่งของในคลัง (SIMULATED SMART MATCH)</span>
+          <span class="text-emerald-400">● ENGINE READY</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          
+          <!-- Left: Claim Input Mockup -->
+          <div class="p-4 rounded-lg bg-midnight-950 border border-midnight-800 space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-blue-400 font-bold">คำร้อง: CLM-2026-089</span>
+              <span class="px-2 py-0.5 rounded text-[10px] bg-amber-950 text-amber-300 border border-amber-800">รอตรวจคู่</span>
+            </div>
+            <div>
+              <div class="font-bold text-white text-sm">กระเป๋าสตางค์หนังสีน้ำตาลเข้ม</div>
+              <p class="text-slate-400 text-xs mt-1">ยี่ห้อ Tough มีรอยขูดขีดเล็กน้อย ลืมไว้ที่โต๊ะม้าหินอ่อนหน้าอาคาร 3 ช่วงพักกลางวัน</p>
+            </div>
+            <div class="pt-2 border-t border-midnight-800 text-[11px] text-slate-500 font-mono">
+              ผู้แจ้ง: ด.ช. ธนกร (ม.3/2) • 089-xxx-xxxx
+            </div>
+          </div>
+
+          <!-- Right: Matched Radar Result -->
+          <div class="p-4 rounded-lg bg-midnight-950 border border-emerald-900/60 space-y-3 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="font-mono text-emerald-400 font-bold">ของในคลัง: LF-2026-001</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">92% MATCH</span>
+            </div>
+            <div>
+              <div class="font-bold text-white text-sm">กระเป๋าสตางค์หนังสีน้ำตาลเข้ม Tough</div>
+              <p class="text-slate-400 text-xs mt-1">จัดเก็บที่ตู้ล็อกเกอร์ 1 ฐานหน้าห้องกิจการ • พบโดยสารวัตรเวร MS1</p>
+            </div>
+            <div class="pt-2 border-t border-midnight-800 flex items-center justify-between">
+              <span class="text-[10px] text-amber-400 font-mono">🔒 มีจุดสังเกตลับสำหรับตรวจ</span>
+              <a href="/lost-found" class="px-2.5 py-1 rounded bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors">
+                ดูในคลังจริง
+              </a>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Tab 2: 3D Digital ID Specimen -->
+      <div id="demo-panel-card" class="hidden p-8 rounded-xl bg-midnight-900 border border-midnight-700 flex flex-col items-center justify-center space-y-6">
+        <div class="text-center space-y-1">
+          <h3 class="text-sm font-tactical font-bold text-white uppercase tracking-wider">ตัวอย่างบัตรประจำตัวสารวัตรนักเรียน 3D</h3>
+          <p class="text-xs text-slate-400">คลิกที่บัตรเพื่อพลิกดูด้านหน้าและด้านหลัง</p>
+        </div>
+
+        <!-- 3D Card Object -->
+        <div class="perspective-1000 w-[240px] h-[360px] cursor-pointer" onclick="flipCardDemo()">
+          <div id="card-3d-demo" class="card-3d-inner">
+            
+            <!-- Card Front -->
+            <div class="card-face bg-midnight-950 border border-midnight-700 p-4 flex flex-col justify-between shadow-2xl">
+              <div class="flex items-center justify-between border-b border-midnight-800 pb-2">
+                <div class="flex items-center gap-1.5">
+                  <img src="/assets/logo.png" alt="SARAWAT" class="w-6 h-6 rounded">
+                  <span class="text-[10px] font-mono font-bold text-slate-200">โรงเรียนพระนารายณ์</span>
+                </div>
+                <span class="text-[9px] font-mono text-cyan-400">CR80</span>
+              </div>
+
+              <div class="text-center space-y-2 py-2">
+                <div class="w-20 h-24 mx-auto rounded-lg bg-midnight-900 border border-midnight-700 overflow-hidden flex items-center justify-center">
+                  <img src="/assets/logo.jpg" alt="Photo" class="w-full h-full object-cover">
+                </div>
+                <div>
+                  <div class="text-xs font-bold text-white">สารวัตรเวรประจำผลัด</div>
+                  <div class="text-[10px] font-mono text-amber-400">[DUTY ID: TS4]</div>
+                </div>
+              </div>
+
+              <div class="border-t border-midnight-800 pt-2 text-[9px] font-mono text-slate-400 text-center">
+                CLICK TO FLIP // พลิกดูด้านหลัง
+              </div>
+            </div>
+
+            <!-- Card Back -->
+            <div class="card-face card-back bg-midnight-950 border border-midnight-700 p-4 flex flex-col justify-between shadow-2xl">
+              <div class="text-[10px] font-mono font-bold text-cyan-400 border-b border-midnight-800 pb-1">
+                VERIFICATION QR CODE
+              </div>
+
+              <div class="flex flex-col items-center justify-center space-y-2 py-4">
+                <div class="w-24 h-24 bg-white p-2 rounded-lg flex items-center justify-center">
+                  <svg class="w-full h-full text-black" viewBox="0 0 24 24" fill="currentColor">
+                    <rect x="2" y="2" width="8" height="8" rx="1"/>
+                    <rect x="14" y="2" width="8" height="8" rx="1"/>
+                    <rect x="2" y="14" width="8" height="8" rx="1"/>
+                    <rect x="14" y="14" width="4" height="4"/>
+                    <rect x="18" y="18" width="4" height="4"/>
+                  </svg>
+                </div>
+                <span class="text-[10px] font-mono text-slate-400">SCAN TO VERIFY</span>
+              </div>
+
+              <div class="text-[8px] font-mono text-slate-500 text-center border-t border-midnight-800 pt-1">
+                ฝ่ายกิจการนักเรียน • กลุ่มบริหารงานบุคคล
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Tab 3: Terminal Console -->
+      <div id="demo-panel-terminal" class="hidden p-6 rounded-xl bg-midnight-950 border border-midnight-700 font-mono text-xs space-y-3">
+        <div class="flex items-center justify-between text-slate-400 pb-2 border-b border-midnight-800">
+          <span>SARAWAT INTERACTIVE CLI (MOCK)</span>
+          <span class="text-slate-500">TYPE 'help' FOR COMMANDS</span>
+        </div>
+
+        <div id="terminal-output" class="space-y-1.5 text-slate-300 min-h-[140px] max-h-[220px] overflow-y-auto">
+          <div><span class="text-cyan-400">sarawat@pranarai:~$</span> status</div>
+          <div class="text-emerald-400">&gt; Station: Station 01 (Front Desk Affairs) [ONLINE]</div>
+          <div class="text-emerald-400">&gt; DB Mode: Supabase PostgreSQL + Local Mirror</div>
+          <div class="text-emerald-400">&gt; Shift Status: All 6 Shifts Active</div>
+        </div>
+
+        <div class="flex items-center gap-2 pt-2 border-t border-midnight-800">
+          <span class="text-cyan-400 font-bold">&gt;</span>
+          <input type="text" id="terminal-input" onkeydown="handleTerminalCommand(event)" placeholder="พิมพ์คำสั่ง เช่น status, roster, lost-found แล้วกด Enter..." class="flex-1 bg-transparent text-white focus:outline-none text-xs font-mono">
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- SYSTEM ARCHITECTURE & INTEGRATION PIPELINE -->
+  <!-- ========================================================== -->
+  <section id="architecture" class="py-20 border-b border-midnight-800">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+      
+      <div class="max-w-2xl space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/80">
+          PIPELINE ARCHITECTURE
+        </div>
+        <h2 class="text-2xl sm:text-4xl font-tactical font-bold text-white tracking-tight">
+          สถาปัตยกรรมข้อมูลแบบเรียลไทม์
+        </h2>
+        <p class="text-sm sm:text-base text-slate-400">
+          การไหลเวียนของข้อมูลจากภาคสนามสู่ศูนย์บัญชาการและการส่งมอบวัตถุพยานอย่างแม่นยำ
+        </p>
+      </div>
+
+      <!-- Pipeline Steps (4-stage flow) -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative">
+          <div class="text-[10px] font-mono text-cyan-400">STAGE 01 // INGESTION</div>
+          <h4 class="text-sm font-tactical font-bold text-white">รับข้อมูลจากผู้ใช้ & ภาคสนาม</h4>
+          <p class="text-xs text-slate-400">
+            คำร้อง Google Form จากนักเรียน, ภาพถ่ายหลักฐานจากสารวัตรเวร, วิดีโอ Bodycam
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative">
+          <div class="text-[10px] font-mono text-blue-400">STAGE 02 // VALIDATION</div>
+          <h4 class="text-sm font-tactical font-bold text-white">ตรวจสอบสิทธิ์ & HMAC</h4>
+          <p class="text-xs text-slate-400">
+            ตรวจลายเซ็น Discord Webhook, ยืนยันรหัสประจำตัวสารวัตร (Duty ID), คัดกรองจุดลับ
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative">
+          <div class="text-[10px] font-mono text-amber-400">STAGE 03 // PERSISTENCE</div>
+          <h4 class="text-sm font-tactical font-bold text-white">บันทึกลง Supabase & Mirror</h4>
+          <p class="text-xs text-slate-400">
+            จัดเก็บแบบ Dual Mirror บน Supabase PostgreSQL พร้อมสำรองไฟล์ JSON ออฟไลน์
+          </p>
+        </div>
+
+        <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3 relative">
+          <div class="text-[10px] font-mono text-emerald-400">STAGE 04 // DISPATCH</div>
+          <h4 class="text-sm font-tactical font-bold text-white">ส่งมอบ & พิมพ์ป้ายบาร์โค้ด</h4>
+          <p class="text-xs text-slate-400">
+            พิมพ์ป้าย CODE128 ติดถุงของกลาง, ถ่ายภาพหลักฐานส่งมอบคู่สารวัตร, ปิดเคสลงระบบ
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- SECURITY & ENTERPRISE COMPLIANCE -->
+  <!-- ========================================================== -->
+  <section id="security" class="py-20 border-b border-midnight-800 bg-midnight-900/30">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+      
+      <div class="max-w-2xl space-y-3">
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded text-[11px] font-mono text-rose-400 bg-rose-950/60 border border-rose-800/80">
+          SECURITY GUARANTEES
+        </div>
+        <h2 class="text-2xl sm:text-3xl font-tactical font-bold text-white tracking-tight">
+          มาตรฐานความปลอดภัยและการปกป้องข้อมูล
+        </h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        
+        <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3">
+          <div class="w-8 h-8 rounded-lg bg-midnight-950 border border-midnight-700 flex items-center justify-center text-blue-400">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          </div>
+          <h4 class="text-sm font-tactical font-bold text-white">Row-Level Security (RLS)</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            กำหนดสิทธิ์การเข้าถึงข้อมูลแบบรายบรรทัด แยกส่วนจุดสังเกตลับออกจากสาธารณะเพื่อป้องกันการสวมรอย
+          </p>
+        </div>
+
+        <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3">
+          <div class="w-8 h-8 rounded-lg bg-midnight-950 border border-midnight-700 flex items-center justify-center text-emerald-400">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          </div>
+          <h4 class="text-sm font-tactical font-bold text-white">Webhook HMAC-SHA256</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            เข้ารหัสทุกคำร้องและสัญญาณแจ้งเตือนระหว่าง Discord Bot, Google Apps Script และ Server ป้องกันการปลอมแปลง
+          </p>
+        </div>
+
+        <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-3">
+          <div class="w-8 h-8 rounded-lg bg-midnight-950 border border-midnight-700 flex items-center justify-center text-amber-400">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          </div>
+          <h4 class="text-sm font-tactical font-bold text-white">PDPA & Student Privacy</h4>
+          <p class="text-xs text-slate-400 leading-relaxed">
+            เบลอข้อมูลติดต่อส่วนบุคคลบนหน้าแสดงผลสาธารณะ และบันทึกประวัติผู้ส่งมอบและผู้รับมอบพร้อมรูปถ่ายหลักฐานทุกครั้ง
+          </p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- COMMAND LAUNCH CTA BANNER -->
+  <!-- ========================================================== -->
+  <section class="py-20 relative bg-tactical-grid overflow-hidden">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6 relative z-10">
+      
+      <div class="w-12 h-12 mx-auto rounded-xl bg-midnight-900 border border-midnight-700 flex items-center justify-center shadow-tactical-glow">
+        <img src="/assets/logo.png" alt="SARAWAT" class="w-7 h-7">
+      </div>
+
+      <h2 class="text-2xl sm:text-4xl font-tactical font-bold text-white tracking-tight">
+        พร้อมเริ่มปฏิบัติการด้วย SARAWAT TACTICAL-OS?
+      </h2>
+
+      <p class="text-xs sm:text-sm text-slate-400 max-w-xl mx-auto">
+        เข้าใช้งานเทอร์มินัลศูนย์บัญชาการสารวัตรนักเรียน คลังของหาย หรือสแกนตรวจสอบบัตรประจำตัวได้ทันที
+      </p>
+
+      <div class="flex items-center justify-center flex-wrap gap-3 pt-2">
+        <a href="/" class="px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs sm:text-sm font-medium transition-colors shadow-tactical-glow">
+          เข้าสู่ศูนย์บัญชาการ (Terminal)
+        </a>
+        <a href="/lost-found" class="px-5 py-2.5 rounded-lg bg-midnight-900 hover:bg-midnight-850 border border-midnight-700 text-slate-200 text-xs sm:text-sm font-medium transition-colors">
+          คลังของหายและวัตถุพยาน
+        </a>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- TACTICAL COMMAND FOOTER -->
+  <!-- ========================================================== -->
+  <footer class="border-t border-midnight-800 bg-midnight-950 py-10 text-xs text-slate-500 font-mono">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-2">
+        <img src="/assets/logo.png" alt="Logo" class="w-5 h-5 rounded">
+        <span class="text-slate-300 font-tactical font-bold">SARAWAT PRANARAI // TACTICAL-OS</span>
+        <span>•</span>
+        <span>โรงเรียนพระนารายณ์</span>
+      </div>
+
+      <div class="flex items-center gap-4 text-[11px]">
+        <a href="/" class="hover:text-slate-300 transition-colors">ศูนย์กลาง</a>
+        <a href="/lost-found" class="hover:text-slate-300 transition-colors">คลังของหาย</a>
+        <a href="/verify" class="hover:text-slate-300 transition-colors">ตรวจบัตร</a>
+        <a href="/bodycam-upload" class="hover:text-slate-300 transition-colors">บอดี้แคม</a>
+      </div>
+
+      <div class="text-[10px] text-slate-600">
+        BUILD: v2.4.0-STATION01 • SECURE PROTOCOL
+      </div>
+
+    </div>
+  </footer>
+
+  <!-- ========================================================== -->
+  <!-- JAVASCRIPT LOGIC & HUD CONTROLLER -->
+  <!-- ========================================================== -->
+  <script>
+    // Real-Time Clock
+    function updateHeroClock() {
+      const el = document.getElementById('hero-clock');
+      if (el) {
+        el.textContent = new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      }
+    }
+    setInterval(updateHeroClock, 1000);
+    updateHeroClock();
+
+    // Theme Switcher (Dark Tactical by default)
+    function initTheme() {
+      const saved = localStorage.getItem('sarawat_landing_theme') || 'dark';
+      if (saved === 'dark') {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        document.getElementById('theme-icon-dark')?.classList.remove('hidden');
+        document.getElementById('theme-icon-light')?.classList.add('hidden');
+      } else {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        document.getElementById('theme-icon-dark')?.classList.add('hidden');
+        document.getElementById('theme-icon-light')?.classList.remove('hidden');
+      }
+    }
+
+    function toggleTheme() {
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
+        localStorage.setItem('sarawat_landing_theme', 'light');
+        document.getElementById('theme-icon-dark')?.classList.add('hidden');
+        document.getElementById('theme-icon-light')?.classList.remove('hidden');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        localStorage.setItem('sarawat_landing_theme', 'dark');
+        document.getElementById('theme-icon-dark')?.classList.remove('hidden');
+        document.getElementById('theme-icon-light')?.classList.add('hidden');
+      }
+    }
+
+    // Interactive Demo Tab Switcher
+    function switchDemoTab(tab) {
+      ['radar', 'card', 'terminal'].forEach(t => {
+        document.getElementById(`demo-panel-${t}`)?.classList.add('hidden');
+        const btn = document.getElementById(`demo-tab-${t}`);
+        if (btn) {
+          btn.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-white transition-colors";
+        }
+      });
+
+      document.getElementById(`demo-panel-${tab}`)?.classList.remove('hidden');
+      const activeBtn = document.getElementById(`demo-tab-${tab}`);
+      if (activeBtn) {
+        activeBtn.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors shadow-sm";
+      }
+    }
+
+    // 3D Card Flipping Demo
+    function flipCardDemo() {
+      const card = document.getElementById('card-3d-demo');
+      if (card) {
+        card.classList.toggle('flipped');
+      }
+    }
+
+    // Interactive Terminal Console
+    function handleTerminalCommand(e) {
+      if (e.key === 'Enter') {
+        const input = document.getElementById('terminal-input');
+        const cmd = input.value.trim().toLowerCase();
+        if (!cmd) return;
+        input.value = '';
+
+        const out = document.getElementById('terminal-output');
+        const line = document.createElement('div');
+        line.innerHTML = `<span class="text-cyan-400">sarawat@pranarai:~$</span> ${cmd}`;
+        out.appendChild(line);
+
+        const resp = document.createElement('div');
+        if (cmd === 'help') {
+          resp.innerHTML = `
+            <div class="text-slate-400">คำสั่งที่ใช้ได้:</div>
+            <div>- <span class="text-cyan-400">status</span> : ตรวจสอบสถานะระบบและฐานข้อมูล</div>
+            <div>- <span class="text-cyan-400">roster</span> : แสดงรายชื่อผลัดเวรสารวัตรที่กำลังปฏิบัติหน้าที่</div>
+            <div>- <span class="text-cyan-400">lost-found</span> : สรุปจำนวนสิ่งของในคลังวัตถุพยาน</div>
+            <div>- <span class="text-cyan-400">clear</span> : ล้างหน้าจอเทอร์มินัล</div>
+          `;
+        } else if (cmd === 'status') {
+          resp.className = 'text-emerald-400';
+          resp.innerHTML = `&gt; Station 01: ONLINE | Supabase: CONNECTED | Port: 10001`;
+        } else if (cmd === 'roster') {
+          resp.className = 'text-amber-400';
+          resp.innerHTML = `&gt; On-Duty Shifts: MS1 (Morning), TS4 (Noon Special), FS (Evening)`;
+        } else if (cmd === 'lost-found') {
+          resp.className = 'text-blue-400';
+          resp.innerHTML = `&gt; Active Warehouse: 7 Items Stored | 1 Confiscated (&gt; 30 days)`;
+        } else if (cmd === 'clear') {
+          out.innerHTML = '';
+          return;
+        } else {
+          resp.className = 'text-rose-400';
+          resp.innerHTML = `&gt; ไม่รู้จักคำสั่ง '${cmd}' — พิมพ์ 'help' เพื่อดูคำสั่งทั้งหมด`;
+        }
+
+        out.appendChild(resp);
+        out.scrollTop = out.scrollHeight;
+      }
+    }
+
+    // Keyboard shortcut / for focus
+    window.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        switchDemoTab('terminal');
+        document.getElementById('terminal-input')?.focus();
+      }
+    });
+
+    // Initialize on load
+    window.addEventListener('DOMContentLoaded', () => {
+      initTheme();
+    });
+  </script>
+
+</body>
+</html>

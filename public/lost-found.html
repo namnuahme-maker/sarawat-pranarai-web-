@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>📦 คลังของหายและส่งมอบคืน // สารวัตรนักเรียน โรงเรียนพระนารายณ์</title>
+  <title>คลังของหายและส่งมอบคืน // สารวัตรนักเรียน โรงเรียนพระนารายณ์</title>
   <link rel="icon" href="/favicon.ico">
 
   <!-- Tailwind CSS & Clean Modern Typography -->
@@ -90,45 +90,48 @@
   <header class="sticky top-0 z-40 bg-midnight-900/95 backdrop-blur-md border-b border-midnight-700/80 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
       
-      <!-- Brand & Headquarters Badge -->
+      <!-- Brand & Tactical Station Identity -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-600/25 text-lg">
-          📦
+        <div class="w-9 h-9 rounded-lg bg-midnight-850 border border-midnight-700/80 flex items-center justify-center text-blue-400 flex-shrink-0">
+          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-base font-bold text-white leading-tight">คลังของหายสารวัตรนักเรียน</h1>
-            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-400 border border-emerald-800/60">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              ระบบภายใน
+            <h1 class="text-sm sm:text-base font-semibold text-white leading-tight">คลังของหายสารวัตรนักเรียน</h1>
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+              ฐานหน้าห้องกิจการ
             </span>
           </div>
-          <p class="text-xs text-slate-400 flex items-center gap-1.5 font-medium mt-0.5">
-            <span>📍 ฐานหลัก: <strong class="text-slate-200">หน้าห้องกิจการ</strong></span>
-            <span>•</span>
-            <span>โรงเรียนพระนารายณ์</span>
+          <p class="text-xs text-slate-400 font-mono mt-0.5">
+            โรงเรียนพระนารายณ์ • ทะเบียนคุมวัตถุพยาน
           </p>
         </div>
       </div>
 
-      <!-- Header Action Controls -->
+      <!-- Header Controls -->
       <div class="flex items-center gap-2 sm:gap-3">
         
         <!-- Live Clock -->
-        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl bg-midnight-850 border border-midnight-700/80 text-slate-300 text-xs font-mono">
-          <span>🕒</span>
-          <span id="live-clock" class="font-bold text-blue-400">12:00:00</span>
+        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-midnight-850 border border-midnight-700/80 text-slate-300 text-xs font-mono">
+          <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="live-clock" class="font-medium text-slate-200">12:00:00</span>
         </div>
 
         <!-- Primary Action: Intake Item -->
-        <button onclick="openIntakeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white font-semibold text-xs sm:text-sm shadow-lg shadow-blue-600/30 transition-all">
-          <span>📸</span>
-          <span>+ บันทึกของพบเจอ</span>
+        <button onclick="openIntakeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium text-xs sm:text-sm transition-colors shadow-sm">
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>บันทึกของพบเจอ</span>
         </button>
 
         <!-- Central Hub Link -->
-        <a href="/" class="hidden sm:inline-flex px-3 py-2 rounded-xl bg-midnight-850 border border-midnight-700/80 hover:bg-midnight-800 text-slate-300 hover:text-white text-xs font-medium transition">
-          ← ศูนย์กลาง
+        <a href="/" class="hidden sm:inline-flex px-3 py-2 rounded-lg bg-midnight-850 border border-midnight-700/80 hover:bg-midnight-800 text-slate-400 hover:text-white text-xs font-medium transition-colors">
+          ศูนย์กลาง
+        </a>
+
+        <!-- SaaS Landing Link -->
+        <a href="/landing" class="hidden sm:inline-flex px-3 py-2 rounded-lg bg-midnight-850 border border-midnight-700/80 hover:bg-midnight-800 text-slate-400 hover:text-white text-xs font-medium transition-colors">
+          หน้าแนะนำ
         </a>
       </div>
 
@@ -140,29 +143,32 @@
   <!-- ========================================================== -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
 
-    <!-- Segmented Navigation Pills Bar -->
+    <!-- Segmented Navigation Bar -->
     <div class="flex items-center justify-between flex-wrap gap-3 pb-2 border-b border-midnight-700/80">
       
-      <!-- Segmented Pill Container -->
-      <div class="inline-flex p-1 rounded-2xl bg-midnight-900 border border-midnight-700/80 text-xs font-semibold shadow-inner">
-        <button onclick="switchTab('showcase')" id="tab-btn-showcase" class="px-4 py-2 rounded-xl bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30 transition-all flex items-center gap-2">
-          <span>📦 คลังของพบเจอ</span>
-          <span id="badge-total-items" class="px-2 py-0.5 rounded-full bg-blue-900/60 text-blue-200 text-[10px] font-mono">0</span>
+      <!-- Segmented Tab Group -->
+      <div class="inline-flex p-1 rounded-xl bg-midnight-900 border border-midnight-700/80 text-xs font-medium">
+        <button onclick="switchTab('showcase')" id="tab-btn-showcase" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-sm">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+          <span>คลังของพบเจอ</span>
+          <span id="badge-total-items" class="px-1.5 py-0.2 rounded bg-blue-900/60 text-blue-200 text-[10px] font-mono tabular-nums">0</span>
         </button>
 
-        <button onclick="switchTab('claims')" id="tab-btn-claims" class="px-4 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-midnight-800 transition-all flex items-center gap-2 font-medium">
-          <span>📋 คำร้อง Google Form</span>
-          <span id="badge-pending-claims" class="px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold">0 รอตรวจ</span>
+        <button onclick="switchTab('claims')" id="tab-btn-claims" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-midnight-800 transition-colors flex items-center gap-2">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+          <span>คำร้อง Google Form</span>
+          <span id="badge-pending-claims" class="px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-300 border border-amber-800/40 text-[10px] font-mono tabular-nums">0 รอตรวจ</span>
         </button>
 
-        <button onclick="switchTab('system')" id="tab-btn-system" class="px-4 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-midnight-800 transition-all flex items-center gap-1.5 font-medium">
-          <span>⚙️ ข้อมูลเชื่อมต่อ & SQL</span>
+        <button onclick="switchTab('system')" id="tab-btn-system" class="px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-midnight-800 transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <span>เชื่อมต่อ & SQL</span>
         </button>
       </div>
 
       <!-- Station Telemetry Indicator -->
-      <div class="flex items-center gap-2 text-xs text-slate-400">
-        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400 shadow-sm shadow-emerald-400/50"></span>
+      <div class="flex items-center gap-2 text-xs text-slate-400 font-mono">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-400"></span>
         <span id="db-status-text" class="text-xs text-slate-300 font-medium">กำลังตรวจสอบสถานะคลัง...</span>
       </div>
     </div>
@@ -173,41 +179,41 @@
     <div id="tab-content-showcase" class="space-y-5">
       
       <!-- Search & Filters Container -->
-      <div class="bg-midnight-850 p-4 sm:p-5 rounded-2xl border border-midnight-700/80 shadow-lg shadow-black/20 space-y-3.5">
+      <div class="bg-midnight-900 p-4 sm:p-5 rounded-xl border border-midnight-700/80 space-y-3.5">
         
         <!-- Search Input Bar -->
         <div class="relative">
-          <input type="text" id="search-input" oninput="loadItems()" placeholder="🔍 ค้นหาชื่อสิ่งของ, ยี่ห้อ, สี, รหัส (LF-...), หรือจุดที่เก็บได้..." class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition">
-          <span class="absolute right-3.5 top-3 text-[10px] font-mono text-slate-500 border border-midnight-700 px-1.5 py-0.5 rounded">/</span>
+          <input type="text" id="search-input" oninput="loadItems()" placeholder="ค้นหาชื่อ รหัส หรือสถานที่พบเจอ..." class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
+          <span class="absolute right-3.5 top-2.5 text-[10px] font-mono text-slate-500 border border-midnight-700 px-1.5 py-0.5 rounded">/</span>
         </div>
 
-        <!-- 1-Click Horizontal Category Pills Bar -->
+        <!-- 1-Click Horizontal Category Selector -->
         <div class="flex items-center gap-2">
           <div id="category-pills-bar" class="flex items-center gap-1.5 overflow-x-auto pb-1 custom-scroll flex-1">
             <!-- Dynamically populated category chips -->
-            <button onclick="selectCategory('ALL')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition bg-blue-600 text-white shadow-md shadow-blue-600/20" data-cat="ALL">
-              📦 ทั้งหมด
+            <button onclick="selectCategory('ALL')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors bg-blue-600 text-white shadow-sm" data-cat="ALL">
+              ทั้งหมด
             </button>
           </div>
 
           <!-- Inline Quick Add Category Button -->
-          <button onclick="openAddCategoryDialog()" title="เพิ่มหมวดหมู่ใหม่แบบรวดเร็ว" class="px-3 py-1.5 rounded-full border border-dashed border-midnight-600 hover:border-blue-500 bg-midnight-900 text-slate-300 hover:text-white text-xs font-semibold whitespace-nowrap transition flex items-center gap-1">
-            <span>➕</span>
+          <button onclick="openAddCategoryDialog()" title="เพิ่มหมวดหมู่ใหม่" class="px-2.5 py-1.5 rounded-lg border border-dashed border-midnight-600 hover:border-slate-500 text-slate-400 hover:text-white text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1 flex-shrink-0">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             <span class="hidden sm:inline">เพิ่มหมวด</span>
           </button>
         </div>
 
-        <!-- Secondary Filters (Status Pills) -->
+        <!-- Secondary Filters (Status Selector) -->
         <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-midnight-700/60 text-xs">
           <div class="flex items-center gap-1.5">
             <span class="text-slate-400 font-medium mr-1">สถานะ:</span>
-            <button onclick="selectStatus('ALL')" class="status-pill px-3 py-1 rounded-lg text-xs font-semibold bg-midnight-750 text-white border border-midnight-600 transition" data-status="ALL">ทั้งหมด</button>
-            <button onclick="selectStatus('WAITING_OWNER')" class="status-pill px-3 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition" data-status="WAITING_OWNER">🟢 รอเจ้าของมารับ</button>
-            <button onclick="selectStatus('DELIVERED')" class="status-pill px-3 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition" data-status="DELIVERED">✨ ส่งมอบสำเร็จ</button>
+            <button onclick="selectStatus('ALL')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-midnight-800 text-white border border-midnight-600 transition-colors" data-status="ALL">ทั้งหมด</button>
+            <button onclick="selectStatus('WAITING_OWNER')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5" data-status="WAITING_OWNER"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>รอเจ้าของรับ</button>
+            <button onclick="selectStatus('DELIVERED')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5" data-status="DELIVERED"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>ส่งมอบแล้ว</button>
           </div>
 
           <div class="text-slate-400 text-xs font-mono">
-            แสดงผล <strong id="item-count-display" class="text-blue-400">0</strong> รายการ
+            แสดงผล <strong id="item-count-display" class="text-blue-400 font-medium tabular-nums">0</strong> รายการ
           </div>
         </div>
 
@@ -226,18 +232,20 @@
     <div id="tab-content-claims" class="hidden space-y-4">
       
       <!-- Tab Header Banner -->
-      <div class="bg-midnight-850 p-4 sm:p-5 rounded-2xl border border-midnight-700/80 flex items-center justify-between flex-wrap gap-3">
+      <div class="bg-midnight-900 p-4 sm:p-5 rounded-xl border border-midnight-700/80 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
-            <span>📋</span> รายการแจ้งของหายจากนักเรียน (Google Form)
+          <h2 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+            <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/></svg>
+            <span>รายการแจ้งของหายจากนักเรียน (Google Form)</span>
           </h2>
           <p class="text-xs text-slate-400 mt-0.5">
-            นักเรียนแจ้งผ่าน Google Form ของโรงเรียน เพื่อให้สารวัตรที่ฐานหน้าห้องกิจการโทรนัดหมายส่งมอบของ
+            นักเรียนแจ้งผ่านแบบฟอร์มโรงเรียนพระนารายณ์ เพื่อให้สารวัตรประจำฐานติดต่อส่งมอบของคืน
           </p>
         </div>
 
-        <button onclick="loadClaims()" class="px-3.5 py-1.5 rounded-xl bg-midnight-900 border border-midnight-700 hover:bg-midnight-800 text-slate-200 text-xs font-medium transition flex items-center gap-1.5 shadow-sm">
-          <span>🔄</span> รีเฟรชคำร้อง
+        <button onclick="loadClaims()" class="px-3 py-1.5 rounded-lg bg-midnight-850 border border-midnight-700 hover:bg-midnight-800 text-slate-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5 shadow-sm">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>
+          <span>รีเฟรชคำร้อง</span>
         </button>
       </div>
 
@@ -246,9 +254,9 @@
         
         <!-- Left: Claims List Feed (5 cols) -->
         <div class="lg:col-span-5 space-y-3">
-          <div class="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-            <span>คำร้องทั้งหมด (<span id="claims-count" class="text-blue-400 font-mono">0</span>)</span>
-            <span class="text-[11px] font-normal text-blue-400">คลิกเพื่อเริ่มสแกนจับคู่</span>
+          <div class="text-xs font-medium text-slate-400 flex items-center justify-between">
+            <span>คำร้องทั้งหมด (<span id="claims-count" class="text-blue-400 font-mono tabular-nums">0</span>)</span>
+            <span class="text-[11px] text-slate-500">คลิกรายการเพื่อจับคู่</span>
           </div>
 
           <div id="claims-list-box" class="space-y-2.5 max-h-[700px] overflow-y-auto pr-1 custom-scroll">
@@ -258,16 +266,16 @@
 
         <!-- Right: Smart Match Radar Panel (7 cols) -->
         <div class="lg:col-span-7">
-          <div class="bg-midnight-850 border border-midnight-700/80 rounded-2xl p-5 shadow-lg shadow-black/20 sticky top-20 min-h-[480px] flex flex-col">
+          <div class="bg-midnight-900 border border-midnight-700/80 rounded-xl p-5 sticky top-20 min-h-[480px] flex flex-col">
             
             <div id="radar-empty-state" class="m-auto text-center py-16 space-y-3">
-              <div class="w-16 h-16 rounded-full bg-midnight-800 border border-midnight-700 flex items-center justify-center text-3xl mx-auto text-blue-400 shadow-inner">
-                🎯
+              <div class="w-12 h-12 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center justify-center mx-auto text-slate-500">
+                <svg class="w-6 h-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
               </div>
               <div class="space-y-1">
-                <h3 class="text-sm font-bold text-slate-200">เลือกคำร้องทางฝั่งซ้ายเพื่อเปิด Smart Match Radar</h3>
+                <h3 class="text-sm font-medium text-slate-200">เลือกคำร้องทางฝั่งซ้ายเพื่อสแกนจับคู่</h3>
                 <p class="text-xs text-slate-400 max-w-sm mx-auto leading-relaxed">
-                  ระบบจะวิเคราะห์หมวดหมู่และลักษณะเด่นของคำร้อง แล้วค้นหาของที่น่าจะตรงกันในคลังสารวัตรให้ทันที
+                  ระบบจะเปรียบเทียบหมวดหมู่และลักษณะเด่นของคำร้องกับของในคลังสารวัตรโดยอัตโนมัติ
                 </p>
               </div>
             </div>
@@ -276,50 +284,51 @@
             <div id="radar-active-view" class="hidden space-y-4 flex-1 flex flex-col">
               
               <!-- Selected Claim Header -->
-              <div class="p-4 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-2.5">
+              <div class="p-4 rounded-xl bg-midnight-950 border border-midnight-700/80 space-y-2.5">
                 <div class="flex items-center justify-between">
-                  <span id="radar-claim-code" class="px-2 py-0.5 rounded text-[11px] font-mono font-bold bg-blue-950 text-blue-300 border border-blue-800/60">CLM-2026-001</span>
-                  <span id="radar-claim-status" class="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-800/60">รอตรวจสอบ</span>
+                  <span id="radar-claim-code" class="px-2 py-0.5 rounded text-[11px] font-mono text-blue-300 bg-blue-950/80 border border-blue-800/60">CLM-2026-001</span>
+                  <span id="radar-claim-status" class="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/80 text-amber-300 border border-amber-800/60">รอตรวจสอบ</span>
                 </div>
 
                 <div>
-                  <h3 id="radar-claim-title" class="text-base font-bold text-white">กระเป๋าสตางค์</h3>
-                  <p id="radar-claim-traits" class="text-xs text-slate-300 mt-1 leading-relaxed bg-midnight-950 p-2.5 rounded-lg border border-midnight-800"></p>
+                  <h3 id="radar-claim-title" class="text-sm sm:text-base font-semibold text-white">กระเป๋าสตางค์</h3>
+                  <p id="radar-claim-traits" class="text-xs text-slate-300 mt-1 leading-relaxed bg-midnight-900 p-2.5 rounded-lg border border-midnight-800"></p>
                 </div>
 
                 <!-- Student Contact & Location Info -->
                 <div class="pt-2 border-t border-midnight-700/60 flex items-center justify-between flex-wrap gap-2 text-xs">
                   <div>
                     <span class="text-slate-400">ผู้แจ้ง:</span>
-                    <strong id="radar-claimant-name" class="text-white font-semibold"></strong>
+                    <strong id="radar-claimant-name" class="text-white font-medium ml-1"></strong>
                     <span id="radar-claimant-class" class="text-slate-400 ml-1"></span>
                   </div>
 
                   <!-- Quick Call Button -->
-                  <a id="radar-call-btn" href="#" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-xs shadow-md shadow-emerald-600/30 transition">
-                    <span>📞</span>
-                    <span>โทรหานักเรียน: <span id="radar-claimant-phone"></span></span>
+                  <a id="radar-call-btn" href="#" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-medium text-xs shadow-sm transition-colors">
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    <span>โทรติดต่อ: <span id="radar-claimant-phone" class="font-mono"></span></span>
                   </a>
                 </div>
 
                 <!-- Student Notification Pickup Instruction -->
-                <div class="text-[11px] bg-blue-950/60 text-blue-300 p-2.5 rounded-lg border border-blue-800/40 flex items-center gap-1.5">
-                  <span>ℹ️</span>
-                  <span>เมื่อโทรประสานงานได้ แจ้งให้นักเรียนมารับของได้ที่: <strong class="text-white">หน้าห้องกิจการ (ฐานหลักสารวัตร)</strong></span>
+                <div class="text-[11px] bg-blue-950/40 text-blue-300 p-2.5 rounded-lg border border-blue-800/40 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-blue-400 flex-shrink-0"></span>
+                  <span>จุดรับของคืน: <strong class="text-slate-200">หน้าห้องกิจการ (ฐานหลักสารวัตรนักเรียน)</strong></span>
                 </div>
               </div>
 
               <!-- Matching Results Section -->
               <div class="space-y-2 flex-1">
                 <div class="flex items-center justify-between">
-                  <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center gap-1.5">
-                    <span>🔍</span> ของในคลังที่ตรงกับคำร้องนี้
+                  <h4 class="text-xs font-medium text-slate-300 flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+                    <span>รายการสิ่งของที่ตรงกับคำร้อง</span>
                   </h4>
-                  <span id="radar-match-count" class="text-xs font-mono text-blue-400">พบ 0 รายการ</span>
+                  <span id="radar-match-count" class="text-xs font-mono text-blue-400 tabular-nums">พบ 0 รายการ</span>
                 </div>
 
                 <!-- Match Candidates Cards List -->
-                <div id="radar-candidates-list" class="space-y-3 max-h-[380px] overflow-y-auto pr-1 custom-scroll">
+                <div id="radar-candidates-list" class="space-y-2.5 max-h-[380px] overflow-y-auto pr-1 custom-scroll">
                   <!-- Injected via JS -->
                 </div>
               </div>
@@ -339,22 +348,24 @@
     <div id="tab-content-system" class="hidden space-y-5">
       
       <!-- Google Apps Script Webhook Card -->
-      <div class="bg-midnight-850 p-6 rounded-2xl border border-midnight-700/80 shadow-lg space-y-4">
+      <div class="bg-midnight-900 p-5 rounded-xl border border-midnight-700/80 space-y-4">
         <div class="flex items-center justify-between flex-wrap gap-2">
           <div>
-            <h3 class="text-base font-bold text-white flex items-center gap-2">
-              <span>🔗</span> สคริปต์ Google Form Webhook (เชื่อมโยงเข้าฐานหน้าห้องกิจการ)
+            <h3 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+              <span>สคริปต์ Google Form Webhook</span>
             </h3>
-            <p class="text-xs text-slate-400 mt-1">
-              นำโค้ด Apps Script นี้ไปใส่ใน Google Form ของโรงเรียนพระนารายณ์ เพื่อให้ส่งข้อมูลเข้ามาที่เว็ปโดยอัตโนมัติ
+            <p class="text-xs text-slate-400 mt-0.5">
+              นำโค้ด Apps Script ไปใส่ใน Google Form เพื่อให้ส่งคำร้องแจ้งของหายเข้าสู่ระบบอัตโนมัติ
             </p>
           </div>
-          <button onclick="copyScriptCode()" class="px-3.5 py-1.5 bg-emerald-950 text-emerald-300 border border-emerald-800/60 rounded-xl text-xs font-semibold hover:bg-emerald-900 transition flex items-center gap-1.5">
-            📋 คัดลอกโค้ด Apps Script
+          <button onclick="copyScriptCode()" class="px-3 py-1.5 bg-midnight-850 hover:bg-midnight-800 text-slate-300 hover:text-white border border-midnight-700 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span>คัดลอกสคริปต์</span>
           </button>
         </div>
 
-        <pre id="script-code-block" class="bg-midnight-950 text-slate-300 p-4 rounded-xl text-xs font-mono overflow-x-auto max-h-56 custom-scroll leading-relaxed border border-midnight-700/80"><code>function onFormSubmit(e) {
+        <pre id="script-code-block" class="bg-midnight-950 text-slate-300 p-4 rounded-lg text-xs font-mono overflow-x-auto max-h-56 custom-scroll leading-relaxed border border-midnight-800"><code>function onFormSubmit(e) {
   // สคริปต์ส่งคำร้องแจ้งของหายจาก Google Form เข้าฐานสารวัตรนักเรียน
   var WEBHOOK_URL = "http://localhost:10001/api/lost-found/claims";
   var responses = e.response.getItemResponses();
@@ -377,19 +388,21 @@
       </div>
 
       <!-- Supabase SQL Architecture Card -->
-      <div class="bg-midnight-850 p-6 rounded-2xl border border-midnight-700/80 shadow-lg space-y-4">
-        <div>
-          <h3 class="text-base font-bold text-white flex items-center gap-2">
-            <span>⚙️</span> สถาปัตยกรรมข้อมูล Supabase & คำสั่งสร้างตาราง
-          </h3>
-          <p class="text-xs text-slate-400 mt-1">
-            นำคำสั่ง SQL ด้านล่างไปรันใน <strong>Supabase Dashboard > SQL Editor</strong> เพื่อรองรับตาราง <code>lost_items</code>, <code>lost_claims</code>, และ <code>lost_categories</code>
-          </p>
-        </div>
+      <div class="bg-midnight-900 p-5 rounded-xl border border-midnight-700/80 space-y-4">
+        <div class="flex items-center justify-between flex-wrap gap-2">
+          <div>
+            <h3 class="text-sm sm:text-base font-semibold text-white flex items-center gap-2">
+              <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <span>สถาปัตยกรรมข้อมูล Supabase & คำสั่งสร้างตาราง</span>
+            </h3>
+            <p class="text-xs text-slate-400 mt-0.5">
+              คำสั่ง SQL สำหรับรันใน <strong>Supabase Dashboard > SQL Editor</strong> เพื่อสร้างตาราง <code>lost_items</code>, <code>lost_claims</code>, และ <code>lost_categories</code>
+            </p>
+          </div>
 
-        <div class="flex justify-end">
-          <button onclick="copySqlCode()" class="px-3.5 py-1.5 bg-blue-950 text-blue-300 border border-blue-800/60 rounded-xl text-xs font-semibold hover:bg-blue-900 transition">
-            📋 คัดลอกคำสั่ง SQL ทั้งหมด
+          <button onclick="copySqlCode()" class="px-3 py-1.5 bg-midnight-850 hover:bg-midnight-800 text-slate-300 hover:text-white border border-midnight-700 rounded-lg text-xs font-medium transition-colors flex items-center gap-1.5 shadow-sm">
+            <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span>คัดลอกคำสั่ง SQL</span>
           </button>
         </div>
 
@@ -443,7 +456,7 @@ CREATE TABLE IF NOT EXISTS public.lost_categories (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     code VARCHAR(50) UNIQUE NOT NULL,
     name VARCHAR(100) UNIQUE NOT NULL,
-    icon VARCHAR(20) DEFAULT '📦',
+    icon VARCHAR(20) DEFAULT 'box',
     description TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
@@ -469,19 +482,21 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- ========================================================== -->
   <!-- MODAL 1: QUICK VIEW DIALOG (VIEW & BLIND VERIFICATION) -->
   <!-- ========================================================== -->
-  <dialog id="modal-quick-view" class="p-0 rounded-2xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-2xl text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="quick-view-title">
+  <dialog id="modal-quick-view" class="p-0 rounded-xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-2xl text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="quick-view-title">
     <div class="p-5 sm:p-6 space-y-5">
       
       <!-- Modal Header -->
-      <div class="flex items-start justify-between gap-3 pb-3 border-b border-midnight-700">
+      <div class="flex items-start justify-between gap-3 pb-3 border-b border-midnight-700/80">
         <div>
           <div class="flex items-center gap-2">
-            <span id="qv-code-badge" class="px-2 py-0.5 rounded text-xs font-mono font-bold bg-blue-950 text-blue-300 border border-blue-800">LF-2026-001</span>
-            <span id="qv-category-badge" class="text-xs font-semibold text-slate-400">หมวดหมู่</span>
+            <span id="qv-code-badge" class="px-2 py-0.5 rounded text-xs font-mono font-medium bg-blue-950/80 text-blue-300 border border-blue-800/60">LF-2026-001</span>
+            <span id="qv-category-badge" class="text-xs font-medium text-slate-400">หมวดหมู่</span>
           </div>
-          <h3 id="quick-view-title" class="text-lg font-bold text-white mt-1">ชื่อสิ่งของ</h3>
+          <h3 id="quick-view-title" class="text-base sm:text-lg font-semibold text-white mt-1">ชื่อสิ่งของ</h3>
         </div>
-        <button onclick="closeQuickViewModal()" class="w-8 h-8 rounded-full bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">✕</button>
+        <button onclick="closeQuickViewModal()" class="w-7 h-7 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="ปิด">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <!-- Modal Body (Grid: Photo + Details) -->
@@ -489,46 +504,53 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         
         <!-- Big Photo View -->
         <div class="space-y-2">
-          <div class="aspect-square rounded-xl overflow-hidden bg-midnight-950 border border-midnight-700 relative">
+          <div class="aspect-square rounded-lg overflow-hidden bg-midnight-950 border border-midnight-700/80 relative">
             <img id="qv-image" src="" alt="รูปสิ่งของ" class="w-full h-full object-cover">
-            <div id="qv-status-pill" class="absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full text-xs font-semibold shadow-md">
+            <div id="qv-status-pill" class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-xs font-medium">
               สถานะ
             </div>
           </div>
-          <p class="text-[11px] text-slate-400 text-center font-mono">📍 จัดเก็บที่: <strong id="qv-storage" class="text-slate-200">หน้าห้องกิจการ</strong></p>
+          <p class="text-[11px] text-slate-400 text-center font-mono flex items-center justify-center gap-1">
+            <svg class="w-3 h-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+            <span>จัดเก็บ: <strong id="qv-storage" class="text-slate-200">หน้าห้องกิจการ</strong></span>
+          </p>
         </div>
 
         <!-- Details & Blind Verification Box -->
         <div class="space-y-3.5 text-xs">
           <div>
-            <span class="text-slate-400 block font-medium mb-0.5">ลักษณะเด่นทั่วไป (ภายนอก):</span>
-            <p id="qv-characteristics" class="text-slate-200 leading-relaxed bg-midnight-950 p-3 rounded-xl border border-midnight-750"></p>
+            <span class="text-slate-400 block font-medium mb-0.5">ลักษณะเด่นภายนอก:</span>
+            <p id="qv-characteristics" class="text-slate-200 leading-relaxed bg-midnight-950 p-3 rounded-lg border border-midnight-800"></p>
           </div>
 
           <!-- Secret Traits Box (Blind Verification for Sarawat) -->
-          <div id="qv-secret-box" class="bg-amber-950/40 border border-amber-800/60 p-3 rounded-xl space-y-1">
-            <span class="font-bold text-amber-300 flex items-center gap-1.5 text-[11px]">
-              <span>🔒</span> จุดสังเกตลับเฉพาะสารวัตร (ถามพิสูจน์เจ้าของจริง):
+          <div id="qv-secret-box" class="bg-amber-950/30 border border-amber-800/50 p-3 rounded-lg space-y-1">
+            <span class="font-medium text-amber-300 flex items-center gap-1.5 text-[11px]">
+              <svg class="w-3.5 h-3.5 text-amber-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>จุดสังเกตลับเฉพาะสารวัตร (ถามพิสูจน์เจ้าของจริง):</span>
             </span>
-            <p id="qv-secret-traits" class="text-slate-200 text-xs italic">ไม่มีการบันทึกจุดลับ</p>
+            <p id="qv-secret-traits" class="text-slate-300 text-xs font-mono">ไม่มีการบันทึกจุดลับ</p>
           </div>
 
           <div class="grid grid-cols-2 gap-2 text-slate-400">
             <div>
-              <span class="text-slate-500 block">สถานที่พบเจอ:</span>
-              <strong id="qv-location" class="text-slate-200 font-semibold"></strong>
+              <span class="text-slate-500 block">สถานที่พบ:</span>
+              <strong id="qv-location" class="text-slate-200 font-medium"></strong>
             </div>
             <div>
-              <span class="text-slate-500 block">วันที่และเวลาที่พบ:</span>
-              <strong id="qv-datetime" class="text-slate-200 font-semibold"></strong>
+              <span class="text-slate-500 block">วันเวลาที่พบ:</span>
+              <div id="qv-datetime" class="text-slate-200 font-medium font-mono text-[11px]"></div>
             </div>
           </div>
 
           <!-- Handover Info (If delivered) -->
-          <div id="qv-handover-box" class="hidden p-3 rounded-xl bg-emerald-950/40 border border-emerald-800/60 space-y-1 text-emerald-200">
-            <span class="font-bold flex items-center gap-1">✨ ข้อมูลการส่งมอบสำเร็จ:</span>
+          <div id="qv-handover-box" class="hidden p-3 rounded-lg bg-emerald-950/40 border border-emerald-800/60 space-y-1 text-emerald-200">
+            <span class="font-medium flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+              <span>ส่งมอบสำเร็จ:</span>
+            </span>
             <p class="text-[11px]">ผู้รับ: <strong id="qv-claimant-name"></strong> • ผู้ส่งมอบ: <span id="qv-delivered-by"></span></p>
-            <p class="text-[10px] text-slate-400" id="qv-delivered-at"></p>
+            <p class="text-[10px] text-slate-400 font-mono" id="qv-delivered-at"></p>
           </div>
 
         </div>
@@ -536,20 +558,23 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       </div>
 
       <!-- Modal Footer Actions -->
-      <div class="pt-3 border-t border-midnight-700 flex items-center justify-between">
-        <button onclick="openPrintTagFromCurrent()" class="px-3.5 py-2 rounded-xl bg-midnight-800 hover:bg-midnight-750 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5">
-          <span>🏷️</span> พิมพ์ป้ายแท็กติดถุง
+      <div class="pt-3 border-t border-midnight-700/80 flex items-center justify-between">
+        <button onclick="openPrintTagFromCurrent()" class="px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-slate-300 hover:text-white text-xs font-medium transition-colors flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect width="12" height="8" x="6" y="14"/></svg>
+          <span>พิมพ์แท็ก</span>
         </button>
 
         <div class="flex items-center gap-2">
-          <button onclick="closeQuickViewModal()" class="px-4 py-2 rounded-xl bg-midnight-800 text-slate-300 text-xs font-medium hover:bg-midnight-750 transition">
+          <button onclick="closeQuickViewModal()" class="px-3.5 py-1.5 rounded-lg bg-midnight-850 text-slate-300 hover:text-white text-xs font-medium transition-colors">
             ปิด
           </button>
           
-          <button id="qv-handover-btn" onclick="openHandoverModalFromCurrent()" class="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md transition flex items-center gap-1.5">
-            <span>📸</span> ส่งมอบของคืน
+          <button id="qv-handover-btn" onclick="openHandoverModalFromCurrent()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors shadow-sm flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>ส่งมอบของคืน</span>
           </button>
         </div>
+      </div>
       </div>
 
     </div>
@@ -558,30 +583,32 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- ========================================================== -->
   <!-- MODAL 2: QUICK 3-STEP INTAKE DIALOG (NEW FOUND ITEM) -->
   <!-- ========================================================== -->
-  <dialog id="modal-intake" class="p-0 rounded-2xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-xl text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="intake-title">
+  <dialog id="modal-intake" class="p-0 rounded-xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-xl text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="intake-title">
     <div class="p-5 sm:p-6 space-y-4">
       
-      <div class="flex items-center justify-between pb-3 border-b border-midnight-700">
+      <div class="flex items-center justify-between pb-3 border-b border-midnight-700/80">
         <div>
-          <span class="text-[11px] font-semibold text-blue-400">INTAKE STATION // ฐานหน้าห้องกิจการ</span>
-          <h3 id="intake-title" class="text-base font-bold text-white">📸 บันทึกสิ่งของพบเจอเข้าสู่คลัง</h3>
+          <span class="text-[11px] font-mono text-blue-400">INTAKE STATION // ฐานหน้าห้องกิจการ</span>
+          <h3 id="intake-title" class="text-base font-semibold text-white">บันทึกสิ่งของพบเจอเข้าสู่คลัง</h3>
         </div>
-        <button onclick="closeIntakeModal()" class="w-8 h-8 rounded-full bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">✕</button>
+        <button onclick="closeIntakeModal()" class="w-7 h-7 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="ปิด">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <form onsubmit="submitIntake(event)" class="space-y-4">
         
         <!-- Step 1: Photo Upload Zone -->
         <div class="space-y-1.5">
-          <label class="block text-xs font-bold text-slate-300">
-            สเต็ป 1: รูปถ่ายสิ่งของ (PHOTO) *
+          <label class="block text-xs font-medium text-slate-300">
+            ขั้นตอนที่ 1: ภาพถ่ายสิ่งของ *
           </label>
-          <div onclick="triggerIntakeFileInput(event)" class="border-2 border-dashed border-midnight-700 hover:border-blue-500 rounded-xl p-4 text-center cursor-pointer bg-midnight-950 transition">
+          <div onclick="triggerIntakeFileInput(event)" class="border border-dashed border-midnight-700 hover:border-slate-500 rounded-lg p-4 text-center cursor-pointer bg-midnight-950 transition-colors">
             <input type="file" id="in-file-input" accept="image/*" class="hidden" onclick="event.stopPropagation()" onchange="handleIntakeFile(event)">
-            <div id="in-photo-preview-box" class="space-y-1">
-              <span class="text-3xl block">📷</span>
-              <p class="text-xs font-semibold text-slate-200">คลิกเพื่อถ่ายรูป หรือเลือกรูปภาพจากเครื่อง</p>
-              <p class="text-[10px] text-slate-400">รองรับไฟล์ JPG, PNG (รูปจะถูกจัดเก็บลง Supabase Storage อัตโนมัติ)</p>
+            <div id="in-photo-preview-box" class="space-y-1 py-1">
+              <svg class="w-7 h-7 text-slate-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <p class="text-xs font-medium text-slate-300">คลิกเพื่อถ่ายภาพ หรือเลือกรูปจากเครื่อง</p>
+              <p class="text-[10px] text-slate-500">รองรับไฟล์ JPG, PNG</p>
             </div>
             <img id="in-photo-preview-img" src="" alt="พรีวิว" class="hidden max-h-40 mx-auto rounded-lg object-contain mt-2 shadow">
           </div>
@@ -590,10 +617,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         <!-- Step 2: 1-Click Category Selection -->
         <div class="space-y-1.5">
           <div class="flex items-center justify-between">
-            <label class="block text-xs font-bold text-slate-300">
-              สเต็ป 2: จิ้มเลือกหมวดหมู่ 1 คลิก *
+            <label class="block text-xs font-medium text-slate-300">
+              ขั้นตอนที่ 2: เลือกหมวดหมู่ *
             </label>
-            <button type="button" onclick="openAddCategoryDialog()" class="text-[11px] font-semibold text-blue-400 hover:underline">
+            <button type="button" onclick="openAddCategoryDialog()" class="text-[11px] font-medium text-blue-400 hover:text-blue-300">
               + เพิ่มหมวดใหม่
             </button>
           </div>
@@ -604,48 +631,49 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         </div>
 
         <!-- Step 3: Details & Blind Verification Traits -->
-        <div class="space-y-3 pt-2 border-t border-midnight-700">
-          <label class="block text-xs font-bold text-slate-300">
-            สเต็ป 3: รายละเอียดสิ่งของและจุดสังเกต
+        <div class="space-y-3 pt-2 border-t border-midnight-700/80">
+          <label class="block text-xs font-medium text-slate-300">
+            ขั้นตอนที่ 3: รายละเอียดสิ่งของและจุดสังเกต
           </label>
 
           <div>
             <label class="block text-[11px] text-slate-400 mb-1">ชื่อสิ่งของ *</label>
-            <input type="text" id="in-title" required placeholder="เช่น กระเป๋าสตางค์ Tough สีน้ำตาลเข้ม, หูฟัง AirPods Pro 2" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+            <input type="text" id="in-title" required placeholder="เช่น กระเป๋าสตางค์ Tough สีน้ำตาลเข้ม, หูฟัง AirPods Pro 2" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
           </div>
 
           <div>
-            <label class="block text-[11px] text-slate-400 mb-1">ลักษณะทั่วไปที่เปิดเผยบนเว็ป (ภายนอก) *</label>
-            <textarea id="in-characteristics" required rows="2" placeholder="เช่น กระเป๋าหนังพับสองตอน มีรอยถลอกมุมขวา สภาพใช้งาน..." class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500 leading-relaxed"></textarea>
+            <label class="block text-[11px] text-slate-400 mb-1">ลักษณะทั่วไปภายนอก *</label>
+            <textarea id="in-characteristics" required rows="2" placeholder="เช่น กระเป๋าหนังพับสองตอน มีรอยถลอกมุมขวา สภาพใช้งาน..." class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500 leading-relaxed"></textarea>
           </div>
 
-          <div class="bg-amber-950/40 border border-amber-800/60 p-3 rounded-xl space-y-1">
-            <label class="block text-[11px] font-bold text-amber-300">
-              🔒 จุดสังเกตลับเฉพาะสารวัตร (Blind Verification - ใช้ถามพิสูจน์เจ้าของจริง)
+          <div class="bg-amber-950/30 border border-amber-800/50 p-3 rounded-lg space-y-1">
+            <label class="block text-[11px] font-medium text-amber-300 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span>จุดสังเกตลับเฉพาะสารวัตร (Blind Verification - ถามพิสูจน์เจ้าของ):</span>
             </label>
-            <input type="text" id="in-secret-traits" placeholder="เช่น เงินในกระเป๋า 320 บาท, บัตรประชาชนชื่อ สมชาย, รูปถ่ายครอบครัวข้างใน" class="w-full bg-midnight-950 border border-amber-800/80 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
-            <span class="text-[10px] text-amber-400/80 block">ข้อมูลช่องนี้จะไม่ถูกเปิดเผยต่อบุคคลทั่วไป สารวัตรจะใช้ถามนักเรียนที่มาขอรับ</span>
+            <input type="text" id="in-secret-traits" placeholder="เช่น เงินในกระเป๋า 320 บาท, รูปถ่ายในช่องใส, สลักชื่อย่อด้านใน" class="w-full bg-midnight-950 border border-amber-800/80 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-amber-500">
+            <span class="text-[10px] text-amber-400/80 block">ข้อมูลนี้จะไม่เปิดเผยบนหน้าเว็บ ใช้เฉพาะสารวัตรเพื่อตรวจพิสูจน์</span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] text-slate-400 mb-1">สถานที่พบเจอ *</label>
-              <input type="text" id="in-location" required placeholder="เช่น โต๊ะม้าหินหน้าอาคาร 3" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+              <input type="text" id="in-location" required placeholder="เช่น โต๊ะม้าหินหน้าอาคาร 3" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
             </div>
 
             <div>
               <label class="block text-[11px] text-slate-400 mb-1">พิกัดจัดเก็บ</label>
-              <input type="text" id="in-storage" value="ฐานหลักสารวัตรนักเรียน หน้าห้องกิจการ" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+              <input type="text" id="in-storage" value="ฐานหลักสารวัตรนักเรียน หน้าห้องกิจการ" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
             </div>
           </div>
         </div>
 
-        <div class="pt-3 border-t border-midnight-700 flex justify-end gap-2">
-          <button type="button" onclick="closeIntakeModal()" class="px-4 py-2 rounded-xl bg-midnight-800 text-slate-300 text-xs font-semibold">
+        <div class="pt-3 border-t border-midnight-700/80 flex justify-end gap-2">
+          <button type="button" onclick="closeIntakeModal()" class="px-3.5 py-1.5 rounded-lg bg-midnight-850 text-slate-300 hover:text-white text-xs font-medium transition-colors">
             ยกเลิก
           </button>
-          <button type="submit" id="intake-submit-btn" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-semibold shadow-md shadow-blue-500/30 transition">
-            + บันทึกสิ่งของเข้าคลัง
+          <button type="submit" id="intake-submit-btn" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors shadow-sm">
+            บันทึกสิ่งของเข้าคลัง
           </button>
         </div>
 
@@ -657,36 +685,38 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- ========================================================== -->
   <!-- MODAL 3: HANDOVER SNAPSHOT (DELIVERY EVIDENCE STUDIO) -->
   <!-- ========================================================== -->
-  <dialog id="modal-handover" class="p-0 rounded-2xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-lg text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="handover-title">
+  <dialog id="modal-handover" class="p-0 rounded-xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-lg text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="handover-title">
     <div class="p-5 sm:p-6 space-y-4">
       
-      <div class="flex items-center justify-between pb-3 border-b border-midnight-700">
+      <div class="flex items-center justify-between pb-3 border-b border-midnight-700/80">
         <div>
-          <span class="text-[11px] font-semibold text-emerald-400">HANDOVER // ฐานหน้าห้องกิจการ</span>
-          <h3 id="handover-title" class="text-base font-bold text-white">📸 บันทึกหลักฐานส่งมอบของคืน</h3>
+          <span class="text-[11px] font-mono text-emerald-400">HANDOVER // ฐานหน้าห้องกิจการ</span>
+          <h3 id="handover-title" class="text-base font-semibold text-white">บันทึกหลักฐานการส่งมอบของคืน</h3>
         </div>
-        <button onclick="closeHandoverModal()" class="w-8 h-8 rounded-full bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">✕</button>
+        <button onclick="closeHandoverModal()" class="w-7 h-7 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="ปิด">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <!-- 2-STEP HANDOVER CONTAINER -->
       <div id="ho-step-1" class="space-y-3.5">
         <!-- Item & Location Brief -->
-        <div class="p-3 rounded-xl bg-midnight-950 border border-midnight-750 text-xs space-y-1">
-          <div>สิ่งของ: <strong id="ho-item-title" class="text-blue-400"></strong> (<span id="ho-item-code"></span>)</div>
+        <div class="p-3 rounded-lg bg-midnight-950 border border-midnight-800 text-xs space-y-1">
+          <div>สิ่งของ: <strong id="ho-item-title" class="text-blue-400 font-medium"></strong> (<span id="ho-item-code" class="font-mono"></span>)</div>
           <div>สถานที่ส่งมอบ: <strong class="text-slate-200">หน้าห้องกิจการ (ฐานหลักสารวัตร)</strong></div>
         </div>
 
         <!-- 1. Photo of Handover with Student -->
         <div class="space-y-1.5">
-          <label class="block text-xs font-bold text-slate-300">
-            1. ถ่ายรูปหรือเลือกรูปหลักฐาน (รูปคนคู่กับสิ่งของ) *
+          <label class="block text-xs font-medium text-slate-300">
+            1. ภาพถ่ายหลักฐานผู้รับคู่กับสิ่งของ *
           </label>
-          <div onclick="triggerHandoverFileInput(event)" class="border-2 border-dashed border-midnight-700 hover:border-emerald-500 rounded-xl p-3.5 text-center cursor-pointer bg-midnight-950 transition">
+          <div onclick="triggerHandoverFileInput(event)" class="border border-dashed border-midnight-700 hover:border-emerald-500 rounded-lg p-3.5 text-center cursor-pointer bg-midnight-950 transition-colors">
             <input type="file" id="ho-file-input" accept="image/*" class="hidden" onclick="event.stopPropagation()" onchange="handleHandoverFile(event)">
-            <div id="ho-preview-box" class="space-y-1">
-              <span class="text-2xl block">📸</span>
-              <p class="text-xs font-semibold text-slate-200">กดเพื่อถ่ายรูปหรือเลือกภาพหลักฐาน</p>
-              <p class="text-[10px] text-slate-400">ระบบจะจัดเก็บภาพบน Discord เป็น Host ข้อมูลรูปถาวร</p>
+            <div id="ho-preview-box" class="space-y-1 py-1">
+              <svg class="w-6 h-6 text-slate-500 mx-auto" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14.5 4h-5L7 7H4a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3l-2.5-3z"/><circle cx="12" cy="13" r="3"/></svg>
+              <p class="text-xs font-medium text-slate-300">กดเพื่อถ่ายภาพหรือเลือกไฟล์หลักฐาน</p>
+              <p class="text-[10px] text-slate-500">จัดเก็บลง Host ถาวร</p>
             </div>
             <img id="ho-preview-img" src="" alt="พรีวิวส่งมอบ" class="hidden max-h-36 mx-auto rounded-lg object-contain mt-2 shadow">
           </div>
@@ -695,87 +725,88 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         <!-- 2. Recipient Name & Contact -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">2. ชื่อ ผู้รับ *</label>
-            <input type="text" id="ho-claimant-name" required placeholder="เช่น นายวรพจน์ บุญมี (ม.4/2)" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-xs font-medium text-slate-300 mb-1">2. ชื่อผู้รับ *</label>
+            <input type="text" id="ho-claimant-name" required placeholder="เช่น นายวรพจน์ บุญมี (ม.4/2)" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-300 mb-1">ข้อมูลติดต่อ (เบอร์โทร/FB)</label>
-            <input type="text" id="ho-claimant-phone" placeholder="เช่น 089-765-4321 หรือ Line ID" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+            <label class="block text-xs font-medium text-slate-300 mb-1">ข้อมูลติดต่อ (เบอร์โทร / ช่องทาง)</label>
+            <input type="text" id="ho-claimant-phone" placeholder="เช่น 089-765-4321 หรือ Line ID" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
           </div>
         </div>
 
         <!-- 3. Inspector Duty ID -->
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">
-            3. รหัสประจำตัวสารวัตร (ค้นหาข้อมูล) *
+          <label class="block text-xs font-medium text-slate-300 mb-1">
+            3. รหัสประจำตัวสารวัตรผู้ส่งมอบ *
           </label>
           <div class="relative">
-            <input type="text" id="ho-duty-id" required placeholder="เช่น MS1, TS4, T2, F3" class="w-full uppercase bg-midnight-950 border border-amber-500/50 rounded-xl px-3.5 py-2 text-xs text-amber-300 font-mono tracking-wider focus:outline-none focus:border-amber-400">
-            <span class="absolute right-3 top-2 text-[11px] text-slate-400">กด OK เพื่อค้นหารูปสารวัตร</span>
+            <input type="text" id="ho-duty-id" required placeholder="เช่น MS1, TS4, T2, F3" class="w-full uppercase bg-midnight-950 border border-amber-500/50 rounded-lg px-3 py-1.5 text-xs text-amber-300 font-mono tracking-wider focus:outline-none focus:border-amber-400">
+            <span class="absolute right-3 top-2 text-[10px] text-slate-500">กดตรวจสอบเพื่อดึงข้อมูล</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-1">💡 ใส่รหัสเวรสารวัตรเพื่อดึงรูปและชื่อจากฐานข้อมูลมาแสดงในขั้นตอนยืนยัน</p>
+          <p class="text-[11px] text-slate-500 mt-1 font-mono">ใส่รหัสเวรสารวัตรเพื่อดึงรูปและชื่อจากฐานข้อมูล</p>
         </div>
 
         <div>
-          <label class="block text-xs font-bold text-slate-300 mb-1">บันทึกเพิ่มเติม (Notes - ถ้ามี)</label>
-          <input type="text" id="ho-notes" placeholder="เช่น ตรวจบัตรนักเรียนแล้ว, มีภาพปลดล็อกหน้าจอ" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          <label class="block text-xs font-medium text-slate-300 mb-1">บันทึกเพิ่มเติม (ถ้ามี)</label>
+          <input type="text" id="ho-notes" placeholder="เช่น ตรวจบัตรนักเรียนแล้ว, มีภาพปลดล็อกหน้าจอ" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500">
         </div>
 
         <input type="hidden" id="ho-item-id">
         <input type="hidden" id="ho-claim-id">
 
-        <div class="pt-3 border-t border-midnight-700 flex justify-end gap-2">
-          <button type="button" onclick="closeHandoverModal()" class="px-4 py-2 rounded-xl bg-midnight-800 text-slate-300 text-xs font-semibold">
+        <div class="pt-3 border-t border-midnight-700/80 flex justify-end gap-2">
+          <button type="button" onclick="closeHandoverModal()" class="px-3.5 py-1.5 rounded-lg bg-midnight-850 text-slate-300 hover:text-white text-xs font-medium transition-colors">
             ยกเลิก
           </button>
-          <button type="button" id="ho-btn-ok" onclick="goToHandoverStep2()" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-1.5">
-            <span>ตรวจสอบข้อมูล (OK)</span>
-            <span>➡️</span>
+          <button type="button" id="ho-btn-ok" onclick="goToHandoverStep2()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium transition-colors flex items-center gap-1.5 shadow-sm">
+            <span>ตรวจสอบข้อมูล</span>
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
         </div>
       </div>
 
-      <!-- STEP 2: VERIFICATION PREVIEW (โชว์ข้อมูล + รูปหลักฐาน + รูปสารวัตร) -->
+      <!-- STEP 2: VERIFICATION PREVIEW -->
       <div id="ho-step-2" class="hidden space-y-4">
-        <div class="p-3 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-xs text-emerald-300 flex items-center gap-2">
-          <span class="text-base">🛡️</span>
-          <span>กรุณาตรวจสอบความถูกต้องของข้อมูลและรูปถ่ายก่อนกดยืนยัน</span>
+        <div class="p-2.5 rounded-lg bg-emerald-950/40 border border-emerald-800/60 text-xs text-emerald-300 flex items-center gap-2">
+          <svg class="w-4 h-4 text-emerald-400 flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span>กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนยืนยันส่งมอบ</span>
         </div>
 
         <!-- Evidence & Inspector Dual Card -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <!-- Evidence Photo -->
-          <div class="bg-midnight-950 border border-midnight-750 rounded-xl p-3 text-center space-y-2">
-            <span class="text-[11px] font-bold text-slate-300 block">📸 รูปหลักฐานคนคู่กับสิ่งของ</span>
-            <img id="ho-step2-evidence-img" src="" alt="หลักฐาน" class="max-h-40 mx-auto rounded-lg object-cover border border-midnight-700 shadow">
+          <div class="bg-midnight-950 border border-midnight-800 rounded-lg p-3 text-center space-y-2">
+            <span class="text-[11px] font-medium text-slate-300 block">ภาพถ่ายหลักฐานผู้รับ</span>
+            <img id="ho-step2-evidence-img" src="" alt="หลักฐาน" class="max-h-40 mx-auto rounded-lg object-cover border border-midnight-800 shadow">
             <div class="text-[11px] text-slate-400">
-              ผู้รับ: <strong id="ho-step2-claimant-text" class="text-white"></strong>
-              <div id="ho-step2-contact-text" class="text-slate-400 text-[10px]"></div>
+              ผู้รับ: <strong id="ho-step2-claimant-text" class="text-white font-medium"></strong>
+              <div id="ho-step2-contact-text" class="text-slate-500 text-[10px] font-mono"></div>
             </div>
           </div>
 
           <!-- Official Inspector Profile Card -->
-          <div class="bg-midnight-950 border border-amber-500/30 rounded-xl p-3 text-center space-y-2">
-            <span class="text-[11px] font-bold text-amber-300 block">👮 สารวัตรนักเรียนผู้ส่งมอบ</span>
-            <img id="ho-step2-inspector-img" src="/assets/logo.png" alt="สารวัตร" class="w-24 h-24 mx-auto rounded-full object-cover border-2 border-amber-500 shadow-md">
+          <div class="bg-midnight-950 border border-amber-800/40 rounded-lg p-3 text-center space-y-2">
+            <span class="text-[11px] font-medium text-amber-300 block">สารวัตรผู้ส่งมอบ</span>
+            <img id="ho-step2-inspector-img" src="/assets/logo.png" alt="สารวัตร" class="w-20 h-20 mx-auto rounded-full object-cover border border-amber-500/60 shadow">
             <div>
-              <div id="ho-step2-inspector-name" class="text-xs font-bold text-white"></div>
-              <div class="flex items-center justify-center gap-1.5 mt-1">
-                <span id="ho-step2-inspector-badge" class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 text-[10px] font-mono font-bold"></span>
-                <span id="ho-step2-inspector-role" class="px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 text-[10px]"></span>
+              <div id="ho-step2-inspector-name" class="text-xs font-medium text-white"></div>
+              <div class="flex items-center justify-center gap-1.5 mt-1 font-mono">
+                <span id="ho-step2-inspector-badge" class="px-2 py-0.5 rounded bg-amber-950/60 text-amber-300 border border-amber-800/40 text-[10px]"></span>
+                <span id="ho-step2-inspector-role" class="px-2 py-0.5 rounded bg-blue-950/60 text-blue-300 border border-blue-800/40 text-[10px]"></span>
               </div>
             </div>
           </div>
         </div>
 
         <!-- Footer Actions -->
-        <div class="pt-3 border-t border-midnight-700 flex justify-between items-center">
-          <button type="button" onclick="goToHandoverStep1()" class="px-4 py-2 rounded-xl bg-midnight-800 hover:bg-midnight-700 text-slate-300 text-xs font-semibold flex items-center gap-1.5">
-            <span>⬅️</span>
-            <span>ย้อนกลับแก้ไข</span>
+        <div class="pt-3 border-t border-midnight-700/80 flex justify-between items-center">
+          <button type="button" onclick="goToHandoverStep1()" class="px-3.5 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 text-slate-300 text-xs font-medium transition-colors flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="15 18 9 12 15 6"/></svg>
+            <span>ย้อนกลับ</span>
           </button>
-          <button type="button" id="ho-submit-btn" onclick="confirmSubmitHandover()" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-emerald-500/30 transition flex items-center gap-1.5">
-            <span>✅ ยืนยันการส่งมอบ</span>
+          <button type="button" id="ho-submit-btn" onclick="confirmSubmitHandover()" class="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium transition-colors shadow-sm flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="20 6 9 17 4 12"/></svg>
+            <span>ยืนยันการส่งมอบ</span>
           </button>
         </div>
       </div>
@@ -786,35 +817,32 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- ========================================================== -->
   <!-- MODAL 4: INLINE ADD CATEGORY DIALOG (1-CLICK CREATION) -->
   <!-- ========================================================== -->
-  <dialog id="modal-add-category" class="p-0 rounded-2xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-sm text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="add-cat-title">
+  <dialog id="modal-add-category" class="p-0 rounded-xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-sm text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="add-cat-title">
     <div class="p-5 space-y-3.5">
-      <div class="flex items-center justify-between pb-2 border-b border-midnight-700">
-        <h3 id="add-cat-title" class="text-sm font-bold text-white flex items-center gap-1.5">
-          <span>➕</span> เพิ่มหมวดหมู่ใหม่
+      <div class="flex items-center justify-between pb-2 border-b border-midnight-700/80">
+        <h3 id="add-cat-title" class="text-xs font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+          <span>เพิ่มหมวดหมู่ใหม่</span>
         </h3>
-        <button onclick="closeAddCategoryDialog()" class="w-7 h-7 rounded-full bg-midnight-800 text-slate-400 hover:text-white text-xs font-bold">✕</button>
+        <button onclick="closeAddCategoryDialog()" class="w-6 h-6 rounded bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="ปิด">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <form onsubmit="submitNewCategoryQuick(event)" class="space-y-3">
-        <div class="grid grid-cols-4 gap-2">
-          <div class="col-span-1">
-            <label class="block text-[10px] text-slate-400 mb-0.5">ไอคอน</label>
-            <input type="text" id="quick-cat-icon" value="📦" maxlength="4" class="w-full text-center bg-midnight-950 border border-midnight-700 rounded-xl px-2 py-2 text-sm text-white">
-          </div>
-          <div class="col-span-3">
-            <label class="block text-[10px] text-slate-400 mb-0.5">ชื่อหมวดหมู่ *</label>
-            <input type="text" id="quick-cat-name" required placeholder="เช่น บัตรนักเรียน / เอกสาร" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
-          </div>
+        <div class="space-y-1">
+          <label class="block text-[11px] text-slate-400">ชื่อหมวดหมู่ *</label>
+          <input type="text" id="quick-cat-name" required placeholder="เช่น บัตรนักเรียน / เอกสาร" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
         </div>
 
         <div>
-          <label class="block text-[10px] text-slate-400 mb-0.5">คำอธิบายสั้นๆ (ไม่บังคับ)</label>
-          <input type="text" id="quick-cat-desc" placeholder="เช่น บัตร ปชช., บัตรนักเรียน, กระเป๋าดินสอ" class="w-full bg-midnight-950 border border-midnight-700 rounded-xl px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
+          <label class="block text-[11px] text-slate-400 mb-0.5">คำอธิบายสั้นๆ (ไม่บังคับ)</label>
+          <input type="text" id="quick-cat-desc" placeholder="เช่น บัตร ปชช., บัตรนักเรียน, กระเป๋าดินสอ" class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-blue-500">
         </div>
 
         <div class="pt-2 flex justify-end gap-2">
-          <button type="button" onclick="closeAddCategoryDialog()" class="px-3 py-1.5 rounded-lg bg-midnight-800 text-xs text-slate-300">ยกเลิก</button>
-          <button type="submit" id="quick-cat-btn" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-sm">+ บันทึก</button>
+          <button type="button" onclick="closeAddCategoryDialog()" class="px-3 py-1.5 rounded-lg bg-midnight-850 text-xs text-slate-300 hover:text-white">ยกเลิก</button>
+          <button type="submit" id="quick-cat-btn" class="px-3.5 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-xs font-medium shadow-sm">บันทึก</button>
         </div>
       </form>
     </div>
@@ -823,15 +851,17 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- ========================================================== -->
   <!-- MODAL 5: PRINTABLE EVIDENCE TAG DIALOG -->
   <!-- ========================================================== -->
-  <dialog id="modal-tag-print" class="p-0 rounded-2xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-sm text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="tag-modal-title">
+  <dialog id="modal-tag-print" class="p-0 rounded-xl bg-midnight-900 border border-midnight-700 shadow-2xl w-full max-w-sm text-slate-100 backdrop:bg-black/75 backdrop:backdrop-blur-sm" aria-labelledby="tag-modal-title">
     <div class="p-5 space-y-4">
-      <div class="flex items-center justify-between pb-2 border-b border-midnight-700">
-        <h3 id="tag-modal-title" class="text-xs font-bold uppercase tracking-wider text-slate-400">ป้ายแท็กติดถุงสิ่งของ (EVIDENCE TAG)</h3>
-        <button onclick="closeTagModal()" class="text-slate-400 hover:text-white text-sm font-bold">✕</button>
+      <div class="flex items-center justify-between pb-2 border-b border-midnight-700/80">
+        <h3 id="tag-modal-title" class="text-xs font-mono font-medium uppercase tracking-wider text-slate-400">ป้ายแท็กติดถุงสิ่งของ (EVIDENCE TAG)</h3>
+        <button onclick="closeTagModal()" class="w-6 h-6 rounded bg-midnight-800 hover:bg-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors" title="ปิด">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
       </div>
 
       <!-- Printable Area (Black & White for Real Printers) -->
-      <div id="printable-tag-area" class="bg-white text-black p-4 rounded-xl border-2 border-dashed border-slate-400 space-y-2 font-mono">
+      <div id="printable-tag-area" class="bg-white text-black p-4 rounded-lg border-2 border-dashed border-slate-400 space-y-2 font-mono">
         <div class="text-center pb-2 border-b border-slate-300">
           <div class="text-xs font-bold">สารวัตรนักเรียน โรงเรียนพระนารายณ์</div>
           <div class="text-[10px] text-slate-600">ฐานหลัก: หน้าห้องกิจการ</div>
@@ -851,9 +881,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       </div>
 
       <div class="flex justify-end gap-2 pt-2">
-        <button onclick="closeTagModal()" class="px-3 py-1.5 rounded-lg bg-midnight-800 text-xs text-slate-300">ปิด</button>
-        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs shadow flex items-center gap-1.5">
-          <span>🖨️</span> สั่งพิมพ์ป้าย
+        <button onclick="closeTagModal()" class="px-3 py-1.5 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-xs text-slate-300 transition-colors">ปิด</button>
+        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 text-white font-medium text-xs transition-colors shadow-sm flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+          <span>สั่งพิมพ์ป้าย</span>
         </button>
       </div>
     </div>
@@ -863,6 +894,25 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   <!-- JAVASCRIPT APPLICATION CONTROLLER -->
   <!-- ========================================================== -->
   <script>
+    // Inline Lucide Icon Definitions (16px / 1.5 stroke, offline & zero external CDN dependency)
+    const ICONS = {
+      box: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>',
+      clock: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+      calendar: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+      mapPin: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>',
+      lock: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+      check: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+      search: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+      user: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+      phone: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+      scale: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>',
+      handshake: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m11 17 2 2a1 1 0 0 0 1.4 0l6.6-6.6a2 2 0 0 0 0-2.8l-1.6-1.6a2 2 0 0 0-2.8 0L14 11"/><path d="m13 7-2-2a1 1 0 0 0-1.4 0L3 11.6a2 2 0 0 0 0 2.8l1.6 1.6a2 2 0 0 0 2.8 0L10 13"/><path d="m9 10 5 5"/></svg>',
+      printer: '<svg class="{c}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>'
+    };
+    function icon(name, cls = 'w-4 h-4') {
+      return (ICONS[name] || '').replace('{c}', cls);
+    }
+
     let allItems = [];
     let allClaims = [];
     let allCategories = [];
@@ -948,7 +998,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const btn = document.getElementById(`tab-btn-${t}`);
         if (pane) pane.classList.add('hidden');
         if (btn) {
-          btn.className = "px-4 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-midnight-800 transition-all flex items-center gap-2 font-medium";
+          btn.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-midnight-800 transition-colors flex items-center gap-2";
         }
       });
 
@@ -956,7 +1006,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
       if (activePane) activePane.classList.remove('hidden');
       if (activeBtn) {
-        activeBtn.className = "px-4 py-2 rounded-xl bg-blue-600 text-white font-bold shadow-md shadow-blue-600/30 transition-all flex items-center gap-2";
+        activeBtn.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-sm";
       }
     }
 
@@ -972,13 +1022,12 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         console.error('[LOAD CATEGORIES ERROR]:', err);
       }
 
-      // ตรวจสอบให้มีหมวด 'ของกลาง' (⚖️) อยู่เสมอเพื่อรองรับสิ่งของค้างเกิน 30 วัน
+      // ตรวจสอบให้มีหมวด 'ของกลาง' อยู่เสมอเพื่อรองรับสิ่งของค้างเกิน 30 วัน
       if (!allCategories.some(c => c.name.includes('ของกลาง'))) {
         allCategories.push({
           id: 'cat-confiscated',
           code: 'CAT-CONFISCATED',
           name: 'ของกลาง',
-          icon: '⚖️',
           description: 'ของที่ไม่มารับเกิน 30 วัน หรือสิ่งของตรวจยึด'
         });
       }
@@ -992,17 +1041,20 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const container = document.getElementById('category-pills-bar');
       if (!container) return;
 
+      const isAll = currentCategory === 'ALL';
       let html = `
-        <button onclick="selectCategory('ALL')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${currentCategory === 'ALL' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 font-bold' : 'bg-midnight-900 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white'}" data-cat="ALL">
-          📦 ทั้งหมด
+        <button onclick="selectCategory('ALL')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${isAll ? 'bg-blue-600 text-white shadow-sm' : 'bg-midnight-850 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white'}" data-cat="ALL">
+          ทั้งหมด
         </button>
       `;
 
       allCategories.forEach(c => {
         const isActive = currentCategory === c.name;
+        const isConfiscated = c.name.includes('ของกลาง');
         html += `
-          <button onclick="selectCategory('${c.name.replace(/'/g, "\\'")}')" class="cat-pill px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition ${isActive ? 'bg-blue-600 text-white shadow-md shadow-blue-600/20 font-bold' : 'bg-midnight-900 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white'}" data-cat="${c.name}">
-            <span>${c.icon || '📦'}</span> ${c.name}
+          <button onclick="selectCategory('${c.name.replace(/'/g, "\\'")}')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${isActive ? (isConfiscated ? 'bg-rose-600 text-white shadow-sm' : 'bg-blue-600 text-white shadow-sm') : (isConfiscated ? 'bg-rose-950/40 border border-rose-800/60 text-rose-300 hover:bg-rose-900/50' : 'bg-midnight-850 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white')}" data-cat="${c.name}">
+            ${isConfiscated ? icon('scale', 'w-3.5 h-3.5 text-rose-400') : ''}
+            <span>${c.name}</span>
           </button>
         `;
       });
@@ -1020,9 +1072,9 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       currentStatus = status;
       document.querySelectorAll('.status-pill').forEach(btn => {
         if (btn.dataset.status === status) {
-          btn.className = "status-pill px-3 py-1 rounded-lg text-xs font-semibold bg-midnight-750 text-white border border-midnight-600 transition";
+          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-midnight-800 text-white border border-midnight-600 transition-colors";
         } else {
-          btn.className = "status-pill px-3 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition";
+          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5";
         }
       });
       loadItems();
@@ -1036,8 +1088,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       container.innerHTML = allCategories.map((c, idx) => {
         const isFirst = idx === 0;
         return `
-          <button type="button" onclick="selectIntakeCat('${c.name.replace(/'/g, "\\'")}', this)" class="intake-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-midnight-700 bg-midnight-950 hover:border-blue-500 transition flex items-center gap-1.5 ${isFirst ? 'border-blue-600 bg-blue-950 text-blue-300 font-bold' : 'text-slate-300'}">
-            <span>${c.icon || '📦'}</span>
+          <button type="button" onclick="selectIntakeCat('${c.name.replace(/'/g, "\\'")}', this)" class="intake-cat-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border transition-colors flex items-center gap-1.5 ${isFirst ? 'border-blue-500 bg-blue-950/60 text-blue-200' : 'border-midnight-700 bg-midnight-950 text-slate-300 hover:border-slate-500'}">
             <span>${c.name}</span>
           </button>
         `;
@@ -1051,9 +1102,9 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     function selectIntakeCat(name, btn) {
       document.getElementById('in-category-value').value = name;
       document.querySelectorAll('.intake-cat-btn').forEach(b => {
-        b.className = "intake-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-midnight-700 bg-midnight-950 hover:border-blue-500 text-slate-300 transition flex items-center gap-1.5";
+        b.className = "intake-cat-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border border-midnight-700 bg-midnight-950 text-slate-300 hover:border-slate-500 transition-colors flex items-center gap-1.5";
       });
-      btn.className = "intake-cat-btn px-3 py-1.5 rounded-xl text-xs font-medium border border-blue-600 bg-blue-950 text-blue-300 transition flex items-center gap-1.5 font-bold shadow-sm";
+      btn.className = "intake-cat-btn px-2.5 py-1.5 rounded-lg text-xs font-medium border border-blue-500 bg-blue-950/60 text-blue-200 transition-colors flex items-center gap-1.5";
     }
 
     // Load Items from Backend
@@ -1080,10 +1131,12 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const container = document.getElementById('items-grid');
       if (!items || items.length === 0) {
         container.innerHTML = `
-          <div class="col-span-full py-20 text-center space-y-2">
-            <span class="text-4xl block">🔍</span>
-            <h4 class="text-sm font-semibold text-slate-300">ไม่พบสิ่งของที่ค้นหา</h4>
-            <p class="text-xs text-slate-500">ลองเปลี่ยนคำค้นหา หรือคลิกดูหมวดหมู่อื่น</p>
+          <div class="col-span-full py-16 text-center space-y-2">
+            <div class="w-10 h-10 mx-auto rounded-lg bg-midnight-900 border border-midnight-700/80 flex items-center justify-center text-slate-500">
+              ${icon('search', 'w-5 h-5')}
+            </div>
+            <h4 class="text-xs font-medium text-slate-300">ไม่พบสิ่งของที่ค้นหา</h4>
+            <p class="text-[11px] text-slate-500">ลองเปลี่ยนคำค้นหา หรือคลิกดูหมวดหมู่อื่น</p>
           </div>
         `;
         return;
@@ -1092,8 +1145,8 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       container.innerHTML = items.map(it => {
         const isDelivered = it.status === 'DELIVERED';
         const statusBadge = isDelivered
-          ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/90 text-emerald-300 border border-emerald-800/80">✨ ส่งมอบสำเร็จ</span>`
-          : `<span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-blue-950/90 text-blue-300 border border-blue-800/80">🟢 รอรับที่ห้องกิจการ</span>`;
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-950/90 text-emerald-300 border border-emerald-800/80"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>ส่งมอบแล้ว</span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-midnight-900/90 text-blue-300 border border-blue-800/80"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>รอเจ้าของรับ</span>`;
 
         const hasSecret = Boolean(it.secret_traits);
         const elapsed = formatElapsedTime(it.created_at || it.found_date, it.found_time);
@@ -1101,41 +1154,42 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
 
         // สไตล์เวลา: เกิน 30 วันปรับข้อความและขอบเป็นสีแดงเด่นชัด (ตามเงื่อนไขของกลาง)
         const timeBadgeClass = elapsed.isOver30
-          ? "text-[10px] font-mono font-bold text-red-400 bg-red-950/80 border border-red-800/90 shadow-sm animate-pulse"
-          : "text-[10px] font-mono font-semibold text-amber-400 bg-midnight-950 border border-midnight-700/80";
+          ? "text-[10px] font-mono font-medium text-red-400 bg-red-950/90 border border-red-800/90"
+          : "text-[10px] font-mono text-slate-400 bg-midnight-950 border border-midnight-700/80";
 
         const confiscatedBadge = isConfiscated
-          ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800 shadow-sm" title="ของค้างเกิน 30 วัน จัดเข้าหมวดของกลาง">⚖️ ของกลาง</span>`
+          ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-rose-950/90 text-rose-300 border border-rose-800" title="ของค้างเกิน 30 วัน จัดเข้าหมวดของกลาง">${icon('scale', 'w-3 h-3 text-rose-400')} ของกลาง</span>`
           : '';
 
         return `
-          <div class="bg-midnight-850 border ${isConfiscated ? 'border-rose-900/60 shadow-rose-950/20' : 'border-midnight-700/80 shadow-black/30'} rounded-2xl overflow-hidden shadow-lg hover:border-blue-500/70 hover:shadow-blue-500/10 transition-all flex flex-col group">
+          <div class="bg-midnight-900 border ${isConfiscated ? 'border-rose-900/60' : 'border-midnight-700/80'} rounded-xl overflow-hidden shadow-sm flex flex-col group">
             
             <!-- Item Photo Box -->
             <div class="aspect-[4/3] bg-midnight-950 relative overflow-hidden cursor-pointer" onclick="openQuickViewModal('${it.id}')">
-              <img src="${it.image_url || '/assets/sample_student.jpg'}" alt="${it.title}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" loading="lazy">
+              <img src="${it.image_url || '/assets/sample_student.jpg'}" alt="${it.title}" class="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90" loading="lazy">
               
-              <div class="absolute top-2.5 left-2.5 flex items-center gap-1.5 flex-wrap">
+              <div class="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
                 ${statusBadge}
                 ${confiscatedBadge}
-                ${hasSecret ? '<span class="px-1.5 py-0.5 rounded text-[10px] bg-amber-500 text-white font-bold" title="มีจุดสังเกตลับสำหรับตรวจ">🔒</span>' : ''}
+                ${hasSecret ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-950/90 text-amber-300 border border-amber-800" title="มีจุดสังเกตลับสำหรับตรวจ">${icon('lock', 'w-3 h-3 text-amber-400')} จุดลับ</span>` : ''}
               </div>
 
-              <div class="absolute bottom-2.5 right-2.5 px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-black/75 text-white backdrop-blur-sm border border-white/10">
+              <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-midnight-950/90 text-slate-300 backdrop-blur-sm border border-midnight-700/80">
                 ${it.item_code}
               </div>
             </div>
 
             <!-- Item Content Body -->
-            <div class="p-4 flex-1 flex flex-col justify-between space-y-3">
+            <div class="p-3.5 flex-1 flex flex-col justify-between space-y-3">
               <div class="space-y-1">
                 <div class="flex items-center justify-between gap-1">
-                  <span class="text-[10px] font-semibold text-blue-400 uppercase tracking-wider block">${it.category}</span>
-                  <span class="${timeBadgeClass} px-1.5 py-0.5 rounded" title="${elapsed.isOver30 ? 'เกิน 30 วันแล้ว (สถานะของกลาง)' : 'เวลาที่ผ่านไปนับแต่พบของ'}">
-                    ⏱️ ${elapsed.text}${elapsed.isOver30 ? ' (เกิน 30 วัน)' : ''}
+                  <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">${it.category}</span>
+                  <span class="${timeBadgeClass} px-1.5 py-0.5 rounded inline-flex items-center gap-1" title="${elapsed.isOver30 ? 'เกิน 30 วันแล้ว (สถานะของกลาง)' : 'เวลาที่ผ่านไปนับแต่พบของ'}">
+                    ${icon('clock', elapsed.isOver30 ? 'w-3 h-3 text-red-400' : 'w-3 h-3 text-slate-500')}
+                    <span>${elapsed.text}${elapsed.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
                   </span>
                 </div>
-                <h3 class="text-sm font-bold text-white line-clamp-1 hover:text-blue-400 transition cursor-pointer" onclick="openQuickViewModal('${it.id}')" title="${it.title}">
+                <h3 class="text-xs sm:text-sm font-semibold text-white line-clamp-1 hover:text-blue-400 transition-colors cursor-pointer" onclick="openQuickViewModal('${it.id}')" title="${it.title}">
                   ${it.title}
                 </h3>
                 <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">
@@ -1143,34 +1197,43 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
                 </p>
               </div>
 
-              <!-- Inspector Info with small avatar (บอทจะใส่ข้อมูลอัตโนมัตและส่งมายังเว็บ มีไอคอนโปรไฟล์สารวัตร) -->
+              <!-- Inspector Info with small avatar -->
               <div class="pt-2 border-t border-midnight-700/60 flex items-center justify-between gap-2">
                 <div class="flex items-center gap-1.5 min-w-0">
-                  <img src="${it.finder_avatar_url || '/assets/sarawat_logo.png'}" alt="สารวัตรผู้บันทึก" class="w-5 h-5 rounded-full object-cover border border-midnight-600 shrink-0" onerror="this.src='/assets/sarawat_logo.png'">
+                  <img src="${it.finder_avatar_url || '/assets/sarawat_logo.png'}" alt="สารวัตรผู้บันทึก" class="w-5 h-5 rounded-full object-cover border border-midnight-700 shrink-0" onerror="this.src='/assets/sarawat_logo.png'">
                   <div class="truncate text-[11px] text-slate-300">
                     <span class="font-medium">${it.finder_name || 'สารวัตรเวร'}</span>
-                    ${it.finder_duty_id ? `<span class="ml-1 text-[10px] font-mono font-bold text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">[${it.finder_duty_id}]</span>` : ''}
+                    ${it.finder_duty_id ? `<span class="ml-1 text-[10px] font-mono text-amber-400 bg-amber-500/10 px-1 py-0.5 rounded border border-amber-500/20">[${it.finder_duty_id}]</span>` : ''}
                   </div>
                 </div>
-                <span class="text-[10px] font-mono text-slate-400 truncate max-w-[90px]" title="${it.location_found}">📍 ${it.location_found || '-'}</span>
+                <div class="text-[10px] font-mono text-slate-400 truncate max-w-[100px] flex items-center gap-1" title="${it.location_found}">
+                  ${icon('mapPin', 'w-3 h-3 text-slate-500 shrink-0')}
+                  <span class="truncate">${it.location_found || '-'}</span>
+                </div>
               </div>
 
               <!-- Date & Time Footer -->
               <div class="text-[10px] font-mono text-slate-400 flex items-center justify-between">
-                <span>📅 ${it.found_date || ''}</span>
-                <span>⏰ ${it.found_time || ''}</span>
+                <div class="flex items-center gap-1">
+                  ${icon('calendar', 'w-3 h-3 text-slate-500')}
+                  <span>${it.found_date || ''}</span>
+                </div>
+                <div class="flex items-center gap-1">
+                  ${icon('clock', 'w-3 h-3 text-slate-500')}
+                  <span>${it.found_time || ''}</span>
+                </div>
               </div>
 
-              <!-- Handover Action Button (ในเว็ปมีปุ่มด้านล่างว่า ส่งมอบของ) -->
+              <!-- Handover Action Button -->
               <div class="pt-1">
                 ${!isDelivered ? `
-                  <button onclick="openHandoverModal('${it.id}')" class="w-full py-2 px-3 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold text-center shadow-md shadow-blue-600/30 transition flex items-center justify-center gap-1.5">
-                    <span>🤝</span>
+                  <button onclick="openHandoverModal('${it.id}')" class="w-full py-1.5 px-3 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white text-xs font-medium text-center transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+                    ${icon('handshake', 'w-3.5 h-3.5')}
                     <span>ส่งมอบของ</span>
                   </button>
                 ` : `
-                  <div class="w-full py-1.5 px-3 rounded-xl bg-emerald-950/70 border border-emerald-800/60 text-emerald-300 text-xs text-center font-medium flex items-center justify-center gap-1.5">
-                    <span>✨</span>
+                  <div class="w-full py-1.5 px-3 rounded-lg bg-midnight-950 border border-midnight-700/80 text-emerald-400 text-xs font-mono font-medium flex items-center justify-center gap-1.5">
+                    ${icon('check', 'w-3.5 h-3.5')}
                     <span>ส่งมอบสำเร็จแล้ว</span>
                   </div>
                 `}
@@ -1196,8 +1259,8 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           if (badgeEl) {
             badgeEl.textContent = `${pendingCount} รอตรวจ`;
             badgeEl.className = pendingCount > 0
-              ? 'px-2 py-0.5 rounded-full bg-red-500/20 text-red-400 border border-red-500/40 text-[10px] font-bold animate-pulse'
-              : 'px-2 py-0.5 rounded-full bg-midnight-800 text-slate-400 text-[10px]';
+              ? 'px-1.5 py-0.2 rounded bg-amber-950/60 text-amber-300 border border-amber-800/40 text-[10px] font-mono tabular-nums'
+              : 'px-1.5 py-0.2 rounded bg-midnight-800 text-slate-400 text-[10px] font-mono tabular-nums';
           }
           renderClaimsList(allClaims);
         }
@@ -1223,31 +1286,40 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const isResolved = c.status === 'RESOLVED';
         const elapsedClaim = formatElapsedTime(c.created_at || c.lost_date);
         const claimTimeClass = elapsedClaim.isOver30
-          ? "text-[10px] font-mono font-bold text-red-400 bg-red-950/80 border border-red-800/80 px-1.5 py-0.5 rounded animate-pulse"
-          : "text-[10px] font-mono text-amber-400/90 bg-amber-950/70 border border-amber-800/50 px-1.5 py-0.5 rounded";
+          ? "text-[10px] font-mono font-medium text-red-400 bg-red-950/80 border border-red-800/80 px-1.5 py-0.5 rounded inline-flex items-center gap-1"
+          : "text-[10px] font-mono text-slate-400 bg-midnight-950 border border-midnight-700/60 px-1.5 py-0.5 rounded inline-flex items-center gap-1";
 
-        let badge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-950/80 text-amber-300 border border-amber-800/60">รอตรวจ</span>`;
-        if (isMatched) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-950/80 text-blue-300 border border-blue-800/60">พบของใกล้เคียง</span>`;
-        if (isResolved) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">ส่งมอบแล้ว</span>`;
+        let badge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-amber-950/80 text-amber-300 border border-amber-800/60">รอตรวจ</span>`;
+        if (isMatched) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-950/80 text-blue-300 border border-blue-800/60">พบของใกล้เคียง</span>`;
+        if (isResolved) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">ส่งมอบแล้ว</span>`;
 
         return `
-          <div onclick="selectClaimForRadar('${c.id}')" class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-900 hover:border-blue-500 cursor-pointer transition shadow-sm space-y-2">
+          <div onclick="selectClaimForRadar('${c.id}')" class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-900 hover:border-slate-500 cursor-pointer transition-colors shadow-sm space-y-2">
             <div class="flex items-center justify-between">
               <div class="flex items-center gap-2">
-                <span class="text-xs font-mono font-bold text-blue-400">${c.claim_code}</span>
-                <span class="${claimTimeClass}" title="${elapsedClaim.isOver30 ? 'คำร้องค้างเกิน 30 วัน' : 'เวลาที่รอตรวจ'}">⏱️ ${elapsedClaim.text}${elapsedClaim.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
+                <span class="text-xs font-mono font-semibold text-blue-400">${c.claim_code}</span>
+                <span class="${claimTimeClass}" title="${elapsedClaim.isOver30 ? 'คำร้องค้างเกิน 30 วัน' : 'เวลาที่รอตรวจ'}">
+                  ${icon('clock', elapsedClaim.isOver30 ? 'w-3 h-3 text-red-400' : 'w-3 h-3 text-slate-500')}
+                  <span>${elapsedClaim.text}${elapsedClaim.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
+                </span>
               </div>
               ${badge}
             </div>
 
             <div>
-              <h4 class="text-sm font-bold text-white">${c.item_type}</h4>
+              <h4 class="text-xs sm:text-sm font-semibold text-white">${c.item_type}</h4>
               <p class="text-xs text-slate-400 line-clamp-1">${c.characteristics}</p>
             </div>
 
             <div class="pt-1.5 border-t border-midnight-700/60 text-[11px] text-slate-400 flex items-center justify-between">
-              <span>👤 ${c.claimant_name} (${c.claimant_class || '-'})</span>
-              <span class="text-slate-300 font-mono">📞 ${c.claimant_contact}</span>
+              <div class="flex items-center gap-1">
+                ${icon('user', 'w-3 h-3 text-slate-500')}
+                <span>${c.claimant_name} (${c.claimant_class || '-'})</span>
+              </div>
+              <div class="flex items-center gap-1 text-slate-300 font-mono">
+                ${icon('phone', 'w-3 h-3 text-slate-500')}
+                <span>${c.claimant_contact}</span>
+              </div>
             </div>
           </div>
         `;
@@ -1265,14 +1337,14 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       activeView.classList.remove('hidden');
 
       const elapsedClaim = formatElapsedTime(claim.created_at || claim.lost_date);
-      const claimRadarTimeClass = elapsedClaim.isOver30 ? 'text-red-400 font-bold bg-red-950/80 border-red-800' : 'text-amber-400 bg-midnight-950 border-midnight-800';
+      const claimRadarTimeClass = elapsedClaim.isOver30 ? 'text-red-400 font-medium bg-red-950/80 border-red-800' : 'text-slate-300 bg-midnight-950 border-midnight-800';
 
       document.getElementById('radar-claim-code').textContent = claim.claim_code;
       document.getElementById('radar-claim-title').textContent = `${claim.category} • ${claim.item_type}`;
       document.getElementById('radar-claim-traits').innerHTML = `
         ${claim.characteristics}
-        <div class="mt-2 text-[11px] ${claimRadarTimeClass} font-mono flex items-center gap-1.5 p-2 rounded border">
-          <span>⏱️ เวลาที่ผ่านไปนับแต่แจ้งหาย:</span>
+        <div class="mt-2 text-[11px] ${claimRadarTimeClass} font-mono flex items-center gap-1.5 p-2 rounded-lg border">
+          <span class="flex items-center gap-1 text-slate-400">${icon('clock', 'w-3.5 h-3.5 text-slate-500')} เวลาที่ผ่านไป:</span>
           <strong class="${elapsedClaim.isOver30 ? 'text-red-300' : 'text-white'}">${elapsedClaim.text}${elapsedClaim.isOver30 ? ' (เกิน 30 วัน)' : ''}</strong>
           <span class="text-slate-500">(${claim.lost_date || ''})</span>
         </div>
@@ -1287,7 +1359,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
 
       // Fetch matches from smart matching engine
       const candidatesBox = document.getElementById('radar-candidates-list');
-      candidatesBox.innerHTML = '<div class="py-10 text-center text-xs text-slate-400">🔍 กำลังสแกนของในคลังด้วย Smart Match Engine...</div>';
+      candidatesBox.innerHTML = '<div class="py-10 text-center text-xs text-slate-400">กำลังสแกนของในคลังด้วย Smart Match Engine...</div>';
 
       try {
         const res = await fetch(`/api/lost-found/claims/${claimId}/matches`);
@@ -1305,8 +1377,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const box = document.getElementById('radar-candidates-list');
       if (!matches || matches.length === 0) {
         box.innerHTML = `
-          <div class="p-6 text-center text-xs text-slate-400 space-y-1">
-            <span class="text-2xl block">📦</span>
+          <div class="p-8 text-center text-xs text-slate-400 space-y-2">
+            <div class="w-9 h-9 mx-auto rounded-lg bg-midnight-900 border border-midnight-700/80 flex items-center justify-center text-slate-500">
+              ${icon('box', 'w-4 h-4')}
+            </div>
             <p>ยังไม่พบของในคลังที่ตรงกับคำร้องนี้</p>
             <p class="text-[10px] text-slate-500">เมื่อมีคนนำของหมวดเดียวกันมาส่ง ระบบจะตรวจจับให้อัตโนมัติ</p>
           </div>
@@ -1318,30 +1392,37 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const it = m.item;
         const elapsedItem = formatElapsedTime(it.created_at || it.found_date, it.found_time);
         const isConfiscated = elapsedItem.isOver30 || (it.category && it.category.includes('ของกลาง'));
-        const itemTimeClass = elapsedItem.isOver30 ? 'text-red-400 font-bold bg-red-950/80 px-1 py-0.2 rounded border border-red-800' : 'text-amber-400';
+        const itemTimeClass = elapsedItem.isOver30 ? 'text-red-400 font-bold bg-red-950/80 px-1 py-0.2 rounded border border-red-800' : 'text-slate-400';
         return `
-          <div class="p-3.5 rounded-xl border border-midnight-700 bg-midnight-950 flex items-center justify-between gap-3 shadow-sm hover:border-blue-500 transition">
+          <div class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-950 flex items-center justify-between gap-3 shadow-sm hover:border-slate-500 transition-colors">
             
             <div class="flex items-center gap-3 min-w-0">
               <img src="${it.image_url || '/assets/sample_student.jpg'}" alt="${it.title}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-midnight-900 border border-midnight-700">
               <div class="min-w-0 space-y-0.5">
                 <div class="flex items-center gap-2 flex-wrap">
-                  <span class="text-xs font-mono font-bold text-blue-400">${it.item_code}</span>
-                  <span class="px-2 py-0.2 rounded-full text-[10px] font-bold bg-emerald-950 text-emerald-300 border border-emerald-800">${m.match_score}% MATCH</span>
-                  ${isConfiscated ? '<span class="px-1.5 py-0.2 rounded text-[10px] font-bold bg-rose-950 text-rose-300 border border-rose-800">⚖️ ของกลาง</span>' : ''}
-                  <span class="text-[10px] font-mono ${itemTimeClass}">⏱️ ${elapsedItem.text}${elapsedItem.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
+                  <span class="text-xs font-mono font-semibold text-blue-400">${it.item_code}</span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-950 text-emerald-300 border border-emerald-800">${m.match_score}% MATCH</span>
+                  ${isConfiscated ? `<span class="px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-rose-950 text-rose-300 border border-rose-800 flex items-center gap-1">${icon('scale', 'w-3 h-3')} ของกลาง</span>` : ''}
+                  <span class="text-[10px] font-mono ${itemTimeClass} flex items-center gap-1">
+                    ${icon('clock', elapsedItem.isOver30 ? 'w-3 h-3 text-red-400' : 'w-3 h-3 text-slate-500')}
+                    <span>${elapsedItem.text}${elapsedItem.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
+                  </span>
                 </div>
-                <h5 class="text-xs font-bold text-white truncate">${it.title}</h5>
+                <h5 class="text-xs font-semibold text-white truncate">${it.title}</h5>
                 <p class="text-[11px] text-slate-400 truncate">${it.characteristics}</p>
-                <p class="text-[10px] text-slate-500">📍 เก็บได้: ${it.location_found} • ตู้: ${it.storage_location || 'หน้าห้องกิจการ'}</p>
+                <p class="text-[10px] text-slate-500 flex items-center gap-1">
+                  ${icon('mapPin', 'w-3 h-3 text-slate-500')}
+                  <span>เก็บได้: ${it.location_found} • ตู้: ${it.storage_location || 'หน้าห้องกิจการ'}</span>
+                </p>
               </div>
             </div>
 
             <div class="flex flex-col gap-1.5 flex-shrink-0">
-              <button onclick="openHandoverModalWithClaim('${it.id}', '${claim.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold shadow-sm transition">
-                🤝 ส่งมอบของ
+              <button onclick="openHandoverModalWithClaim('${it.id}', '${claim.id}')" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium shadow-sm transition-colors flex items-center gap-1.5">
+                ${icon('handshake', 'w-3.5 h-3.5')}
+                <span>ส่งมอบ</span>
               </button>
-              <button onclick="openQuickViewModal('${it.id}')" class="px-3 py-1 rounded-lg bg-midnight-800 text-slate-300 text-[11px] hover:bg-midnight-700 transition">
+              <button onclick="openQuickViewModal('${it.id}')" class="px-3 py-1 rounded-lg bg-midnight-850 hover:bg-midnight-800 text-slate-300 text-[11px] font-medium transition-colors border border-midnight-700/80">
                 ดูจุดสังเกต
               </button>
             </div>
@@ -1364,10 +1445,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       document.getElementById('qv-location').textContent = it.location_found;
       const elapsed = formatElapsedTime(it.created_at || it.found_date, it.found_time);
       const isConfiscated = elapsed.isOver30 || (it.category && it.category.includes('ของกลาง'));
-      const timeClass = elapsed.isOver30 ? 'text-red-400 font-bold' : 'text-slate-300';
+      const timeClass = elapsed.isOver30 ? 'text-red-400 font-medium' : 'text-slate-300';
       document.getElementById('qv-datetime').innerHTML = `
         <span>${it.found_date || ''} (${it.found_time || ''})</span> • 
-        <span class="${timeClass}">⏱️ ผ่านมาแล้ว ${elapsed.text}${elapsed.isOver30 ? ' <span class="text-red-400 font-bold underline">⚠️ (เกิน 30 วัน - จัดเป็นของกลาง)</span>' : ''}</span>
+        <span class="${timeClass} inline-flex items-center gap-1">${icon('clock', elapsed.isOver30 ? 'w-3.5 h-3.5 text-red-400' : 'w-3.5 h-3.5 text-slate-500')} ผ่านมาแล้ว ${elapsed.text}${elapsed.isOver30 ? ' <span class="text-red-400 font-bold">(เกิน 30 วัน - จัดเป็นของกลาง)</span>' : ''}</span>
       `;
       document.getElementById('qv-storage').textContent = it.storage_location || 'ฐานหลักสารวัตร หน้าห้องกิจการ';
       document.getElementById('qv-image').src = it.image_url || '/assets/sample_student.jpg';
@@ -1392,13 +1473,13 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         document.getElementById('qv-claimant-name').textContent = it.claimant_name || 'ผู้รับ';
         document.getElementById('qv-delivered-by').textContent = it.delivered_by || '-';
         document.getElementById('qv-delivered-at').textContent = it.delivered_at ? new Date(it.delivered_at).toLocaleString('th-TH') : '';
-        document.getElementById('qv-status-pill').textContent = '✨ ส่งมอบสำเร็จ';
-        document.getElementById('qv-status-pill').className = 'absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-600 text-white shadow-md border border-emerald-400/40';
+        document.getElementById('qv-status-pill').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5"></span>ส่งมอบสำเร็จ`;
+        document.getElementById('qv-status-pill').className = 'absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-midnight-950/90 text-emerald-300 border border-emerald-800/80 flex items-center shadow-sm';
       } else {
         hoBox.classList.add('hidden');
         hoBtn.classList.remove('hidden');
-        document.getElementById('qv-status-pill').textContent = '🟢 รอเจ้าของมารับ';
-        document.getElementById('qv-status-pill').className = 'absolute top-2.5 left-2.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-600 text-white shadow-md border border-blue-400/40';
+        document.getElementById('qv-status-pill').innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-blue-400 mr-1.5"></span>รอเจ้าของมารับ`;
+        document.getElementById('qv-status-pill').className = 'absolute top-2.5 left-2.5 px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-midnight-950/90 text-blue-300 border border-blue-800/80 flex items-center shadow-sm';
       }
 
       const modal = document.getElementById('modal-quick-view');
@@ -1481,12 +1562,12 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         if (data.success) {
           closeIntakeModal();
           await loadItems();
-          alert(`✅ บันทึกของเข้าคลังเรียบร้อยแล้ว!\nรหัสประจำสิ่งของ: ${data.item.item_code}\nพิกัดเก็บ: ${storage_location}`);
+          alert(`บันทึกของเข้าคลังเรียบร้อยแล้ว\nรหัสประจำสิ่งของ: ${data.item.item_code}\nพิกัดเก็บ: ${storage_location}`);
         } else {
-          alert('⚠️ ' + (data.error || 'ไม่สามารถบันทึกได้'));
+          alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถบันทึกได้'));
         }
       } catch (err) {
-        alert('⚠️ ข้อผิดพลาด: ' + err.message);
+        alert('เกิดข้อผิดพลาด: ' + err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = '+ บันทึกสิ่งของเข้าคลัง';
@@ -1551,7 +1632,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const dutyId = document.getElementById('ho-duty-id').value.trim();
 
       if (!currentHandoverBase64) {
-        alert('📸 กรุณาถ่ายรูปหรือเลือกรูปถ่ายหลักฐานคนคู่กับสิ่งของก่อนกด OK');
+        alert('กรุณาถ่ายรูปหรือเลือกรูปถ่ายหลักฐานคนคู่กับสิ่งของก่อนกด OK');
         return;
       }
       if (!name) {
@@ -1599,10 +1680,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         document.getElementById('ho-step-1').classList.add('hidden');
         document.getElementById('ho-step-2').classList.remove('hidden');
       } catch (err) {
-        alert('⚠️ ไม่สามารถค้นหาข้อมูลสารวัตรได้: ' + err.message);
+        alert('ไม่สามารถค้นหาข้อมูลสารวัตรได้: ' + err.message);
       } finally {
         okBtn.disabled = false;
-        okBtn.innerHTML = `<span>ตรวจสอบข้อมูล (OK)</span> <span>➡️</span>`;
+        okBtn.innerHTML = `<span>ตรวจสอบข้อมูล (OK)</span>`;
       }
     }
 
@@ -1660,15 +1741,15 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           closeHandoverModal();
           await loadItems();
           await loadClaims();
-          alert(`✨ ส่งมอบสิ่งของคืนสำเร็จเรียบร้อย!\nผู้รับมอบ: ${claimant_name}\nผู้ส่งมอบ: ${payload.delivered_by}`);
+          alert(`ส่งมอบสิ่งของคืนสำเร็จเรียบร้อย\nผู้รับมอบ: ${claimant_name}\nผู้ส่งมอบ: ${payload.delivered_by}`);
         } else {
-          alert('⚠️ ' + (data.error || 'ไม่สามารถบันทึกการส่งมอบได้'));
+          alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถบันทึกการส่งมอบได้'));
         }
       } catch (err) {
-        alert('⚠️ ข้อผิดพลาด: ' + err.message);
+        alert('เกิดข้อผิดพลาด: ' + err.message);
       } finally {
         btn.disabled = false;
-        btn.textContent = '✅ ยืนยันการส่งมอบ';
+        btn.textContent = 'ยืนยันการส่งมอบ';
       }
     }
 
@@ -1686,7 +1767,6 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     async function submitNewCategoryQuick(e) {
       e.preventDefault();
       const name = document.getElementById('quick-cat-name').value.trim();
-      const icon = document.getElementById('quick-cat-icon').value.trim() || '📦';
       const description = document.getElementById('quick-cat-desc').value.trim();
 
       if (!name) return;
@@ -1706,10 +1786,10 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           document.getElementById('quick-cat-desc').value = '';
           await loadCategories();
         } else {
-          alert('⚠️ ' + (data.error || 'ไม่สามารถเพิ่มหมวดได้'));
+          alert('เกิดข้อผิดพลาด: ' + (data.error || 'ไม่สามารถเพิ่มหมวดได้'));
         }
       } catch (err) {
-        alert('⚠️ ข้อผิดพลาด: ' + err.message);
+        alert('เกิดข้อผิดพลาด: ' + err.message);
       } finally {
         btn.disabled = false;
       }
@@ -1755,14 +1835,14 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     function copyScriptCode() {
       const code = document.getElementById('script-code-block').textContent;
       navigator.clipboard.writeText(code).then(() => {
-        alert('✅ คัดลอกโค้ด Apps Script เรียบร้อยแล้ว!\nสามารถนำไปวางใน Script Editor ของ Google Form เพื่อเชื่อมต่อเข้าฐานข้อมูลได้ทันที');
+        alert('คัดลอกโค้ด Apps Script เรียบร้อยแล้ว\nสามารถนำไปวางใน Script Editor ของ Google Form เพื่อเชื่อมต่อเข้าฐานข้อมูลได้ทันที');
       });
     }
 
     function copySqlCode() {
       const code = document.getElementById('sql-code-block').textContent;
       navigator.clipboard.writeText(code).then(() => {
-        alert('✅ คัดลอกคำสั่ง SQL เรียบร้อยแล้ว!\nสามารถนำไปวางใน Supabase Dashboard > SQL Editor แล้วกด Run ได้ทันที');
+        alert('คัดลอกคำสั่ง SQL เรียบร้อยแล้ว\nสามารถนำไปวางใน Supabase Dashboard > SQL Editor แล้วกด Run ได้ทันที');
       });
     }
 

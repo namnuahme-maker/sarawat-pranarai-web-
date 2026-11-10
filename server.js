@@ -1324,13 +1324,20 @@ app.get('/verify', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7.2 หน้าเว็บบัตรประจำตัวดิจิทัล (/card?id=...)
+// 7.2 หน้าเว็บบอร์ดบัญชาการภายใน (/dashboard, /app, /console, /card)
 // -------------------------------------------------------------
-app.get(['/card', '/card.html'], (req, res) => {
+app.get(['/dashboard', '/dashboard.html', '/app', '/console', '/card', '/card.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
+});
+
+// -------------------------------------------------------------
+// 7.3 หน้าเว็บ Modern SaaS Landing Page (/, /landing)
+// -------------------------------------------------------------
+app.get(['/', '/landing', '/landing.html'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// หน้าแดชบอร์ดหลัก
+// หน้าหลักสำรอง
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
