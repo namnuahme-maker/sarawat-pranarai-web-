@@ -1324,9 +1324,16 @@ app.get('/verify', (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7.2 หน้าเว็บบอร์ดบัญชาการภายใน (/dashboard, /app, /console, /card)
+// 7.2 สตูดิโอออกแบบเทมเพลตบัตรสารวัตร (/card-studio, /card)
 // -------------------------------------------------------------
-app.get(['/dashboard', '/dashboard.html', '/app', '/console', '/card', '/card.html'], (req, res) => {
+app.get(['/card-studio', '/card-studio.html', '/card', '/card.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'card-studio.html'));
+});
+
+// -------------------------------------------------------------
+// 7.2.1 หน้าเว็บบอร์ดบัญชาการเดิม (/dashboard, /app, /console)
+// -------------------------------------------------------------
+app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 

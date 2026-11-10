@@ -87,54 +87,85 @@
   <!-- ========================================================== -->
   <!-- TOP NAVIGATION BAR (MIDNIGHT COMMAND HEADER) -->
   <!-- ========================================================== -->
-  <header class="sticky top-0 z-40 bg-midnight-900/95 backdrop-blur-md border-b border-midnight-700/80 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-3">
+  <!-- ========================================================== -->
+  <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (UNIVERSAL NAVIGATION) -->
+  <!-- ========================================================== -->
+  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-midnight-700/80 px-3 sm:px-4 py-2.5 transition">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
       
-      <!-- Brand & Tactical Station Identity -->
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 rounded-lg bg-midnight-850 border border-midnight-700/80 flex items-center justify-center text-blue-400 flex-shrink-0">
-          <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+      <!-- Brand & School Logo -->
+      <a href="/" class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group">
+        <div class="relative flex-shrink-0">
+          <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
+          <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
         </div>
-        <div>
-          <div class="flex items-center gap-2">
-            <h1 class="text-sm sm:text-base font-semibold text-white leading-tight">คลังของหายสารวัตรนักเรียน</h1>
-            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-800/60">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-              ฐานหน้าห้องกิจการ
-            </span>
+        <div class="leading-tight">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="font-bold text-xs sm:text-sm md:text-base tracking-wider text-slate-100 uppercase">SARAWAT PRANARAI</span>
+            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold">LOST & FOUND</span>
           </div>
-          <p class="text-xs text-slate-400 font-mono mt-0.5">
-            โรงเรียนพระนารายณ์ • ทะเบียนคุมวัตถุพยาน
-          </p>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block">คลังของหายและส่งมอบคืน • โรงเรียนพระนารายณ์</p>
         </div>
-      </div>
+      </a>
+
+      <!-- Desktop Core Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-1.5 bg-midnight-900/90 border border-midnight-700/80 rounded-xl p-1 font-sans text-xs">
+        <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
+          <span>🛡️</span> หน้าหลัก
+        </a>
+        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
+          <span>🎨</span> ทำบัตร
+        </a>
+        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow">
+          <span>📦</span> ของหาย
+        </a>
+        <a href="/verify" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
+          <span>🔍</span> ตรวจบัตร
+        </a>
+        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
+          <span>📷</span> บอดี้แคม
+        </a>
+      </nav>
 
       <!-- Header Controls -->
       <div class="flex items-center gap-2 sm:gap-3">
-        
         <!-- Live Clock -->
-        <div class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-midnight-850 border border-midnight-700/80 text-slate-300 text-xs font-mono">
-          <svg class="w-3.5 h-3.5 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-midnight-850 border border-midnight-700/80 text-slate-300 text-xs font-mono">
+          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
           <span id="live-clock" class="font-medium text-slate-200">12:00:00</span>
         </div>
 
         <!-- Primary Action: Intake Item -->
-        <button onclick="openIntakeModal()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium text-xs sm:text-sm transition-colors shadow-sm">
-          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
+        <button onclick="openIntakeModal()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-500 active:bg-blue-700 text-white font-medium text-xs transition shadow-sm">
+          <span>➕</span>
           <span>บันทึกของพบเจอ</span>
         </button>
 
-        <!-- Central Hub Link -->
-        <a href="/" class="hidden sm:inline-flex px-3 py-2 rounded-lg bg-midnight-850 border border-midnight-700/80 hover:bg-midnight-800 text-slate-400 hover:text-white text-xs font-medium transition-colors">
-          ศูนย์กลาง
-        </a>
-
-        <!-- SaaS Landing Link -->
-        <a href="/landing" class="hidden sm:inline-flex px-3 py-2 rounded-lg bg-midnight-850 border border-midnight-700/80 hover:bg-midnight-800 text-slate-400 hover:text-white text-xs font-medium transition-colors">
-          หน้าแนะนำ
-        </a>
+        <!-- Mobile Hamburger Menu Button -->
+        <button onclick="document.getElementById('mobile-lf-nav')?.classList.toggle('hidden')" class="lg:hidden p-1.5 rounded-lg bg-midnight-850 text-slate-300 hover:text-white border border-midnight-700/80 text-xs flex items-center justify-center transition" aria-label="Toggle navigation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
       </div>
 
+    </div>
+
+    <!-- Mobile Dropdown Navigation Drawer -->
+    <div id="mobile-lf-nav" class="hidden lg:hidden pt-3 pb-2 border-t border-midnight-700/80 mt-2.5 grid grid-cols-2 gap-2 text-xs">
+      <a href="/" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>🛡️</span> หน้าหลัก
+      </a>
+      <a href="/card-studio" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>🎨</span> ทำบัตรสารวัตร
+      </a>
+      <a href="/lost-found" class="p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 text-amber-300 font-bold">
+        <span>📦</span> คลังของหาย
+      </a>
+      <a href="/verify" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>🔍</span> ตรวจสอบบัตร
+      </a>
+      <a href="/bodycam-upload" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>📷</span> ส่งภาพบอดี้แคม
+      </a>
     </div>
   </header>
 

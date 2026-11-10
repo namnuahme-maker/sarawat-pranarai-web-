@@ -1,0 +1,1244 @@
+<!DOCTYPE html>
+<html lang="th" class="dark scroll-smooth antialiased">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title>SARAWAT CARD STUDIO // สตูดิโอออกแบบบัตรสารวัตรนักเรียน</title>
+  
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <!-- Tailwind CSS & Tactical Dark Palette -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              950: '#030712',
+              900: '#090d16',
+              850: '#0f172a',
+              800: '#1e293b',
+              border: 'rgba(255,255,255,0.08)',
+              glow: 'rgba(59,130,246,0.15)'
+            }
+          },
+          fontFamily: {
+            mono: ['JetBrains Mono', 'Menlo', 'Consolas', 'monospace'],
+            sans: ['Prompt', 'sans-serif'],
+            tactical: ['Syncopate', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;700&family=JetBrains+Mono:wght@400;600;700&family=Prompt:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Fabric.js, JsBarcode, JSZip -->
+  <script src="https://cdn.jsdelivr.net/npm/fabric@5.3.0/dist/fabric.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    body {
+      background-color: #000000;
+      color: #f8fafc;
+      font-family: 'Prompt', sans-serif;
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 5px; height: 5px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: #000; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    
+    @media print {
+      body * { visibility: hidden; }
+      #a4-print-sheet, #a4-print-sheet * { visibility: visible; }
+      #a4-print-sheet {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        background: white !important;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-black text-slate-100 flex flex-col selection:bg-amber-500 selection:text-black">
+
+  <!-- ========================================================== -->
+  <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (UNIVERSAL NAVIGATION) -->
+  <!-- ========================================================== -->
+  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-tactical-border px-3 sm:px-4 py-2.5 transition">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Brand & School Logo -->
+      <a href="/" class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group">
+        <div class="relative flex-shrink-0">
+          <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
+          <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
+        </div>
+        <div class="leading-tight">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="font-bold text-xs sm:text-sm md:text-base tracking-wider text-slate-100 uppercase font-tactical">SARAWAT PRANARAI</span>
+            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold">CARD STUDIO</span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block">สตูดิโอออกแบบบัตรประจำตัว • โรงเรียนพระนารายณ์</p>
+        </div>
+      </a>
+
+      <!-- Desktop Core Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-1.5 bg-tactical-900/90 border border-tactical-border rounded-xl p-1 font-sans text-xs">
+        <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>🛡️</span> หน้าหลัก
+        </a>
+        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow">
+          <span>🎨</span> ทำบัตร
+        </a>
+        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>📦</span> ของหาย
+        </a>
+        <a href="/verify" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>🔍</span> ตรวจบัตร
+        </a>
+        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>📷</span> บอดี้แคม
+        </a>
+      </nav>
+
+      <!-- Action Controls & Guide & Mobile Toggle -->
+      <div class="flex items-center gap-2">
+        <button onclick="openFeatureGuideModal()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="เปิดคู่มือแนะนำฟังก์ชันและความสามารถของระบบ">
+          <span class="animate-pulse">💡</span> <span class="hidden sm:inline">แนะนำฟังก์ชัน</span>
+        </button>
+
+        <button onclick="location.reload()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-tactical-900 hover:bg-tactical-800 text-slate-300 hover:text-white border border-tactical-border text-xs flex items-center gap-1.5 transition active:scale-95" title="รีเฟรชสตูดิโอ">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
+        </button>
+
+        <button onclick="toggleMobileNav()" class="lg:hidden p-1.5 rounded-lg bg-tactical-900 text-slate-300 hover:text-white border border-tactical-border text-xs flex items-center justify-center transition" aria-label="Toggle navigation">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Dropdown Navigation Drawer -->
+    <div id="mobile-nav-drawer" class="hidden lg:hidden pt-3 pb-2 border-t border-tactical-border/70 mt-2.5 grid grid-cols-2 gap-2 text-xs">
+      <a href="/" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>🛡️</span> หน้าหลัก
+      </a>
+      <a href="/card-studio" class="p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 text-amber-300 font-bold">
+        <span>🎨</span> ทำบัตรสารวัตร
+      </a>
+      <a href="/lost-found" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>📦</span> คลังของหาย
+      </a>
+      <a href="/verify" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>🔍</span> ตรวจสอบบัตร
+      </a>
+      <a href="/bodycam-upload" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>📷</span> ส่งภาพบอดี้แคม
+      </a>
+      <button onclick="toggleMobileNav(); openFeatureGuideModal();" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300 text-left">
+        <span>💡</span> แนะนำฟังก์ชัน
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================== -->
+  <!-- 🎨 CARD STUDIO WORKSPACE (MAIN ENGINE) -->
+  <!-- ========================================================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 space-y-6">
+
+    <!-- Top Action & Toolbar Bar -->
+    <div class="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4 bg-tactical-900/90 border border-tactical-border rounded-2xl p-4 sm:p-5 shadow-2xl">
+      <div>
+        <h1 class="text-base sm:text-lg font-bold text-white flex items-center gap-2 font-tactical">
+          <span class="text-amber-400">🎨</span> CARD STUDIO // สตูดิโอออกแบบเทมเพลตบัตร
+        </h1>
+        <p class="text-xs text-slate-400 mt-1">
+          คลิกเลือกเลเยอร์บนบัตรเพื่อลากย้าย หมุน ย่อขยาย หรือปรับสี | มาตรฐาน CR80 (430 × 680 px) พร้อมบันทึกเทมเพลตขึ้นเซิร์ฟเวอร์
+        </p>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- Live Member Preview Selector -->
+        <div class="flex items-center gap-1.5 bg-black border border-tactical-border rounded-xl px-2.5 py-1.5 text-xs">
+          <span class="text-slate-400">พรีวิว:</span>
+          <select id="studio-member-select" onchange="loadMemberToStudio(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer max-w-[200px] truncate">
+            <option value="SAMPLE" class="bg-tactical-950 text-white">นายณิชกานต์ (NAMNUAH) - ตัวอย่าง Mockup</option>
+          </select>
+        </div>
+
+        <!-- Custom Uploads -->
+        <input type="file" id="studio-photo-upload-input" accept="image/*" class="hidden" onchange="handleStudentPhotoUpload(event)">
+        <input type="file" id="studio-image-upload-input" accept="image/*" class="hidden" onchange="handleCustomImageUpload(event)">
+        
+        <button onclick="document.getElementById('studio-photo-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+          <span>👤</span> อัปโหลดรูปคน
+        </button>
+        <button onclick="document.getElementById('studio-image-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
+          <span>🖼️</span> เพิ่มโลโก้/รูป
+        </button>
+
+        <button onclick="saveStudioTemplate()" id="btn-save-template" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>💾</span> บันทึกเทมเพลต
+        </button>
+        <button onclick="resetStudioTemplate()" class="px-2.5 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-slate-300 hover:text-white border border-tactical-border text-xs transition active:scale-95">
+          <span>🔄</span> รีเซ็ต
+        </button>
+        <button onclick="exportCurrentCardPNG()" class="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>📥</span> โหลดรูปเดี่ยว (HD)
+        </button>
+        <button onclick="batchExportAllCards()" id="btn-batch-export" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>📦</span> โหลดทุกคน (ZIP)
+        </button>
+        <button onclick="openA4PrintModal()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>🖨️</span> จัดพิมพ์ A4
+        </button>
+      </div>
+    </div>
+
+    <!-- Presets & Quick Style Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 bg-tactical-900 border border-tactical-border rounded-2xl p-3 px-4 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold text-slate-300 flex items-center gap-1.5 font-mono">
+          <span>🎨</span> เทมเพลตสำเร็จรูป:
+        </span>
+        <button onclick="applyPreset('tactical')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-blue-500/40 text-blue-400 hover:text-blue-300 font-bold transition active:scale-95">
+          🛡️ Tactical Standard
+        </button>
+        <button onclick="applyPreset('executive')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition active:scale-95">
+          👑 Executive Gold
+        </button>
+        <button onclick="applyPreset('academic')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-cyan-500/40 text-cyan-400 hover:text-cyan-300 font-bold transition active:scale-95">
+          🎓 Formal Academic
+        </button>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold text-slate-300 flex items-center gap-1 font-mono">
+          <span>🏅</span> ตราเวร:
+        </span>
+        <button onclick="stampDutyBadge('M')" class="w-6 h-6 rounded bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500 text-blue-400 font-bold text-[10px]" title="เวรจันทร์">M</button>
+        <button onclick="stampDutyBadge('T')" class="w-6 h-6 rounded bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500 text-purple-400 font-bold text-[10px]" title="เวรอังคาร">T</button>
+        <button onclick="stampDutyBadge('W')" class="w-6 h-6 rounded bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500 text-emerald-400 font-bold text-[10px]" title="เวรพุธ">W</button>
+        <button onclick="stampDutyBadge('Ts')" class="w-6 h-6 rounded bg-orange-600/20 hover:bg-orange-600/40 border border-orange-500 text-orange-400 font-bold text-[10px]" title="เวรพฤหัสบดี">Ts</button>
+        <button onclick="stampDutyBadge('F')" class="w-6 h-6 rounded bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500 text-rose-400 font-bold text-[10px]" title="เวรศุกร์">F</button>
+        <button onclick="stampDutyBadge('S')" class="w-6 h-6 rounded bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500 text-amber-400 font-bold text-[10px]" title="เวรพิเศษ">S</button>
+        
+        <span class="text-slate-600 mx-1">|</span>
+        <span class="font-bold text-slate-300 flex items-center gap-1 font-mono">
+          <span>🖼️</span> กรอบรูป:
+        </span>
+        <button onclick="setPhotoFrameShape('fade')" class="px-2 py-0.5 rounded bg-black hover:bg-tactical-800 border border-tactical-border text-slate-300">Fade</button>
+        <button onclick="setPhotoFrameShape('rounded')" class="px-2 py-0.5 rounded bg-black hover:bg-tactical-800 border border-tactical-border text-slate-300">มน</button>
+      </div>
+    </div>
+
+    <!-- Workspace Grid: Left Canvas (Col 7) / Right Inspector (Col 5) -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      
+      <!-- Canvas Display Zone -->
+      <div class="lg:col-span-7 p-4 sm:p-6 rounded-2xl bg-tactical-950 border border-tactical-border flex flex-col items-center justify-center relative min-h-[740px]">
+        
+        <div class="text-[11px] font-mono text-slate-400 mb-3 flex items-center gap-3">
+          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Canvas Active</span>
+          <span>•</span>
+          <span>430 × 680 px (CR80)</span>
+          <span>•</span>
+          <span class="text-amber-400">คลิกที่ข้อความหรือรูปเพื่อจัดตำแหน่ง</span>
+        </div>
+
+        <!-- Fabric Canvas Dropzone -->
+        <div id="studio-dropzone" class="relative rounded-lg shadow-[0_20px_50px_rgba(0,0,0,0.9)] overflow-hidden border border-slate-700/60" style="width: 430px; height: 680px; background: #ffffff;">
+          <canvas id="studio-canvas" width="430" height="680"></canvas>
+          
+          <div id="studio-drop-overlay" class="absolute inset-0 bg-blue-600/80 backdrop-blur-sm border-4 border-dashed border-white hidden flex flex-col items-center justify-center text-white z-50 pointer-events-none">
+            <span class="text-4xl animate-bounce">📥</span>
+            <p class="font-bold text-sm mt-2">วางไฟล์รูปภาพที่นี่</p>
+          </div>
+        </div>
+
+        <div class="mt-4 text-[11px] text-slate-400 flex items-center gap-4">
+          <span>💡 <b>คีย์ลัด:</b> กดลูกศรบนคีย์บอร์ดเพื่อเลื่อนทีละ 1px (กด Shift + ลูกศร = 10px)</span>
+        </div>
+      </div>
+
+      <!-- Right Inspector & Controls -->
+      <div class="lg:col-span-5 space-y-4">
+        
+        <!-- Inspector Panel -->
+        <div class="bg-tactical-900 border border-tactical-border rounded-2xl p-5 shadow-xl text-left space-y-4">
+          <div class="flex items-center justify-between border-b border-tactical-border pb-3">
+            <h3 class="text-xs sm:text-sm font-bold text-white flex items-center gap-2">
+              <span>⚙️</span> คุณสมบัติเลเยอร์ (Inspector)
+            </h3>
+            <span id="selected-layer-name" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">ไม่ได้เลือกวัตถุ</span>
+          </div>
+
+          <div id="inspector-empty-state" class="py-8 text-center text-slate-500 text-xs">
+            คลิกที่เลเยอร์ใดก็ได้บนบัตรเพื่อปรับค่าตำแหน่ง, ฟอนต์, หรือสี
+          </div>
+
+          <div id="inspector-controls" class="space-y-4 hidden text-xs">
+            
+            <!-- Text Content (for Text Objects) -->
+            <div id="field-text-content" class="space-y-1">
+              <label class="text-slate-400 font-mono text-[11px]">ข้อความ:</label>
+              <input type="text" id="prop-text" oninput="updateActiveObjectProperty('text', this.value)" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-sans">
+            </div>
+
+            <!-- Position Controls (X, Y) -->
+            <div class="grid grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">ตำแหน่ง X (ซ้าย):</label>
+                <input type="number" id="prop-left" oninput="updateActiveObjectProperty('left', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+              </div>
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">ตำแหน่ง Y (บน):</label>
+                <input type="number" id="prop-top" oninput="updateActiveObjectProperty('top', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+              </div>
+            </div>
+
+            <!-- Font Styling Controls -->
+            <div id="field-font-controls" class="space-y-3">
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-slate-400 font-mono text-[11px]">ขนาดตัวอักษร (Size):</label>
+                  <input type="number" id="prop-fontsize" oninput="updateActiveObjectProperty('fontSize', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+                </div>
+                <div class="space-y-1">
+                  <label class="text-slate-400 font-mono text-[11px]">แบบอักษร (Font):</label>
+                  <select id="prop-fontfamily" onchange="updateActiveObjectProperty('fontFamily', this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 cursor-pointer">
+                    <option value="Syncopate">Syncopate (สากล)</option>
+                    <option value="Prompt">Prompt (ไทยทันสมัย)</option>
+                    <option value="Chakra Petch">Chakra Petch (แทคติคอล)</option>
+                    <option value="JetBrains Mono">JetBrains Mono (โค้ด)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-2 gap-3">
+                <div class="space-y-1">
+                  <label class="text-slate-400 font-mono text-[11px]">ระยะห่างตัวอักษร (Spacing):</label>
+                  <input type="number" id="prop-charspacing" oninput="updateActiveObjectProperty('charSpacing', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+                </div>
+                <div class="space-y-1">
+                  <label class="text-slate-400 font-mono text-[11px]">ความหนา (Weight):</label>
+                  <select id="prop-fontweight" onchange="updateActiveObjectProperty('fontWeight', this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 cursor-pointer">
+                    <option value="normal">Normal</option>
+                    <option value="bold">Bold (หนา)</option>
+                    <option value="600">Semi-Bold</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Color & Opacity -->
+            <div class="grid grid-cols-2 gap-3 items-center">
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">สีเนื้อวัตถุ (Fill):</label>
+                <div class="flex items-center gap-2">
+                  <input type="color" id="prop-fill-color" onchange="updateActiveObjectProperty('fill', this.value)" class="w-8 h-8 rounded border border-tactical-border bg-transparent cursor-pointer">
+                  <input type="text" id="prop-fill-text" oninput="updateActiveObjectProperty('fill', this.value)" class="flex-1 px-2.5 py-1 rounded bg-black border border-tactical-border text-white font-mono text-xs">
+                </div>
+              </div>
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">ความโปร่งใส (Opacity):</label>
+                <input type="range" id="prop-opacity" min="0" max="1" step="0.05" oninput="updateActiveObjectProperty('opacity', parseFloat(this.value))" class="w-full accent-amber-500">
+              </div>
+            </div>
+
+            <!-- Layer Order Actions -->
+            <div class="border-t border-tactical-border pt-3 space-y-2">
+              <label class="text-slate-400 font-mono text-[11px]">ลำดับเลเยอร์ & จัดการ:</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button onclick="bringActiveObjectForward()" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 text-slate-300 border border-tactical-border text-xs flex items-center justify-center gap-1">
+                  <span>⬆️</span> ขยับขึ้น 1 ชั้น
+                </button>
+                <button onclick="sendActiveObjectBackward()" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 text-slate-300 border border-tactical-border text-xs flex items-center justify-center gap-1">
+                  <span>⬇️</span> ขยับลง 1 ชั้น
+                </button>
+              </div>
+              <button onclick="deleteActiveObject()" class="w-full py-1.5 rounded-lg bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-500/40 text-xs font-semibold flex items-center justify-center gap-1 mt-2">
+                <span>🗑️</span> ลบเลเยอร์นี้ออกจากบัตร
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Layer List Overview -->
+        <div class="bg-tactical-900 border border-tactical-border rounded-2xl p-4 shadow-xl text-left space-y-3">
+          <h3 class="text-xs font-bold text-slate-200 flex items-center gap-2 font-mono">
+            <span>📑</span> เลเยอร์ทั้งหมดบนบัตร (Layers)
+          </h3>
+          <div id="studio-layers-container" class="space-y-1.5 max-h-[220px] overflow-y-auto custom-scrollbar text-xs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================== -->
+  <!-- 🖨️ A4 SHEET PRINT PREVIEW & PRINT ENGINE (8 CARDS/SHEET) -->
+  <!-- ========================================================== -->
+  <div id="a4-print-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex flex-col items-center justify-center p-4">
+    <div class="bg-tactical-900 border border-tactical-border rounded-2xl w-full max-w-5xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
+      <div class="p-4 border-b border-tactical-border flex items-center justify-between">
+        <h3 class="text-sm font-bold text-white flex items-center gap-2">
+          <span>🖨️</span> ตัวอย่างการจัดหน้าพิมพ์ A4 (8 ใบ/แผ่น)
+        </h3>
+        <div class="flex items-center gap-2">
+          <button onclick="window.print()" class="px-3.5 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs flex items-center gap-1.5 shadow">
+            <span>🖨️</span> สั่งพิมพ์ (Print / PDF)
+          </button>
+          <button onclick="closeA4PrintModal()" class="w-8 h-8 rounded-lg bg-tactical-800 text-slate-300 hover:text-white flex items-center justify-center text-sm">✕</button>
+        </div>
+      </div>
+      
+      <div class="p-6 overflow-y-auto flex-1 flex justify-center bg-black custom-scrollbar">
+        <!-- A4 Page Container (Ratio 1:1.414) -->
+        <div id="a4-print-sheet" class="bg-white text-black p-6 grid grid-cols-4 gap-3 shadow-2xl" style="width: 794px; min-height: 1123px;">
+          <!-- 8 cards rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 💡 TACTICAL FEATURE GUIDE MODAL (GLOBAL SYSTEM GUIDE) -->
+  <!-- ========================================================== -->
+  <div id="feature-guide-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all">
+    <div class="bg-tactical-900 border border-tactical-border rounded-2xl w-full max-w-3xl overflow-hidden shadow-2xl">
+      <div class="p-4 sm:p-5 border-b border-tactical-border flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-base">💡</div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-white">คู่มือแนะนำฟังก์ชัน SARAWAT PRANARAI OS</h3>
+            <p class="text-[11px] text-slate-400">ระบบสารสนเทศและการบัญชาการสารวัตรนักเรียนแบบรวมศูนย์</p>
+          </div>
+        </div>
+        <button onclick="closeFeatureGuideModal()" class="w-8 h-8 rounded-lg bg-tactical-800 text-slate-300 hover:text-white flex items-center justify-center text-sm">✕</button>
+      </div>
+
+      <div class="p-5 sm:p-6 space-y-4 max-h-[70vh] overflow-y-auto custom-scrollbar text-xs text-slate-300">
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-amber-300 flex items-center gap-1.5 text-sm">
+              <span>🛡️</span> ศูนย์บัญชาการ (Command OS)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              หน้ารวมศูนย์เฝ้าระวังเวร 6 วัน, สถิติความพร้อมปฏิบัติการ (Bento KPIs), ค้นหารายชื่อสารวัตร, ดูบัตรดิจิทัล CR80 พร้อมส่งออกใบเช็คชื่อ และคัดลอกสรุปเวรลงกลุ่มไลน์
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-cyan-300 flex items-center gap-1.5 text-sm">
+              <span>🎨</span> สตูดิโอออกแบบบัตร (Card Studio)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              ระบบปรับแต่งเลเยอร์บัตรด้วย Fabric.js แบบ 2D ลากย้ายปรับเปลี่ยนฟอนต์, สี, โลโก้, ลายน้ำหนุมาน และบันทึกเป็นเทมเพลตทางการซิงค์ตรงกับบอท Discord ทันที
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-emerald-300 flex items-center gap-1.5 text-sm">
+              <span>📦</span> คลังของหาย (Lost & Found)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              บันทึกสิ่งของที่เก็บได้ ตรวจสอบสถานะการรับคืน พร้อมระบบ Smart Matching จับคู่ของที่ตามหากับประวัติการส่งมอบ
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-purple-300 flex items-center gap-1.5 text-sm">
+              <span>🔍</span> ตรวจสอบบัตร (Digital ID Verify)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              หน้าสแกน QR Code เพื่อยืนยันสถานะความถูกต้องของบัตรสารวัตรนักเรียนแบบสาธารณะ ตรวจสอบรหัสเวรและข้อมูลตัวจริงได้ทันที
+            </p>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-xl bg-blue-950/20 border border-blue-500/30 flex items-center justify-between gap-4">
+          <div>
+            <div class="font-bold text-blue-300 text-xs">ต้องการทัวร์หน้าจอจริงหรือไม่?</div>
+            <p class="text-[11px] text-slate-400">ระบบจะไฮไลต์ชี้จุดสำคัญบนหน้าจอหลักทีละขั้นตอน</p>
+          </div>
+          <a href="/?tour=start" class="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow whitespace-nowrap">
+            <span>🎯</span> เริ่มทัวร์หน้าจอจริง
+          </a>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-5 right-5 z-50 transform translate-y-20 opacity-0 transition-all duration-300 px-4 py-2.5 rounded-xl bg-tactical-850 border border-amber-500/50 text-white text-xs font-semibold shadow-2xl flex items-center gap-2">
+    <span id="toast-icon">✨</span>
+    <span id="toast-msg">ข้อความ</span>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 💻 STUDIO SCRIPT LOGIC -->
+  <!-- ========================================================== -->
+  <script>
+    let studioCanvas = null;
+    let studioConfig = null;
+    let activeStudioMember = null;
+    let allMembers = [];
+
+    const DEFAULT_STUDIO_CONFIG = {
+      canvas: { width: 430, height: 680, backgroundColor: "#ffffff" },
+      elements: {
+        stripeBlue: { id: "stripeBlue", name: "แถบซ้าย (น้ำเงิน)", type: "rect", left: 0, top: 0, width: 13, height: 680, fill: "#002b80", selectable: false },
+        stripeRed: { id: "stripeRed", name: "แถบขวา (แดง)", type: "rect", left: 417, top: 0, width: 13, height: 680, fill: "#b91c1c", selectable: false },
+        verticalSchoolText: { id: "verticalSchoolText", name: "ข้อความแนวตั้ง PRANARAI", type: "text", text: "PRANARAI SCHOOL", left: 403, top: 108, fontSize: 13, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", angle: 90, charSpacing: 400 },
+        watermark: { id: "watermark", name: "ลายน้ำตราสารวัตร (เอียง)", type: "image", src: "/assets/logo.png", left: -20, top: 75, width: 250, height: 250, opacity: 0.45, angle: -14 },
+        photo: { id: "photo", name: "รูปถ่ายนักเรียน (Gradient Fade)", type: "photo", left: 35, top: 125, width: 350, height: 360 },
+        headerSarawat: { id: "headerSarawat", name: "หัวข้อ SARAWAT", type: "text", text: "SARAWAT", left: 215, top: 14, originX: "center", fontSize: 47, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", charSpacing: 200, scaleY: 1.05 },
+        headerInspector: { id: "headerInspector", name: "หัวข้อ INSPECTOR (กลวง)", type: "text", text: "INSPECTOR", left: 215, top: 60, originX: "center", fontSize: 26, fontFamily: "Syncopate", fontWeight: "bold", fill: "transparent", stroke: "#94a3b8", strokeWidth: 1.2, charSpacing: 350 },
+        nickname: { id: "nickname", name: "ชื่อเล่นอังกฤษ (ใหญ่)", type: "text", text: "{{nickname}}", left: 215, top: 490, originX: "center", fontSize: 47, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", charSpacing: 250, scaleY: 1.05 },
+        codeline: { id: "codeline", name: "รหัสเวรและชั้น (Code Line)", type: "text", text: "{{codeline}}", left: 215, top: 542, originX: "center", fontSize: 19, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", charSpacing: 110 },
+        thaiNickname: { id: "thaiNickname", name: "ชื่อเล่นไทย", type: "text", text: "{{thaiNickname}}", left: 130, top: 574, originX: "center", fontSize: 20, fontFamily: "Prompt", fontWeight: "bold", fill: "#050505" },
+        thaiFullname: { id: "thaiFullname", name: "ชื่อ-นามสกุลไทย", type: "text", text: "{{thaiFullname}}", left: 130, top: 598, originX: "center", fontSize: 15, fontFamily: "Prompt", fontWeight: "600", fill: "#050505" },
+        barcode: { id: "barcode", name: "บาร์โค้ด Code128", type: "barcode", left: 35, top: 622, width: 185, height: 48 },
+        schoolEmblem: { id: "schoolEmblem", name: "ตราโรงเรียนพระนารายณ์", type: "image", src: "/assets/school_emblem.png", left: 315, top: 568, width: 78, height: 98 }
+      }
+    };
+
+    const SAMPLE_MEMBER = {
+      first_name: "ณิชกานต์",
+      last_name: "คำไชย",
+      nickname: "NAMNUAH",
+      thai_nickname: "นำเหนือ",
+      grade_class: "ม.5/7",
+      student_no: "69055",
+      phone_number: "0634125121",
+      duty_id: "TS1",
+      profile_image_url: "/assets/logo.png"
+    };
+
+    const PRESET_TEMPLATES = {
+      tactical: {
+        name: 'Tactical Standard (มืด-ฟ้าแทคติคอล)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#ffffff';
+          if (studioConfig.elements.headerInspector) studioConfig.elements.headerInspector.fill = '#38bdf8';
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#0284c7';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#e2e8f0';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#0369a1';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#0f172a';
+          studioConfig.photoShape = 'fade';
+        }
+      },
+      executive: {
+        name: 'Executive Gold (ทองหรูหราผู้บริหาร)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.stripeBlue) studioConfig.elements.stripeBlue.fill = '#b45309';
+          if (studioConfig.elements.stripeRed) studioConfig.elements.stripeRed.fill = '#d97706';
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#92400e';
+          if (studioConfig.elements.headerInspector) {
+            studioConfig.elements.headerInspector.fill = 'transparent';
+            studioConfig.elements.headerInspector.stroke = '#f59e0b';
+          }
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#b45309';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#451a03';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#78350f';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#451a03';
+          studioConfig.photoShape = 'rounded';
+        }
+      },
+      academic: {
+        name: 'Formal Academic (สไตล์ทางการกระทรวง)',
+        apply: () => {
+          if (!studioConfig.elements) return;
+          if (studioConfig.elements.stripeBlue) studioConfig.elements.stripeBlue.fill = '#002b80';
+          if (studioConfig.elements.stripeRed) studioConfig.elements.stripeRed.fill = '#b91c1c';
+          if (studioConfig.elements.headerSarawat) studioConfig.elements.headerSarawat.fill = '#050505';
+          if (studioConfig.elements.headerInspector) {
+            studioConfig.elements.headerInspector.fill = 'transparent';
+            studioConfig.elements.headerInspector.stroke = '#94a3b8';
+          }
+          if (studioConfig.elements.nickname) studioConfig.elements.nickname.fill = '#050505';
+          if (studioConfig.elements.codeline) studioConfig.elements.codeline.fill = '#050505';
+          if (studioConfig.elements.thaiNickname) studioConfig.elements.thaiNickname.fill = '#050505';
+          if (studioConfig.elements.thaiFullname) studioConfig.elements.thaiFullname.fill = '#050505';
+          studioConfig.photoShape = 'rounded';
+        }
+      }
+    };
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) drawer.classList.toggle('hidden');
+    }
+
+    function openFeatureGuideModal() {
+      const m = document.getElementById('feature-guide-modal');
+      if (m) m.classList.remove('hidden');
+    }
+
+    function closeFeatureGuideModal() {
+      const m = document.getElementById('feature-guide-modal');
+      if (m) m.classList.add('hidden');
+    }
+
+    function showToast(msg, icon = '✨') {
+      const t = document.getElementById('toast');
+      document.getElementById('toast-msg').textContent = msg;
+      document.getElementById('toast-icon').textContent = icon;
+      t.classList.remove('translate-y-20', 'opacity-0');
+      setTimeout(() => {
+        t.classList.add('translate-y-20', 'opacity-0');
+      }, 3000);
+    }
+
+    // Initialize Canvas & App
+    async function initStudio() {
+      studioCanvas = new fabric.Canvas('studio-canvas', {
+        width: 430,
+        height: 680,
+        backgroundColor: '#ffffff',
+        selection: true,
+        preserveObjectStacking: true
+      });
+
+      // Load config from server or fallback
+      try {
+        const res = await fetch('/api/card-template');
+        const data = await res.json();
+        if (data.success && data.config) {
+          studioConfig = data.config;
+        } else {
+          studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
+        }
+      } catch (e) {
+        studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
+      }
+
+      // Fetch members for preview dropdown
+      try {
+        const mRes = await fetch('/api/members');
+        const mData = await mRes.json();
+        if (mData.success && Array.isArray(mData.members)) {
+          allMembers = mData.members;
+          populateMembersDropdown();
+        }
+      } catch (e) {}
+
+      // Initial Canvas Render
+      await renderConfigToCanvas(SAMPLE_MEMBER);
+
+      // Event Listeners
+      studioCanvas.on('selection:created', onObjectSelected);
+      studioCanvas.on('selection:updated', onObjectSelected);
+      studioCanvas.on('selection:cleared', onSelectionCleared);
+      studioCanvas.on('object:modified', onObjectModified);
+
+      window.addEventListener('keydown', handleCanvasKeyboardNudge);
+      setupDragAndDrop();
+    }
+
+    function populateMembersDropdown() {
+      const select = document.getElementById('studio-member-select');
+      if (!select) return;
+      select.innerHTML = '<option value="SAMPLE">นายณิชกานต์ (NAMNUAH) - ตัวอย่าง Mockup</option>';
+      allMembers.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.id;
+        opt.textContent = `${m.first_name || ''} ${m.last_name || ''} (${m.nickname || 'SARAWAT'}) - [${m.duty_id || m.duty_day || '-'}]`;
+        select.appendChild(opt);
+      });
+    }
+
+    function loadMemberToStudio(id) {
+      if (id === 'SAMPLE') {
+        activeStudioMember = SAMPLE_MEMBER;
+      } else {
+        activeStudioMember = allMembers.find(m => m.id === id) || SAMPLE_MEMBER;
+      }
+      renderConfigToCanvas(activeStudioMember);
+    }
+
+    function generateBarcodeDataURL(text) {
+      const canvas = document.createElement('canvas');
+      try {
+        JsBarcode(canvas, text, {
+          format: "CODE128",
+          width: 2,
+          height: 50,
+          displayValue: false,
+          margin: 0,
+          background: "transparent",
+          lineColor: "#050505"
+        });
+        return canvas.toDataURL('image/png');
+      } catch (e) {
+        return '';
+      }
+    }
+
+    async function renderConfigToCanvas(member = SAMPLE_MEMBER) {
+      if (!studioCanvas) return;
+      studioCanvas.clear();
+      studioCanvas.setBackgroundColor('#ffffff', studioCanvas.renderAll.bind(studioCanvas));
+
+      const rawClass = (member.grade_class || '').replace('ม.', '').trim();
+      const classDisplay = rawClass ? `M${rawClass.replace('/', '-')}` : 'M5-7';
+      const dutyId = member.duty_id || 'TS1';
+      const phoneOrNo = member.phone_number || member.student_no || '0634125121';
+      const codeLine = `${classDisplay}-${dutyId}-${phoneOrNo}`;
+      const thaiNick = member.thai_nickname || member.nickname || 'นำเหนือ';
+      const englishNick = member.nickname ? member.nickname.toUpperCase() : 'NAMNUAH';
+      let thaiName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'นายณิชกานต์ คำไชย';
+      if (!thaiName.startsWith('นาย') && !thaiName.startsWith('นางสาว') && !thaiName.startsWith('ด.ช.') && !thaiName.startsWith('ด.ญ.')) {
+        thaiName = `นาย${thaiName}`;
+      }
+
+      const elements = studioConfig.elements || DEFAULT_STUDIO_CONFIG.elements;
+      const baseKeys = Object.keys(elements).filter(k => {
+        const t = elements[k].type;
+        return t === 'photo' || (t === 'image' && k.includes('watermark'));
+      });
+      const topKeys = Object.keys(elements).filter(k => !baseKeys.includes(k));
+
+      const renderElement = async (key, el) => {
+        let fObj = null;
+
+        if (el.type === 'rect') {
+          fObj = new fabric.Rect({
+            left: el.left,
+            top: el.top,
+            width: el.width,
+            height: el.height,
+            fill: el.fill,
+            selectable: el.selectable !== undefined ? el.selectable : true,
+            hoverCursor: el.selectable === false ? 'default' : 'move'
+          });
+        } else if (el.type === 'text') {
+          let textVal = el.text;
+          if (textVal === '{{nickname}}') textVal = englishNick;
+          if (textVal === '{{codeline}}') textVal = codeLine;
+          if (textVal === '{{thaiNickname}}') textVal = thaiNick;
+          if (textVal === '{{thaiFullname}}') textVal = thaiName;
+
+          fObj = new fabric.Text(textVal, {
+            left: el.left,
+            top: el.top,
+            originX: el.originX || 'left',
+            originY: el.originY || 'top',
+            fontSize: el.fontSize || 20,
+            fontFamily: el.fontFamily || 'Prompt',
+            fontWeight: el.fontWeight || 'normal',
+            fill: el.fill || '#050505',
+            stroke: el.stroke || null,
+            strokeWidth: el.strokeWidth || 0,
+            charSpacing: el.charSpacing || 0,
+            angle: el.angle || 0,
+            scaleY: el.scaleY || 1
+          });
+        } else if (el.type === 'image' && el.src) {
+          fObj = await new Promise((resolve) => {
+            fabric.Image.fromURL(el.src, (img) => {
+              if (!img) return resolve(null);
+              img.set({
+                left: el.left,
+                top: el.top,
+                originX: el.originX || 'left',
+                originY: el.originY || 'top',
+                angle: el.angle || 0,
+                opacity: el.opacity !== undefined ? el.opacity : 1
+              });
+              if (el.width && el.height) {
+                img.scaleToWidth(el.width);
+              }
+              resolve(img);
+            }, { crossOrigin: 'anonymous' });
+          });
+        } else if (el.type === 'photo') {
+          const photoUrl = member.profile_image_url || '/assets/logo.png';
+          fObj = await new Promise((resolve) => {
+            fabric.Image.fromURL(photoUrl, (img) => {
+              if (!img || !img.width) {
+                fabric.Image.fromURL('/assets/logo.png', (fallbackImg) => {
+                  if (fallbackImg) {
+                    fallbackImg.set({ left: el.left, top: el.top, angle: el.angle || 0 });
+                    fallbackImg.scaleToWidth(el.width || 350);
+                  }
+                  resolve(fallbackImg || null);
+                });
+                return;
+              }
+              img.set({ left: el.left, top: el.top, angle: el.angle || 0 });
+              img.scaleToWidth(el.width || 350);
+              resolve(img);
+            }, { crossOrigin: 'anonymous' });
+          });
+        } else if (el.type === 'barcode') {
+          const bcVal = `${dutyId}-${member.student_no || '69055'}`;
+          const bcDataUrl = generateBarcodeDataURL(bcVal);
+          if (bcDataUrl) {
+            fObj = await new Promise((resolve) => {
+              fabric.Image.fromURL(bcDataUrl, (img) => {
+                if (!img) return resolve(null);
+                img.set({ left: el.left, top: el.top });
+                img.scaleToWidth(el.width || 185);
+                resolve(img);
+              });
+            });
+          }
+        }
+
+        if (fObj) {
+          fObj.customKey = key;
+          fObj.customName = el.name || key;
+          studioCanvas.add(fObj);
+        }
+      };
+
+      for (const k of baseKeys) await renderElement(k, elements[k]);
+      for (const k of topKeys) await renderElement(k, elements[k]);
+
+      studioCanvas.renderAll();
+      updateLayerListUI();
+    }
+
+    function updateLayerListUI() {
+      const container = document.getElementById('studio-layers-container');
+      if (!container || !studioCanvas) return;
+      container.innerHTML = '';
+      const objs = studioCanvas.getObjects().slice().reverse();
+      
+      objs.forEach(o => {
+        const item = document.createElement('div');
+        item.className = 'p-2 rounded-lg bg-black hover:bg-tactical-850 border border-tactical-border flex items-center justify-between cursor-pointer transition';
+        item.onclick = () => {
+          studioCanvas.setActiveObject(o);
+          studioCanvas.renderAll();
+          onObjectSelected({ target: o });
+        };
+        item.innerHTML = `
+          <div class="flex items-center gap-2 truncate">
+            <span class="w-2 h-2 rounded-full ${o.selectable === false ? 'bg-slate-600' : 'bg-amber-400'}"></span>
+            <span class="truncate text-slate-300 font-medium">${o.customName || o.customKey || o.type}</span>
+          </div>
+          <span class="text-[10px] font-mono text-slate-500">${o.type}</span>
+        `;
+        container.appendChild(item);
+      });
+    }
+
+    function onObjectSelected(e) {
+      const obj = e.target;
+      if (!obj) return;
+      
+      document.getElementById('inspector-empty-state').classList.add('hidden');
+      document.getElementById('inspector-controls').classList.remove('hidden');
+      document.getElementById('selected-layer-name').textContent = obj.customName || obj.customKey || obj.type;
+
+      document.getElementById('prop-left').value = Math.round(obj.left || 0);
+      document.getElementById('prop-top').value = Math.round(obj.top || 0);
+      document.getElementById('prop-opacity').value = obj.opacity !== undefined ? obj.opacity : 1;
+
+      const isText = obj.type === 'text';
+      document.getElementById('field-text-content').style.display = isText ? 'block' : 'none';
+      document.getElementById('field-font-controls').style.display = isText ? 'block' : 'none';
+
+      if (isText) {
+        document.getElementById('prop-text').value = obj.text || '';
+        document.getElementById('prop-fontsize').value = Math.round(obj.fontSize || 20);
+        document.getElementById('prop-fontfamily').value = obj.fontFamily || 'Prompt';
+        document.getElementById('prop-charspacing').value = obj.charSpacing || 0;
+        document.getElementById('prop-fontweight').value = obj.fontWeight || 'normal';
+      }
+
+      if (obj.fill && typeof obj.fill === 'string') {
+        document.getElementById('prop-fill-color').value = obj.fill.startsWith('#') ? obj.fill : '#000000';
+        document.getElementById('prop-fill-text').value = obj.fill;
+      }
+    }
+
+    function onSelectionCleared() {
+      document.getElementById('inspector-empty-state').classList.remove('hidden');
+      document.getElementById('inspector-controls').classList.add('hidden');
+      document.getElementById('selected-layer-name').textContent = 'ไม่ได้เลือกวัตถุ';
+    }
+
+    function onObjectModified(e) {
+      const obj = e.target;
+      if (!obj) return;
+      if (document.getElementById('prop-left')) document.getElementById('prop-left').value = Math.round(obj.left || 0);
+      if (document.getElementById('prop-top')) document.getElementById('prop-top').value = Math.round(obj.top || 0);
+      syncConfigFromCanvas();
+    }
+
+    function updateActiveObjectProperty(prop, val) {
+      if (!studioCanvas) return;
+      const obj = studioCanvas.getActiveObject();
+      if (!obj) return;
+      
+      obj.set(prop, val);
+      studioCanvas.renderAll();
+      syncConfigFromCanvas();
+    }
+
+    function bringActiveObjectForward() {
+      if (!studioCanvas) return;
+      const obj = studioCanvas.getActiveObject();
+      if (obj) {
+        studioCanvas.bringForward(obj);
+        studioCanvas.renderAll();
+        updateLayerListUI();
+      }
+    }
+
+    function sendActiveObjectBackward() {
+      if (!studioCanvas) return;
+      const obj = studioCanvas.getActiveObject();
+      if (obj) {
+        studioCanvas.sendBackwards(obj);
+        studioCanvas.renderAll();
+        updateLayerListUI();
+      }
+    }
+
+    function deleteActiveObject() {
+      if (!studioCanvas) return;
+      const obj = studioCanvas.getActiveObject();
+      if (!obj) return;
+      if (confirm(`ต้องการลบเลเยอร์ "${obj.customName || 'วัตถุนี้'}" ใช่หรือไม่?`)) {
+        if (studioConfig && studioConfig.elements && obj.customKey) {
+          delete studioConfig.elements[obj.customKey];
+        }
+        studioCanvas.remove(obj);
+        studioCanvas.discardActiveObject();
+        studioCanvas.renderAll();
+        updateLayerListUI();
+        onSelectionCleared();
+      }
+    }
+
+    function handleCanvasKeyboardNudge(e) {
+      if (!studioCanvas) return;
+      if (['input', 'textarea', 'select'].includes(document.activeElement.tagName.toLowerCase())) return;
+      const obj = studioCanvas.getActiveObject();
+      if (!obj) return;
+
+      const step = e.shiftKey ? 10 : 1;
+      let handled = false;
+
+      if (e.key === 'ArrowLeft') { obj.left -= step; handled = true; }
+      else if (e.key === 'ArrowRight') { obj.left += step; handled = true; }
+      else if (e.key === 'ArrowUp') { obj.top -= step; handled = true; }
+      else if (e.key === 'ArrowDown') { obj.top += step; handled = true; }
+
+      if (handled) {
+        e.preventDefault();
+        obj.setCoords();
+        studioCanvas.renderAll();
+        onObjectModified({ target: obj });
+      }
+    }
+
+    function syncConfigFromCanvas() {
+      if (!studioCanvas || !studioConfig) return;
+      if (!studioConfig.elements) studioConfig.elements = {};
+
+      studioCanvas.getObjects().forEach(o => {
+        if (!o.customKey) return;
+        const entry = studioConfig.elements[o.customKey] || {};
+        entry.left = Math.round(o.left);
+        entry.top = Math.round(o.top);
+        if (o.type === 'text') {
+          entry.fontSize = o.fontSize;
+          entry.fontFamily = o.fontFamily;
+          entry.fontWeight = o.fontWeight;
+          entry.fill = o.fill;
+          entry.charSpacing = o.charSpacing;
+        } else if (o.type === 'rect') {
+          entry.width = Math.round(o.getScaledWidth());
+          entry.height = Math.round(o.getScaledHeight());
+          entry.fill = o.fill;
+        }
+        studioConfig.elements[o.customKey] = entry;
+      });
+    }
+
+    async function saveStudioTemplate() {
+      syncConfigFromCanvas();
+      const btn = document.getElementById('btn-save-template');
+      btn.textContent = '⏳ กำลังบันทึก...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch('/api/card-template', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(studioConfig)
+        });
+        const d = await res.json();
+        if (d.success) {
+          showToast('บันทึกเทมเพลตขึ้นเซิร์ฟเวอร์เรียบร้อย!', '💾');
+        } else {
+          showToast('บันทึกไม่สำเร็จ: ' + (d.message || ''), '❌');
+        }
+      } catch (err) {
+        showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ', '❌');
+      } finally {
+        btn.innerHTML = '<span>💾</span> บันทึกเทมเพลต';
+        btn.disabled = false;
+      }
+    }
+
+    function resetStudioTemplate() {
+      if (confirm('ต้องการคืนค่าเทมเพลตกลับเป็นค่าเริ่มต้นทางการใช่หรือไม่?')) {
+        studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
+        renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+        showToast('คืนค่าเทมเพลตเริ่มต้นเรียบร้อย', '🔄');
+      }
+    }
+
+    function applyPreset(presetKey) {
+      const p = PRESET_TEMPLATES[presetKey];
+      if (!p) return;
+      p.apply();
+      renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      showToast(`ปรับใช้เทมเพลต ${p.name} สำเร็จ!`, '🎨');
+    }
+
+    function stampDutyBadge(badgeCode) {
+      if (!studioCanvas) return;
+      const badgeColors = {
+        M: { bg: '#2563eb', text: '🔵 M' },
+        T: { bg: '#9333ea', text: '🟣 T' },
+        W: { bg: '#16a34a', text: '🟢 W' },
+        Ts: { bg: '#ea580c', text: '🟠 Ts' },
+        F: { bg: '#dc2626', text: '🔴 F' },
+        S: { bg: '#ca8a04', text: '⭐ S' }
+      };
+      const info = badgeColors[badgeCode] || { bg: '#2563eb', text: badgeCode };
+
+      let badgeObj = studioCanvas.getObjects().find(o => o.isDutyBadgeStamp);
+      if (badgeObj) studioCanvas.remove(badgeObj);
+
+      const rect = new fabric.Rect({
+        width: 48,
+        height: 24,
+        rx: 12,
+        ry: 12,
+        fill: info.bg,
+        originX: 'center',
+        originY: 'center'
+      });
+      const text = new fabric.Text(info.text, {
+        fontSize: 12,
+        fontFamily: 'Prompt',
+        fontWeight: 'bold',
+        fill: '#ffffff',
+        originX: 'center',
+        originY: 'center'
+      });
+      badgeObj = new fabric.Group([rect, text], {
+        left: 355,
+        top: 440,
+        isDutyBadgeStamp: true,
+        selectable: true
+      });
+      studioCanvas.add(badgeObj);
+      studioCanvas.setActiveObject(badgeObj);
+      studioCanvas.renderAll();
+      showToast(`ประทับตราเวร [${info.text}] เรียบร้อย!`, '🏷️');
+    }
+
+    function setPhotoFrameShape(shape) {
+      studioConfig.photoShape = shape;
+      renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      showToast(`เปลี่ยนกรอบรูปถ่ายเป็น: ${shape.toUpperCase()}`, '🖼️');
+    }
+
+    function exportCurrentCardPNG() {
+      if (!studioCanvas) return;
+      studioCanvas.discardActiveObject();
+      studioCanvas.renderAll();
+
+      const dataUrl = studioCanvas.toDataURL({
+        format: 'png',
+        multiplier: 2
+      });
+
+      const member = activeStudioMember || SAMPLE_MEMBER;
+      const fileName = `SARAWAT_CARD_${member.duty_id || 'ID'}_${member.nickname || 'OFFICER'}.png`;
+
+      const link = document.createElement('a');
+      link.download = fileName;
+      link.href = dataUrl;
+      link.click();
+      showToast('ดาวน์โหลดบัตร HD เรียบร้อย!', '📥');
+    }
+
+    async function batchExportAllCards() {
+      if (!allMembers || allMembers.length === 0) {
+        showToast('ไม่พบข้อมูลสารวัตรสำหรับ Export', '⚠️');
+        return;
+      }
+
+      const btn = document.getElementById('btn-batch-export');
+      btn.textContent = '⏳ กำลังสร้าง...';
+      btn.disabled = true;
+
+      try {
+        const zip = new JSZip();
+        for (let i = 0; i < allMembers.length; i++) {
+          const m = allMembers[i];
+          await renderConfigToCanvas(m);
+          studioCanvas.discardActiveObject();
+          studioCanvas.renderAll();
+          
+          const dataUrl = studioCanvas.toDataURL({ format: 'png', multiplier: 2 });
+          const base64Data = dataUrl.replace(/^data:image\/png;base64,/, '');
+          const filename = `${m.duty_id || 'SW'}_${m.nickname || m.first_name}.png`;
+          zip.file(filename, base64Data, { base64: true });
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(zipBlob);
+        link.download = `SARAWAT_ALL_CARDS_${new Date().toISOString().slice(0, 10)}.zip`;
+        link.click();
+        showToast('ดาวน์โหลดชุดบัตรครบทุกคน (ZIP) สำเร็จ!', '📦');
+      } catch (err) {
+        showToast('เกิดข้อผิดพลาดในการรวมบัตร', '❌');
+      } finally {
+        btn.innerHTML = '<span>📦</span> โหลดทุกคน (ZIP)';
+        btn.disabled = false;
+        renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      }
+    }
+
+    function openA4PrintModal() {
+      const modal = document.getElementById('a4-print-modal');
+      const sheet = document.getElementById('a4-print-sheet');
+      if (!modal || !sheet) return;
+
+      sheet.innerHTML = '';
+      const list = allMembers.slice(0, 8);
+      if (list.length === 0) list.push(SAMPLE_MEMBER);
+
+      const cardDataUrl = studioCanvas.toDataURL({ format: 'png', multiplier: 1.5 });
+      for (let i = 0; i < 8; i++) {
+        const item = document.createElement('div');
+        item.className = 'border border-slate-300 rounded overflow-hidden shadow-sm flex flex-col items-center justify-center p-1 bg-white';
+        item.innerHTML = `<img src="${cardDataUrl}" class="w-full h-auto object-contain">`;
+        sheet.appendChild(item);
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeA4PrintModal() {
+      document.getElementById('a4-print-modal').classList.add('hidden');
+    }
+
+    function handleStudentPhotoUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        if (!activeStudioMember) activeStudioMember = Object.assign({}, SAMPLE_MEMBER);
+        activeStudioMember.profile_image_url = evt.target.result;
+        renderConfigToCanvas(activeStudioMember);
+        showToast('อัปเดตรูปถ่ายนักเรียนสำเร็จ!', '👤');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function handleCustomImageUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        fabric.Image.fromURL(evt.target.result, (img) => {
+          if (!img) return;
+          if (img.width > 250) img.scaleToWidth(200);
+          img.set({
+            left: 115,
+            top: 240,
+            customKey: 'custom_' + Date.now(),
+            customName: `รูป (${file.name.slice(0, 15)})`
+          });
+          studioCanvas.add(img);
+          studioCanvas.setActiveObject(img);
+          studioCanvas.renderAll();
+          updateLayerListUI();
+          onObjectSelected({ target: img });
+          showToast('เพิ่มรูปภาพลงบนบัตรสำเร็จ!', '🖼️');
+        });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function setupDragAndDrop() {
+      const dropzone = document.getElementById('studio-dropzone');
+      const overlay = document.getElementById('studio-drop-overlay');
+      if (!dropzone || !overlay) return;
+
+      ['dragenter', 'dragover'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          overlay.classList.remove('hidden');
+        });
+      });
+
+      ['dragleave', 'drop'].forEach(name => {
+        dropzone.addEventListener(name, (e) => {
+          e.preventDefault();
+          overlay.classList.add('hidden');
+        });
+      });
+
+      dropzone.addEventListener('drop', (e) => {
+        const files = e.dataTransfer && e.dataTransfer.files;
+        if (files && files.length > 0 && files[0].type.startsWith('image/')) {
+          const reader = new FileReader();
+          reader.onload = (evt) => {
+            fabric.Image.fromURL(evt.target.result, (img) => {
+              if (img) {
+                img.scaleToWidth(180);
+                img.set({ left: 100, top: 200, customKey: 'custom_' + Date.now(), customName: 'รูปวาง' });
+                studioCanvas.add(img);
+                studioCanvas.setActiveObject(img);
+                studioCanvas.renderAll();
+                updateLayerListUI();
+              }
+            });
+          };
+          reader.readAsDataURL(files[0]);
+        }
+      });
+    }
+
+    window.addEventListener('DOMContentLoaded', initStudio);
+  </script>
+</body>
+</html>

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="th" data-type="software" data-radius="soft" data-buttons="solid" class="dark scroll-smooth antialiased">
+<html lang="th" data-type="software" data-radius="soft" data-buttons="solid" class="dark antialiased">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
@@ -109,6 +109,11 @@
       pointer-events: none;
     }
 
+    :focus-visible {
+      outline: 2px solid #3b82f6 !important;
+      outline-offset: 2px !important;
+    }
+
     @media (prefers-reduced-motion: reduce) {
       *, ::before, ::after {
         animation-duration: 0.01ms !important;
@@ -139,18 +144,20 @@
       </a>
 
       <!-- Desktop Nav Links -->
-      <nav class="hidden lg:flex items-center gap-6 text-xs font-medium text-slate-300">
-        <a href="#features" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">ระบบปฏิบัติการ</a>
-        <a href="#radar" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">Smart Match Radar</a>
-        <a href="#architecture" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">สถาปัตยกรรมข้อมูล</a>
-        <a href="#security" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">ความปลอดภัย & RLS</a>
+      <nav class="hidden xl:flex items-center gap-5 text-xs font-medium text-slate-300">
+        <a href="/" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5 font-bold text-amber-300">🛡️ ศูนย์บัญชาการ</a>
+        <a href="/card-studio" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">🎨 ทำบัตรสารวัตร</a>
+        <a href="/lost-found" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">📦 คลังของหาย</a>
+        <a href="/verify" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5">🔍 ตรวจบัตร</a>
+        <a href="#features" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5 text-slate-400">ระบบปฏิบัติการ</a>
+        <a href="#radar" class="whitespace-nowrap hover:text-white transition-colors focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none rounded px-1.5 py-0.5 text-slate-400">Smart Match</a>
       </nav>
 
       <!-- Right Header Actions -->
       <div class="flex items-center gap-3 sm:gap-2 flex-shrink-0">
         
         <!-- Live Station Ping -->
-        <div class="hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-midnight-900 border border-midnight-800 text-[11px] font-mono text-emerald-400 whitespace-nowrap">
+        <div class="hidden 2xl:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-midnight-900 border border-midnight-800 text-[11px] font-mono text-emerald-400 whitespace-nowrap">
           <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
           <span>STATION 01 // ONLINE</span>
         </div>
@@ -162,7 +169,7 @@
         </button>
 
         <!-- Secondary: Lost & Found Portal -->
-        <a href="/lost-found" class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-xs font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none">
+        <a href="/lost-found" class="hidden xl:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-xs font-medium text-slate-300 hover:text-white transition-colors whitespace-nowrap focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none">
           <svg class="w-3.5 h-3.5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
           <span>คลังของหาย</span>
         </a>
@@ -715,7 +722,7 @@
         
         <!-- Stage 1: Field Ingestion (Fragment Top) -->
         <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-cyan-950/40 border border-cyan-800/80 p-3 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-cyan-950/40 border border-cyan-800/80 p-3 flex flex-col justify-between" data-ui="pipeline-ingest">
             <div class="flex items-center justify-between">
               <span class="text-[9px] font-mono text-cyan-300 bg-cyan-900/80 px-1.5 py-0.5 rounded border border-cyan-700">STAGE 01</span>
               <svg class="w-5 h-5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
@@ -741,7 +748,7 @@
               ตรวจลายเซ็น Discord Webhook ยืนยันรหัสประจำตัวสารวัตร (Duty ID) และคัดกรองจุดลับ
             </p>
           </div>
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3 flex flex-col justify-between" data-ui="pipeline-verify">
             <div class="flex items-center justify-between">
               <span class="text-[9px] font-mono text-blue-300 bg-blue-900/80 px-1.5 py-0.5 rounded border border-blue-700">STAGE 02</span>
               <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -761,7 +768,7 @@
               จัดเก็บแบบ Dual Mirror บน Supabase PostgreSQL พร้อมสำรองไฟล์ JSON ออฟไลน์
             </p>
           </div>
-          <div class="h-28 rounded-lg bg-amber-950/30 border border-amber-800/70 p-3 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-amber-950/30 border border-amber-800/70 p-3 flex flex-col justify-between" data-ui="pipeline-store">
             <div class="flex items-center justify-between">
               <span class="text-[9px] font-mono text-amber-300 bg-amber-900/80 px-1.5 py-0.5 rounded border border-amber-700">STAGE 03</span>
               <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
@@ -775,7 +782,7 @@
 
         <!-- Stage 4: Chain of Custody Handover (Fragment Top) -->
         <div class="p-5 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 flex flex-col justify-between hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-emerald-950/40 border border-emerald-800/80 p-3 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-emerald-950/40 border border-emerald-800/80 p-3 flex flex-col justify-between" data-ui="pipeline-dispatch">
             <div class="flex items-center justify-between">
               <span class="text-[9px] font-mono text-emerald-300 bg-emerald-900/80 px-1.5 py-0.5 rounded border border-emerald-700">STAGE 04</span>
               <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="8" x2="7" y2="16"/><line x1="11" y1="8" x2="11" y2="16"/><line x1="15" y1="8" x2="15" y2="12"/><line x1="15" y1="15" x2="15" y2="16"/></svg>
@@ -816,7 +823,7 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         
         <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui="security-rls">
             <div class="flex items-center justify-between text-[10px] font-mono">
               <span class="text-blue-400 bg-blue-950 px-2 py-0.5 rounded border border-blue-800 font-bold inline-flex items-center gap-1.5">
                 <svg class="w-5 h-5 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -842,7 +849,7 @@
         </div>
 
         <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui="security-hmac">
             <div class="flex items-center justify-between text-[10px] font-mono">
               <span class="text-emerald-400 bg-emerald-950 px-2 py-0.5 rounded border border-emerald-800 font-bold inline-flex items-center gap-1.5">
                 <svg class="w-5 h-5 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
@@ -868,7 +875,7 @@
         </div>
 
         <div class="p-6 rounded-xl bg-midnight-900 border border-midnight-700/80 space-y-4 hover:-translate-y-0.5 transition-transform">
-          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui>
+          <div class="h-28 rounded-lg bg-midnight-950 border border-midnight-800 p-3.5 flex flex-col justify-between" data-ui="security-pdpa">
             <div class="flex items-center justify-between text-[10px] font-mono">
               <span class="text-amber-400 bg-amber-950 px-2 py-0.5 rounded border border-amber-800 font-bold inline-flex items-center gap-1.5">
                 <svg class="w-5 h-5 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
