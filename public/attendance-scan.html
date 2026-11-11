@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (Discord Leave Integration) // SARAWAT PRANARAI</title>
+  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (เปิดแอปกล้องมือถือ) // SARAWAT PRANARAI</title>
 
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -65,9 +65,9 @@
           <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
           <div>
             <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
-              <span>📸</span> สแกนเช็คชื่อ (เชื่อม Discord Leave)
+              <span>📸</span> สแกนเช็คชื่อ (เปิดแอปกล้อง)
             </h1>
-            <p class="text-[10px] text-slate-400">ฝนดำช่อง [○] = มา | ว่าง = สาย | การลาดึงจาก Discord</p>
+            <p class="text-[10px] text-slate-400">เข้าแอปกล้องมือถือโดยตรง • ตรวจจับ [○] (ม) และการลา Discord</p>
           </div>
         </div>
       </div>
@@ -83,15 +83,21 @@
   <!-- ========================================================== -->
   <main class="max-w-2xl mx-auto w-full px-3.5 py-4 flex-1 space-y-4">
 
+    <!-- HIDDEN NATIVE CAMERA FILE INPUTS -->
+    <!-- capture="environment" สั่งให้เบราว์เซอร์เปิดแอปกล้องจริงของโทรศัพท์โดยตรงทันที -->
+    <input type="file" id="native-camera-input" accept="image/*" capture="environment" onchange="onPhotoSelected(event)" class="hidden">
+    <!-- input สำหรับเลือกจากอัลบั้มรูปภาพ -->
+    <input type="file" id="album-file-input" accept="image/*" onchange="onPhotoSelected(event)" class="hidden">
+
     <!-- ====================================================== -->
-    <!-- 🗓️ STEP 1: เลือกผลัดเวรและวันที่ (ก่อนถ่ายภาพ)             -->
+    <!-- 🗓️ STEP 1: เลือกผลัดเวรและเปิดกล้องมือถือ                   -->
     <!-- ====================================================== -->
-    <div id="step-select-date-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+    <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
       <!-- หัวข้อขั้นตอนที่ 1 -->
       <div class="flex items-center justify-between">
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
-          <span>ขั้นตอนที่ 1</span> • เลือกผลัดเวรและตรวจสอบการลา
+          <span>ขั้นตอนที่ 1</span> • เลือกผลัดเวรและกดถ่ายภาพ
         </div>
         <div id="badge-today-tag" class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
           วันนี้: พ. 11/11
@@ -99,9 +105,9 @@
       </div>
 
       <div class="space-y-1">
-        <h2 class="text-sm sm:text-base font-bold text-white">1. เลือกผลัดเวรที่ต้องการตรวจเช็ค</h2>
+        <h2 class="text-sm sm:text-base font-bold text-white">เลือกผลัดเวรที่ต้องการตรวจเช็ค</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          ระบบจะเชื่อมต่อฐานข้อมูล Discord เพื่อตรวจเช็คว่ามีสารวัตรคนใดแจ้งลาไว้หรือไม่ โดยไม่ต้องติ๊กช่องลาในกระดาษ
+          เลือกรอบเวรเพื่อตรวจสอบประวัติการลาใน Discord จากนั้นกดปุ่มเพื่อ<strong>เปิดแอปกล้องมือถือถ่ายภาพได้ทันที</strong>
         </p>
       </div>
 
@@ -173,7 +179,7 @@
         <div id="discord-leave-banner" class="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs space-y-1">
           <div class="flex items-center justify-between text-sky-300 font-bold">
             <span class="flex items-center gap-1.5">
-              <span>💬</span> ข้อมูลแจ้งลาใน Discord ประจำวัน:
+              <span>💬</span> ตรวจพบการแจ้งลาใน Discord:
             </span>
             <span id="discord-leave-count-badge" class="font-mono bg-sky-500/20 px-2 py-0.5 rounded text-[10px]">0 รายการ</span>
           </div>
@@ -186,102 +192,28 @@
         <div class="border-t border-slate-700/60 pt-2 flex items-start gap-2 text-xs text-slate-300">
           <span class="text-emerald-400 text-sm">💡</span>
           <div class="text-[11px] leading-relaxed">
-            <strong>กติกาสแกนใหม่:</strong> ตรวจเฉพาะช่องวงกลม <strong class="text-amber-300">[○] (ม)</strong> ของวันที่ <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong>:
+            <strong>กติกาใหม่:</strong> ถ่ายเห็นเฉพาะแถวรายชื่อและช่อง <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong>
             <br>• ถ้าฝนดำช่อง [○] $\rightarrow$ <strong class="text-emerald-400">มาปฏิบัติหน้าที่</strong>
-            <br>• ถ้าช่องว่างเปล่า $\rightarrow$ <strong class="text-amber-400">มาสาย</strong> (เว้นแต่จะมีการแจ้งลาใน Discord ไว้ จะปรับเป็น <strong class="text-sky-400">ขอลา</strong> อัตโนมัติ)
+            <br>• ถ้าช่องว่างเปล่า $\rightarrow$ <strong class="text-amber-400">มาสาย</strong> (หากแจ้งลาใน Discord จะปรับเป็น <strong class="text-sky-400">ขอลา</strong> อัตโนมัติ)
           </div>
         </div>
       </div>
 
-      <!-- ปุ่มเริ่มเปิดกล้องถ่าย 1 รูป -->
-      <button onclick="goToCameraStep()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/20 active:scale-[0.98] transition flex items-center justify-center gap-2 pulse-btn">
-        <span>📸</span>
-        <span>เริ่มเปิดกล้องถ่ายภาพ (1 รูป)</span>
-        <span>→</span>
-      </button>
-
-    </div>
-
-    <!-- ====================================================== -->
-    <!-- 📹 STEP 2: กล้องถ่ายภาพสด (ถ่ายแค่รูปเดียว)                -->
-    <!-- ====================================================== -->
-    <div id="step-camera-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3 relative overflow-hidden">
-      
-      <!-- Top Action Bar: Back to Day Selection & Info Badge -->
-      <div class="flex items-center justify-between">
-        <button onclick="backToDateSelection()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition">
-          <span>←</span> <span>เปลี่ยนผลัดเวร/วัน</span>
+      <!-- ปุ่มหลัก: เปิดแอปกล้องมือถือถ่ายภาพโดยตรงทันที -->
+      <div class="pt-2 space-y-2 text-center">
+        <button onclick="launchNativeCamera()" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-amber-500 to-emerald-600 hover:from-emerald-500 hover:to-amber-400 text-slate-950 font-bold text-base sm:text-lg shadow-xl shadow-amber-500/20 active:scale-[0.98] transition flex items-center justify-center gap-2.5 pulse-btn">
+          <span class="text-2xl">📸</span>
+          <span>เปิดแอปกล้องมือถือถ่ายภาพ (1 รูป)</span>
         </button>
 
-        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 border border-amber-500/40 text-[11px] font-bold text-amber-300">
-          <span id="cam-shift-badge">เวรวันพุธ</span> • คอลัมน์ <span id="cam-col-badge" class="font-mono text-white">11/11</span>
-        </div>
-      </div>
+        <p class="text-[11px] text-slate-400">
+          จะเปิดแอปกล้องจริงของโทรศัพท์ โฟกัสง่าย ถ่ายคมชัดระดับ 12MP โดยไม่ต้องมองผ่านเว็บ
+        </p>
 
-      <!-- Live Viewfinder Container -->
-      <div class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden border border-slate-700/80 shadow-inner flex items-center justify-center">
-        
-        <!-- Video Live Stream -->
-        <video id="camera-stream" autoplay playsinline muted class="w-full h-full object-cover"></video>
-
-        <!-- Flash Effect Overlay -->
-        <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-30"></div>
-
-        <!-- Camera HUD Guidelines: เล็งแถวรายชื่อ และ วันที่ -->
-        <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-3.5 z-20">
-          
-          <div class="text-center">
-            <span class="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[10px] text-amber-300 font-bold border border-amber-500/40">
-              🎯 เล็งแถวรายชื่อและช่องวงกลม [○] วันที่ <span id="hud-date-text">11/11</span>
-            </span>
-          </div>
-
-          <!-- Target Bounding Box -->
-          <div class="w-full h-40 border-2 border-dashed border-amber-400/80 rounded-xl relative flex items-center justify-between px-3 bg-amber-500/5 backdrop-blur-[1px]">
-            <div class="bg-black/80 px-2 py-1 rounded border border-amber-400/50 text-[10px] text-amber-200 font-bold text-center">
-              <div>◀ ชั้น (เลขที่)</div>
-              <div class="text-[8px] text-slate-300">ชื่อสารวัตร</div>
-            </div>
-
-            <div class="text-center">
-              <div class="text-[9px] text-amber-300/80 font-mono tracking-widest uppercase">── เล็งช่อง [○] วันนี้ ──</div>
-              <div class="text-xs text-white font-bold drop-shadow">ตรวจจับการฝนช่อง (ม)</div>
-            </div>
-
-            <div class="bg-black/80 px-2 py-1 rounded border border-amber-400/50 text-[10px] text-amber-200 font-bold text-center">
-              <div id="hud-col-text">คอลัมน์ 11/11 ▶</div>
-              <div class="text-[8px] text-slate-300">วงกลม [○] (ม)</div>
-            </div>
-          </div>
-
-          <div class="text-center">
-            <span class="px-2 py-0.5 rounded bg-black/75 text-[9px] text-slate-300 border border-slate-700">
-              💡 ถือกล้องใกล้ 20-30 ซม. ให้เห็นวงกลมชัดเจน (ถ่ายแค่รูปเดียว)
-            </span>
-          </div>
-
-        </div>
-
-        <!-- Loading State for Camera -->
-        <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3">
-          <div class="w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div>
-          <div class="text-xs text-slate-300 font-medium">กำลังเปิดกล้องถ่ายภาพ...</div>
-        </div>
-
-      </div>
-
-      <!-- Shutter Button: ถ่ายแค่รูปเดียว (Single Shot) -->
-      <div class="pt-2 text-center space-y-2">
-        <button id="btn-single-shutter" onclick="triggerSingleCapture()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
-          <span class="text-xl">📸</span>
-          <span>ถ่ายภาพใบเช็คชื่อ (1 รูป)</span>
-        </button>
-
-        <!-- Fallback File Input -->
+        <!-- ตัวเลือกรอง: เลือกจากแกลเลอรี -->
         <div class="pt-1">
-          <input type="file" id="camera-file-input" accept="image/*" capture="environment" onchange="onSingleFileSelected(event)" class="hidden">
-          <button onclick="document.getElementById('camera-file-input').click()" class="text-xs text-slate-400 hover:text-amber-300 underline underline-offset-4 transition">
-            📁 หรือเลือกภาพจากอัลบั้ม / ถ่ายด้วยกล้องมาตรฐานมือถือ
+          <button onclick="launchAlbumPicker()" class="text-xs text-slate-400 hover:text-amber-300 underline underline-offset-4 transition">
+            📁 หรือเลือกรูปภาพจากอัลบั้ม / แกลเลอรี
           </button>
         </div>
       </div>
@@ -289,7 +221,7 @@
     </div>
 
     <!-- ====================================================== -->
-    <!-- ⏳ STEP 2.5: OMR PROCESSING OVERLAY                       -->
+    <!-- ⏳ STEP 2: OMR PROCESSING OVERLAY                       -->
     <!-- ====================================================== -->
     <div id="step-processing-omr" class="hidden bg-slate-900/95 border border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-xl relative overflow-hidden">
       <div class="scan-line"></div>
@@ -344,7 +276,7 @@
       <!-- พรีวิวรูปภาพพร้อม Bounding Box ไฮไลต์จุดที่ตรวจพบ -->
       <div class="space-y-1.5">
         <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
-          <span>ภาพถ่ายพร้อมกรอบการจำแนกสถานะ:</span>
+          <span>ภาพถ่ายจากกล้องพร้อมกรอบวิเคราะห์ OMR:</span>
           <span class="text-[10px] text-slate-400">แตะเพื่อขยายดูรูป</span>
         </div>
         
@@ -393,8 +325,8 @@
 
       <!-- Action Buttons: Retake & Submit -->
       <div class="pt-2 flex flex-col sm:flex-row gap-2.5">
-        <button onclick="retakePhoto()" class="w-full sm:w-1/3 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
-          🔄 ถ่ายใหม่
+        <button onclick="launchNativeCamera()" class="w-full sm:w-1/3 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition flex items-center justify-center gap-1.5">
+          <span>📸</span> <span>เปิดกล้องถ่ายใหม่</span>
         </button>
 
         <button id="btn-submit-attendance" onclick="submitAttendanceConfirmation()" class="w-full sm:w-2/3 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
@@ -466,13 +398,12 @@
   </div>
 
   <!-- ========================================================== -->
-  <!-- ⚙️ JAVASCRIPT LOGIC & DISCORD INTEGRATED OMR ENGINE         -->
+  <!-- ⚙️ JAVASCRIPT LOGIC & NATIVE CAMERA LAUNCHER                -->
   <!-- ========================================================== -->
   <script>
     // ----------------------------------------------------------
     // 1. DATA & GLOBAL STATE
     // ----------------------------------------------------------
-    let currentStream = null;
     let singleCapturedImage = null; // Single base64 string
     let annotatedDataUrl = null; // Image with OMR boxes drawn
     let activeRoster = []; // Member list with statuses
@@ -636,13 +567,8 @@
 
     function updateColHighlights() {
       document.getElementById('guide-col-highlight').textContent = `[${currentTargetCol}]`;
-      document.getElementById('cam-shift-badge').textContent = SHIFT_NAMES[currentShiftCode];
-      document.getElementById('cam-col-badge').textContent = currentTargetCol;
-      document.getElementById('hud-date-text').textContent = currentTargetCol;
-      document.getElementById('hud-col-text').textContent = `คอลัมน์ ${currentTargetCol} ▶`;
     }
 
-    // ดึงข้อมูลการแจ้งลาจากตาราง leave_requests ใน Supabase
     async function fetchDiscordLeaves(shiftKey) {
       const banner = document.getElementById('discord-leave-detail-list');
       const badge = document.getElementById('discord-leave-count-badge');
@@ -657,7 +583,6 @@
           leaves = result.data;
         }
 
-        // กรองเฉพาะการลาของวันที่เลือก (หรือรายการลาล่าสุด)
         const matchedLeaves = leaves.filter(l => {
           if (!l.leave_date) return true;
           return l.leave_date === todayInfo.dateIso || l.leave_date.includes(todayInfo.mmdd);
@@ -696,101 +621,21 @@
     }
 
     // ----------------------------------------------------------
-    // 4. TRANSITION TO CAMERA (ขั้นตอนที่ 2)
+    // 4. LAUNCH NATIVE CAMERA APP (เปิดแอปกล้องมือถือโดยตรง)
     // ----------------------------------------------------------
-    function goToCameraStep() {
-      document.getElementById('step-select-date-card').classList.add('hidden');
-      document.getElementById('step-camera-card').classList.remove('hidden');
-      startLiveCamera();
+    function launchNativeCamera() {
+      const input = document.getElementById('native-camera-input');
+      input.value = '';
+      input.click();
     }
 
-    function backToDateSelection() {
-      if (currentStream) {
-        currentStream.getTracks().forEach(track => track.stop());
-        currentStream = null;
-      }
-      document.getElementById('step-camera-card').classList.add('hidden');
-      document.getElementById('step-select-date-card').classList.remove('hidden');
+    function launchAlbumPicker() {
+      const input = document.getElementById('album-file-input');
+      input.value = '';
+      input.click();
     }
 
-    async function startLiveCamera() {
-      const video = document.getElementById('camera-stream');
-      const loading = document.getElementById('camera-loading');
-      loading.classList.remove('hidden');
-
-      if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
-      }
-
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: { ideal: 'environment' },
-            width: { ideal: 1920 },
-            height: { ideal: 1080 }
-          },
-          audio: false
-        });
-        currentStream = stream;
-        video.srcObject = stream;
-        await video.play();
-        loading.classList.add('hidden');
-      } catch (err) {
-        try {
-          const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
-          currentStream = fallbackStream;
-          video.srcObject = fallbackStream;
-          await video.play();
-          loading.classList.add('hidden');
-        } catch (err2) {
-          loading.innerHTML = `
-            <div class="text-amber-400 text-3xl">📷</div>
-            <div class="text-xs text-white font-bold">ไม่สามารถเปิดกล้องได้อัตโนมัติ</div>
-            <button onclick="document.getElementById('camera-file-input').click()" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-black text-xs font-bold">
-              📁 ถ่ายภาพด้วยกล้องมือถือ / เลือกรูป
-            </button>
-          `;
-        }
-      }
-    }
-
-    // ----------------------------------------------------------
-    // 5. CAPTURE & PROCESS VIA DISCORD-INTEGRATED OMR ENGINE
-    // ----------------------------------------------------------
-    async function triggerSingleCapture() {
-      const video = document.getElementById('camera-stream');
-      const flash = document.getElementById('flash-overlay');
-      const btn = document.getElementById('btn-single-shutter');
-
-      if (!currentStream || !video.videoWidth) {
-        document.getElementById('camera-file-input').click();
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = `<span>⏳</span><span>กำลังบันทึกภาพ...</span>`;
-
-      flash.style.opacity = '0.9';
-      if (navigator.vibrate) navigator.vibrate(60);
-      setTimeout(() => { flash.style.opacity = '0'; }, 120);
-
-      const canvas = document.createElement('canvas');
-      canvas.width = video.videoWidth || 1280;
-      canvas.height = video.videoHeight || 720;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      singleCapturedImage = canvas.toDataURL('image/jpeg', 0.90);
-
-      if (currentStream) {
-        currentStream.getTracks().forEach(t => t.stop());
-        currentStream = null;
-      }
-
-      await runDiscordIntegratedOmr(singleCapturedImage);
-    }
-
-    function onSingleFileSelected(e) {
+    function onPhotoSelected(e) {
       const file = e.target.files[0];
       if (!file) return;
 
@@ -803,11 +648,10 @@
     }
 
     // ----------------------------------------------------------
-    // 6. REAL OMR FOR "มา" [○] + DISCORD LEAVE RECONCILIATION
+    // 5. OMR ENGINE: ตรวจวัดรอยมาร์ก [○] (ม) + DISCORD LEAVE
     // ----------------------------------------------------------
     async function runDiscordIntegratedOmr(imageBase64) {
-      document.getElementById('step-camera-card').classList.add('hidden');
-      document.getElementById('step-select-date-card').classList.add('hidden');
+      document.getElementById('step-select-card').classList.add('hidden');
       const proc = document.getElementById('step-processing-omr');
       proc.classList.remove('hidden');
 
@@ -815,86 +659,94 @@
       img.src = imageBase64;
       await new Promise(resolve => { img.onload = resolve; });
 
-      const w = img.naturalWidth || img.width;
-      const h = img.naturalHeight || img.height;
+      // ย่อขนาดภาพให้ไม่เกิน 1600px เพื่อความรวดเร็วและประหยัดแรมบนมือถือ
+      let targetW = img.naturalWidth || img.width;
+      let targetH = img.naturalHeight || img.height;
+      const MAX_DIM = 1600;
+      if (targetW > MAX_DIM || targetH > MAX_DIM) {
+        if (targetW > targetH) {
+          targetH = Math.round((targetH * MAX_DIM) / targetW);
+          targetW = MAX_DIM;
+        } else {
+          targetW = Math.round((targetW * MAX_DIM) / targetH);
+          targetH = MAX_DIM;
+        }
+      }
 
       const offCanvas = document.createElement('canvas');
-      offCanvas.width = w;
-      offCanvas.height = h;
+      offCanvas.width = targetW;
+      offCanvas.height = targetH;
       const offCtx = offCanvas.getContext('2d');
-      offCtx.drawImage(img, 0, 0, w, h);
-      const imgData = offCtx.getImageData(0, 0, w, h);
+      offCtx.drawImage(img, 0, 0, targetW, targetH);
+      const imgData = offCtx.getImageData(0, 0, targetW, targetH);
       const pixels = imgData.data;
 
       // Grayscale
-      const gray = new Uint8Array(w * h);
+      const gray = new Uint8Array(targetW * targetH);
       for (let i = 0; i < pixels.length; i += 4) {
         gray[i / 4] = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
       }
 
       function getPixel(x, y) {
-        if (x < 0 || x >= w || y < 0 || y >= h) return 255;
-        return gray[y * w + x];
-      }
-
-      function analyzeCircle(cx, cy, radius) {
-        let sum = 0, count = 0, darkCount = 0;
-        const rSq = radius * radius;
-        for (let py = Math.max(0, cy - radius); py <= Math.min(h - 1, cy + radius); py++) {
-          for (let px = Math.max(0, cx - radius); px <= Math.min(w - 1, cx + radius); px++) {
-            const distSq = (px - cx) * (px - cx) + (py - cy) * (py - cy);
-            if (distSq <= rSq) {
-              const val = getPixel(px, py);
-              sum += val;
-              count++;
-              if (val < 135) darkCount++;
-            }
-          }
-        }
-        return {
-          mean: count > 0 ? sum / count : 255,
-          darkRatio: count > 0 ? darkCount / count : 0
-        };
+        if (x < 0 || x >= targetW || y < 0 || y >= targetH) return 255;
+        return gray[y * targetW + x];
       }
 
       const numRows = activeRoster.length || 6;
-      let yStart = Math.round(h * 0.28);
-      let yEnd = Math.round(h * 0.94);
+      let yStart = Math.round(targetH * 0.28);
+      let yEnd = Math.round(targetH * 0.94);
       let rowH = (yEnd - yStart) / numRows;
 
-      // พิกัดคอลัมน์ของวันนี้
-      let colX1 = Math.round(w * 0.44);
-      let colX2 = Math.round(w * 0.53);
-      let colMid = Math.round((colX1 + colX2) / 2);
+      // ช่วงค้นหาคอลัมน์เป้าหมาย
+      let colSearchX1 = Math.round(targetW * 0.42);
+      let colSearchX2 = Math.round(targetW * 0.56);
 
-      // Canvas พรีวิวผลวิเคราะห์
+      // Canvas แสดงผลพรีวิวพร้อม Bounding Box
       const annotCanvas = document.getElementById('review-canvas');
-      annotCanvas.width = w;
-      annotCanvas.height = h;
+      annotCanvas.width = targetW;
+      annotCanvas.height = targetH;
       const annotCtx = annotCanvas.getContext('2d');
-      annotCtx.drawImage(img, 0, 0, w, h);
+      annotCtx.drawImage(img, 0, 0, targetW, targetH);
 
       let presentCount = 0;
       let lateCount = 0;
       let leaveCount = 0;
 
       activeRoster.forEach((m, r) => {
-        const rY1 = Math.round(yStart + r * rowH);
-        const rY2 = Math.round(yStart + (r + 1) * rowH);
+        const rY1 = Math.round(yStart + r * rowH) + Math.max(2, Math.round(rowH * 0.15));
+        const rY2 = Math.round(yStart + (r + 1) * rowH) - Math.max(2, Math.round(rowH * 0.15));
         const cellCenterY = Math.round((rY1 + rY2) / 2);
-        const cellRadius = Math.max(5, Math.round(rowH * 0.22));
 
-        // ตรวจสอบความมืดภายในวงกลม [○] (ม)
-        const circleMetrics = analyzeCircle(colMid, cellCenterY, cellRadius);
-        const isCircleFilled = (circleMetrics.darkRatio > 0.28 || circleMetrics.mean < 145);
+        // ค้นหาจุดที่มืดที่สุดในแถวของสารวัตรคนนี้ (เพื่อหาตำแหน่งวงกลม [○])
+        let minBlockVal = 255;
+        let bestCenterX = Math.round((colSearchX1 + colSearchX2) / 2);
+        const bh = Math.max(6, Math.round(rowH * 0.35));
+        const bw = bh;
 
+        for (let x = colSearchX1; x <= colSearchX2 - bw; x += 3) {
+          let sum = 0, cnt = 0;
+          for (let py = cellCenterY - Math.floor(bh/2); py <= cellCenterY + Math.floor(bh/2); py++) {
+            for (let px = x; px < x + bw; px++) {
+              sum += getPixel(px, py);
+              cnt++;
+            }
+          }
+          const blockMean = cnt > 0 ? sum / cnt : 255;
+          if (blockMean < minBlockVal) {
+            minBlockVal = blockMean;
+            bestCenterX = x + Math.floor(bw / 2);
+          }
+        }
+
+        // หากตรวจพบเม็ดสีมืด (ฝนดำ) ในวงกลม
+        const isCircleFilled = (minBlockVal < 135);
         const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
 
         let finalStatus = 'PRESENT';
         let note = '';
+        const circleRadius = Math.max(6, Math.round(rowH * 0.24));
 
         if (isCircleFilled) {
-          // มีรอยฝนดำในกระดาษ -> ถือว่ามาปฏิบัติหน้าที่
           finalStatus = 'PRESENT';
           presentCount++;
 
@@ -904,40 +756,38 @@
             note = '✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่)';
           }
 
-          // วาดกรอบสีเขียวล้อมวงกลม
+          // วาดวงกลมสีเขียวล้อมรอบจุดที่ฝน
           annotCtx.strokeStyle = '#22c55e';
-          annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
-          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+          annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
+          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.3)';
           annotCtx.beginPath();
-          annotCtx.arc(colMid, cellCenterY, cellRadius + 2, 0, 2 * Math.PI);
+          annotCtx.arc(bestCenterX, cellCenterY, circleRadius + 2, 0, 2 * Math.PI);
           annotCtx.fill();
           annotCtx.stroke();
 
         } else {
-          // ช่องว่างเปล่า (ไม่ได้ฝน)
+          // ช่องว่างเปล่า
           if (hasDiscordLeave) {
-            // แจ้งลาใน Discord -> ปรับเป็น "ขอลา"
             finalStatus = 'LEAVE';
             leaveCount++;
             note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type})`;
 
             // วาดกรอบสีฟ้าล้อมช่อง
             annotCtx.strokeStyle = '#38bdf8';
-            annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
-            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.2)';
-            annotCtx.strokeRect(colX1, rY1 + 2, colX2 - colX1, rowH - 4);
+            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
+            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.25)';
+            annotCtx.strokeRect(bestCenterX - circleRadius - 4, cellCenterY - circleRadius - 2, (circleRadius + 4) * 2, (circleRadius + 2) * 2);
 
           } else {
-            // ไม่มีใบลา และช่องว่างเปล่า -> ปรับเป็น "มาสาย"
             finalStatus = 'LATE';
             lateCount++;
             note = '⚡ ช่องว่างเปล่า (ไม่มีรอยฝนและไม่มีใบลาใน Discord)';
 
             // วาดกรอบเส้นประสีส้มเตือน
             annotCtx.strokeStyle = '#f59e0b';
-            annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
+            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
             annotCtx.setLineDash([4, 4]);
-            annotCtx.strokeRect(colX1, rY1 + 2, colX2 - colX1, rowH - 4);
+            annotCtx.strokeRect(bestCenterX - circleRadius - 4, cellCenterY - circleRadius - 2, (circleRadius + 4) * 2, (circleRadius + 2) * 2);
             annotCtx.setLineDash([]);
           }
         }
@@ -957,7 +807,7 @@
     }
 
     // ----------------------------------------------------------
-    // 7. REVIEW & CONFIRMATION (ขั้นตอนที่ 3)
+    // 6. REVIEW & CONFIRMATION
     // ----------------------------------------------------------
     function showReviewStep(presentCnt, lateCnt, leaveCnt) {
       const reviewCard = document.getElementById('step-review-card');
@@ -1083,7 +933,7 @@
     }
 
     // ----------------------------------------------------------
-    // 8. SUBMIT ATTENDANCE (ยืนยันบันทึกผล 1 คลิก)
+    // 7. SUBMIT ATTENDANCE
     // ----------------------------------------------------------
     async function submitAttendanceConfirmation() {
       const btn = document.getElementById('btn-submit-attendance');
@@ -1095,7 +945,7 @@
         quarter: 1,
         duty_date: todayInfo.dateIso,
         week_index: document.getElementById('date-col-select').selectedIndex,
-        scanned_by: 'หัวหน้าเวร (Discord OMR)',
+        scanned_by: 'หัวหน้าเวร (Native Camera OMR)',
         image_base64: annotatedDataUrl || singleCapturedImage || '',
         records: activeRoster.map(m => ({
           duty_id: m.duty_id,
@@ -1143,20 +993,14 @@
       document.getElementById('succ-rate').textContent = `${rate}%`;
     }
 
-    function retakePhoto() {
-      document.getElementById('step-review-card').classList.add('hidden');
-      goToCameraStep();
-    }
-
     function resetToFirstStep() {
       document.getElementById('step-success-card').classList.add('hidden');
       document.getElementById('step-review-card').classList.add('hidden');
-      document.getElementById('step-camera-card').classList.add('hidden');
-      document.getElementById('step-select-date-card').classList.remove('hidden');
+      document.getElementById('step-select-card').classList.remove('hidden');
     }
 
     // ----------------------------------------------------------
-    // 9. LIGHTBOX MODAL
+    // 8. LIGHTBOX MODAL
     // ----------------------------------------------------------
     function openSingleImageModal() {
       const modal = document.getElementById('image-modal');
@@ -1173,7 +1017,7 @@
     }
 
     // ----------------------------------------------------------
-    // 10. ON LOAD
+    // 9. ON LOAD
     // ----------------------------------------------------------
     window.addEventListener('DOMContentLoaded', () => {
       computeTodayInfo();
