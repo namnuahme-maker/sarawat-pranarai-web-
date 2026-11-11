@@ -660,10 +660,10 @@
 
       let theadHtml = `
         <tr>
-          <th rowspan="2" style="width: 28px;">ลำดับ</th>
-          <th rowspan="2" style="width: 90px;">รหัสเวร+ชื่อเล่น</th>
-          <th rowspan="2" style="width: 140px; text-align: left; padding-left: 6px;">ชื่อ - สกุลจริง</th>
-          <th rowspan="2" style="width: 65px;">ชั้น (เลขที่)</th>
+          <th rowspan="2" style="width: 58px;">ห้อง/เลขที่</th>
+          <th rowspan="2" style="width: 75px;">ชื่อเล่น</th>
+          <th rowspan="2" style="width: 135px; text-align: left; padding-left: 6px;">ชื่อ - สกุลจริง</th>
+          <th rowspan="2" style="width: 55px;">รหัสประจำตัว</th>
           <th colspan="12" style="background-color: #f1f5f9; font-weight: bold;">${dateColTitle}</th>
           <th rowspan="2" style="width: 85px;">หมายเหตุ</th>
         </tr>
@@ -701,10 +701,10 @@
 
         return `
           <tr class="${isOdd ? 'bg-slate-50' : 'bg-white'}" data-duty-row="${m.duty_id}">
-            <td style="font-weight: bold; font-family: 'JetBrains Mono', monospace;">${idx + 1}</td>
-            <td style="font-weight: 700; color: #1a5276; white-space: nowrap;">[${m.duty_id}] ${m.nickname}${roleTag}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-size: 8pt; font-weight: 600;">${m.class_room}</td>
+            <td style="font-weight: 700; color: #1a5276; white-space: nowrap;">${m.nickname}${roleTag}</td>
             <td style="text-align: left; padding-left: 6px; white-space: nowrap;">${m.name}</td>
-            <td style="font-family: 'JetBrains Mono', monospace; font-size: 8pt;">${m.class_room}</td>
+            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #d97706; font-size: 8.5pt;">${m.duty_id}</td>
             ${dateCells}
             <td style="font-size: 7.5pt; color: #64748b;">${m.post || '-'}</td>
           </tr>
