@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>สแกนใบเช็คชื่อดิจิทัล A4 // SARAWAT QUICK-SCAN</title>
+
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- jsQR for Instant Client-Side QR Detection -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
+  <style>
+    body {
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+      background-color: #0b0f19;
+      color: #f8fafc;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 4px;
+      height: 4px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #334155;
+      border-radius: 4px;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
+
+  <!-- ========================================================== -->
+  <!-- 📱 HEADER & TOP STATUS                                     -->
+  <!-- ========================================================== -->
+  <header class="bg-slate-900/90 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md px-3.5 py-3">
+    <div class="max-w-2xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-2.5">
+        <a href="/" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition border border-slate-700 text-xs">
+          ← หน้าหลัก
+        </a>
+        <div class="flex items-center gap-2">
+          <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
+          <div>
+            <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
+              <span>📸</span> สแกนใบเช็คชื่อ A4
+            </h1>
+            <p class="text-[10px] text-slate-400">กลุ่มงานสารวัตรนักเรียน โรงเรียนพระนารายณ์</p>
+          </div>
+        </div>
+      </div>
+
+      <a href="/attendance-sheet" class="text-[11px] font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1 transition">
+        <span>📄</span> ดูแบบฟอร์ม A4
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================== -->
+  <!-- 📥 MAIN SCANNER CONTAINER                                 -->
+  <!-- ========================================================== -->
+  <main class="max-w-2xl mx-auto w-full px-3.5 py-4 flex-1 space-y-4">
+
+    <!-- Step 1: Capture Card -->
+    <div id="step-capture-card" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden">
+      <div class="text-center space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto shadow-inner text-amber-400">
+          📷
+        </div>
+        <div>
+          <h2 class="text-sm sm:text-base font-bold text-white">ถ่ายภาพใบเช็คชื่อ A4 ช็อตเดียว</h2>
+          <p class="text-xs text-slate-400 max-w-md mx-auto mt-1">
+            วางกระดาษให้เห็นครบทั้ง 4 มุมในแสงสว่างปกติ ระบบจะตรวจจับ QR Code และอ่านสถานะของวันนี้โดยอัตโนมัติ
+          </p>
+        </div>
+
+        <!-- Hidden File & Camera Input -->
+        <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleImageSelected(event)" class="hidden">
+        <input type="file" id="gallery-input" accept="image/*" onchange="handleImageSelected(event)" class="hidden">
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
+          <button onclick="document.getElementById('camera-input').click()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-98 transition">
+            <span class="text-base">📸</span> เปิดกล้องมือถือถ่ายภาพ
+          </button>
+          <button onclick="document.getElementById('gallery-input').click()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 active:scale-98 transition">
+            <span>🖼️</span> เลือกรูปจากคลังภาพ
+          </button>
+        </div>
+
+        <div class="pt-2 flex items-center justify-center gap-4 text-[11px] text-slate-400">
+          <span class="flex items-center gap-1"><span>⚡</span> สแกนไวใน 0.5 วิ</span>
+          <span class="flex items-center gap-1"><span>🛡️</span> ล็อกความแม่นยำด้วย QR</span>
+          <span class="flex items-center gap-1"><span>✏️</span> ปรับแก้ไขได้ก่อนส่ง</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hidden Processing Canvas -->
+    <canvas id="scan-canvas" class="hidden"></canvas>
+
+    <!-- Step 2: Processing Spinner (Hidden by default) -->
+    <div id="step-processing" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
+      <div class="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      <div class="text-sm font-bold text-white">กำลังวิเคราะห์ภาพใบเช็คชื่อ A4...</div>
+      <p class="text-xs text-slate-400" id="processing-subtext">ถอดรหัส QR Session และอ่านพิกัดสัปดาห์</p>
+    </div>
+
+    <!-- Step 3: Verification & Review Card (Shows after scan) -->
+    <div id="step-review-card" class="hidden space-y-3">
+      
+      <!-- Session Telemetry Header Banner -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30" id="badge-qr-detected">
+              ✓ อ่าน QR สำเร็จ
+            </span>
+            <span class="text-xs font-bold text-white" id="session-title">ผลัด: วันจันทร์ (M)</span>
+          </div>
+
+          <!-- Rescan button -->
+          <button onclick="resetScanner()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 underline">
+            <span>🔄</span> ถ่ายใหม่
+          </button>
+        </div>
+
+        <!-- Shift & Week Selector Overrides -->
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-lg p-2">
+            <span class="text-[10px] text-slate-400 block mb-0.5">รอบเวร:</span>
+            <select id="select-shift-override" onchange="onShiftOverride(this.value)" class="w-full bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+              <option value="M" class="bg-slate-900 text-white">เวรวันจันทร์ (M)</option>
+              <option value="T" class="bg-slate-900 text-white">เวรวันอังคาร (T)</option>
+              <option value="W" class="bg-slate-900 text-white">เวรวันพุธ (W)</option>
+              <option value="Ts" class="bg-slate-900 text-white">เวรวันพฤหัสบดี (Ts)</option>
+              <option value="F" class="bg-slate-900 text-white">เวรวันศุกร์ (F)</option>
+              <option value="S" class="bg-slate-900 text-white">เวรพิเศษทุกวัน (S)</option>
+            </select>
+          </div>
+
+          <div class="bg-slate-800/80 border border-slate-700/80 rounded-lg p-2">
+            <span class="text-[10px] text-slate-400 block mb-0.5">สัปดาห์ที่เข้าเวร:</span>
+            <select id="select-week-override" onchange="onWeekOverride(this.value)" class="w-full bg-transparent text-cyan-400 font-bold outline-none cursor-pointer font-mono">
+              <option value="1" class="bg-slate-900 text-white">สัปดาห์ที่ 1 (11/9)</option>
+              <option value="2" class="bg-slate-900 text-white">สัปดาห์ที่ 2 (11/16)</option>
+              <option value="3" class="bg-slate-900 text-white">สัปดาห์ที่ 3 (11/23)</option>
+              <option value="4" class="bg-slate-900 text-white">สัปดาห์ที่ 4 (11/30)</option>
+              <option value="5" class="bg-slate-900 text-white">สัปดาห์ที่ 5 (12/7)</option>
+              <option value="6" class="bg-slate-900 text-white">สัปดาห์ที่ 6 (12/14)</option>
+              <option value="7" class="bg-slate-900 text-white">สัปดาห์ที่ 7 (12/21)</option>
+              <option value="8" class="bg-slate-900 text-white">สัปดาห์ที่ 8 (12/28)</option>
+              <option value="9" class="bg-slate-900 text-white">สัปดาห์ที่ 9 (1/4)</option>
+              <option value="10" class="bg-slate-900 text-white">สัปดาห์ที่ 10 (1/11)</option>
+              <option value="11" class="bg-slate-900 text-white">สัปดาห์ที่ 11 (1/18)</option>
+              <option value="12" class="bg-slate-900 text-white">สัปดาห์ที่ 12 (1/25)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- KPI Pill Counters -->
+        <div class="grid grid-cols-4 gap-1.5 pt-1 text-center font-mono text-[11px]">
+          <div class="bg-emerald-950/40 border border-emerald-500/30 rounded-lg py-1 px-1 text-emerald-400">
+            <div class="text-[9px] text-slate-400">มา</div>
+            <div class="font-bold text-xs" id="stat-present">0</div>
+          </div>
+          <div class="bg-amber-950/40 border border-amber-500/30 rounded-lg py-1 px-1 text-amber-400">
+            <div class="text-[9px] text-slate-400">สาย</div>
+            <div class="font-bold text-xs" id="stat-late">0</div>
+          </div>
+          <div class="bg-yellow-950/40 border border-yellow-500/30 rounded-lg py-1 px-1 text-yellow-400">
+            <div class="text-[9px] text-slate-400">ลา</div>
+            <div class="font-bold text-xs" id="stat-leave">0</div>
+          </div>
+          <div class="bg-rose-950/40 border border-rose-500/30 rounded-lg py-1 px-1 text-rose-400">
+            <div class="text-[9px] text-slate-400">ขาด</div>
+            <div class="font-bold text-xs" id="stat-absent">0</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Scanned Photo Thumbnail & Verification Tip -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2.5">
+          <img id="scanned-thumbnail" src="" class="w-12 h-12 object-cover rounded-lg border border-slate-700 bg-black" alt="ภาพถ่ายใบเช็คชื่อ">
+          <div>
+            <div class="font-semibold text-slate-200">ตรวจสอบความถูกต้องก่อนกดยืนยัน</div>
+            <div class="text-[10px] text-slate-400">ค่าเริ่มต้นคือ "มา" | แตะปุ่มเพื่อสลับเป็น สาย / ลา / ขาด</div>
+          </div>
+        </div>
+        <span class="text-xs text-amber-400 font-bold bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20" id="badge-rate">
+          100%
+        </span>
+      </div>
+
+      <!-- Student Roster Review List (Mobile-Friendly Touch Targets) -->
+      <div class="space-y-2" id="roster-list-container">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Supervisor Sign / Submitter Note -->
+      <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 space-y-2">
+        <div class="flex items-center justify-between text-xs">
+          <label class="font-semibold text-slate-300">ชื่อหัวหน้าเวร / ผู้ส่งข้อมูล:</label>
+          <span class="text-[10px] text-slate-400">บันทึกเป็น Digital Audit Trail</span>
+        </div>
+        <input type="text" id="input-sender-name" placeholder="ระบุชื่อหัวหน้าเวร เช่น [M1] นำเหนือ" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-amber-500">
+      </div>
+
+      <!-- Confirm and Submit Button (Sticky Bottom Style) -->
+      <div class="pt-2">
+        <button onclick="confirmAndSubmit()" id="btn-submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-98 transition">
+          <span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Step 4: Success Card (After Submission) -->
+    <div id="step-success-card" class="hidden bg-slate-900 border border-emerald-500/40 rounded-2xl p-6 text-center space-y-4">
+      <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-3xl mx-auto text-emerald-400">
+        ✓
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-white">บันทึกข้อมูลการเข้าเวรสำเร็จ!</h3>
+        <p class="text-xs text-slate-400 mt-1" id="success-desc">
+          ข้อมูลถูกจัดเก็บลงฐานข้อมูลและส่งแจ้งเตือนเข้า Discord เรียบร้อยแล้ว
+        </p>
+      </div>
+
+      <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-xs text-left space-y-1 font-mono">
+        <div class="flex justify-between"><span class="text-slate-400">รอบเวร:</span> <span class="text-white" id="res-shift">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">สัปดาห์:</span> <span class="text-white" id="res-week">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">มา / สาย / ลา / ขาด:</span> <span class="text-emerald-400" id="res-counts">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">อัตราความพร้อม:</span> <span class="text-cyan-400 font-bold" id="res-rate">-</span></div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 pt-2">
+        <a href="/" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold flex items-center justify-center gap-1.5 border border-slate-700">
+          <span>📊</span> ดูแดชบอร์ด
+        </a>
+        <button onclick="resetScanner()" class="py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center justify-center gap-1.5">
+          <span>📸</span> สแกนใบถัดไป
+        </button>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="py-3 text-center text-[10px] text-slate-500 border-t border-slate-900">
+    SARAWAT PRANARAI COMMAND OS // MOBILE ATTENDANCE SCANNER v1.0
+  </footer>
+
+  <!-- ========================================================== -->
+  <!-- 💻 JAVASCRIPT LOGIC (QR DECODER, TOUCH INTERFACE, API)     -->
+  <!-- ========================================================== -->
+  <script>
+    // Roster ground truth
+    const ROSTER_DATABASE = {
+      M: [
+        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_head: true, post: "ประตู 1" },
+        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "MS3", name: "นางสาวพรนัชชา ประสมพงค์", nickname: "น้ำชา", class_room: "5/5 (3)", post: "โรงอาหาร" },
+        { duty_id: "MS4", name: "นางสาวพิมพิพัฒณ์ รักษาทางดี", nickname: "พิมมี่", class_room: "5/7 (27)", post: "จุดคัดกรอง" },
+        { duty_id: "M1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", post: "อาคาร 2" },
+        { duty_id: "M2", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "5/2 (12)", post: "อาคาร 4" }
+      ],
+      T: [
+        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "น้ำเหนือ", class_room: "5/7 (36)", is_head: true, post: "ประตู 1" },
+        { duty_id: "TS2", name: "นายคณิศร ตะพานแก้ว", nickname: "คิว", class_room: "5/8 (5)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "TS3", name: "นายพงศ์ภัค ทองคำใส", nickname: "แบงก์", class_room: "5/7 (38)", post: "โรงอาหาร" },
+        { duty_id: "TS4", name: "นายนนท์ธวัตร แย้มอำพล", nickname: "กานต์", class_room: "5/7 (32)", post: "จุดคัดกรอง" },
+        { duty_id: "TS5", name: "นายปัณณวัฒน์ ปานฮวด", nickname: "ปัน", class_room: "5/7 (22)", post: "สายตรวจ" }
+      ],
+      W: [
+        { duty_id: "W1", name: "นายธีรภัทร พรหมดิสาร", nickname: "บีม", class_room: "4/7 (19)", is_head: true, post: "ประตู 1" },
+        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "5/3 (15)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "3/4 (20)", post: "โรงอาหาร" }
+      ],
+      Ts: [
+        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true, post: "ประตู 1" },
+        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)", post: "โรงอาหาร" }
+      ],
+      F: [
+        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true, post: "ประตู 1" },
+        { duty_id: "F1", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "6/4 (10)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "5/2 (16)", post: "โรงอาหาร" }
+      ],
+      S: [
+        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true, post: "ประตู 1" },
+        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)", post: "โรงอาหาร" },
+        { duty_id: "MS3", name: "นางสาวพรนัชชา ประสมพงค์", nickname: "น้ำชา", class_room: "5/5 (3)", post: "อาคาร 1" },
+        { duty_id: "MS4", name: "นางสาวพิมพิพัฒณ์ รักษาทางดี", nickname: "พิมมี่", class_room: "5/7 (27)", post: "อาคาร 2" },
+        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "น้ำเหนือ", class_room: "5/7 (36)", post: "จุดคัดกรอง" },
+        { duty_id: "TS2", name: "นายคณิศร ตะพานแก้ว", nickname: "คิว", class_room: "5/8 (5)", post: "ลานกิจกรรม" },
+        { duty_id: "TS3", name: "นายพงศ์ภัค ทองคำใส", nickname: "แบงก์", class_room: "5/7 (38)", post: "สายตรวจ" },
+        { duty_id: "TS4", name: "นายนนท์ธวัตร แย้มอำพล", nickname: "กานต์", class_room: "5/7 (32)", post: "สายตรวจ" },
+        { duty_id: "TS5", name: "นายปัณณวัฒน์ ปานฮวด", nickname: "ปัน", class_room: "5/7 (22)", post: "สายตรวจ" }
+      ]
+    };
+
+    const SHIFT_NAMES = {
+      M: "เวรวันจันทร์",
+      T: "เวรวันอังคาร",
+      W: "เวรวันพุธ",
+      Ts: "เวรวันพฤหัสบดี",
+      F: "เวรวันศุกร์",
+      S: "เวรพิเศษทุกวัน"
+    };
+
+    let activeShift = 'M';
+    let activeWeek = 1;
+    let activeQuarter = 1;
+    let currentRosterRecords = [];
+    let uploadedImageBase64 = null;
+
+    // Handle Image Chosen
+    function handleImageSelected(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+
+      document.getElementById('step-capture-card').classList.add('hidden');
+      document.getElementById('step-processing').classList.remove('hidden');
+
+      const reader = new FileReader();
+      reader.onload = function(event) {
+        uploadedImageBase64 = event.target.result;
+        document.getElementById('scanned-thumbnail').src = uploadedImageBase64;
+        processImageWithQR(uploadedImageBase64);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    // Client-side QR scan using jsQR + Canvas
+    function processImageWithQR(base64Data) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.getElementById('scan-canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = img.width;
+        canvas.height = img.height;
+        ctx.drawImage(img, 0, 0, img.width, img.height);
+
+        // Try to decode QR Code
+        let detectedShift = null;
+        let detectedQ = null;
+
+        try {
+          const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          const qrCode = jsQR(imageData.data, imageData.width, imageData.height, {
+            inversionAttempts: "dontInvert"
+          });
+
+          if (qrCode && qrCode.data) {
+            console.log('[QR DECODED]', qrCode.data);
+            if (qrCode.data.includes('shift=')) {
+              const url = new URL(qrCode.data);
+              detectedShift = url.searchParams.get('shift');
+              detectedQ = parseInt(url.searchParams.get('q') || '1', 10);
+            } else if (qrCode.data.startsWith('{')) {
+              const p = JSON.parse(qrCode.data);
+              detectedShift = p.shift;
+              detectedQ = p.quarter;
+            }
+          }
+        } catch (err) {
+          console.warn('[QR ERROR]', err);
+        }
+
+        // Determine current day-of-week to map default shift if not found
+        const dayIdx = new Date().getDay();
+        const defaultShiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+        activeShift = detectedShift || defaultShiftMap[dayIdx] || 'M';
+        activeQuarter = detectedQ || 1;
+
+        // Populate controls
+        document.getElementById('select-shift-override').value = activeShift;
+        document.getElementById('select-week-override').value = activeWeek;
+        document.getElementById('session-title').textContent = `ผลัด: ${SHIFT_NAMES[activeShift] || activeShift} (${activeShift})`;
+
+        // Build roster records (Default: PRESENT)
+        buildRosterReviewList();
+
+        // Show review card
+        document.getElementById('step-processing').classList.add('hidden');
+        document.getElementById('step-review-card').classList.remove('hidden');
+      };
+      img.src = base64Data;
+    }
+
+    // Build the review table
+    function buildRosterReviewList() {
+      const roster = ROSTER_DATABASE[activeShift] || ROSTER_DATABASE['M'];
+      
+      currentRosterRecords = roster.map((m, idx) => ({
+        duty_id: m.duty_id,
+        name: m.name,
+        nickname: m.nickname,
+        class_room: m.class_room,
+        post: m.post || '-',
+        is_head: m.is_head || false,
+        status: 'PRESENT' // ค่าเริ่มต้นคือ มาปฏิบัติหน้าที่ (Default)
+      }));
+
+      // Pre-fill sender name with shift head
+      const head = currentRosterRecords.find(m => m.is_head);
+      if (head) {
+        document.getElementById('input-sender-name').value = `[${head.duty_id}] ${head.nickname} (${head.name})`;
+      }
+
+      renderRosterRows();
+    }
+
+    function renderRosterRows() {
+      const container = document.getElementById('roster-list-container');
+      
+      container.innerHTML = currentRosterRecords.map((r, idx) => {
+        const headBadge = r.is_head ? ' <span class="text-rose-400 font-bold text-[10px]">(หัวหน้า)</span>' : '';
+        
+        return `
+          <div class="bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 transition hover:border-slate-700">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs font-bold text-amber-400">[${r.duty_id}]</span>
+                <span class="font-bold text-xs text-white">${r.nickname}</span>
+                <span class="text-xs text-slate-300">(${r.name})</span>
+                ${headBadge}
+              </div>
+              <div class="text-[11px] text-slate-400 mt-0.5">
+                ห้อง: ${r.class_room} • จุดประจำการ: <span class="text-slate-300">${r.post}</span>
+              </div>
+            </div>
+
+            <!-- Status Buttons: [มา] [สาย] [ลา] [ขาด] -->
+            <div class="grid grid-cols-4 gap-1.5 self-end sm:self-center w-full sm:w-auto font-sans text-xs">
+              
+              <!-- มา (PRESENT) -->
+              <button onclick="setStatus('${r.duty_id}', 'PRESENT')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'PRESENT' ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
+                มา
+              </button>
+
+              <!-- สาย (LATE) -->
+              <button onclick="setStatus('${r.duty_id}', 'LATE')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'LATE' ? 'bg-amber-500 text-black border-amber-400 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
+                สาย
+              </button>
+
+              <!-- ลา (LEAVE) -->
+              <button onclick="setStatus('${r.duty_id}', 'LEAVE')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'LEAVE' ? 'bg-yellow-500 text-black border-yellow-400 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
+                ลา
+              </button>
+
+              <!-- ขาด (ABSENT) -->
+              <button onclick="setStatus('${r.duty_id}', 'ABSENT')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'ABSENT' ? 'bg-rose-600 text-white border-rose-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
+                ขาด
+              </button>
+
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      updateReviewStats();
+    }
+
+    function setStatus(dutyId, newStatus) {
+      const record = currentRosterRecords.find(r => r.duty_id === dutyId);
+      if (record) {
+        record.status = newStatus;
+        renderRosterRows();
+      }
+    }
+
+    function updateReviewStats() {
+      let p = 0, l = 0, le = 0, a = 0;
+      currentRosterRecords.forEach(r => {
+        if (r.status === 'PRESENT') p++;
+        else if (r.status === 'LATE') l++;
+        else if (r.status === 'LEAVE') le++;
+        else if (r.status === 'ABSENT') a++;
+      });
+
+      document.getElementById('stat-present').textContent = p;
+      document.getElementById('stat-late').textContent = l;
+      document.getElementById('stat-leave').textContent = le;
+      document.getElementById('stat-absent').textContent = a;
+
+      const total = currentRosterRecords.length;
+      const rate = total > 0 ? Math.round(((p + l) / total) * 100) : 0;
+      const rateBadge = document.getElementById('badge-rate');
+      rateBadge.textContent = `ความพร้อม ${rate}%`;
+      rateBadge.className = `text-xs font-bold px-2 py-1 rounded border ${rate >= 80 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : (rate >= 50 ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' : 'text-rose-400 bg-rose-500/10 border-rose-500/30')}`;
+    }
+
+    function onShiftOverride(val) {
+      activeShift = val;
+      document.getElementById('session-title').textContent = `ผลัด: ${SHIFT_NAMES[activeShift] || activeShift} (${activeShift})`;
+      buildRosterReviewList();
+    }
+
+    function onWeekOverride(val) {
+      activeWeek = parseInt(val, 10);
+    }
+
+    // Submit and broadcast to system + Discord
+    async function confirmAndSubmit() {
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = true;
+      btn.innerHTML = `<span>⏳</span> กำลังบันทึกข้อมูลเข้าระบบ...`;
+
+      const senderName = document.getElementById('input-sender-name').value.trim() || 'หัวหน้าเวร';
+      const todayIso = new Date().toISOString().slice(0, 10);
+
+      const payload = {
+        shift_code: activeShift,
+        quarter: activeQuarter,
+        week_index: activeWeek,
+        duty_date: todayIso,
+        scanned_by: senderName,
+        image_base64: uploadedImageBase64,
+        records: currentRosterRecords
+      };
+
+      try {
+        const res = await fetch('/api/attendance/confirm', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          // Show Success Card
+          document.getElementById('step-review-card').classList.add('hidden');
+          document.getElementById('step-success-card').classList.remove('hidden');
+
+          document.getElementById('res-shift').textContent = `${SHIFT_NAMES[activeShift]} (${activeShift})`;
+          document.getElementById('res-week').textContent = `สัปดาห์ที่ ${activeWeek}`;
+          document.getElementById('res-counts').textContent = `มา ${data.summary.present} | สาย ${data.summary.late} | ลา ${data.summary.leave} | ขาด ${data.summary.absent}`;
+          document.getElementById('res-rate').textContent = `${data.summary.attendance_rate}%`;
+        } else {
+          alert('⚠️ บันทึกข้อมูลไม่สำเร็จ: ' + (data.error || 'กรุณาลองใหม่อีกครั้ง'));
+          btn.disabled = false;
+          btn.innerHTML = `<span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord`;
+        }
+      } catch (err) {
+        alert('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + err.message);
+        btn.disabled = false;
+        btn.innerHTML = `<span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord`;
+      }
+    }
+
+    function resetScanner() {
+      uploadedImageBase64 = null;
+      document.getElementById('camera-input').value = '';
+      document.getElementById('gallery-input').value = '';
+      document.getElementById('step-success-card').classList.add('hidden');
+      document.getElementById('step-review-card').classList.add('hidden');
+      document.getElementById('step-processing').classList.add('hidden');
+      document.getElementById('step-capture-card').classList.remove('hidden');
+      const btn = document.getElementById('btn-submit');
+      btn.disabled = false;
+      btn.innerHTML = `<span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord`;
+    }
+  </script>
+</body>
+</html>

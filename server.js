@@ -1302,6 +1302,235 @@ app.post(['/api/lost-found/killfile', '/api/lost-found/reset'], async (req, res)
   }
 });
 
+// =============================================================
+// 6.8 ระบบจัดการและบันทึกผลการสแกนใบเช็คชื่อ A4 ดิจิทัล
+// =============================================================
+const ATTENDANCE_DB_FILE = path.join(__dirname, '..', 'data', 'attendance_db.json');
+const ATTENDANCE_LOCAL_DB = path.join(__dirname, 'attendance_db.json');
+
+function getAttendanceData() {
+  let db = { sessions: [], records: [] };
+  const candidates = [ATTENDANCE_DB_FILE, ATTENDANCE_LOCAL_DB];
+  for (const f of candidates) {
+    try {
+      if (fs.existsSync(f)) {
+        const parsed = JSON.parse(fs.readFileSync(f, 'utf8'));
+        if (parsed && typeof parsed === 'object') {
+          if (Array.isArray(parsed.sessions) && parsed.sessions.length > 0) db.sessions = parsed.sessions;
+          if (Array.isArray(parsed.records) && parsed.records.length > 0) db.records = parsed.records;
+        }
+      }
+    } catch (e) {}
+  }
+  return db;
+}
+
+function saveAttendanceData(db) {
+  try {
+    const dataDir = path.join(__dirname, '..', 'data');
+    if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir, { recursive: true });
+    fs.writeFileSync(ATTENDANCE_DB_FILE, JSON.stringify(db, null, 2), 'utf8');
+  } catch (e) {
+    try {
+      fs.writeFileSync(ATTENDANCE_LOCAL_DB, JSON.stringify(db, null, 2), 'utf8');
+    } catch (err) {}
+  }
+}
+
+// ฟังก์ชันส่งประกาศแจ้งเตือนสรุปยอดเข้าเวรไปยัง Discord
+async function notifyAttendanceToDiscord(sessionData, summary) {
+  try {
+    const token = process.env.DISCORD_TOKEN;
+    const guildId = process.env.GUILD_ID;
+    const chId = process.env.ATTENDANCE_CHANNEL_ID || process.env.INCIDENT_CHANNEL_ID;
+    if (!token || !guildId || !chId) return false;
+
+    const shiftNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Ts: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
+    const shiftThai = shiftNames[sessionData.shift_code] || sessionData.shift_code;
+    const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
+
+    const embed = {
+      title: `📋 บันทึกการปฏิบัติหน้าที่ประจำวัน // สารวัตรนักเรียน`,
+      description: `**ผลัดปฏิบัติการ:** เวร${shiftThai} [${sessionData.shift_code}]\n` +
+                   `**ประจำวันที่:** ${sessionData.duty_date} (สัปดาห์ที่ ${sessionData.week_index || 1})\n` +
+                   `**ผู้รายงาน/หัวหน้าเวร:** ${sessionData.scanned_by || 'หัวหน้าเวร'}\n\n` +
+                   `**📊 สรุปยอดความพร้อม:**\n` +
+                   `• ✅ มาปฏิบัติหน้าที่: **${summary.present}** นาย\n` +
+                   `• ⏰ มาสาย: **${summary.late}** นาย\n` +
+                   `• 📝 ขอลาเวร: **${summary.leave}** นาย\n` +
+                   `• ❌ ขาดเวร: **${summary.absent}** นาย\n` +
+                   `• 🎯 อัตราความพร้อม: **${summary.attendance_rate}%**\n\n` +
+                   `🔗 ตรวจสอบข้อมูลแบบสด: [คลิกเปิดระบบศูนย์บัญชาการ](${webUrl})`,
+      color: summary.attendance_rate >= 80 ? 0x22c55e : (summary.attendance_rate >= 50 ? 0xf59e0b : 0xef4444),
+      footer: { text: `SARAWAT PRANARAI OS • PAPER-TO-DIGITAL INGESTION` },
+      timestamp: new Date().toISOString()
+    };
+
+    if (sessionData.raw_image_url && sessionData.raw_image_url.startsWith('http')) {
+      embed.image = { url: sessionData.raw_image_url };
+    }
+
+    await fetch(`https://discord.com/api/v10/channels/${chId}/messages`, {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bot ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ embeds: [embed] })
+    });
+    return true;
+  } catch (err) {
+    console.warn('[ATTENDANCE-DISCORD-NOTIFY] ⚠️ ส่งแจ้งเตือน Discord ไม่สำเร็จ:', err.message);
+    return false;
+  }
+}
+
+// 6.8.1 บันทึกผลยืนยันการสแกนใบเช็คชื่อ (/api/attendance/confirm)
+app.post('/api/attendance/confirm', async (req, res) => {
+  try {
+    const { shift_code, quarter, week_index, duty_date, scanned_by, image_base64, records } = req.body;
+    if (!shift_code || !Array.isArray(records)) {
+      return res.status(400).json({ success: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาระบุกะเวรและรายชื่อสารวัตร' });
+    }
+
+    let rawImageUrl = null;
+    if (image_base64) {
+      const uploadDir = path.join(__dirname, 'public', 'uploads');
+      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+      const filename = `attendance_${shift_code}_${Date.now()}.jpg`;
+      const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
+      fs.writeFileSync(path.join(uploadDir, filename), buf);
+      rawImageUrl = `/uploads/${filename}`;
+
+      try {
+        const storagePath = `attendance/${filename}`;
+        const { error: sErr } = await supabase.storage
+          .from('sarawat-photos')
+          .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
+        if (!sErr) {
+          const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+          rawImageUrl = publicUrl;
+        }
+      } catch (e) {}
+    }
+
+    // คำนวณสรุปยอด
+    let present = 0, late = 0, leave = 0, absent = 0;
+    records.forEach(r => {
+      if (r.status === 'PRESENT') present++;
+      else if (r.status === 'LATE') late++;
+      else if (r.status === 'LEAVE') leave++;
+      else if (r.status === 'ABSENT') absent++;
+    });
+    const total = records.length;
+    const attendance_rate = total > 0 ? Math.round(((present + late) / total) * 100) : 0;
+    const summary = { total, present, late, leave, absent, attendance_rate };
+
+    const sessionData = {
+      id: `att-sess-${Date.now()}`,
+      shift_code,
+      quarter_number: quarter || 1,
+      week_index: week_index || 1,
+      duty_date: duty_date || new Date().toISOString().slice(0, 10),
+      raw_image_url: rawImageUrl,
+      scanned_by: scanned_by || 'หัวหน้าเวร',
+      total_roster: total,
+      present_count: present,
+      late_count: late,
+      leave_count: leave,
+      absent_count: absent,
+      attendance_rate,
+      created_at: new Date().toISOString()
+    };
+
+    // 1. บันทึกลง Supabase Database
+    try {
+      await supabase.from('attendance_scan_sessions').upsert({
+        shift_code: sessionData.shift_code,
+        duty_date: sessionData.duty_date,
+        quarter_number: sessionData.quarter_number,
+        week_column_index: sessionData.week_index,
+        raw_image_url: sessionData.raw_image_url,
+        total_roster: total,
+        present_count: present,
+        late_count: late,
+        leave_count: leave,
+        absent_count: absent,
+        attendance_rate,
+        scanned_by: sessionData.scanned_by
+      }, { onConflict: 'shift_code,duty_date' });
+
+      // Upsert individual records
+      const upsertRows = records.map(r => ({
+        duty_id: r.duty_id,
+        member_name: r.name,
+        shift_code,
+        duty_date: sessionData.duty_date,
+        status: r.status,
+        confidence: 0.98,
+        was_manually_edited: !!r.was_edited
+      }));
+      await supabase.from('attendance_records').upsert(upsertRows, { onConflict: 'duty_id,duty_date' });
+    } catch (dbErr) {
+      console.warn('[ATTENDANCE-DB] Supabase error, using local fallback:', dbErr.message);
+    }
+
+    // 2. บันทึกลง Local Cache
+    const db = getAttendanceData();
+    db.sessions.unshift(sessionData);
+    records.forEach(r => {
+      db.records.push({
+        session_id: sessionData.id,
+        duty_id: r.duty_id,
+        member_name: r.name,
+        shift_code,
+        duty_date: sessionData.duty_date,
+        status: r.status,
+        created_at: new Date().toISOString()
+      });
+    });
+    saveAttendanceData(db);
+
+    // 3. แจ้งเตือนไปยัง Discord
+    notifyAttendanceToDiscord(sessionData, summary);
+
+    res.json({
+      success: true,
+      session_id: sessionData.id,
+      summary,
+      message: 'บันทึกข้อมูลการเข้าเวรสำเร็จเรียบร้อย'
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.8.2 ดูประวัติการเข้าเวรล่าสุด (/api/attendance/records)
+app.get('/api/attendance/records', async (req, res) => {
+  try {
+    const { shift, date } = req.query;
+    let records = [];
+    try {
+      let q = supabase.from('attendance_records').select('*').order('duty_date', { ascending: false }).limit(100);
+      if (shift) q = q.eq('shift_code', shift);
+      if (date) q = q.eq('duty_date', date);
+      const { data, error } = await q;
+      if (!error && data) records = data;
+    } catch (e) {}
+
+    if (records.length === 0) {
+      const db = getAttendanceData();
+      records = db.records || [];
+      if (shift) records = records.filter(r => r.shift_code === shift);
+      if (date) records = records.filter(r => r.duty_date === date);
+    }
+
+    res.json({ success: true, count: records.length, data: records });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // 7. หน้าเว็บระบบของหาย (/lost-found)
 // -------------------------------------------------------------
@@ -1342,6 +1571,13 @@ app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
 // -------------------------------------------------------------
 app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
+});
+
+// -------------------------------------------------------------
+// 7.2.3 หน้าเว็บสแกนใบเช็คชื่อ A4 ดิจิทัล (/attendance-scan, /scan-attendance)
+// -------------------------------------------------------------
+app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'attendance-scan.html'));
 });
 
 // -------------------------------------------------------------
