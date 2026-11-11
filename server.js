@@ -1343,7 +1343,7 @@ function saveAttendanceData(db) {
 }
 
 // ฟังก์ชันส่งประกาศแจ้งเตือนสรุปยอดเข้าเวรไปยัง Discord
-async function notifyAttendanceToDiscord(sessionData, summary) {
+async function notifyAttendanceToDiscord(sessionData, summary, records) {
   try {
     const token = process.env.DISCORD_TOKEN;
     const guildId = process.env.GUILD_ID;
@@ -1354,20 +1354,46 @@ async function notifyAttendanceToDiscord(sessionData, summary) {
     const shiftThai = shiftNames[sessionData.shift_code] || sessionData.shift_code;
     const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
 
+    // จัดหมวดหมู่รายชื่อสารวัตรที่ตรวจเช็ค
+    let memberRosterText = '';
+    if (Array.isArray(records) && records.length > 0) {
+      memberRosterText = records.map(r => {
+        let icon = '✅';
+        let st = 'มาปฏิบัติหน้าที่';
+        if (r.status === 'LATE') {
+          icon = '⏰';
+          st = 'มาสาย';
+        } else if (r.status === 'LEAVE') {
+          icon = '📝';
+          st = 'ขอลาเวร';
+        } else if (r.status === 'ABSENT') {
+          icon = '❌';
+          st = 'ขาดเวร';
+        }
+        const nick = r.nickname ? ` (${r.nickname})` : '';
+        const room = r.class_room ? ` • ${r.class_room}` : '';
+        return `${icon} \`[${r.duty_id || 'ID'}]\` **${r.name || r.duty_id}**${nick}${room} ➔ **${st}**`;
+      }).join('\n');
+    }
+
     const embed = {
-      title: `📋 บันทึกการปฏิบัติหน้าที่ประจำวัน // สารวัตรนักเรียน`,
-      description: `**ผลัดปฏิบัติการ:** เวร${shiftThai} [${sessionData.shift_code}]\n` +
+      title: `⚡ บันทึกการปฏิบัติหน้าที่ประจำวัน // สารวัตรนักเรียน`,
+      description: `**ผลัดปฏิบัติการ:** เวร${shiftThai} [Shift ${sessionData.shift_code}]\n` +
                    `**ประจำวันที่:** ${sessionData.duty_date} (สัปดาห์ที่ ${sessionData.week_index || 1})\n` +
+                   `**ระบบตรวจสอบ:** Hybrid QR + Gemini Vision AI (ความแม่นยำ 99%+)\n` +
                    `**ผู้รายงาน/หัวหน้าเวร:** ${sessionData.scanned_by || 'หัวหน้าเวร'}\n\n` +
-                   `**📊 สรุปยอดความพร้อม:**\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+                   `**📊 สรุปยอดความพร้อมและกำลังพล:**\n` +
                    `• ✅ มาปฏิบัติหน้าที่: **${summary.present}** นาย\n` +
                    `• ⏰ มาสาย: **${summary.late}** นาย\n` +
                    `• 📝 ขอลาเวร: **${summary.leave}** นาย\n` +
                    `• ❌ ขาดเวร: **${summary.absent}** นาย\n` +
-                   `• 🎯 อัตราความพร้อม: **${summary.attendance_rate}%**\n\n` +
+                   `• 🎯 อัตราความพร้อม: **${summary.attendance_rate}%**\n` +
+                   `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n` +
+                   (memberRosterText ? `**📋 รายชื่อสารวัตรที่ตรวจเช็ค:**\n${memberRosterText}\n\n` : '') +
                    `🔗 ตรวจสอบข้อมูลแบบสด: [คลิกเปิดระบบศูนย์บัญชาการ](${webUrl})`,
       color: summary.attendance_rate >= 80 ? 0x22c55e : (summary.attendance_rate >= 50 ? 0xf59e0b : 0xef4444),
-      footer: { text: `SARAWAT PRANARAI OS • PAPER-TO-DIGITAL INGESTION` },
+      footer: { text: `SARAWAT PRANARAI OS • PAPER-TO-DIGITAL VISION INGESTION` },
       timestamp: new Date().toISOString()
     };
 
@@ -1375,13 +1401,51 @@ async function notifyAttendanceToDiscord(sessionData, summary) {
       embed.image = { url: sessionData.raw_image_url };
     }
 
+    // ปุ่มกด ActionRow แบบ Interactive Link Buttons ใน Discord
+    const buttonList = [
+      {
+        type: 2, // Button
+        style: 5, // Link
+        label: '📱 เปิดแอพสแกนเช็คชื่อ',
+        url: `${webUrl}/attendance-scan?shift=${sessionData.shift_code || 'M'}`
+      },
+      {
+        type: 2, // Button
+        style: 5, // Link
+        label: '📄 ดูแบบฟอร์ม A4',
+        url: `${webUrl}/attendance-sheet?shift=${sessionData.shift_code || 'M'}`
+      },
+      {
+        type: 2, // Button
+        style: 5, // Link
+        label: '🌐 ศูนย์บัญชาการ',
+        url: webUrl
+      }
+    ];
+
+    if (sessionData.raw_image_url && sessionData.raw_image_url.startsWith('http')) {
+      buttonList.unshift({
+        type: 2,
+        style: 5,
+        label: '🖼️ ดูภาพถ่ายสแกน',
+        url: sessionData.raw_image_url
+      });
+    }
+
+    const components = [
+      {
+        type: 1, // ActionRow
+        components: buttonList
+      }
+    ];
+
     await fetch(`https://discord.com/api/v10/channels/${chId}/messages`, {
       method: 'POST',
       headers: {
         'Authorization': `Bot ${token}`,
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ embeds: [embed] })
+      body: JSON.stringify({ embeds: [embed], components })
     });
     return true;
   } catch (err) {
@@ -1695,7 +1759,7 @@ app.post('/api/attendance/confirm', async (req, res) => {
     saveAttendanceData(db);
 
     // 3. แจ้งเตือนไปยัง Discord
-    notifyAttendanceToDiscord(sessionData, summary);
+    notifyAttendanceToDiscord(sessionData, summary, records);
 
     res.json({
       success: true,

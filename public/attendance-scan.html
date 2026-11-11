@@ -401,11 +401,14 @@
       </div>
 
       <div class="pt-2 flex flex-col sm:flex-row gap-2 justify-center">
-        <a href="/" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs sm:text-sm transition">
-          📊 ดูแดชบอร์ดสรุปยอดรวม
+        <a href="/" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
+          <span>📊</span> <span>ดูแดชบอร์ดสรุปยอด</span>
         </a>
-        <button onclick="resetToFirstStep()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
-          📸 สแกนรอบต่อไป
+        <a id="succ-sheet-link" href="/attendance-sheet" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs sm:text-sm border border-amber-500/30 transition flex items-center justify-center gap-1.5">
+          <span>📄</span> <span>ดูแบบฟอร์ม A4 ผลัดนี้</span>
+        </a>
+        <button onclick="resetToFirstStep()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition flex items-center justify-center gap-1.5">
+          <span>📸</span> <span>สแกนรอบต่อไป</span>
         </button>
       </div>
     </div>
@@ -1291,6 +1294,9 @@
         image_base64: annotatedDataUrl || singleCapturedImage || '',
         records: activeRoster.map(m => ({
           duty_id: m.duty_id,
+          name: m.name || m.duty_id,
+          nickname: m.nickname || '',
+          class_room: m.class_room || '',
           status: m.status,
           was_edited: m.was_edited
         }))
@@ -1328,6 +1334,11 @@
       const late = activeRoster.filter(m => m.status === 'LATE').length;
       const leave = activeRoster.filter(m => m.status === 'LEAVE').length;
       const rate = total > 0 ? Math.round(((present + leave) / total) * 100) : 100;
+
+      const sheetLink = document.getElementById('succ-sheet-link');
+      if (sheetLink) {
+        sheetLink.href = `/attendance-sheet?shift=${currentShiftCode}`;
+      }
 
       document.getElementById('success-date-str').textContent = currentTargetCol;
       document.getElementById('succ-shift').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
