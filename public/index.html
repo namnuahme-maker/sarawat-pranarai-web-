@@ -351,74 +351,6 @@
             </div>
           </div>
 
-          <!-- Quick Tactical Command Desk (Practical Utilities) -->
-          <div id="daily-ops-controls" class="p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-2.5">
-            <div class="flex items-center justify-between">
-              <h3 class="font-bold text-xs text-slate-300 uppercase tracking-wider font-mono flex items-center gap-1.5">
-                <span>⚡</span> เครื่องมือปฏิบัติการด่วน
-              </h3>
-              <span class="text-[10px] text-amber-400 font-mono">TACTICAL DESK</span>
-            </div>
-
-            <!-- Primary Attendance Launchers -->
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <a href="/attendance-scan" class="p-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center gap-2 group shadow-sm">
-                <span class="text-base group-hover:scale-110 transition">⚡</span>
-                <div>
-                  <div class="font-bold text-emerald-300">สแกนเช็คชื่อ AI</div>
-                  <div class="text-[10px] text-emerald-400/80">กล้องตรวจ [○] (ม)</div>
-                </div>
-              </a>
-
-              <a href="/attendance-sheet" class="p-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400 transition flex items-center gap-2 group shadow-sm">
-                <span class="text-base group-hover:scale-110 transition">📄</span>
-                <div>
-                  <div class="font-bold text-amber-300">แบบฟอร์ม A4</div>
-                  <div class="text-[10px] text-amber-400/80">ตาราง 12 สัปดาห์</div>
-                </div>
-              </a>
-            </div>
-            
-            <div class="grid grid-cols-2 gap-2 text-xs">
-              <a href="/verify" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-emerald-500/40 transition flex items-center gap-2">
-                <span class="text-base">🔍</span>
-                <div>
-                  <div class="font-semibold text-slate-200">ตรวจสอบบัตร</div>
-                  <div class="text-[10px] text-slate-400">สแกน QR / ตรวจสถานะ</div>
-                </div>
-              </a>
-
-              <a href="/card-studio" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-cyan-500/40 transition flex items-center gap-2">
-                <span class="text-base">🎨</span>
-                <div>
-                  <div class="font-semibold text-slate-200">สตูดิโอทำบัตร</div>
-                  <div class="text-[10px] text-slate-400">ปรับแต่งเทมเพลต 2D</div>
-                </div>
-              </a>
-
-              <a href="/bodycam-upload" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-blue-500/40 transition flex items-center gap-2">
-                <span class="text-base">📹</span>
-                <div>
-                  <div class="font-semibold text-slate-200">ส่งคลิป Bodycam</div>
-                  <div class="text-[10px] text-slate-400">อัปโหลดหลักฐาน</div>
-                </div>
-              </a>
-
-              <a href="/lost-found" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-purple-500/40 transition flex items-center gap-2">
-                <span class="text-base">📦</span>
-                <div>
-                  <div class="font-semibold text-slate-200">คลังของหาย</div>
-                  <div class="text-[10px] text-slate-400">ส่งมอบ & ค้นหา</div>
-                </div>
-              </a>
-            </div>
-
-            <!-- Quick Incident Button -->
-            <button onclick="openQuickIncidentModal()" class="w-full py-2 px-3 rounded-lg bg-rose-950/20 hover:bg-rose-900/40 text-rose-300 border border-rose-500/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 mt-1">
-              <span>🚨</span> บันทึกเหตุการณ์ประจำวันด่วน (Quick Incident)
-            </button>
-          </div>
-
         </div>
 
       </div>
@@ -1450,11 +1382,6 @@
         targetId: 'shifts-grid-container',
         title: '📅 ตารางเวร 6 ผลัด (Shift Matrix)',
         desc: 'ตรวจสอบกำลังพลประจำเวรแต่ละวัน จันทร์-ศุกร์ และเวรพิเศษ พร้อมไฮไลต์เตือนเวรประจำวันวันนี้อัตโนมัติ'
-      },
-      {
-        targetId: 'daily-ops-controls',
-        title: '⚡ เครื่องมือปฏิบัติการด่วน',
-        desc: 'คัดลอกสรุปเวรส่งไลน์, บันทึกเหตุการณ์ด่วน, ตรวจสอบบัตรสารวัตร และเข้าสู่สตูดิโอทำบัตร'
       },
       {
         targetId: 'roster-search-input',
