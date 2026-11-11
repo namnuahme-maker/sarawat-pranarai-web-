@@ -612,6 +612,123 @@
       }, 3000);
     }
 
+    const COMMON_NICKNAMES = {
+      'น้ำเหนือ': 'NAMNUAH',
+      'นำเหนือ': 'NAMNUAH',
+      'น้ำ': 'NAM',
+      'น้ำำ': 'NAM',
+      'ปัน': 'PUN',
+      'คิว': 'Q',
+      'แบงก์': 'BANK',
+      'แบงค์': 'BANK',
+      'กานต์': 'KANT',
+      'กันต์': 'GUN',
+      'กัน': 'GUN',
+      'ไอซ์': 'ICE',
+      'นาย': 'NINE',
+      'น้ำชา': 'NAMCHA',
+      'พิมมี่': 'PIMMY',
+      'พิม': 'PIM',
+      'บีม': 'BEAM',
+      'ภีมะ': 'PEEMA',
+      'นน': 'NON',
+      'ดิสดิส': 'DISDIS',
+      'โบ๊ท': 'BOAT',
+      'โบ๊ต': 'BOAT',
+      'บอส': 'BOSS',
+      'เบสท์': 'BEST',
+      'เบส': 'BEST',
+      'อาร์ม': 'ARM',
+      'กาย': 'GUY',
+      'มิว': 'MEW',
+      'ภูมิ': 'POOM',
+      'วิน': 'WIN',
+      'นิว': 'NEW',
+      'ฟลุ๊ค': 'FLUKE',
+      'ฟลุ๊คส์': 'FLUKE',
+      'ฟลุค': 'FLUKE',
+      'นนท์': 'NON',
+      'นนท': 'NON',
+      'มาร์ค': 'MARK',
+      'มาร์คัส': 'MARCUS',
+      'เกม': 'GAME',
+      'เกมส์': 'GAME',
+      'ก้อง': 'KONG',
+      'เฟิร์ส': 'FIRST',
+      'บิว': 'BEW',
+      'เต้': 'TAE',
+      'ตูน': 'TOON',
+      'ต้น': 'TON',
+      'นัท': 'NUT',
+      'พี': 'PEE',
+      'พีท': 'PETE',
+      'กอล์ฟ': 'GOLF',
+      'กิ๊ฟ': 'GIFT',
+      'แอน': 'ANN',
+      'ฟ้า': 'FAH',
+      'พลอย': 'PLOY',
+      'มายด์': 'MIND',
+      'มาย': 'MIND',
+      'เฟิร์น': 'FERN',
+      'มุก': 'MOOK',
+      'บิวตี้': 'BEAUTY',
+      'เจมส์': 'JAMES',
+      'ปอนด์': 'POUND',
+      'โฟกัส': 'FOCUS',
+      'มิกซ์': 'MIX',
+      'ออฟ': 'OFF',
+      'เต๋า': 'TAO',
+      'ท็อป': 'TOP',
+      'มิ้น': 'MINT',
+      'มินต์': 'MINT',
+      'แพร': 'PRAE',
+      'บอม': 'BOMB',
+      'บอมบ์': 'BOMB',
+      'เบียร์': 'BEER',
+      'วิว': 'VIEW',
+      'โอ๊ค': 'OAK',
+      'เอิร์ธ': 'EARTH',
+      'ข้าว': 'KHAO',
+      'เนย': 'NOEY',
+      'เตย': 'TOEY',
+      'เป็ด': 'PED',
+      'ไก่': 'KAI',
+      'หมู': 'MOO',
+      'ปลา': 'PLA'
+    };
+
+    function romanizeThaiNickname(thai) {
+      if (!thai) return 'SARAWAT';
+      const clean = thai.trim();
+      if (!clean || clean === '.' || clean === '-') return 'SARAWAT';
+      if (/^[A-Za-z0-9_\-\s]+$/.test(clean)) return clean.toUpperCase();
+      if (COMMON_NICKNAMES[clean]) return COMMON_NICKNAMES[clean];
+      const withoutTones = clean.replace(/[\u0E48-\u0E4C\u0E47\u0E4D\u0E4E\u0E3A]/g, '');
+      if (COMMON_NICKNAMES[withoutTones]) return COMMON_NICKNAMES[withoutTones];
+      for (const [k, v] of Object.entries(COMMON_NICKNAMES)) {
+        if (clean === k || withoutTones === k) return v;
+      }
+      let res = clean;
+      res = res.replace(/เ(.*)ือ(.*)/g, '$1UAH$2');
+      res = res.replace(/แ(.*)ว/g, '$1AEW');
+      res = res.replace(/เ(.*)ย/g, '$1OEY');
+      res = res.replace(/เ(.*)า/g, '$1AO');
+      res = res.replace(/โ(.*)ะ/g, '$1O');
+      res = res.replace(/โ(.*)/g, '$1O');
+      res = res.replace(/แ(.*)/g, '$1AE');
+      res = res.replace(/เ(.*)/g, '$1E');
+      res = res.replace(/ำ/g, 'AM');
+      res = res.replace(/ั/g, 'U');
+      res = res.replace(/า/g, 'A');
+      res = res.replace(/ิ/g, 'I');
+      res = res.replace(/ี/g, 'EE');
+      res = res.replace(/ึ/g, 'EU');
+      res = res.replace(/ื/g, 'EU');
+      res = res.replace(/ุ/g, 'U');
+      res = res.replace(/ู/g, 'OO');
+      return res.replace(/[^A-Za-z0-9]/g, '').toUpperCase() || 'SARAWAT';
+    }
+
     // Initialize Canvas & App
     async function initStudio() {
       studioCanvas = new fabric.Canvas('studio-canvas', {
@@ -639,11 +756,14 @@
       try {
         const mRes = await fetch('/api/members');
         const mData = await mRes.json();
-        if (mData.success && Array.isArray(mData.members)) {
-          allMembers = mData.members;
+        const membersList = mData.data || mData.members || [];
+        if (mData.success && Array.isArray(membersList)) {
+          allMembers = membersList;
           populateMembersDropdown();
         }
-      } catch (e) {}
+      } catch (e) {
+        console.warn('Failed to load members for studio preview:', e);
+      }
 
       // Initial Canvas Render
       await renderConfigToCanvas(SAMPLE_MEMBER);
@@ -665,7 +785,9 @@
       allMembers.forEach(m => {
         const opt = document.createElement('option');
         opt.value = m.id;
-        opt.textContent = `${m.first_name || ''} ${m.last_name || ''} (${m.nickname || 'SARAWAT'}) - [${m.duty_id || m.duty_day || '-'}]`;
+        const nickEng = m.english_nickname || romanizeThaiNickname(m.nickname || '');
+        const name = `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'สารวัตร';
+        opt.textContent = `${name} (${m.nickname ? m.nickname + ' / ' + nickEng : nickEng}) - [${m.duty_id || m.duty_day || '-'}]`;
         select.appendChild(opt);
       });
     }
@@ -708,7 +830,7 @@
       const phoneOrNo = member.phone_number || member.student_no || '0634125121';
       const codeLine = `${classDisplay}-${dutyId}-${phoneOrNo}`;
       const thaiNick = member.thai_nickname || member.nickname || 'นำเหนือ';
-      const englishNick = member.nickname ? member.nickname.toUpperCase() : 'NAMNUAH';
+      const englishNick = member.english_nickname || romanizeThaiNickname(member.nickname) || 'NAMNUAH';
       let thaiName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'นายณิชกานต์ คำไชย';
       if (!thaiName.startsWith('นาย') && !thaiName.startsWith('นางสาว') && !thaiName.startsWith('ด.ช.') && !thaiName.startsWith('ด.ญ.')) {
         thaiName = `นาย${thaiName}`;
