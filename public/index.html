@@ -124,6 +124,12 @@
         <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow">
           <span>🛡️</span> หน้าหลัก
         </a>
+        <a href="/attendance-scan" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-emerald-300 hover:text-white hover:bg-emerald-600/20 border border-emerald-500/40">
+          <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
+        </a>
+        <a href="/attendance-sheet" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-amber-300 hover:text-white hover:bg-amber-600/20 border border-amber-500/30">
+          <span>📄</span> ใบเช็คชื่อ A4
+        </a>
         <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
           <span>🎨</span> ทำบัตร
         </a>
@@ -167,6 +173,12 @@
     <div id="mobile-nav-drawer" class="hidden lg:hidden pt-3 pb-2 border-t border-tactical-border/70 mt-2.5 grid grid-cols-2 gap-2 text-xs">
       <a href="/" class="p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 text-amber-300 font-bold">
         <span>🛡️</span> หน้าหลัก
+      </a>
+      <a href="/attendance-scan" class="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-2 text-emerald-300 font-bold">
+        <span>⚡</span> สแกนเช็คชื่อ AI
+      </a>
+      <a href="/attendance-sheet" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300">
+        <span>📄</span> แบบฟอร์ม A4
       </a>
       <a href="/card-studio" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
         <span>🎨</span> ทำบัตรสารวัตร
@@ -213,7 +225,9 @@
       <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-cyan-500/40 transition">
         <div class="flex items-center justify-between text-slate-400 text-xs">
           <span>เวรปฏิบัติการวันนี้</span>
-          <span class="text-cyan-400 text-sm">📅</span>
+          <a href="/attendance-scan" class="text-[10px] font-sans px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 hover:bg-emerald-500/30 font-bold border border-emerald-500/40 transition flex items-center gap-1 shadow-sm" title="เปิดระบบกล้องสแกนเช็คชื่อเวรวันนี้">
+            <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
+          </a>
         </div>
         <div class="mt-1.5 flex items-baseline gap-2">
           <span id="kpi-today-shift-code" class="text-2xl font-bold font-mono text-cyan-300">-</span>
@@ -325,9 +339,14 @@
                 <h3 class="font-bold text-xs text-slate-200">สารวัตรเข้าเวรวันนี้</h3>
                 <span id="today-officer-count" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0 นาย</span>
               </div>
-              <button onclick="copyDailyLineBrief()" class="px-2 py-1 rounded bg-tactical-850 hover:bg-emerald-600/30 text-emerald-300 hover:text-emerald-200 border border-emerald-500/30 text-[11px] font-semibold flex items-center gap-1 transition active:scale-95" title="คัดลอกสรุปเวรประจำวันสำหรับส่งลงไลน์">
-                <span>📱</span> คัดลอกสรุปส่งไลน์
-              </button>
+              <div class="flex items-center gap-1.5">
+                <a href="/attendance-scan" class="px-2 py-1 rounded bg-emerald-600/30 hover:bg-emerald-500/40 text-emerald-300 hover:text-white border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="เปิดระบบสแกนเช็คชื่อเวรวันนี้">
+                  <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
+                </a>
+                <button onclick="copyDailyLineBrief()" class="px-2 py-1 rounded bg-tactical-850 hover:bg-emerald-600/30 text-slate-300 hover:text-emerald-200 border border-tactical-border text-[11px] font-medium flex items-center gap-1 transition active:scale-95" title="คัดลอกสรุปเวรประจำวันสำหรับส่งลงไลน์">
+                  <span>📱</span> ไลน์
+                </button>
+              </div>
             </div>
 
             <div id="today-officers-list" class="space-y-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
@@ -342,6 +361,25 @@
                 <span>⚡</span> เครื่องมือปฏิบัติการด่วน
               </h3>
               <span class="text-[10px] text-amber-400 font-mono">TACTICAL DESK</span>
+            </div>
+
+            <!-- Primary Attendance Launchers -->
+            <div class="grid grid-cols-2 gap-2 text-xs">
+              <a href="/attendance-scan" class="p-2.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 border border-emerald-500/40 hover:border-emerald-400 transition flex items-center gap-2 group shadow-sm">
+                <span class="text-base group-hover:scale-110 transition">⚡</span>
+                <div>
+                  <div class="font-bold text-emerald-300">สแกนเช็คชื่อ AI</div>
+                  <div class="text-[10px] text-emerald-400/80">กล้องตรวจ [○] (ม)</div>
+                </div>
+              </a>
+
+              <a href="/attendance-sheet" class="p-2.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 border border-amber-500/30 hover:border-amber-400 transition flex items-center gap-2 group shadow-sm">
+                <span class="text-base group-hover:scale-110 transition">📄</span>
+                <div>
+                  <div class="font-bold text-amber-300">แบบฟอร์ม A4</div>
+                  <div class="text-[10px] text-amber-400/80">ตาราง 12 สัปดาห์</div>
+                </div>
+              </a>
             </div>
             
             <div class="grid grid-cols-2 gap-2 text-xs">
@@ -909,8 +947,15 @@
               </div>
             </div>
             <div class="mt-2.5 pt-2 border-t border-tactical-border/60 flex items-center justify-between text-[11px] font-mono text-slate-400">
-              <span>กำลังพล:</span>
-              <span class="text-amber-400 font-bold">${mems.length} นาย</span>
+              <span>กำลังพล: <strong class="text-amber-400">${mems.length}</strong></span>
+              <div class="flex items-center gap-1">
+                <a href="/attendance-scan?shift=${s.code}" class="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 hover:text-white border border-emerald-500/30 text-[10px] font-sans font-bold transition flex items-center gap-0.5 shadow-sm" title="สแกนเช็คชื่อเวร ${s.title}">
+                  <span>📷</span> สแกน
+                </a>
+                <a href="/attendance-sheet?shift=${s.code}" class="px-2 py-0.5 rounded bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-white border border-amber-500/30 text-[10px] font-sans font-bold transition flex items-center gap-0.5 shadow-sm" title="ดูใบตาราง A4 เวร ${s.title}">
+                  <span>📄</span> A4
+                </a>
+              </div>
             </div>
           </div>
         `;
