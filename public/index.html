@@ -393,15 +393,46 @@
 
       </div>
 
-      <!-- Result Counter -->
-      <div class="flex items-center justify-between text-xs px-1 text-slate-400 font-mono">
-        <span id="roster-count-text">กำลังค้นหาทำเนียบสารวัตร...</span>
-        <span>คลิกที่การ์ดเพื่อเปิดบัตรประจำตัวดิจิทัล</span>
+      <!-- Result Counter & View Mode Switcher -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs px-1 text-slate-400 font-mono">
+        <div class="flex items-center gap-2">
+          <span id="roster-count-text">กำลังค้นหาทำเนียบสารวัตร...</span>
+          <span class="text-slate-600 hidden sm:inline">•</span>
+          <span class="text-[11px] text-slate-400 hidden sm:inline">คลิกที่แถวเพื่อเปิดบัตรประจำตัวดิจิทัล</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-[11px] text-slate-500">มุมมอง:</span>
+          <div class="inline-flex items-center bg-tactical-950 border border-tactical-border rounded-lg p-0.5 text-[11px]">
+            <button id="view-mode-list-btn" onclick="setRosterViewMode('list')" class="px-2.5 py-1 rounded bg-amber-500 text-black font-bold flex items-center gap-1.5 transition shadow-sm" title="แสดงผลแบบตารางแถวรายการ (List)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+              <span>รายการ (List)</span>
+            </button>
+            <button id="view-mode-grid-btn" onclick="setRosterViewMode('grid')" class="px-2.5 py-1 rounded text-slate-400 hover:text-white flex items-center gap-1.5 transition" title="แสดงผลแบบการ์ด (Grid)">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+              <span>การ์ด (Grid)</span>
+            </button>
+          </div>
+        </div>
       </div>
 
-      <!-- Officers High-Density Grid -->
-      <div id="roster-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        <div class="p-8 text-center text-xs text-slate-500 col-span-full">กำลังโหลดทำเนียบสารวัตร...</div>
+      <!-- Officers Table & List Container -->
+      <div class="overflow-x-auto custom-scrollbar pb-2">
+        <!-- Table Column Headers (Visible in List Mode) -->
+        <div id="roster-list-header" class="min-w-[760px] grid grid-cols-[36px_44px_76px_1fr_120px_130px_160px_90px] items-center gap-3 px-4 py-2 mb-1.5 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider bg-tactical-950 border border-tactical-border/70 rounded-xl">
+          <div class="text-center">#</div>
+          <div class="text-center">รูป</div>
+          <div class="text-center">รหัสเวร</div>
+          <div>ชื่อ - สกุล</div>
+          <div>ชื่อเล่น</div>
+          <div>ชั้น / เลขที่</div>
+          <div>ผลัดปฏิบัติหน้าที่</div>
+          <div class="text-right">บัตรประจำตัว</div>
+        </div>
+
+        <!-- High-Density Roster Viewport -->
+        <div id="roster-grid" class="flex flex-col gap-2 min-w-[760px]">
+          <div class="p-8 text-center text-xs text-slate-500">กำลังโหลดทำเนียบสารวัตร...</div>
+        </div>
       </div>
 
     </section>
@@ -739,6 +770,7 @@
     let currentLevelFilter = 'ALL';
     let currentCaseFilter = 'ALL';
     let supabaseRealtime = null;
+    let rosterViewMode = 'list';
 
     const SHIFT_MAP = {
       'M': { name: 'วันจันทร์', color: 'border-blue-500/40 text-blue-400', badge: 'bg-blue-500/20 text-blue-300' },
@@ -756,6 +788,11 @@
 
     // 1. Initial Load & Clock
     document.addEventListener('DOMContentLoaded', () => {
+      try {
+        const savedViewMode = localStorage.getItem('sarawat_roster_view_mode');
+        if (savedViewMode === 'list' || savedViewMode === 'grid') rosterViewMode = savedViewMode;
+      } catch (e) {}
+      applyRosterViewModeUI();
       initLiveClock();
       fetchData();
       initRealtime();
@@ -1006,33 +1043,136 @@
         return;
       }
 
-      grid.innerHTML = filtered.map(m => {
-        const dutyDay = m.duty_day || '-';
-        const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' };
-        
-        return `
-          <div onclick="openCardModal('${m.id}')" class="p-3 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5 cursor-pointer transition shadow-md group">
-            <div class="flex items-center gap-3">
-              <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black">
+      if (rosterViewMode === 'list') {
+        grid.innerHTML = filtered.map((m, idx) => {
+          const dutyDay = m.duty_day || '-';
+          const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' };
+
+          return `
+            <div onclick="openCardModal('${m.id}')" class="grid grid-cols-[36px_44px_76px_1fr_120px_130px_160px_90px] items-center gap-3 px-4 py-2.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:bg-tactical-850 cursor-pointer transition shadow-md group">
+              <!-- 1. Index -->
+              <div class="text-center font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400 transition">
+                ${String(idx + 1).padStart(2, '0')}
+              </div>
+
+              <!-- 2. Avatar Photo -->
+              <div class="w-10 h-11 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black flex items-center justify-center">
                 <img src="${m.profile_image_url || '/assets/logo.png'}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
               </div>
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center justify-between gap-1">
-                  <span class="font-bold text-xs text-slate-100 truncate">${m.first_name} ${m.last_name}</span>
-                  <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold">${m.duty_id || 'รอ'}</span>
-                </div>
-                <div class="text-[11px] text-slate-300 font-mono mt-0.5">
-                  ชื่อเล่น: <strong class="text-amber-300">${m.nickname || '-'}</strong> • ม.${m.grade_class || '-'} #${m.student_no || '-'}
-                </div>
-                <div class="mt-1.5 flex items-center justify-between text-[10px]">
-                  <span class="px-1.5 py-0.5 rounded ${shiftInfo.badge} font-mono">${shiftInfo.name}</span>
-                  <span class="text-cyan-400 group-hover:underline">ดูบัตร →</span>
-                </div>
+
+              <!-- 3. Duty ID Badge -->
+              <div class="text-center">
+                <span class="inline-block px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono font-bold text-xs shadow-sm">
+                  [${m.duty_id || 'รอ'}]
+                </span>
+              </div>
+
+              <!-- 4. Full Name -->
+              <div class="font-bold text-xs text-slate-100 truncate pr-2 group-hover:text-amber-300 transition">
+                ${m.first_name || ''} ${m.last_name || ''}
+              </div>
+
+              <!-- 5. Nickname -->
+              <div class="text-xs font-mono truncate">
+                <span class="text-slate-500 text-[10px]">ชื่อเล่น: </span>
+                <strong class="text-amber-300 font-bold">${m.nickname || '-'}</strong>
+              </div>
+
+              <!-- 6. Grade & Student No -->
+              <div class="text-xs font-mono text-slate-300 whitespace-nowrap">
+                <span>ม.${m.grade_class || '-'}</span>
+                <span class="text-slate-500 ml-1.5">#${m.student_no || '-'}</span>
+              </div>
+
+              <!-- 7. Duty Shift Badge -->
+              <div class="whitespace-nowrap">
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[11px] border ${shiftInfo.color}">
+                  ${shiftInfo.name}
+                </span>
+              </div>
+
+              <!-- 8. Action Link -->
+              <div class="text-right whitespace-nowrap">
+                <span class="text-xs font-mono text-cyan-400 group-hover:text-cyan-300 group-hover:underline flex items-center justify-end gap-1 font-semibold">
+                  <span>ดูบัตร</span>
+                  <span>→</span>
+                </span>
               </div>
             </div>
-          </div>
-        `;
-      }).join('');
+          `;
+        }).join('');
+      } else {
+        grid.innerHTML = filtered.map(m => {
+          const dutyDay = m.duty_day || '-';
+          const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' };
+
+          return `
+            <div onclick="openCardModal('${m.id}')" class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5 cursor-pointer transition shadow-md group flex flex-col justify-between h-full">
+              <div class="flex items-start gap-3">
+                <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black">
+                  <img src="${m.profile_image_url || '/assets/logo.png'}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center justify-between gap-1">
+                    <span class="font-bold text-xs text-slate-100 truncate">${m.first_name || ''} ${m.last_name || ''}</span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold whitespace-nowrap">[${m.duty_id || 'รอ'}]</span>
+                  </div>
+                  <div class="text-[11px] text-slate-300 font-mono mt-1">
+                    ชื่อเล่น: <strong class="text-amber-300">${m.nickname || '-'}</strong>
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-mono mt-0.5">
+                    ม.${m.grade_class || '-'} #${m.student_no || '-'}
+                  </div>
+                </div>
+              </div>
+              <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
+                <span class="px-1.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[10px] border ${shiftInfo.color}">${shiftInfo.name}</span>
+                <span class="text-cyan-400 group-hover:underline font-mono">ดูบัตร →</span>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+    }
+
+    function setRosterViewMode(mode) {
+      rosterViewMode = mode;
+      try {
+        localStorage.setItem('sarawat_roster_view_mode', mode);
+      } catch (e) {}
+      applyRosterViewModeUI();
+      renderRoster(allMembers);
+    }
+
+    function applyRosterViewModeUI() {
+      const listBtn = document.getElementById('view-mode-list-btn');
+      const gridBtn = document.getElementById('view-mode-grid-btn');
+      const listHeader = document.getElementById('roster-list-header');
+      const gridContainer = document.getElementById('roster-grid');
+
+      if (rosterViewMode === 'list') {
+        if (listBtn) {
+          listBtn.className = 'px-2.5 py-1 rounded bg-amber-500 text-black font-bold flex items-center gap-1.5 transition shadow-sm';
+        }
+        if (gridBtn) {
+          gridBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+        }
+        if (listHeader) listHeader.classList.remove('hidden');
+        if (gridContainer) {
+          gridContainer.className = 'flex flex-col gap-2 min-w-[760px]';
+        }
+      } else {
+        if (listBtn) {
+          listBtn.className = 'px-2.5 py-1 rounded text-slate-400 hover:text-white flex items-center gap-1.5 transition';
+        }
+        if (gridBtn) {
+          gridBtn.className = 'px-2.5 py-1 rounded bg-amber-500 text-black font-bold flex items-center gap-1.5 transition shadow-sm';
+        }
+        if (listHeader) listHeader.classList.add('hidden');
+        if (gridContainer) {
+          gridContainer.className = 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 min-w-0';
+        }
+      }
     }
 
     function filterRoster(shiftCode) {
