@@ -14,7 +14,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,700&family=Prompt:wght@300;400;500;600;700&family=Kanit:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,700&family=Prompt:wght@300;400;500;600;700;800;900&family=Kanit:ital,wght@0,400;0,600;0,700;0,800;0,900&family=Michroma&display=swap" rel="stylesheet">
   
   <!-- Utility Libraries -->
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
@@ -87,12 +87,12 @@
 
     /* Vertical ISO CR80 Card Dimensions (Standard Vertical Badge) */
     .id-card-cr80 {
-      width: 290px;
-      height: 460px;
+      width: 280px;
+      height: 442px;
       position: relative;
-      border-radius: 16px;
+      border-radius: 12px;
       overflow: hidden;
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), 0 0 15px rgba(245, 158, 11, 0.2);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
     }
   </style>
 </head>
@@ -488,51 +488,70 @@
         <p class="text-[11px] text-slate-400">โรงเรียนพระนารายณ์ • Digital Student Marshall ID</p>
       </div>
 
-      <!-- CR80 Digital Card Container (Front-only, High Quality) -->
-      <div id="modal-card-render-zone" class="id-card-cr80 bg-gradient-to-b from-[#001738] via-[#040c1a] to-[#000000] border-2 border-amber-500/50 p-4 flex flex-col justify-between text-white relative">
+      <!-- CR80 Digital Card Container (Front-only, Official Template Standard) -->
+      <div id="modal-card-render-zone" class="id-card-cr80 relative bg-white text-neutral-900 border border-slate-300 rounded-lg shadow-2xl overflow-hidden select-none text-left" style="width: 280px; height: 442px;">
         
-        <!-- Security Watermark Pattern -->
-        <div class="absolute inset-0 opacity-15 pointer-events-none flex items-center justify-center">
-          <img src="/assets/logo.png" class="w-64 h-64 object-contain rotate-12 drop-shadow" alt="Watermark">
+        <!-- Left Blue Stripe / Right Red Stripe -->
+        <div class="absolute left-0 top-0 bottom-0 w-[9px] bg-[#002b80] z-30"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-[9px] bg-[#b91c1c] z-30"></div>
+
+        <!-- Vertical PRANARAI SCHOOL text alongside red stripe -->
+        <div class="absolute right-[11px] top-[70px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[3px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
+          PRANARAI SCHOOL
         </div>
 
-        <!-- Card Top Bar: School Emblem, Logo & Titles -->
-        <div class="relative z-10 flex items-center justify-between border-b border-amber-500/30 pb-2">
-          <div class="flex items-center gap-2">
-            <img src="/assets/school_emblem.png" class="w-8 h-8 object-contain" alt="School Emblem">
-            <img src="/assets/logo.png" class="w-8 h-8 object-contain" alt="Sarawat Emblem">
-            <div class="leading-tight text-left">
-              <div class="text-[11px] font-bold text-amber-400 uppercase tracking-wider">PRANARAI SCHOOL</div>
-              <div class="text-[9px] text-slate-300">กลุ่มงานสารวัตรนักเรียน</div>
+        <!-- Circular Watermark Emblem behind left shoulder -->
+        <img src="/assets/logo.png" alt="Watermark" class="absolute -left-3 top-[48px] w-[165px] h-[165px] object-contain opacity-45 pointer-events-none z-[2]" style="transform: rotate(-14deg);">
+
+        <!-- Student Photo with soft bottom gradient fade-out (No black/gold border) -->
+        <div class="absolute left-[22px] right-[28px] top-[78px] h-[235px] flex items-center justify-center pointer-events-none z-[5]">
+          <img id="card-photo-img" src="" alt="Photo" class="w-full h-full object-cover hidden" style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);">
+          <span id="card-photo-placeholder" class="text-5xl text-slate-400">👤</span>
+        </div>
+
+        <!-- Ambient Color Fades (Over profile photo, strictly behind all text) -->
+        <div class="absolute left-0 top-0 bottom-0 w-[90px] bg-gradient-to-r from-[#002b80]/22 via-[#002b80]/08 to-transparent z-[8] pointer-events-none"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-[90px] bg-gradient-to-l from-[#b91c1c]/22 via-[#b91c1c]/08 to-transparent z-[8] pointer-events-none"></div>
+        <div class="absolute left-0 right-0 top-[200px] h-[115px] bg-gradient-to-t from-white/95 via-white/50 to-transparent z-[8] pointer-events-none"></div>
+
+        <!-- Top Header: Wide Bold SARAWAT + Hollow Outline INSPECTOR -->
+        <div class="absolute left-[9px] right-[9px] top-[6px] text-center z-20 pointer-events-none">
+          <h1 class="text-[31px] font-bold tracking-[2.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
+            SARAWAT
+          </h1>
+          <p class="text-[17px] font-bold tracking-[4.5px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-[-1px] text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
+            INSPECTOR
+          </p>
+        </div>
+
+        <!-- Middle Text: Giant Nickname + Code Line -->
+        <div class="absolute left-[9px] right-[9px] bottom-[78px] text-center z-20 px-1 pointer-events-none">
+          <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[31px] font-bold text-black uppercase leading-[0.9] tracking-[3px] truncate" style="transform: scaleY(1.05);">
+            NAMNUAH
+          </div>
+          <div id="card-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12.5px] font-bold text-black uppercase tracking-[1.5px] leading-tight mt-1 truncate">
+            M5-7-TS1-0634125121
+          </div>
+        </div>
+
+        <!-- Bottom Row: Left (Thai Nick + Full Name + Barcode) / Right (School Emblem) -->
+        <div class="absolute left-[9px] right-[9px] bottom-[6px] px-2 flex items-end justify-between z-20 pointer-events-none">
+          <!-- Left Column -->
+          <div class="flex flex-col items-center justify-end flex-1 text-center pr-1">
+            <div id="card-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13.5px] font-bold text-black leading-none">
+              นำเหนือ
+            </div>
+            <div id="card-fullname" class="font-['Prompt','Kanit',sans-serif] text-[10.5px] font-semibold text-black leading-tight mt-0.5 whitespace-nowrap">
+              นายณิชกานต์ คำไชย
+            </div>
+            <div class="mt-1 flex items-center justify-center w-[120px] h-[32px]">
+              <svg id="card-barcode-svg" class="w-full h-8"></svg>
             </div>
           </div>
-          <div id="card-duty-badge" class="px-2 py-0.5 rounded bg-amber-500 text-black font-bold font-mono text-[10px]">
-            [M1]
-          </div>
-        </div>
 
-        <!-- Student Photo & Info -->
-        <div class="relative z-10 flex flex-col items-center text-center my-auto py-1">
-          <div class="w-28 h-32 rounded-xl overflow-hidden border-2 border-amber-400/80 bg-black/60 shadow-lg relative flex items-center justify-center">
-            <img id="card-photo-img" src="/assets/school_emblem.png" class="w-full h-full object-cover" alt="Student Photo">
-          </div>
-          
-          <div class="mt-2.5">
-            <div id="card-fullname" class="font-bold text-sm text-amber-300 truncate max-w-[250px]">นายสารวัตร นามสมมุติ</div>
-            <div id="card-nickname-class" class="text-xs text-slate-200 mt-0.5 font-mono">ปัน • ม.5/2 #14</div>
-            <div id="card-role-title" class="text-[10px] text-emerald-400 font-semibold mt-0.5">สารวัตรนักเรียนประจำเวร</div>
-          </div>
-        </div>
-
-        <!-- Card Bottom Bar: Barcode & Seal -->
-        <div class="relative z-10 border-t border-slate-700/60 pt-2 flex items-center justify-between">
-          <div class="flex flex-col text-left">
-            <svg id="card-barcode-svg" class="h-7 w-36 bg-white/90 p-0.5 rounded"></svg>
-            <span id="card-student-id" class="text-[9px] font-mono text-slate-400 mt-0.5">ID: 1567-001</span>
-          </div>
-          <div class="text-right">
-            <div class="text-[8px] font-mono text-amber-400 uppercase tracking-wider">OFFICIAL MARSHALL</div>
-            <div class="text-[8px] text-slate-400">VERIFIED CARD</div>
+          <!-- Right Column (School Emblem without black box) -->
+          <div class="flex items-center justify-center flex-shrink-0 pb-0.5">
+            <img src="/assets/school_emblem.png" alt="ตราโรงเรียน" class="w-[52px] h-[64px] object-contain">
           </div>
         </div>
 
@@ -1093,29 +1112,180 @@
       renderCases(allCases);
     }
 
-    // 9. Card Modal Logic
+    const COMMON_NICKNAMES = {
+      'น้ำเหนือ': 'NAMNUAH',
+      'นำเหนือ': 'NAMNUAH',
+      'น้ำ': 'NAM',
+      'น้ำำ': 'NAM',
+      'ปัน': 'PUN',
+      'คิว': 'Q',
+      'แบงก์': 'BANK',
+      'แบงค์': 'BANK',
+      'กานต์': 'KANT',
+      'กันต์': 'GUN',
+      'กัน': 'GUN',
+      'ไอซ์': 'ICE',
+      'นาย': 'NINE',
+      'น้ำชา': 'NAMCHA',
+      'พิมมี่': 'PIMMY',
+      'พิม': 'PIM',
+      'บีม': 'BEAM',
+      'ภีมะ': 'PEEMA',
+      'นน': 'NON',
+      'ดิสดิส': 'DISDIS',
+      'โบ๊ท': 'BOAT',
+      'โบ๊ต': 'BOAT',
+      'บอส': 'BOSS',
+      'เบสท์': 'BEST',
+      'เบส': 'BEST',
+      'อาร์ม': 'ARM',
+      'กาย': 'GUY',
+      'มิว': 'MEW',
+      'ภูมิ': 'POOM',
+      'วิน': 'WIN',
+      'นิว': 'NEW',
+      'ฟลุ๊ค': 'FLUKE',
+      'ฟลุ๊คส์': 'FLUKE',
+      'ฟลุค': 'FLUKE',
+      'นนท์': 'NON',
+      'นนท': 'NON',
+      'มาร์ค': 'MARK',
+      'มาร์คัส': 'MARCUS',
+      'เกม': 'GAME',
+      'เกมส์': 'GAME',
+      'ก้อง': 'KONG',
+      'เฟิร์ส': 'FIRST',
+      'บิว': 'BEW',
+      'เต้': 'TAE',
+      'ตูน': 'TOON',
+      'ต้น': 'TON',
+      'นัท': 'NUT',
+      'พี': 'PEE',
+      'พีท': 'PETE',
+      'กอล์ฟ': 'GOLF',
+      'กิ๊ฟ': 'GIFT',
+      'แอน': 'ANN',
+      'ฟ้า': 'FAH',
+      'พลอย': 'PLOY',
+      'มายด์': 'MIND',
+      'มาย': 'MIND',
+      'เฟิร์น': 'FERN',
+      'มุก': 'MOOK',
+      'บิวตี้': 'BEAUTY',
+      'เจมส์': 'JAMES',
+      'ปอนด์': 'POUND',
+      'โฟกัส': 'FOCUS',
+      'มิกซ์': 'MIX',
+      'ออฟ': 'OFF',
+      'เต๋า': 'TAO',
+      'ท็อป': 'TOP',
+      'มิ้น': 'MINT',
+      'มินต์': 'MINT',
+      'แพร': 'PRAE',
+      'บอม': 'BOMB',
+      'บอมบ์': 'BOMB',
+      'เบียร์': 'BEER',
+      'วิว': 'VIEW',
+      'โอ๊ค': 'OAK',
+      'เอิร์ธ': 'EARTH',
+      'ข้าว': 'KHAO',
+      'เนย': 'NOEY',
+      'เตย': 'TOEY',
+      'เป็ด': 'PED',
+      'ไก่': 'KAI',
+      'หมู': 'MOO',
+      'ปลา': 'PLA'
+    };
+
+    function romanizeThaiNickname(thai) {
+      if (!thai) return 'SARAWAT';
+      const clean = thai.trim();
+      if (!clean || clean === '.' || clean === '-') return 'SARAWAT';
+      if (/^[A-Za-z0-9_\-\s]+$/.test(clean)) return clean.toUpperCase();
+      if (COMMON_NICKNAMES[clean]) return COMMON_NICKNAMES[clean];
+      const withoutTones = clean.replace(/[\u0E48-\u0E4C\u0E47\u0E4D\u0E4E\u0E3A]/g, '');
+      if (COMMON_NICKNAMES[withoutTones]) return COMMON_NICKNAMES[withoutTones];
+      for (const [k, v] of Object.entries(COMMON_NICKNAMES)) {
+        if (clean === k || withoutTones === k) return v;
+      }
+      let res = clean;
+      res = res.replace(/เ(.*)ือ(.*)/g, '$1UAH$2');
+      res = res.replace(/แ(.*)ว/g, '$1AEW');
+      res = res.replace(/เ(.*)ย/g, '$1OEY');
+      res = res.replace(/เ(.*)า/g, '$1AO');
+      res = res.replace(/โ(.*)ะ/g, '$1O');
+      res = res.replace(/โ(.*)/g, '$1O');
+      res = res.replace(/แ(.*)/g, '$1AE');
+      res = res.replace(/เ(.*)/g, '$1E');
+      res = res.replace(/ำ/g, 'AM');
+      res = res.replace(/ั/g, 'U');
+      res = res.replace(/า/g, 'A');
+      res = res.replace(/ิ/g, 'I');
+      res = res.replace(/ี/g, 'EE');
+      res = res.replace(/ึ/g, 'EU');
+      res = res.replace(/ื/g, 'EU');
+      res = res.replace(/ุ/g, 'U');
+      res = res.replace(/ู/g, 'OO');
+      return res.replace(/[^A-Za-z0-9]/g, '').toUpperCase() || 'SARAWAT';
+    }
+
+    // 9. Card Modal Logic (CR80 Standard Replica)
     function openCardModal(memberId) {
       const m = allMembers.find(item => item.id === memberId);
       if (!m) return;
       activeCardMember = m;
 
-      document.getElementById('card-duty-badge').textContent = m.duty_id ? `[${m.duty_id}]` : '[เวร]';
-      document.getElementById('card-fullname').textContent = `${m.first_name || ''} ${m.last_name || ''}`;
-      document.getElementById('card-nickname-class').textContent = `${m.nickname || '-'} • ม.${m.grade_class || '-'} #${m.student_no || '-'}`;
-      document.getElementById('card-role-title').textContent = m.role_title || (m.role === 'PRESIDENT' ? 'ประธานสารวัตรนักเรียน' : 'สารวัตรนักเรียนปฏิบัติการ');
-      document.getElementById('card-student-id').textContent = `CODE: ${m.duty_id || 'MARSHALL'}-${m.student_no || '000'}`;
-      
+      const thaiNick = m.nickname || 'สารวัตร';
+      const englishNick = m.english_nickname || romanizeThaiNickname(thaiNick);
+
+      let fullName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || 'นายณิชกานต์ คำไชย';
+      if (!fullName.startsWith('นาย') && !fullName.startsWith('นางสาว') && !fullName.startsWith('ด.ช.') && !fullName.startsWith('ด.ญ.')) {
+        fullName = `นาย${fullName}`;
+      }
+
+      const rawClass = (m.grade_class || '').replace('ม.', '').trim();
+      const classDisplay = rawClass ? `M${rawClass.replace('/', '-')}` : 'M5-7';
+      const dutyId = m.duty_id || 'TS1';
+      const phoneOrNo = m.phone_number || m.student_no || '0634125121';
+      const codeLine = `${classDisplay}-${dutyId}-${phoneOrNo}`;
+
+      const nickEl = document.getElementById('card-nickname');
+      if (nickEl) nickEl.textContent = englishNick;
+
+      const codeEl = document.getElementById('card-codeline');
+      if (codeEl) codeEl.textContent = codeLine;
+
+      const thaiNickEl = document.getElementById('card-thainick');
+      if (thaiNickEl) thaiNickEl.textContent = m.thai_nickname || thaiNick;
+
+      const nameEl = document.getElementById('card-fullname');
+      if (nameEl) nameEl.textContent = fullName;
+
       const photoEl = document.getElementById('card-photo-img');
-      photoEl.src = m.profile_image_url || '/assets/logo.png';
+      const placeholderEl = document.getElementById('card-photo-placeholder');
+      if (m.profile_image_url) {
+        photoEl.src = m.profile_image_url;
+        photoEl.onload = () => {
+          photoEl.classList.remove('hidden');
+          if (placeholderEl) placeholderEl.classList.add('hidden');
+        };
+        photoEl.onerror = () => {
+          photoEl.classList.add('hidden');
+          if (placeholderEl) placeholderEl.classList.remove('hidden');
+        };
+      } else {
+        photoEl.classList.add('hidden');
+        if (placeholderEl) placeholderEl.classList.remove('hidden');
+      }
 
       // Generate Barcode Code128
       try {
-        const barcodeText = m.student_no ? `${m.duty_id || 'SW'}${m.student_no}` : (m.duty_id || 'SARAWAT');
+        const barcodeText = `${dutyId}-${m.student_no || '69055'}`;
         JsBarcode("#card-barcode-svg", barcodeText, {
           format: "CODE128",
-          lineColor: "#000000",
+          lineColor: "#050505",
           width: 1.2,
-          height: 24,
+          height: 30,
           displayValue: false,
           margin: 0
         });
@@ -1208,8 +1378,8 @@
 
       try {
         const canvas = await html2canvas(zone, {
-          scale: 2, // High resolution retina output
-          backgroundColor: '#000000',
+          scale: 3, // High resolution retina output
+          backgroundColor: '#ffffff',
           useCORS: true
         });
         const link = document.createElement('a');
