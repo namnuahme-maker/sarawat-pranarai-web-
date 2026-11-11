@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>แบบบันทึกการปฏิบัติหน้าที่ประจำวัน สารวัตรนักเรียน // SARAWAT A4 OMR</title>
+  <title>แบบบันทึกการปฏิบัติหน้าที่ประจำเดือน สารวัตรนักเรียน // SARAWAT A4 MONTHLY OMR</title>
 
   <!-- Google Fonts: Sarabun & JetBrains Mono -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,11 +15,11 @@
 
   <style>
     /* ========================================================== */
-    /* 📄 STRICT A4 PRINT RULES (ISO 216 STANDARD: 210 x 297 mm)  */
+    /* 📄 STRICT A4 PRINT RULES (ISO 216 STANDARD: 297 x 210 mm)  */
     /* ========================================================== */
     @page {
-      size: A4 portrait;
-      margin: 10mm 12mm 10mm 12mm;
+      size: A4 landscape;
+      margin: 7mm 8mm 7mm 8mm;
     }
 
     * {
@@ -31,11 +31,11 @@
     body {
       margin: 0;
       padding: 0;
-      background-color: #0f172a;
+      background-color: #0b0f19;
       color: #0f172a;
       font-family: 'Sarabun', 'Prompt', sans-serif;
-      font-size: 11pt;
-      line-height: 1.3;
+      font-size: 10pt;
+      line-height: 1.25;
     }
 
     /* Screen Wrapper */
@@ -44,14 +44,14 @@
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 24px 16px;
+      padding: 20px 10px;
     }
 
-    /* A4 Page Container on Screen */
+    /* A4 Landscape Page Container */
     .a4-sheet {
-      width: 210mm;
-      min-height: 297mm;
-      padding: 12mm 14mm;
+      width: 297mm;
+      min-height: 210mm;
+      padding: 8mm 10mm;
       background: #ffffff;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       border-radius: 4px;
@@ -61,19 +61,28 @@
       justify-content: space-between;
     }
 
+    /* Orientation Modes */
+    body.portrait-mode @page {
+      size: A4 portrait;
+      margin: 8mm 8mm 8mm 8mm;
+    }
+    body.portrait-mode .a4-sheet {
+      width: 210mm;
+      min-height: 297mm;
+    }
+
     /* Corner Fiducial Markers for Computer Vision */
     .fiducial-marker {
       position: absolute;
-      width: 14mm;
-      height: 14mm;
+      width: 12mm;
+      height: 12mm;
       pointer-events: none;
     }
-    .fiducial-tl { top: 6mm; left: 6mm; }
-    .fiducial-tr { top: 6mm; right: 6mm; }
-    .fiducial-bl { bottom: 6mm; left: 6mm; }
-    .fiducial-br { bottom: 6mm; right: 6mm; }
+    .fiducial-tl { top: 4mm; left: 4mm; }
+    .fiducial-tr { top: 4mm; right: 4mm; }
+    .fiducial-bl { bottom: 4mm; left: 4mm; }
+    .fiducial-br { bottom: 4mm; right: 4mm; }
 
-    /* Crosshair Graphic inside marker */
     .crosshair {
       width: 100%;
       height: 100%;
@@ -103,8 +112,8 @@
       position: absolute;
       top: 50%;
       left: 50%;
-      width: 6mm;
-      height: 6mm;
+      width: 5mm;
+      height: 5mm;
       background: #000000;
       transform: translate(-50%, -50%);
     }
@@ -114,40 +123,51 @@
       width: 100%;
       border-collapse: collapse;
       border: 1.5px solid #000000;
-      margin-top: 6px;
-      font-size: 9pt;
+      margin-top: 5px;
+      font-size: 8.5pt;
     }
 
     table.attendance-table th {
       background-color: #1e293b;
       color: #ffffff;
       border: 1px solid #334155;
-      padding: 5px 3px;
+      padding: 4px 2px;
       font-weight: 600;
       text-align: center;
       font-family: 'Prompt', 'Sarabun', sans-serif;
     }
 
+    table.attendance-table th.week-header {
+      background-color: #0f172a;
+      border-bottom: 1px solid #475569;
+    }
+
+    table.attendance-table th.sub-col {
+      background-color: #334155;
+      font-size: 7.5pt;
+      padding: 2px 1px;
+    }
+
     table.attendance-table td {
       border: 1px solid #cbd5e1;
-      padding: 4px 4px;
+      padding: 3px 2px;
       vertical-align: middle;
     }
 
-    /* Zebra Striping (Prevents Row-Slippage in AI Vision) */
+    /* Zebra Striping */
     table.attendance-table tr.row-even {
       background-color: #ffffff;
     }
     table.attendance-table tr.row-odd {
-      background-color: #f1f5f9;
+      background-color: #f8fafc;
     }
 
-    /* OMR Checkbox Container */
+    /* OMR Compact Checkbox Container (Monthly Density) */
     .omr-box {
-      width: 24px;
-      height: 24px;
-      border: 1.5px solid #0f172a;
-      border-radius: 3px;
+      width: 18px;
+      height: 18px;
+      border: 1.2px solid #0f172a;
+      border-radius: 2px;
       margin: 0 auto;
       display: flex;
       align-items: center;
@@ -165,11 +185,11 @@
     .omr-box.marked-check::after {
       content: '✔';
       position: absolute;
-      font-size: 19px;
+      font-size: 15px;
       font-weight: 900;
       color: #1e3a8a; /* Deep blue pen ink */
       line-height: 1;
-      transform: translate(1px, -2px);
+      transform: translate(0.5px, -1.5px);
       pointer-events: none;
     }
     .omr-box.marked-crossed {
@@ -178,7 +198,7 @@
     .omr-box.marked-crossed::after {
       content: '✖';
       position: absolute;
-      font-size: 14px;
+      font-size: 11px;
       font-weight: 900;
       color: #ffffff;
       line-height: 1;
@@ -187,7 +207,7 @@
 
     /* Faint Watermark Binding Code inside Checkbox */
     .omr-box-watermark {
-      font-size: 7px;
+      font-size: 5.5px;
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
       color: #94a3b8;
@@ -195,13 +215,14 @@
       line-height: 1;
       letter-spacing: -0.5px;
       user-select: none;
+      pointer-events: none;
     }
 
     /* Duty ID Monospace Style */
     .duty-code {
       font-family: 'JetBrains Mono', monospace;
       font-weight: 700;
-      font-size: 10pt;
+      font-size: 9pt;
       color: #0f172a;
     }
 
@@ -232,22 +253,38 @@
   <!-- ========================================================== -->
   <!-- 🖥️ TOP CONTROL TOOLBAR (SCREEN ONLY / HIDDEN ON PRINT)     -->
   <!-- ========================================================== -->
-  <div class="no-print w-full bg-slate-900 border-b border-slate-800 text-white p-3.5 sticky top-0 z-50 shadow-xl">
-    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+  <div class="no-print w-full bg-slate-900 border-b border-slate-800 text-white p-3 sticky top-0 z-50 shadow-xl font-sans">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
+      
+      <!-- Brand & Title -->
       <div class="flex items-center gap-3">
-        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition flex items-center gap-1.5 border border-slate-700">
-          <span>←</span> ศูนย์บัญชาการ
+        <a href="/" class="px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition flex items-center gap-1.5 border border-slate-700">
+          <span>←</span> หน้าหลัก
         </a>
         <h1 class="text-xs sm:text-sm font-bold flex items-center gap-2 text-white">
-          <span>📋</span> แบบฟอร์มใบเช็คชื่อ A4 มาตรฐาน AI/OMR
+          <span>📅</span> แบบฟอร์มใบเช็คชื่อ A4 ประจำเดือน (Full Month Edition)
         </h1>
       </div>
 
+      <!-- Controls & Actions -->
       <div class="flex items-center gap-2 flex-wrap text-xs">
+        
+        <!-- Month Selector -->
+        <div class="flex items-center gap-1.5 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700">
+          <span class="text-slate-400">ประจำเดือน:</span>
+          <select id="select-month" onchange="changeMonth(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+            <option value="2026-11" class="bg-slate-900 text-white">พฤศจิกายน 2569</option>
+            <option value="2026-12" class="bg-slate-900 text-white">ธันวาคม 2569</option>
+            <option value="2027-01" class="bg-slate-900 text-white">มกราคม 2570</option>
+            <option value="2027-02" class="bg-slate-900 text-white">กุมภาพันธ์ 2570</option>
+            <option value="2027-03" class="bg-slate-900 text-white">มีนาคม 2570</option>
+          </select>
+        </div>
+
         <!-- Shift Selector -->
         <div class="flex items-center gap-1.5 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700">
-          <span class="text-slate-400">เลือกกะเวร:</span>
-          <select id="select-shift" onchange="switchShift(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+          <span class="text-slate-400">ผลัดเวร:</span>
+          <select id="select-shift" onchange="changeShift(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
             <option value="M" class="bg-slate-900 text-white">วันจันทร์ (M)</option>
             <option value="T" class="bg-slate-900 text-white">วันอังคาร (T)</option>
             <option value="W" class="bg-slate-900 text-white">วันพุธ (W)</option>
@@ -257,34 +294,33 @@
           </select>
         </div>
 
-        <!-- Date Input -->
-        <input type="date" id="select-date" onchange="updateDate(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 outline-none text-xs font-mono">
-
-        <!-- Live Mark Counter Badge -->
-        <div class="hidden md:flex items-center gap-2 bg-slate-800/90 border border-slate-700 rounded-lg px-2.5 py-1 font-mono text-[11px]">
-          <span class="text-emerald-400 font-bold" id="badge-present">มา: 0</span>
-          <span class="text-amber-400 font-bold" id="badge-leave">ลา: 0</span>
-          <span class="text-rose-400 font-bold" id="badge-absent">ขาด: 0</span>
+        <!-- Live Monthly Counters -->
+        <div class="hidden lg:flex items-center gap-2 bg-slate-800/90 border border-slate-700 rounded-lg px-2.5 py-1 font-mono text-[11px]">
+          <span class="text-emerald-400 font-bold" id="badge-present">รวมมา: 0</span>
+          <span class="text-amber-400 font-bold" id="badge-leave">รวมลา: 0</span>
+          <span class="text-rose-400 font-bold" id="badge-absent">รวมขาด: 0</span>
+          <span class="text-cyan-400 font-bold" id="badge-rate">ความพร้อม: 0%</span>
         </div>
 
         <!-- Simulation Tools -->
-        <button onclick="simulateMarks()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white font-semibold text-xs flex items-center gap-1 transition active:scale-95" title="สุ่มจำลองการใช้ปากกาติ๊กช่องมา/ลา/ขาด เพื่อทดสอบการแสดงผล">
-          <span>✏️</span> จำลองติ๊ก
+        <button onclick="simulateMonth()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white font-semibold text-xs flex items-center gap-1 transition active:scale-95" title="จำลองการติ๊กเช็คชื่อตลอดทั้งเดือน">
+          <span>✏️</span> จำลองติ๊กทั้งเดือน
         </button>
-        <button onclick="clearMarks()" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition active:scale-95 border border-slate-700" title="ล้างรอยติ๊กทั้งหมดเป็นกระดาษเปล่า">
+        <button onclick="clearMonth()" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition active:scale-95 border border-slate-700" title="ล้างรอยหมึกทั้งหมดเป็นกระดาษเปล่าพร้อมพิมพ์">
           <span>🔄</span> ล้างรอย
         </button>
 
         <!-- Print Button -->
         <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition">
-          <span>🖨️</span> สั่งพิมพ์ A4
+          <span>🖨️</span> สั่งพิมพ์ A4 แนวนอน
         </button>
       </div>
+
     </div>
   </div>
 
   <!-- ========================================================== -->
-  <!-- 📄 PHYSICAL A4 SHEET WRAPPER                               -->
+  <!-- 📄 PHYSICAL A4 SHEET WRAPPER (LANDSCAPE)                   -->
   <!-- ========================================================== -->
   <div class="screen-wrapper">
     <div class="a4-sheet" id="printable-sheet">
@@ -296,124 +332,134 @@
       <div class="fiducial-marker fiducial-br"><div class="crosshair"><div class="corner-target"></div></div></div>
 
       <!-- ========================================================== -->
-      <!-- 1. HEADER SECTION (METADATA & SESSION QR CODE)            -->
+      <!-- 1. HEADER SECTION (METADATA & MONTHLY SESSION QR CODE)    -->
       <!-- ========================================================== -->
       <div>
-        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000000; padding-bottom: 8px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000000; padding-bottom: 5px;">
           
           <!-- Left: School & Marshall Emblems -->
-          <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="assets/school_emblem.png" onerror="this.onerror=null; this.src='/assets/school_emblem.png';" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราโรงเรียน">
-            <img src="assets/logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราสารวัตร">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <img src="assets/school_emblem.png" onerror="this.onerror=null; this.src='/assets/school_emblem.png';" style="width: 46px; height: 46px; object-fit: contain;" alt="ตราโรงเรียน">
+            <img src="assets/logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" style="width: 46px; height: 46px; object-fit: contain;" alt="ตราสารวัตร">
             <div>
-              <h2 style="margin: 0; font-size: 13pt; font-weight: 700; color: #000000; line-height: 1.2;">
-                แบบบันทึกเวลาปฏิบัติหน้าที่สารวัตรนักเรียน
+              <h2 style="margin: 0; font-size: 12pt; font-weight: 700; color: #000000; line-height: 1.15;">
+                แบบบันทึกการปฏิบัติหน้าที่สารวัตรนักเรียน ประจำเดือน
               </h2>
-              <div style="font-size: 9.5pt; color: #334155; margin-top: 2px;">
+              <div style="font-size: 8.5pt; color: #334155; margin-top: 1px;">
                 กลุ่มงานสารวัตรนักเรียน • โรงเรียนพระนารายณ์ จังหวัดลพบุรี
               </div>
-              <div style="font-size: 9pt; font-weight: 600; color: #1e3a8a; margin-top: 2px;" id="header-shift-title">
-                ผลัดปฏิบัติการ: [M] วันจันทร์ • ประจำวันที่ 12 พฤศจิกายน 2569
+              <div style="font-size: 8.5pt; font-weight: 700; color: #1e3a8a; margin-top: 1px;" id="header-shift-title">
+                ผลัดปฏิบัติการ: [M] วันจันทร์ • ประจำเดือนพฤศจิกายน พ.ศ. 2569 (ภาคเรียนที่ 2/2569)
               </div>
             </div>
           </div>
 
-          <!-- Right: Session Header QR Code (Machine Readable Session Anchor) -->
-          <div style="display: flex; flex-direction: column; align-items: center;">
-            <div style="border: 2px solid #000000; padding: 4px; background: #ffffff; border-radius: 4px;">
-              <div id="session-qrcode" style="width: 78px; height: 78px;"></div>
+          <!-- Middle: Leadership Bar (Inline Compact) -->
+          <div style="background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 4px; padding: 4px 10px; font-size: 8pt; line-height: 1.3;">
+            <div><strong>หัวหน้าเวร:</strong> <span id="hdr-head-name">-</span></div>
+            <div><strong>รองหัวหน้า:</strong> <span id="hdr-deputy-name">-</span></div>
+            <div style="color: #64748b; font-size: 7.5pt;">* ใบเช็คชื่อนี้ใช้บันทึกต่อเนื่องตลอด 1 เดือนเต็ม *</div>
+          </div>
+
+          <!-- Right: Monthly Session Header QR Code -->
+          <div style="display: flex; align-items: center; gap: 6px;">
+            <div style="text-align: right; font-size: 7pt; font-family: 'JetBrains Mono', monospace; line-height: 1.2;">
+              <div style="font-weight: 700; color: #000000;" id="qr-session-label">M-202611-M10</div>
+              <div style="color: #64748b;">MONTHLY OMR</div>
+              <div style="color: #15803d; font-weight: 700;">1 SHEET / MO</div>
             </div>
-            <div style="font-size: 7.5pt; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #000000; margin-top: 2px;" id="qr-session-label">
-              M-20261112-Q12
+            <div style="border: 1.5px solid #000000; padding: 2px; background: #ffffff; border-radius: 3px;">
+              <div id="session-qrcode" style="width: 58px; height: 58px;"></div>
             </div>
           </div>
 
         </div>
 
-        <!-- ========================================================== -->
-        <!-- 2. MACHINE-READABLE INSTRUCTION BOX                       -->
-        <!-- ========================================================== -->
-        <div style="background-color: #f8fafc; border: 1px dashed #475569; border-radius: 4px; padding: 5px 8px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 8pt;">
-          <div style="display: flex; align-items: center; gap: 8px;">
+        <!-- Instruction Sub-bar -->
+        <div style="background-color: #f1f5f9; border: 1px dashed #64748b; border-radius: 3px; padding: 3px 8px; margin-top: 4px; display: flex; align-items: center; justify-content: space-between; font-size: 7.5pt;">
+          <div>
             <span style="font-weight: 700; color: #b91c1c;">คำชี้แจง:</span>
-            <span>ใช้ปากกาน้ำเงิน/ดำ ติ๊กเครื่องหมายถูก <b>(✔)</b> ในช่อง <b>[มา] [ลา]</b> หรือ <b>[ขาด]</b> | หากติ๊กผิด ให้ระบายทึบดำ <b>(■)</b> ทับช่องเดิม แล้วติ๊กเครื่องหมายถูกลงในช่องใหม่</span>
+            <span>ใช้ปากกาติ๊กถูก <b>(✔)</b> ลงในช่อง <b>[ม=มา] [ล=ลา] [ข=ขาด]</b> ในแต่ละสัปดาห์ที่เข้าเวร | หากติ๊กผิด ให้ระบายทึบ <b>(■)</b> ทับช่องเดิม แล้วติ๊กช่องใหม่</span>
           </div>
-          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #475569; font-size: 7.5pt;">
-            OMR-VER: 1.2
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #475569;">
+            ISO 216 A4 LANDSCAPE // FORM-VER: 2.0-MONTHLY
           </div>
         </div>
 
         <!-- ========================================================== -->
-        <!-- 3. ATTENDANCE ROSTER TABLE (ZEBRA STRIPED)                 -->
+        <!-- 2. MONTHLY ATTENDANCE TABLE (DYNAMIC 4-5 WEEKS GRID)       -->
         <!-- ========================================================== -->
-        <table class="attendance-table" id="roster-table">
-          <thead>
-            <tr>
-              <th style="width: 28px;">#</th>
-              <th style="width: 58px;">รหัสเวร</th>
-              <th style="text-align: left; padding-left: 8px;">ชื่อ - สกุล สารวัตรนักเรียน</th>
-              <th style="width: 60px;">ชื่อเล่น</th>
-              <th style="width: 80px;">ชั้น/ห้อง (เลขที่)</th>
-              <th style="width: 48px; background: #1e3a8a;">[ มา ]</th>
-              <th style="width: 48px; background: #92400e;">[ ลา ]</th>
-              <th style="width: 48px; background: #991b1b;">[ ขาด ]</th>
-              <th style="width: 72px;">เวลาปฏิบัติงาน</th>
-              <th style="width: 130px;">บันทึกเหตุการณ์ / หมายเหตุ</th>
-            </tr>
+        <table class="attendance-table" id="main-attendance-table">
+          <thead id="table-head">
+            <!-- Dynamically populated via JS -->
           </thead>
           <tbody id="table-body">
-            <!-- Rendered Dynamically by JS -->
+            <!-- Dynamically populated via JS -->
           </tbody>
         </table>
       </div>
 
       <!-- ========================================================== -->
-      <!-- 4. BOTTOM SUPERVISOR SIGN-OFF ROI BOXES & AUDIT STAMP     -->
+      <!-- 3. MONTHLY SIGN-OFF ROIS & SYSTEM AUDIT FOOTER             -->
       <!-- ========================================================== -->
-      <div style="margin-top: 10px;">
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+      <div style="margin-top: 6px;">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
           
-          <!-- ROI: SUPERVISOR_SIGN (หัวหน้าเวร) -->
-          <div style="border: 1.5px solid #000000; border-radius: 4px; padding: 6px 10px; background: #ffffff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; font-size: 8pt; font-weight: 700;">
-              <span>1. ผู้ตรวจเช็ค: หัวหน้าเวรประจำวัน</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 7pt; color: #64748b;">ROI: SUPERVISOR_SIGN</span>
+          <!-- Box 1: Shift Head -->
+          <div style="border: 1.2px solid #000000; border-radius: 3px; padding: 4px 6px; background: #ffffff; font-size: 7.5pt;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; font-weight: 700;">
+              <span>1. ผู้บันทึก (หัวหน้าเวร)</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; color: #64748b;">ROI: HEAD_SIGN</span>
             </div>
-            <div style="height: 38px; display: flex; align-items: flex-end; justify-content: center;">
-              <div style="width: 85%; border-bottom: 1px dotted #64748b; text-align: center; font-size: 8.5pt; color: #64748b;">
-                (ลงลายมือชื่อหัวหน้าเวร)
-              </div>
+            <div style="height: 26px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 80%; border-bottom: 1px dotted #64748b; text-align: center; color: #94a3b8; font-size: 7pt;">(ลงชื่อหัวหน้าเวร)</div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; color: #334155; margin-top: 4px;">
-              <span id="sign-supervisor-name">ชื่อ: ....................................................</span>
-              <span>เวลา: ..........:.......... น.</span>
-            </div>
+            <div style="font-size: 7pt; color: #334155; margin-top: 2px;" id="sign-head-label">ชื่อ: .......................................</div>
           </div>
 
-          <!-- ROI: ADVISOR_SIGN (ครูที่ปรึกษา) -->
-          <div style="border: 1.5px solid #000000; border-radius: 4px; padding: 6px 10px; background: #ffffff;">
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; font-size: 8pt; font-weight: 700;">
-              <span>2. ผู้รับรอง: ครูที่ปรึกษางานสารวัตรนักเรียน</span>
-              <span style="font-family: 'JetBrains Mono', monospace; font-size: 7pt; color: #64748b;">ROI: ADVISOR_SIGN</span>
+          <!-- Box 2: Deputy Head -->
+          <div style="border: 1.2px solid #000000; border-radius: 3px; padding: 4px 6px; background: #ffffff; font-size: 7.5pt;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; font-weight: 700;">
+              <span>2. ผู้ตรวจทาน (รองหัวหน้า)</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; color: #64748b;">ROI: DEPUTY_SIGN</span>
             </div>
-            <div style="height: 38px; display: flex; align-items: flex-end; justify-content: center;">
-              <div style="width: 85%; border-bottom: 1px dotted #64748b; text-align: center; font-size: 8.5pt; color: #64748b;">
-                (ลงลายมือชื่อครูที่ปรึกษา)
-              </div>
+            <div style="height: 26px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 80%; border-bottom: 1px dotted #64748b; text-align: center; color: #94a3b8; font-size: 7pt;">(ลงชื่อรองหัวหน้าเวร)</div>
             </div>
-            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; color: #334155; margin-top: 4px;">
-              <span>ชื่อ: ....................................................</span>
-              <span>สถานะ: [ &nbsp; ] รับทราบผล</span>
+            <div style="font-size: 7pt; color: #334155; margin-top: 2px;" id="sign-deputy-label">ชื่อ: .......................................</div>
+          </div>
+
+          <!-- Box 3: Teacher Advisor -->
+          <div style="border: 1.2px solid #000000; border-radius: 3px; padding: 4px 6px; background: #ffffff; font-size: 7.5pt;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; font-weight: 700;">
+              <span>3. ครูที่ปรึกษาสารวัตร</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; color: #64748b;">ROI: ADVISOR_SIGN</span>
             </div>
+            <div style="height: 26px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 80%; border-bottom: 1px dotted #64748b; text-align: center; color: #94a3b8; font-size: 7pt;">(ลงชื่อครูที่ปรึกษา)</div>
+            </div>
+            <div style="font-size: 7pt; color: #334155; margin-top: 2px;">วันที่: ....../....../2569</div>
+          </div>
+
+          <!-- Box 4: Chief / Student Affairs -->
+          <div style="border: 1.2px solid #000000; border-radius: 3px; padding: 4px 6px; background: #ffffff; font-size: 7.5pt;">
+            <div style="display: flex; justify-content: space-between; border-bottom: 1px solid #e2e8f0; padding-bottom: 2px; font-weight: 700;">
+              <span>4. หัวหน้ากลุ่มงานกิจการฯ</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; color: #64748b;">ROI: CHIEF_STAMP</span>
+            </div>
+            <div style="height: 26px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 80%; border-bottom: 1px dotted #64748b; text-align: center; color: #94a3b8; font-size: 7pt;">(ลงชื่อหัวหน้ากลุ่มงาน)</div>
+            </div>
+            <div style="font-size: 7pt; color: #334155; margin-top: 2px;">[ &nbsp; ] อนุมัติผลสรุปยอดสิ้นเดือน</div>
           </div>
 
         </div>
 
-        <!-- System Machine Stamp Footer -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #94a3b8; padding-top: 4px; margin-top: 8px; font-size: 7pt; font-family: 'JetBrains Mono', monospace; color: #64748b;">
-          <span>SARAWAT PRANARAI OS // A4-OMR-HYBRID PROTOCOL</span>
-          <span>PAGE 1 OF 1 • 210 x 297 mm</span>
-          <span id="checksum-label">SHA256: FORM-M-VERIFIED</span>
+        <!-- Footer Machine Stamp -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 3px; margin-top: 4px; font-size: 6.5pt; font-family: 'JetBrains Mono', monospace; color: #64748b;">
+          <span>SARAWAT PRANARAI OS // MONTHLY-OMR ENGINE</span>
+          <span>1 SHEET PER MONTH • A4 LANDSCAPE (297 x 210 mm)</span>
+          <span id="checksum-label">SHA256: MONTHLY_M_202611_VERIFIED</span>
         </div>
       </div>
 
@@ -421,58 +467,58 @@
   </div>
 
   <!-- ========================================================== -->
-  <!-- 💻 SCRIPT LOGIC (QR CODE GENERATION & SHIFT ROSTER)        -->
+  <!-- 💻 SCRIPT LOGIC (CALENDAR COMPUTATION & INTERACTIVE OMR)   -->
   <!-- ========================================================== -->
   <script>
-    // Sample / Verified Mock Roster Data for 6 Shifts
+    // 6-Shift Roster Database with Real Marshal Names & Ranks
     const ROSTER_DATABASE = {
       M: [
-        { duty_id: "M1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
-        { duty_id: "M2", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012" },
-        { duty_id: "M3", name: "นายธนวัฒน์ แจ่มใส", nickname: "บอส", class_room: "ม.4/1", student_no: "70114" },
-        { duty_id: "M4", name: "เด็กชายจิรพัฒน์ รุ่งเรือง", nickname: "นนท์", class_room: "ม.3/2", student_no: "71205" },
-        { duty_id: "M5", name: "เด็กชายพงศกร สดใส", nickname: "ปัน", class_room: "ม.3/5", student_no: "71244" },
-        { duty_id: "M6", name: "นายภัทรดนัย บุญมี", nickname: "เบสท์", class_room: "ม.6/3", student_no: "68019" },
-        { duty_id: "M7", name: "เด็กชายวรพล มงคล", nickname: "ไอซ์", class_room: "ม.2/4", student_no: "72091" },
-        { duty_id: "M8", name: "นายศุภกร ยิ้มแย้ม", nickname: "โบ๊ท", class_room: "ม.5/9", student_no: "69201" },
-        { duty_id: "MS1", name: "นายวีรภัทร ชาญชัย", nickname: "วิน", class_room: "ม.5/1", student_no: "69002" },
-        { duty_id: "MS2", name: "เด็กชายชินดนัย แสงแก้ว", nickname: "ภูมิ", class_room: "ม.3/1", student_no: "71015" }
+        { duty_id: "M1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true, post: "ประตู 1" },
+        { duty_id: "M2", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012", is_deputy: true, post: "เสาธง" },
+        { duty_id: "M3", name: "นายธนวัฒน์ แจ่มใส", nickname: "บอส", class_room: "ม.4/1", student_no: "70114", post: "โรงอาหาร" },
+        { duty_id: "M4", name: "เด็กชายจิรพัฒน์ รุ่งเรือง", nickname: "นนท์", class_room: "ม.3/2", student_no: "71205", post: "อาคาร 2" },
+        { duty_id: "M5", name: "เด็กชายพงศกร สดใส", nickname: "ปัน", class_room: "ม.3/5", student_no: "71244", post: "ประตู 3" },
+        { duty_id: "M6", name: "นายภัทรดนัย บุญมี", nickname: "เบสท์", class_room: "ม.6/3", student_no: "68019", post: "จุดคัดกรอง" },
+        { duty_id: "M7", name: "เด็กชายวรพล มงคล", nickname: "ไอซ์", class_room: "ม.2/4", student_no: "72091", post: "อาคาร 4" },
+        { duty_id: "M8", name: "นายศุภกร ยิ้มแย้ม", nickname: "โบ๊ท", class_room: "ม.5/9", student_no: "69201", post: "ลานกิจกรรม" },
+        { duty_id: "MS1", name: "นายวีรภัทร ชาญชัย", nickname: "วิน", class_room: "ม.5/1", student_no: "69002", post: "สายตรวจเดินเท้า" },
+        { duty_id: "MS2", name: "เด็กชายชินดนัย แสงแก้ว", nickname: "ภูมิ", class_room: "ม.3/1", student_no: "71015", post: "สายตรวจเดินเท้า" }
       ],
       T: [
-        { duty_id: "T1", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045", is_head: true },
-        { duty_id: "T2", name: "นายณัฐภัทร วัฒนา", nickname: "มิว", class_room: "ม.5/4", student_no: "69112" },
-        { duty_id: "T3", name: "เด็กชายรพีพงศ์ เลิศล้ำ", nickname: "ดิสดิส", class_room: "ม.3/3", student_no: "71155" },
-        { duty_id: "T4", name: "นายสรวิชญ์ เก่งกล้า", nickname: "แบงค์", class_room: "ม.5/8", student_no: "69255" },
-        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055" },
-        { duty_id: "TS2", name: "นายอภิสิทธิ์ ชัยชนะ", nickname: "เบสท์", class_room: "ม.4/5", student_no: "70211" }
+        { duty_id: "T1", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045", is_head: true, post: "ประตู 1" },
+        { duty_id: "T2", name: "นายณัฐภัทร วัฒนา", nickname: "มิว", class_room: "ม.5/4", student_no: "69112", is_deputy: true, post: "เสาธง" },
+        { duty_id: "T3", name: "เด็กชายรพีพงศ์ เลิศล้ำ", nickname: "ดิสดิส", class_room: "ม.3/3", student_no: "71155", post: "โรงอาหาร" },
+        { duty_id: "T4", name: "นายสรวิชญ์ เก่งกล้า", nickname: "แบงค์", class_room: "ม.5/8", student_no: "69255", post: "จุดคัดกรอง" },
+        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", post: "สายตรวจ" },
+        { duty_id: "TS2", name: "นายอภิสิทธิ์ ชัยชนะ", nickname: "เบสท์", class_room: "ม.4/5", student_no: "70211", post: "สายตรวจ" }
       ],
       W: [
-        { duty_id: "W1", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001", is_head: true },
-        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "ม.5/3", student_no: "69088" },
-        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "ม.3/4", student_no: "71190" },
-        { duty_id: "W4", name: "นายพงศพัศ รัตนชัย", nickname: "นนท์", class_room: "ม.4/2", student_no: "70155" },
-        { duty_id: "WS1", name: "นายชินภัทร เจริญศิลป์", nickname: "วิน", class_room: "ม.5/5", student_no: "69144" }
+        { duty_id: "W1", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001", is_head: true, post: "ประตู 1" },
+        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "ม.5/3", student_no: "69088", is_deputy: true, post: "เสาธง" },
+        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "ม.3/4", student_no: "71190", post: "โรงอาหาร" },
+        { duty_id: "W4", name: "นายพงศพัศ รัตนชัย", nickname: "นนท์", class_room: "ม.4/2", student_no: "70155", post: "อาคาร 1" },
+        { duty_id: "WS1", name: "นายชินภัทร เจริญศิลป์", nickname: "วิน", class_room: "ม.5/5", student_no: "69144", post: "สายตรวจ" }
       ],
       Ts: [
-        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
-        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "ม.5/6", student_no: "69188" },
-        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "ม.3/6", student_no: "71288" },
-        { duty_id: "Ts4", name: "นายธนกร แดนดวง", nickname: "ภูมิ", class_room: "ม.4/4", student_no: "70199" },
-        { duty_id: "TSS1", name: "เด็กชายวรดร สถิต", nickname: "มิว", class_room: "ม.2/1", student_no: "72005" }
+        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true, post: "ประตู 1" },
+        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "ม.5/6", student_no: "69188", is_deputy: true, post: "เสาธง" },
+        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "ม.3/6", student_no: "71288", post: "โรงอาหาร" },
+        { duty_id: "Ts4", name: "นายธนกร แดนดวง", nickname: "ภูมิ", class_room: "ม.4/4", student_no: "70199", post: "จุดคัดกรอง" },
+        { duty_id: "TSS1", name: "เด็กชายวรดร สถิต", nickname: "มิว", class_room: "ม.2/1", student_no: "72005", post: "สายตรวจ" }
       ],
       F: [
-        { duty_id: "F1", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115", is_head: true },
-        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "ม.5/2", student_no: "69066" },
-        { duty_id: "F3", name: "เด็กชายศุภวิชญ์ แจ้งสว่าง", nickname: "เบส", class_room: "ม.3/2", student_no: "71089" },
-        { duty_id: "F4", name: "นายอัครพล ยิ่งยง", nickname: "อาร์ม", class_room: "ม.4/6", student_no: "70244" },
-        { duty_id: "FS1", name: "นายสิรภพ อินทร", nickname: "นน", class_room: "ม.5/8", student_no: "69277" }
+        { duty_id: "F1", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115", is_head: true, post: "ประตู 1" },
+        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "ม.5/2", student_no: "69066", is_deputy: true, post: "เสาธง" },
+        { duty_id: "F3", name: "เด็กชายศุภวิชญ์ แจ้งสว่าง", nickname: "เบส", class_room: "ม.3/2", student_no: "71089", post: "โรงอาหาร" },
+        { duty_id: "F4", name: "นายอัครพล ยิ่งยง", nickname: "อาร์ม", class_room: "ม.4/6", student_no: "70244", post: "อาคาร 3" },
+        { duty_id: "FS1", name: "นายสิรภพ อินทร", nickname: "นน", class_room: "ม.5/8", student_no: "69277", post: "สายตรวจ" }
       ],
       S: [
-        { duty_id: "S1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
-        { duty_id: "S2", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045" },
-        { duty_id: "S3", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001" },
-        { duty_id: "S4", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115" },
-        { duty_id: "S5", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012" }
+        { duty_id: "S1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true, post: "ประตู 1" },
+        { duty_id: "S2", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045", is_deputy: true, post: "จุดคัดกรอง" },
+        { duty_id: "S3", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001", post: "เสาธง" },
+        { duty_id: "S4", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115", post: "โรงอาหาร" },
+        { duty_id: "S5", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012", post: "สายตรวจ" }
       ]
     };
 
@@ -485,51 +531,87 @@
       S: "เวรพิเศษ (วันเสาร์/กิจกรรม)"
     };
 
+    const DAY_OF_WEEK_MAP = {
+      M: 1, // Monday
+      T: 2, // Tuesday
+      W: 3, // Wednesday
+      Ts: 4, // Thursday
+      F: 5, // Friday
+      S: 6  // Saturday
+    };
+
+    const THAI_MONTHS = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+    const THAI_MONTHS_SHORT = ["ม.ค.", "ก.พ.", "มี.ค.", "เม.ย.", "พ.ค.", "มิ.ย.", "ก.ค.", "ส.ค.", "ก.ย.", "ต.ค.", "พ.ย.", "ธ.ค."];
+
     let currentShift = 'M';
-    let currentDate = new Date().toISOString().slice(0, 10);
+    let currentMonthStr = '2026-11'; // YYYY-MM
+    let computedWeeks = []; // Computed Date objects for the month and shift
 
-    function initPage() {
-      document.getElementById('select-date').value = currentDate;
-      renderSheet();
+    // Initialize Page
+    function initMonthlySheet() {
+      renderMonthlySheet();
     }
 
-    function switchShift(shiftCode) {
-      currentShift = shiftCode;
-      renderSheet();
+    function changeMonth(mStr) {
+      currentMonthStr = mStr;
+      renderMonthlySheet();
     }
 
-    function updateDate(dateVal) {
-      currentDate = dateVal;
-      renderSheet();
+    function changeShift(sCode) {
+      currentShift = sCode;
+      renderMonthlySheet();
     }
 
-    function renderSheet() {
-      const roster = ROSTER_DATABASE[currentShift] || ROSTER_DATABASE['M'];
+    // Compute all target dates (weeks) in the chosen month for this shift
+    function getDutyDatesForMonth(year, monthIdx, targetDayOfWeek) {
+      const dates = [];
+      const d = new Date(year, monthIdx, 1);
+      while (d.getMonth() === monthIdx) {
+        if (d.getDay() === targetDayOfWeek) {
+          dates.push(new Date(d));
+        }
+        d.setDate(d.getDate() + 1);
+      }
+      return dates;
+    }
+
+    function renderMonthlySheet() {
+      const [yearStr, monthStr] = currentMonthStr.split('-');
+      const year = parseInt(yearStr, 10);
+      const monthIdx = parseInt(monthStr, 10) - 1;
+      const thaiYear = year + 543;
+      const monthThai = THAI_MONTHS[monthIdx];
       const shiftThai = SHIFT_NAMES[currentShift] || currentShift;
+      const targetDay = DAY_OF_WEEK_MAP[currentShift] || 1;
 
-      // Format Date to Thai readable
-      const d = new Date(currentDate);
-      const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
-      const thaiYear = d.getFullYear() + 543;
-      const formattedDateThai = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${thaiYear}`;
+      // Calculate the specific dates of this shift in the month
+      computedWeeks = getDutyDatesForMonth(year, monthIdx, targetDay);
 
-      // Update Header Text
+      // Update Header Titles
       document.getElementById('header-shift-title').textContent = 
-        `ผลัดปฏิบัติการ: [${currentShift}] ${shiftThai} • ประจำวันที่ ${formattedDateThai}`;
+        `ผลัดปฏิบัติการ: [${currentShift}] ${shiftThai} • ประจำเดือน${monthThai} พ.ศ. ${thaiYear} (ยอดรวม ${computedWeeks.length} สัปดาห์/ครั้งในเดือนนี้)`;
 
-      // Update Head of Shift Name
+      const roster = ROSTER_DATABASE[currentShift] || ROSTER_DATABASE['M'];
       const head = roster.find(m => m.is_head) || roster[0];
+      const deputy = roster.find(m => m.is_deputy) || roster[1] || roster[0];
+
       if (head) {
-        document.getElementById('sign-supervisor-name').textContent = `ชื่อ: [${head.duty_id}] ${head.name} (${head.nickname})`;
+        document.getElementById('hdr-head-name').textContent = `[${head.duty_id}] ${head.name} (${head.nickname})`;
+        document.getElementById('sign-head-label').textContent = `ชื่อ: [${head.duty_id}] ${head.name}`;
+      }
+      if (deputy) {
+        document.getElementById('hdr-deputy-name').textContent = `[${deputy.duty_id}] ${deputy.name} (${deputy.nickname})`;
+        document.getElementById('sign-deputy-label').textContent = `ชื่อ: [${deputy.duty_id}] ${deputy.name}`;
       }
 
-      // Generate Session Header QR Code JSON Payload
+      // Generate Session Header QR Code Payload (Monthly Machine-Readable JSON)
       const qrPayload = JSON.stringify({
         system: "SARAWAT_OS",
-        form: "A4_OMR_V1",
+        type: "MONTHLY_A4_OMR",
         shift: currentShift,
-        date: currentDate,
-        total: roster.length,
+        month: currentMonthStr,
+        weeks_count: computedWeeks.length,
+        dates: computedWeeks.map(d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`),
         roster: roster.map(m => m.duty_id)
       });
 
@@ -537,130 +619,249 @@
       qrContainer.innerHTML = '';
       new QRCode(qrContainer, {
         text: qrPayload,
-        width: 78,
-        height: 78,
+        width: 58,
+        height: 58,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M
       });
 
-      const shortDateCode = currentDate.replace(/-/g, '');
-      document.getElementById('qr-session-label').textContent = `${currentShift}-${shortDateCode}-N${roster.length}`;
-      document.getElementById('checksum-label').textContent = `PAYLOAD: ${currentShift}_${shortDateCode}_OMR_READY`;
+      const shortMonth = currentMonthStr.replace('-', '');
+      document.getElementById('qr-session-label').textContent = `${currentShift}-${shortMonth}-W${computedWeeks.length}`;
+      document.getElementById('checksum-label').textContent = `SHA256: MONTHLY_${currentShift}_${shortMonth}_W${computedWeeks.length}_VERIFIED`;
 
-      // Render Table Rows with Zebra Striping
+      // -------------------------------------------------------------
+      // Build Table Headers (2 Rows: Info + Weeks + Summary + Notes)
+      // -------------------------------------------------------------
+      const thead = document.getElementById('table-head');
+      
+      let headerRow1 = `
+        <tr>
+          <th rowspan="2" style="width: 24px;">ที่</th>
+          <th rowspan="2" style="width: 44px;">รหัสเวร</th>
+          <th rowspan="2" style="width: 140px; text-align: left; padding-left: 6px;">ชื่อ - สกุล สารวัตรนักเรียน</th>
+          <th rowspan="2" style="width: 46px;">ชื่อเล่น</th>
+          <th rowspan="2" style="width: 60px;">ชั้น/ห้อง</th>
+      `;
+
+      // Add week columns in Header Row 1
+      computedWeeks.forEach((wDate, idx) => {
+        const dStr = `${wDate.getDate()} ${THAI_MONTHS_SHORT[wDate.getMonth()]}`;
+        headerRow1 += `
+          <th colspan="3" class="week-header" style="min-width: 66px;">
+            สัปดาห์ที่ ${idx + 1}<br><span style="font-size: 7.5pt; font-weight: normal; color: #94a3b8;">(${dStr})</span>
+          </th>
+        `;
+      });
+
+      // Add Monthly Summary in Header Row 1
+      headerRow1 += `
+          <th colspan="4" style="background-color: #047857; min-width: 90px;">
+            สรุปยอดทั้งเดือน
+          </th>
+          <th rowspan="2" style="width: 75px;">จุดประจำการ</th>
+        </tr>
+      `;
+
+      // Build Header Row 2 (Sub-columns under each week & summary)
+      let headerRow2 = `<tr>`;
+      
+      // Under each week: [มา] [ลา] [ขาด]
+      computedWeeks.forEach((_, wIdx) => {
+        headerRow2 += `
+          <th class="sub-col" title="มาปฏิบัติหน้าที่" style="color: #6ee7b7;">มา</th>
+          <th class="sub-col" title="ขอลาเวร" style="color: #fde047;">ลา</th>
+          <th class="sub-col" title="ขาดเวร" style="color: #fca5a5;">ขาด</th>
+        `;
+      });
+
+      // Under Monthly Summary: [มา] [ลา] [ขาด] [%]
+      headerRow2 += `
+        <th class="sub-col" style="background-color: #065f46; color: #6ee7b7; font-weight: bold;">รวมมา</th>
+        <th class="sub-col" style="background-color: #065f46; color: #fde047; font-weight: bold;">รวมลา</th>
+        <th class="sub-col" style="background-color: #065f46; color: #fca5a5; font-weight: bold;">รวมขาด</th>
+        <th class="sub-col" style="background-color: #065f46; color: #ffffff; font-weight: bold;">% มา</th>
+      </tr>`;
+
+      thead.innerHTML = headerRow1 + headerRow2;
+
+      // -------------------------------------------------------------
+      // Build Table Data Rows (Roster)
+      // -------------------------------------------------------------
       const tbody = document.getElementById('table-body');
       tbody.innerHTML = roster.map((m, idx) => {
         const isOdd = idx % 2 === 1;
-        const headBadge = m.is_head ? ' <span style="color:#b91c1c; font-weight:700; font-size:8pt;">(หัวหน้าเวร)</span>' : '';
-        
-        return `
-          <tr class="${isOdd ? 'row-odd' : 'row-even'}">
-            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700;">${idx + 1}</td>
-            <td style="text-align: center;"><span class="duty-code">${m.duty_id}</span></td>
-            <td><b>${m.name}</b>${headBadge}</td>
-            <td style="text-align: center; font-weight: 600;">${m.nickname}</td>
-            <td style="text-align: center; font-size: 8.5pt;">${m.class_room} <span style="color:#64748b;">(#${m.student_no})</span></td>
-            
+        const roleTag = m.is_head 
+          ? ' <span style="color: #b91c1c; font-weight: bold; font-size: 7pt;">(หัวหน้า)</span>'
+          : (m.is_deputy ? ' <span style="color: #0284c7; font-weight: bold; font-size: 7pt;">(รอง)</span>' : '');
+
+        let weekCells = '';
+        computedWeeks.forEach((_, wIdx) => {
+          weekCells += `
             <!-- Checkbox: มา (PRESENT) -->
-            <td style="text-align: center;">
-              <div class="omr-box" data-type="PRESENT" onclick="toggleOmr(this, '${m.duty_id}', 'PRESENT')" title="${m.duty_id} มา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
-                <span class="omr-box-watermark">${m.duty_id}<br>มา</span>
+            <td style="text-align: center; padding: 2px 1px;">
+              <div class="omr-box" data-duty="${m.duty_id}" data-week="${wIdx}" data-type="PRESENT" onclick="toggleOmrMonthly(this)" title="${m.duty_id} ส.${wIdx+1} มา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
+                <span class="omr-box-watermark">${m.duty_id}<br>W${wIdx+1}</span>
               </div>
             </td>
 
             <!-- Checkbox: ลา (LEAVE) -->
-            <td style="text-align: center;">
-              <div class="omr-box" data-type="LEAVE" onclick="toggleOmr(this, '${m.duty_id}', 'LEAVE')" title="${m.duty_id} ลา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
+            <td style="text-align: center; padding: 2px 1px;">
+              <div class="omr-box" data-duty="${m.duty_id}" data-week="${wIdx}" data-type="LEAVE" onclick="toggleOmrMonthly(this)" title="${m.duty_id} ส.${wIdx+1} ลา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
                 <span class="omr-box-watermark">${m.duty_id}<br>ลา</span>
               </div>
             </td>
 
             <!-- Checkbox: ขาด (ABSENT) -->
-            <td style="text-align: center;">
-              <div class="omr-box" data-type="ABSENT" onclick="toggleOmr(this, '${m.duty_id}', 'ABSENT')" title="${m.duty_id} ขาด (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
+            <td style="text-align: center; padding: 2px 1px;">
+              <div class="omr-box" data-duty="${m.duty_id}" data-week="${wIdx}" data-type="ABSENT" onclick="toggleOmrMonthly(this)" title="${m.duty_id} ส.${wIdx+1} ขาด (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
                 <span class="omr-box-watermark">${m.duty_id}<br>ขาด</span>
               </div>
             </td>
+          `;
+        });
 
-            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #94a3b8;">
-              .... : .... น.
-            </td>
-            <td style="color: #94a3b8; font-size: 8pt;">
-              &nbsp;
-            </td>
+        return `
+          <tr class="${isOdd ? 'row-odd' : 'row-even'}" data-duty-row="${m.duty_id}">
+            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700;">${idx + 1}</td>
+            <td style="text-align: center;"><span class="duty-code">${m.duty_id}</span></td>
+            <td style="white-space: nowrap; font-weight: 500;">${m.name}${roleTag}</td>
+            <td style="text-align: center; font-weight: 600;">${m.nickname}</td>
+            <td style="text-align: center; font-size: 8pt; font-family: 'JetBrains Mono', monospace;">${m.class_room}</td>
+
+            ${weekCells}
+
+            <!-- Monthly Summary Cells (Auto-calculated) -->
+            <td style="text-align: center; font-weight: 700; color: #047857;" class="summary-present font-mono">-</td>
+            <td style="text-align: center; font-weight: 700; color: #b45309;" class="summary-leave font-mono">-</td>
+            <td style="text-align: center; font-weight: 700; color: #b91c1c;" class="summary-absent font-mono">-</td>
+            <td style="text-align: center; font-weight: 700; font-family: 'JetBrains Mono', monospace;" class="summary-pct">-</td>
+
+            <td style="text-align: center; font-size: 7.5pt; color: #475569;">${m.post || '-'}</td>
           </tr>
         `;
       }).join('');
 
-      updateCounters();
+      updateMonthlyCounters();
     }
 
-    function toggleOmr(boxEl, dutyId, type) {
+    // Toggle Checkmark / Cross-out on Click
+    function toggleOmrMonthly(boxEl) {
+      const dutyId = boxEl.dataset.duty;
+      const weekIdx = boxEl.dataset.week;
       const row = boxEl.closest('tr');
-      const allBoxesInRow = row.querySelectorAll('.omr-box');
+      const boxesInWeek = row.querySelectorAll(`.omr-box[data-week="${weekIdx}"]`);
 
-      // 1st click: marked-check (✔)
-      // 2nd click: marked-crossed (■/✖ scribble override)
-      // 3rd click: clear
       if (boxEl.classList.contains('marked-check')) {
         boxEl.classList.remove('marked-check');
         boxEl.classList.add('marked-crossed');
       } else if (boxEl.classList.contains('marked-crossed')) {
         boxEl.classList.remove('marked-crossed');
       } else {
-        allBoxesInRow.forEach(b => {
+        boxesInWeek.forEach(b => {
           b.classList.remove('marked-check');
           b.classList.remove('marked-crossed');
         });
         boxEl.classList.add('marked-check');
       }
-      updateCounters();
+
+      updateMonthlyCounters();
     }
 
-    function updateCounters() {
-      const presentCount = document.querySelectorAll('.omr-box[data-type="PRESENT"].marked-check').length;
-      const leaveCount = document.querySelectorAll('.omr-box[data-type="LEAVE"].marked-check').length;
-      const absentCount = document.querySelectorAll('.omr-box[data-type="ABSENT"].marked-check').length;
+    // Recalculate Monthly Statistics for all rows and global toolbar
+    function updateMonthlyCounters() {
+      const rows = document.querySelectorAll('#table-body tr');
+      let grandPresent = 0;
+      let grandLeave = 0;
+      let grandAbsent = 0;
+      let totalSlotsFilled = 0;
+
+      rows.forEach(row => {
+        const pCount = row.querySelectorAll('.omr-box[data-type="PRESENT"].marked-check').length;
+        const lCount = row.querySelectorAll('.omr-box[data-type="LEAVE"].marked-check').length;
+        const aCount = row.querySelectorAll('.omr-box[data-type="ABSENT"].marked-check').length;
+
+        const totalWeeks = computedWeeks.length;
+        const cellP = row.querySelector('.summary-present');
+        const cellL = row.querySelector('.summary-leave');
+        const cellA = row.querySelector('.summary-absent');
+        const cellPct = row.querySelector('.summary-pct');
+
+        if (cellP) cellP.textContent = pCount > 0 ? pCount : '0';
+        if (cellL) cellL.textContent = lCount > 0 ? lCount : '0';
+        if (cellA) cellA.textContent = aCount > 0 ? aCount : '0';
+
+        if (cellPct) {
+          const filled = pCount + lCount + aCount;
+          if (filled > 0) {
+            const pct = Math.round((pCount / filled) * 100);
+            cellPct.textContent = `${pct}%`;
+            cellPct.style.color = pct >= 80 ? '#047857' : (pct >= 50 ? '#b45309' : '#b91c1c');
+          } else {
+            cellPct.textContent = '-';
+            cellPct.style.color = '#64748b';
+          }
+        }
+
+        grandPresent += pCount;
+        grandLeave += lCount;
+        grandAbsent += aCount;
+        totalSlotsFilled += (pCount + lCount + aCount);
+      });
 
       const bp = document.getElementById('badge-present');
       const bl = document.getElementById('badge-leave');
       const ba = document.getElementById('badge-absent');
-      if (bp) bp.textContent = `มา: ${presentCount}`;
-      if (bl) bl.textContent = `ลา: ${leaveCount}`;
-      if (ba) ba.textContent = `ขาด: ${absentCount}`;
+      const br = document.getElementById('badge-rate');
+
+      if (bp) bp.textContent = `รวมมา: ${grandPresent}`;
+      if (bl) bl.textContent = `รวมลา: ${grandLeave}`;
+      if (ba) ba.textContent = `รวมขาด: ${grandAbsent}`;
+      if (br) {
+        const rate = totalSlotsFilled > 0 ? Math.round((grandPresent / totalSlotsFilled) * 100) : 0;
+        br.textContent = `ความพร้อม: ${rate}%`;
+      }
     }
 
-    function simulateMarks() {
+    // Simulate Whole Month attendance with realistic student distribution
+    function simulateMonth() {
       const rows = document.querySelectorAll('#table-body tr');
       rows.forEach(row => {
-        const boxes = row.querySelectorAll('.omr-box');
-        boxes.forEach(b => {
-          b.classList.remove('marked-check');
-          b.classList.remove('marked-crossed');
-        });
+        computedWeeks.forEach((_, wIdx) => {
+          const boxes = row.querySelectorAll(`.omr-box[data-week="${wIdx}"]`);
+          boxes.forEach(b => {
+            b.classList.remove('marked-check');
+            b.classList.remove('marked-crossed');
+          });
 
-        const rand = Math.random();
-        if (rand < 0.8) {
-          boxes[0].classList.add('marked-check'); // มา
-        } else if (rand < 0.9) {
-          boxes[1].classList.add('marked-check'); // ลา
-        } else {
-          boxes[2].classList.add('marked-check'); // ขาด
-        }
+          // 85% Present, 8% Leave, 5% Absent, 2% Error correction
+          const rand = Math.random();
+          if (rand < 0.85) {
+            boxes[0].classList.add('marked-check'); // มา
+          } else if (rand < 0.93) {
+            boxes[1].classList.add('marked-check'); // ลา
+          } else if (rand < 0.98) {
+            boxes[2].classList.add('marked-check'); // ขาด
+          } else {
+            // Simulated error correction: ticked Absent then crossed out and ticked Leave
+            boxes[2].classList.add('marked-crossed');
+            boxes[1].classList.add('marked-check');
+          }
+        });
       });
-      updateCounters();
+      updateMonthlyCounters();
     }
 
-    function clearMarks() {
+    // Clear all marks on the sheet
+    function clearMonth() {
       document.querySelectorAll('.omr-box').forEach(b => {
         b.classList.remove('marked-check');
         b.classList.remove('marked-crossed');
       });
-      updateCounters();
+      updateMonthlyCounters();
     }
 
-    window.addEventListener('DOMContentLoaded', initPage);
+    window.addEventListener('DOMContentLoaded', initMonthlySheet);
   </script>
 </body>
 </html>
