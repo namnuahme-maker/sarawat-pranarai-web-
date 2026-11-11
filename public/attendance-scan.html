@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (OMR Vision) // SARAWAT PRANARAI</title>
+  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (Discord Leave Integration) // SARAWAT PRANARAI</title>
 
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -44,7 +44,7 @@
       left: 0;
       right: 0;
       height: 2px;
-      background: linear-gradient(90deg, transparent, #22c55e, #eab308, #22c55e, transparent);
+      background: linear-gradient(90deg, transparent, #22c55e, #38bdf8, #eab308, transparent);
       box-shadow: 0 0 12px #22c55e;
       animation: scanline 2s ease-in-out infinite alternate;
     }
@@ -65,9 +65,9 @@
           <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
           <div>
             <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
-              <span>📸</span> สแกนเช็คชื่อ (ระบบวิเคราะห์ OMR)
+              <span>📸</span> สแกนเช็คชื่อ (เชื่อม Discord Leave)
             </h1>
-            <p class="text-[10px] text-slate-400">ตรวจจับรอยมาร์กสีมืด [ส]/[ล] อัตโนมัติจากภาพถ่าย</p>
+            <p class="text-[10px] text-slate-400">ฝนดำช่อง [○] = มา | ว่าง = สาย | การลาดึงจาก Discord</p>
           </div>
         </div>
       </div>
@@ -91,7 +91,7 @@
       <!-- หัวข้อขั้นตอนที่ 1 -->
       <div class="flex items-center justify-between">
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
-          <span>ขั้นตอนที่ 1</span> • เลือกผลัดเวรก่อนถ่าย
+          <span>ขั้นตอนที่ 1</span> • เลือกผลัดเวรและตรวจสอบการลา
         </div>
         <div id="badge-today-tag" class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
           วันนี้: พ. 11/11
@@ -99,9 +99,9 @@
       </div>
 
       <div class="space-y-1">
-        <h2 class="text-sm sm:text-base font-bold text-white">1. เลือกผลัดเวรที่ต้องการสแกน</h2>
+        <h2 class="text-sm sm:text-base font-bold text-white">1. เลือกผลัดเวรที่ต้องการตรวจเช็ค</h2>
         <p class="text-xs text-slate-400 leading-relaxed">
-          เลือกรอบเวรเพื่อโหลดรายชื่อสารวัตร ระบบจะใช้รายชื่อนี้จับคู่กับรอยมาร์กในตาราง <strong>ไม่ต้องถ่ายเห็นหัวกระดาษหรือ QR Code</strong>
+          ระบบจะเชื่อมต่อฐานข้อมูล Discord เพื่อตรวจเช็คว่ามีสารวัตรคนใดแจ้งลาไว้หรือไม่ โดยไม่ต้องติ๊กช่องลาในกระดาษ
         </p>
       </div>
 
@@ -146,8 +146,8 @@
 
       </div>
 
-      <!-- สรุปผลัดเวรและวันที่เป้าหมายในกระดาษ -->
-      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-2">
+      <!-- สรุปผลัดเวร และกล่องแจ้งเตือนรายการลาจาก Discord -->
+      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-2.5">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
             <span class="text-base">🛡️</span>
@@ -169,11 +169,26 @@
           </div>
         </div>
 
-        <!-- คำแนะนำการถ่ายแบบเจาะจง -->
+        <!-- กล่องสถานะการแจ้งลาผ่าน Discord วันนี้ -->
+        <div id="discord-leave-banner" class="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs space-y-1">
+          <div class="flex items-center justify-between text-sky-300 font-bold">
+            <span class="flex items-center gap-1.5">
+              <span>💬</span> ข้อมูลแจ้งลาใน Discord ประจำวัน:
+            </span>
+            <span id="discord-leave-count-badge" class="font-mono bg-sky-500/20 px-2 py-0.5 rounded text-[10px]">0 รายการ</span>
+          </div>
+          <div id="discord-leave-detail-list" class="text-[11px] text-slate-300 space-y-0.5 pt-0.5">
+            กำลังตรวจสอบฐานข้อมูล Discord...
+          </div>
+        </div>
+
+        <!-- คำแนะนำการถ่ายรูปแบบใหม่ -->
         <div class="border-t border-slate-700/60 pt-2 flex items-start gap-2 text-xs text-slate-300">
           <span class="text-emerald-400 text-sm">💡</span>
           <div class="text-[11px] leading-relaxed">
-            ระบบวิเคราะห์ OMR จะตรวจวัดความมืดของรอยกาในช่อง <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong>: หากมืดที่ช่อง [ส] จะระบุว่า <strong>มาสาย</strong> หากมืดที่ช่อง [ล] จะระบุว่า <strong>ขอลา</strong> หากเป็นช่องว่างจะถือว่า <strong>มาปกติ</strong>
+            <strong>กติกาสแกนใหม่:</strong> ตรวจเฉพาะช่องวงกลม <strong class="text-amber-300">[○] (ม)</strong> ของวันที่ <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong>:
+            <br>• ถ้าฝนดำช่อง [○] $\rightarrow$ <strong class="text-emerald-400">มาปฏิบัติหน้าที่</strong>
+            <br>• ถ้าช่องว่างเปล่า $\rightarrow$ <strong class="text-amber-400">มาสาย</strong> (เว้นแต่จะมีการแจ้งลาใน Discord ไว้ จะปรับเป็น <strong class="text-sky-400">ขอลา</strong> อัตโนมัติ)
           </div>
         </div>
       </div>
@@ -217,7 +232,7 @@
           
           <div class="text-center">
             <span class="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[10px] text-amber-300 font-bold border border-amber-500/40">
-              🎯 เล็งให้เห็นแถวรายชื่อและช่อง <span id="hud-date-text">11/11</span>
+              🎯 เล็งแถวรายชื่อและช่องวงกลม [○] วันที่ <span id="hud-date-text">11/11</span>
             </span>
           </div>
 
@@ -229,19 +244,19 @@
             </div>
 
             <div class="text-center">
-              <div class="text-[9px] text-amber-300/80 font-mono tracking-widest uppercase">── วางให้ตรงกรอบ ──</div>
-              <div class="text-xs text-white font-bold drop-shadow">เล็งแถวรอยกาวันนี้</div>
+              <div class="text-[9px] text-amber-300/80 font-mono tracking-widest uppercase">── เล็งช่อง [○] วันนี้ ──</div>
+              <div class="text-xs text-white font-bold drop-shadow">ตรวจจับการฝนช่อง (ม)</div>
             </div>
 
             <div class="bg-black/80 px-2 py-1 rounded border border-amber-400/50 text-[10px] text-amber-200 font-bold text-center">
               <div id="hud-col-text">คอลัมน์ 11/11 ▶</div>
-              <div class="text-[8px] text-slate-300">ช่อง [ส] / [ล]</div>
+              <div class="text-[8px] text-slate-300">วงกลม [○] (ม)</div>
             </div>
           </div>
 
           <div class="text-center">
             <span class="px-2 py-0.5 rounded bg-black/75 text-[9px] text-slate-300 border border-slate-700">
-              💡 ถือกล้องห่างกระดาษ 20-30 ซม. ให้เห็นตัวหนังสือและรอยกาชัดเจน
+              💡 ถือกล้องใกล้ 20-30 ซม. ให้เห็นวงกลมชัดเจน (ถ่ายแค่รูปเดียว)
             </span>
           </div>
 
@@ -262,7 +277,7 @@
           <span>ถ่ายภาพใบเช็คชื่อ (1 รูป)</span>
         </button>
 
-        <!-- Fallback File Input: ถ่ายผ่านแอปกล้องมือถือโดยตรง -->
+        <!-- Fallback File Input -->
         <div class="pt-1">
           <input type="file" id="camera-file-input" accept="image/*" capture="environment" onchange="onSingleFileSelected(event)" class="hidden">
           <button onclick="document.getElementById('camera-file-input').click()" class="text-xs text-slate-400 hover:text-amber-300 underline underline-offset-4 transition">
@@ -284,8 +299,8 @@
       </div>
       
       <div class="space-y-1">
-        <h3 class="text-base font-bold text-white">กำลังวิเคราะห์รอยมาร์ก OMR จากภาพถ่าย...</h3>
-        <p id="omr-proc-text" class="text-xs text-slate-400">ตรวจจับพิกัดตาราง และวัดความเข้มเม็ดสีช่อง [ส] และ [ล]</p>
+        <h3 class="text-base font-bold text-white">กำลังวิเคราะห์ภาพ OMR และเชื่อมโยง Discord...</h3>
+        <p id="omr-proc-text" class="text-xs text-slate-400">ตรวจวัดความมืดของช่อง [○] และจับคู่ประวัติการลาใน Discord</p>
       </div>
       
       <!-- Progress Bar -->
@@ -303,7 +318,7 @@
       <div class="bg-gradient-to-r from-emerald-950/60 via-slate-900 to-emerald-950/60 border border-emerald-500/40 rounded-xl p-3.5 space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40">
-            <span>✓</span> วิเคราะห์ภาพสำเร็จ (OMR Detected)
+            <span>✓</span> ตรวจจับภาพและข้อมูล Discord สำเร็จ
           </span>
           <span id="review-date-badge" class="font-mono text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
             11/11
@@ -322,14 +337,14 @@
 
         <!-- OMR Detection Summary Badge -->
         <div id="omr-detection-summary-box" class="pt-1.5 border-t border-slate-800 text-[11px] text-amber-300 flex items-center gap-1.5">
-          <span>🎯</span> <span id="omr-summary-label">ตรวจพบรอยมาร์กมืด...</span>
+          <span>🎯</span> <span id="omr-summary-label">สรุปผลลัพธ์: กำลังประมวลผล...</span>
         </div>
       </div>
 
       <!-- พรีวิวรูปภาพพร้อม Bounding Box ไฮไลต์จุดที่ตรวจพบ -->
       <div class="space-y-1.5">
         <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
-          <span>ภาพถ่ายพร้อมกรอบวิเคราะห์ OMR:</span>
+          <span>ภาพถ่ายพร้อมกรอบการจำแนกสถานะ:</span>
           <span class="text-[10px] text-slate-400">แตะเพื่อขยายดูรูป</span>
         </div>
         
@@ -337,9 +352,9 @@
         <div onclick="openSingleImageModal()" class="w-full bg-slate-950 rounded-xl overflow-hidden border border-slate-700 cursor-zoom-in relative group flex items-center justify-center">
           <canvas id="review-canvas" class="w-full h-auto max-h-56 object-contain"></canvas>
           <div class="absolute bottom-0 inset-x-0 bg-black/80 px-2 py-1 text-center text-[10px] font-semibold text-slate-300 flex items-center justify-center gap-3">
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> มาปกติ</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> มาสาย [ส]</span>
-            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> ขอลา [ล]</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></span> มาปฏิบัติหน้าที่ (ฝนดำ)</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-500 inline-block"></span> มาสาย (ช่องว่าง)</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-sky-400 inline-block"></span> ขอลา (Discord)</span>
           </div>
         </div>
       </div>
@@ -351,7 +366,7 @@
           <div id="stat-total" class="text-lg font-bold text-white font-mono">0</div>
         </div>
         <div class="bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-2">
-          <div class="text-[10px] text-emerald-300">มาปกติ</div>
+          <div class="text-[10px] text-emerald-300">มาปฏิบัติหน้าที่</div>
           <div id="stat-present" class="text-lg font-bold text-emerald-400 font-mono">0</div>
         </div>
         <div class="bg-amber-500/10 border border-amber-500/30 rounded-xl p-2">
@@ -359,12 +374,12 @@
           <div id="stat-late" class="text-lg font-bold text-amber-400 font-mono">0</div>
         </div>
         <div class="bg-sky-500/10 border border-sky-500/30 rounded-xl p-2">
-          <div class="text-[10px] text-sky-300">ขอลา (ล)</div>
+          <div class="text-[10px] text-sky-300">ขอลา (Discord)</div>
           <div id="stat-leave" class="text-lg font-bold text-sky-400 font-mono">0</div>
         </div>
       </div>
 
-      <!-- รายชื่อสารวัตรประจำผลัด (แสดงสถานะตามที่ OMR ตรวจพบ + แตะสลับได้) -->
+      <!-- รายชื่อสารวัตรประจำผลัด (แสดงสถานะตามที่ OMR + Discord ตรวจพบ) -->
       <div class="space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span class="font-bold text-slate-200">ผลวิเคราะห์รายบุคคล (ตรวจสอบ/ปรับแก้ได้):</span>
@@ -411,7 +426,7 @@
           <span id="succ-shift" class="font-bold text-white">--</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-400">จำนวนมาปฏิบัติหน้าที่:</span>
+          <span class="text-slate-400">มาปฏิบัติหน้าที่:</span>
           <span id="succ-present" class="font-bold text-emerald-400">-- นาย</span>
         </div>
         <div class="flex justify-between">
@@ -419,7 +434,7 @@
           <span id="succ-late" class="font-bold text-amber-400">-- นาย</span>
         </div>
         <div class="flex justify-between">
-          <span class="text-slate-400">ขอลา:</span>
+          <span class="text-slate-400">ขอลา (Discord):</span>
           <span id="succ-leave" class="font-bold text-sky-400">-- นาย</span>
         </div>
         <div class="flex justify-between border-t border-slate-700 pt-1">
@@ -451,7 +466,7 @@
   </div>
 
   <!-- ========================================================== -->
-  <!-- ⚙️ JAVASCRIPT LOGIC & COMPUTER VISION OMR ENGINE            -->
+  <!-- ⚙️ JAVASCRIPT LOGIC & DISCORD INTEGRATED OMR ENGINE         -->
   <!-- ========================================================== -->
   <script>
     // ----------------------------------------------------------
@@ -461,6 +476,7 @@
     let singleCapturedImage = null; // Single base64 string
     let annotatedDataUrl = null; // Image with OMR boxes drawn
     let activeRoster = []; // Member list with statuses
+    let discordLeavesMap = {}; // Map of duty_id -> leave info from Discord
     let currentShiftCode = 'W';
     let currentTargetCol = '11/11';
     let todayInfo = {};
@@ -550,7 +566,6 @@
       document.getElementById('badge-today-tag').textContent = `วันนี้: ${dayNames[dayOfWeek].replace('วัน', '')}. ${mmdd}`;
       currentTargetCol = mmdd;
 
-      // เลือกผลัดเวรของวันนี้เป็นค่าเริ่มต้น
       selectShift(defaultShift);
     }
 
@@ -575,9 +590,9 @@
     }
 
     // ----------------------------------------------------------
-    // 3. SHIFT & DATE SELECTION (ขั้นตอนที่ 1)
+    // 3. SHIFT SELECTION & DISCORD LEAVES FETCH
     // ----------------------------------------------------------
-    function selectShift(shiftKey) {
+    async function selectShift(shiftKey) {
       currentShiftCode = shiftKey;
 
       document.querySelectorAll('.day-chip').forEach(el => {
@@ -609,12 +624,14 @@
       }
 
       updateColHighlights();
-      loadRosterForShift(shiftKey);
+      await loadRosterForShift(shiftKey);
+      await fetchDiscordLeaves(shiftKey);
     }
 
     function onDateColChanged() {
       currentTargetCol = document.getElementById('date-col-select').value;
       updateColHighlights();
+      fetchDiscordLeaves(currentShiftCode);
     }
 
     function updateColHighlights() {
@@ -623,6 +640,59 @@
       document.getElementById('cam-col-badge').textContent = currentTargetCol;
       document.getElementById('hud-date-text').textContent = currentTargetCol;
       document.getElementById('hud-col-text').textContent = `คอลัมน์ ${currentTargetCol} ▶`;
+    }
+
+    // ดึงข้อมูลการแจ้งลาจากตาราง leave_requests ใน Supabase
+    async function fetchDiscordLeaves(shiftKey) {
+      const banner = document.getElementById('discord-leave-detail-list');
+      const badge = document.getElementById('discord-leave-count-badge');
+      discordLeavesMap = {};
+
+      try {
+        const res = await fetch(`/api/leaves?shift=${shiftKey}`);
+        const result = await res.json();
+        
+        let leaves = [];
+        if (result && result.success && Array.isArray(result.data)) {
+          leaves = result.data;
+        }
+
+        // กรองเฉพาะการลาของวันที่เลือก (หรือรายการลาล่าสุด)
+        const matchedLeaves = leaves.filter(l => {
+          if (!l.leave_date) return true;
+          return l.leave_date === todayInfo.dateIso || l.leave_date.includes(todayInfo.mmdd);
+        });
+
+        matchedLeaves.forEach(l => {
+          const dutyId = (l.members && l.members.duty_id) ? l.members.duty_id : l.duty_id;
+          if (dutyId) {
+            discordLeavesMap[dutyId] = {
+              leave_type: l.leave_type || 'ขอลา',
+              reason: l.reason || 'แจ้งลาผ่านระบบ Discord',
+              name: l.members ? `${l.members.first_name} ${l.members.last_name}` : ''
+            };
+          }
+        });
+
+        const leaveCount = Object.keys(discordLeavesMap).length;
+        badge.textContent = `${leaveCount} รายการ`;
+
+        if (leaveCount === 0) {
+          banner.innerHTML = `<span class="text-slate-400">ไม่มีสมาชิกแจ้งลาในรอบเวรวันนี้ (ทุกคนต้องมาเข้าเวร)</span>`;
+        } else {
+          banner.innerHTML = Object.entries(discordLeavesMap).map(([id, info]) => `
+            <div class="flex items-center gap-1.5 text-sky-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+              <strong class="font-mono text-amber-300">[${id}]</strong> ${info.name}: 
+              <span class="text-white">${info.leave_type}</span>
+            </div>
+          `).join('');
+        }
+
+      } catch (err) {
+        badge.textContent = '0 รายการ';
+        banner.innerHTML = `<span class="text-slate-500">เชื่อมต่อ Discord ฐานข้อมูลออฟไลน์</span>`;
+      }
     }
 
     // ----------------------------------------------------------
@@ -686,7 +756,7 @@
     }
 
     // ----------------------------------------------------------
-    // 5. CAPTURE & PROCESS VIA COMPUTER VISION OMR ENGINE
+    // 5. CAPTURE & PROCESS VIA DISCORD-INTEGRATED OMR ENGINE
     // ----------------------------------------------------------
     async function triggerSingleCapture() {
       const video = document.getElementById('camera-stream');
@@ -701,12 +771,10 @@
       btn.disabled = true;
       btn.innerHTML = `<span>⏳</span><span>กำลังบันทึกภาพ...</span>`;
 
-      // เอฟเฟกต์แฟลชและสั่น
       flash.style.opacity = '0.9';
       if (navigator.vibrate) navigator.vibrate(60);
       setTimeout(() => { flash.style.opacity = '0'; }, 120);
 
-      // สร้างภาพจาก Canvas
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth || 1280;
       canvas.height = video.videoHeight || 720;
@@ -719,8 +787,7 @@
         currentStream = null;
       }
 
-      // เริ่มการวิเคราะห์ OMR
-      await runOmrVisionAnalysis(singleCapturedImage);
+      await runDiscordIntegratedOmr(singleCapturedImage);
     }
 
     function onSingleFileSelected(e) {
@@ -730,22 +797,20 @@
       const reader = new FileReader();
       reader.onload = async (evt) => {
         singleCapturedImage = evt.target.result;
-        await runOmrVisionAnalysis(singleCapturedImage);
+        await runDiscordIntegratedOmr(singleCapturedImage);
       };
       reader.readAsDataURL(file);
     }
 
     // ----------------------------------------------------------
-    // 6. REAL COMPUTER VISION OMR ANALYSIS ENGINE (Client-Side)
+    // 6. REAL OMR FOR "มา" [○] + DISCORD LEAVE RECONCILIATION
     // ----------------------------------------------------------
-    async function runOmrVisionAnalysis(imageBase64) {
-      // สลับหน้าจอไปแสดงสถานะกำลังวิเคราะห์ OMR
+    async function runDiscordIntegratedOmr(imageBase64) {
       document.getElementById('step-camera-card').classList.add('hidden');
       document.getElementById('step-select-date-card').classList.add('hidden');
       const proc = document.getElementById('step-processing-omr');
       proc.classList.remove('hidden');
 
-      // โหลดรูปภาพเข้า HTML Image object เพื่อดึงเม็ดสี
       const img = new Image();
       img.src = imageBase64;
       await new Promise(resolve => { img.onload = resolve; });
@@ -753,7 +818,6 @@
       const w = img.naturalWidth || img.width;
       const h = img.naturalHeight || img.height;
 
-      // สร้าง Canvas สำหรับอ่านเม็ดสี
       const offCanvas = document.createElement('canvas');
       offCanvas.width = w;
       offCanvas.height = h;
@@ -762,7 +826,7 @@
       const imgData = offCtx.getImageData(0, 0, w, h);
       const pixels = imgData.data;
 
-      // แปลงเป็น Grayscale
+      // Grayscale
       const gray = new Uint8Array(w * h);
       for (let i = 0; i < pixels.length; i += 4) {
         gray[i / 4] = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
@@ -773,14 +837,18 @@
         return gray[y * w + x];
       }
 
-      function analyzeBox(x1, y1, x2, y2) {
+      function analyzeCircle(cx, cy, radius) {
         let sum = 0, count = 0, darkCount = 0;
-        for (let py = Math.max(0, y1); py < Math.min(h, y2); py++) {
-          for (let px = Math.max(0, x1); px < Math.min(w, x2); px++) {
-            const val = getPixel(px, py);
-            sum += val;
-            count++;
-            if (val < 135) darkCount++;
+        const rSq = radius * radius;
+        for (let py = Math.max(0, cy - radius); py <= Math.min(h - 1, cy + radius); py++) {
+          for (let px = Math.max(0, cx - radius); px <= Math.min(w - 1, cx + radius); px++) {
+            const distSq = (px - cx) * (px - cx) + (py - cy) * (py - cy);
+            if (distSq <= rSq) {
+              const val = getPixel(px, py);
+              sum += val;
+              count++;
+              if (val < 135) darkCount++;
+            }
           }
         }
         return {
@@ -790,97 +858,102 @@
       }
 
       const numRows = activeRoster.length || 6;
-
-      // ตรวจหาขอบตารางอัตโนมัติ (Horizontal & Vertical Scans)
-      // โซนของตารางมักเริ่มต้นประมาณ 25% - 35% จากบน และกินพื้นที่ลงมา
       let yStart = Math.round(h * 0.28);
       let yEnd = Math.round(h * 0.94);
       let rowH = (yEnd - yStart) / numRows;
 
-      // คอลัมน์เป้าหมาย:
-      // หากผู้ใช้เล็งตาม HUD คอลัมน์วันที่แรกจะอยู่ประมาณ x = 44% ถึง 53% ของความกว้างภาพ
+      // พิกัดคอลัมน์ของวันนี้
       let colX1 = Math.round(w * 0.44);
       let colX2 = Math.round(w * 0.53);
       let colMid = Math.round((colX1 + colX2) / 2);
 
-      // สร้าง Canvas ไฮไลต์ผลการตรวจจับเพื่อพรีวิวให้ผู้ใช้เห็น
+      // Canvas พรีวิวผลวิเคราะห์
       const annotCanvas = document.getElementById('review-canvas');
       annotCanvas.width = w;
       annotCanvas.height = h;
       const annotCtx = annotCanvas.getContext('2d');
       annotCtx.drawImage(img, 0, 0, w, h);
 
-      let detectedLateCount = 0;
-      let detectedLeaveCount = 0;
-      let detectedPresentCount = 0;
+      let presentCount = 0;
+      let lateCount = 0;
+      let leaveCount = 0;
 
-      // วนลูปวิเคราะห์รอยมาร์กของสารวัตรแต่ละคน
       activeRoster.forEach((m, r) => {
         const rY1 = Math.round(yStart + r * rowH);
         const rY2 = Math.round(yStart + (r + 1) * rowH);
+        const cellCenterY = Math.round((rY1 + rY2) / 2);
+        const cellRadius = Math.max(5, Math.round(rowH * 0.22));
 
-        const padY1 = rY1 + Math.max(2, Math.round(rowH * 0.16));
-        const padY2 = rY2 - Math.max(2, Math.round(rowH * 0.16));
+        // ตรวจสอบความมืดภายในวงกลม [○] (ม)
+        const circleMetrics = analyzeCircle(colMid, cellCenterY, cellRadius);
+        const isCircleFilled = (circleMetrics.darkRatio > 0.28 || circleMetrics.mean < 145);
 
-        // กล่อง [ส] และ [ล]
-        const boxS = analyzeBox(colX1 + 2, padY1, colMid - 2, padY2);
-        const boxL = analyzeBox(colMid + 2, padY1, colX2 - 2, padY2);
+        const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
 
         let finalStatus = 'PRESENT';
-        let confidenceNote = '';
+        let note = '';
 
-        // กฎเกณฑ์จำแนก OMR:
-        // ถ้าช่อง [ส] มืดกว่าชัดเจน (darkRatio > 0.28 หรือ mean ต่ำกว่าอย่างมีนัยสำคัญ)
-        if ((boxS.darkRatio > 0.26 && boxS.darkRatio > boxL.darkRatio + 0.15) || 
-            (boxL.mean - boxS.mean > 35 && boxS.mean < 155)) {
-          finalStatus = 'LATE';
-          confidenceNote = 'พบรอยมาร์กสีมืดที่ช่อง [ส]';
-          detectedLateCount++;
+        if (isCircleFilled) {
+          // มีรอยฝนดำในกระดาษ -> ถือว่ามาปฏิบัติหน้าที่
+          finalStatus = 'PRESENT';
+          presentCount++;
 
-          // วาดกรอบสีส้ม-ทองล้อมช่อง [ส] บนภาพพรีวิว
-          annotCtx.strokeStyle = '#f59e0b';
+          if (hasDiscordLeave) {
+            note = '✓ ฝนช่อง "ม" (มาเข้าเวรจริง แม้มีประวัติแจ้งลาใน Discord)';
+          } else {
+            note = '✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่)';
+          }
+
+          // วาดกรอบสีเขียวล้อมวงกลม
+          annotCtx.strokeStyle = '#22c55e';
           annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
-          annotCtx.fillStyle = 'rgba(245, 158, 11, 0.25)';
-          annotCtx.fillRect(colX1, padY1, colMid - colX1, padY2 - padY1);
-          annotCtx.strokeRect(colX1, padY1, colMid - colX1, padY2 - padY1);
-
-        } else if ((boxL.darkRatio > 0.26 && boxL.darkRatio > boxS.darkRatio + 0.15) || 
-                   (boxS.mean - boxL.mean > 35 && boxL.mean < 155)) {
-          finalStatus = 'LEAVE';
-          confidenceNote = 'พบรอยมาร์กสีมืดที่ช่อง [ล]';
-          detectedLeaveCount++;
-
-          // วาดกรอบสีฟ้าล้อมช่อง [ล] บนภาพพรีวิว
-          annotCtx.strokeStyle = '#38bdf8';
-          annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
-          annotCtx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-          annotCtx.fillRect(colMid, padY1, colX2 - colMid, padY2 - padY1);
-          annotCtx.strokeRect(colMid, padY1, colX2 - colMid, padY2 - padY1);
+          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.25)';
+          annotCtx.beginPath();
+          annotCtx.arc(colMid, cellCenterY, cellRadius + 2, 0, 2 * Math.PI);
+          annotCtx.fill();
+          annotCtx.stroke();
 
         } else {
-          finalStatus = 'PRESENT';
-          confidenceNote = 'ช่องว่าง (ไม่พบรอยมาร์ก)';
-          detectedPresentCount++;
+          // ช่องว่างเปล่า (ไม่ได้ฝน)
+          if (hasDiscordLeave) {
+            // แจ้งลาใน Discord -> ปรับเป็น "ขอลา"
+            finalStatus = 'LEAVE';
+            leaveCount++;
+            note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type})`;
 
-          // วาดกรอบสีเขียวล้อมช่องปกติ
-          annotCtx.strokeStyle = 'rgba(34, 197, 94, 0.6)';
-          annotCtx.lineWidth = Math.max(1, Math.round(w * 0.003));
-          annotCtx.strokeRect(colX1, padY1, colX2 - colX1, padY2 - padY1);
+            // วาดกรอบสีฟ้าล้อมช่อง
+            annotCtx.strokeStyle = '#38bdf8';
+            annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
+            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.2)';
+            annotCtx.strokeRect(colX1, rY1 + 2, colX2 - colX1, rowH - 4);
+
+          } else {
+            // ไม่มีใบลา และช่องว่างเปล่า -> ปรับเป็น "มาสาย"
+            finalStatus = 'LATE';
+            lateCount++;
+            note = '⚡ ช่องว่างเปล่า (ไม่มีรอยฝนและไม่มีใบลาใน Discord)';
+
+            // วาดกรอบเส้นประสีส้มเตือน
+            annotCtx.strokeStyle = '#f59e0b';
+            annotCtx.lineWidth = Math.max(2, Math.round(w * 0.005));
+            annotCtx.setLineDash([4, 4]);
+            annotCtx.strokeRect(colX1, rY1 + 2, colX2 - colX1, rowH - 4);
+            annotCtx.setLineDash([]);
+          }
         }
 
         m.status = finalStatus;
-        m.omr_note = confidenceNote;
+        m.omr_note = note;
+        m.has_discord_leave = hasDiscordLeave;
         m.was_edited = false;
       });
 
       annotatedDataUrl = annotCanvas.toDataURL('image/jpeg', 0.90);
 
-      // หน่วงเวลา 0.6 วินาทีเพื่อให้เห็นกระบวนการวิเคราะห์
       await new Promise(r => setTimeout(r, 600));
       proc.classList.add('hidden');
 
-      // แสดงหน้าตรวจสอบข้อมูลพร้อมผลการวิเคราะห์
-      showReviewStep(detectedPresentCount, detectedLateCount, detectedLeaveCount);
+      showReviewStep(presentCount, lateCount, leaveCount);
     }
 
     // ----------------------------------------------------------
@@ -890,14 +963,12 @@
       const reviewCard = document.getElementById('step-review-card');
       reviewCard.classList.remove('hidden');
 
-      // อัปเดตข้อมูลวันที่และผลัดเวร
       document.getElementById('review-date-badge').textContent = currentTargetCol;
       document.getElementById('review-full-date-text').textContent = `${todayInfo.fullThai} (คอลัมน์ ${currentTargetCol})`;
       document.getElementById('review-shift-text').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
 
-      // ป้ายแจ้งเตือนสรุปผลลัพธ์ OMR
       const summaryLabel = document.getElementById('omr-summary-label');
-      summaryLabel.innerHTML = `ตรวจพบรอยมาร์กสีมืด: <strong>มาสาย ${lateCnt} นาย</strong>, <strong>ขอลา ${leaveCnt} นาย</strong>, <strong>มาปกติ ${presentCnt} นาย</strong>`;
+      summaryLabel.innerHTML = `ผลวิเคราะห์: <strong>มา ${presentCnt} นาย</strong>, <strong>สาย ${lateCnt} นาย (ช่องว่าง)</strong>, <strong>ลา ${leaveCnt} นาย (Discord)</strong>`;
 
       renderRosterList();
     }
@@ -938,20 +1009,22 @@
         const isPresent = m.status === 'PRESENT';
         const isLate = m.status === 'LATE';
         const isLeave = m.status === 'LEAVE';
+        const isAbsent = m.status === 'ABSENT';
 
-        // ป้ายระบุผลการวิเคราะห์ OMR
-        let omrBadge = '';
-        if (isLate) {
-          omrBadge = `<span class="text-[10px] text-amber-400 font-semibold flex items-center gap-1"><span>⚡</span> รอยมาร์กดำที่ช่อง [ส] (มาสาย)</span>`;
+        let badge = '';
+        if (isPresent) {
+          badge = `<span class="text-[10px] text-emerald-400 font-semibold flex items-center gap-1"><span>✓</span> ${m.omr_note || 'มาปฏิบัติหน้าที่'}</span>`;
         } else if (isLeave) {
-          omrBadge = `<span class="text-[10px] text-sky-400 font-semibold flex items-center gap-1"><span>📝</span> รอยมาร์กดำที่ช่อง [ล] (ขอลา)</span>`;
-        } else {
-          omrBadge = `<span class="text-[10px] text-emerald-400 font-normal">✓ ไม่พบรอยมาร์ก (มาปกติ)</span>`;
+          badge = `<span class="text-[10px] text-sky-400 font-semibold flex items-center gap-1"><span>📝</span> ${m.omr_note || 'แจ้งลาผ่าน Discord'}</span>`;
+        } else if (isLate) {
+          badge = `<span class="text-[10px] text-amber-400 font-semibold flex items-center gap-1"><span>⚡</span> ${m.omr_note || 'ช่องว่างเปล่า (มาสาย)'}</span>`;
+        } else if (isAbsent) {
+          badge = `<span class="text-[10px] text-red-400 font-semibold flex items-center gap-1"><span>❌</span> ขาดเวร</span>`;
         }
 
         return `
-          <div class="p-2.5 rounded-xl bg-slate-800/80 border ${isLate ? 'border-amber-500/40 bg-amber-500/5' : (isLeave ? 'border-sky-500/40 bg-sky-500/5' : 'border-slate-700')} flex items-center justify-between gap-2 text-xs">
-            <!-- Member Info & OMR Badge -->
+          <div class="p-2.5 rounded-xl bg-slate-800/80 border ${isPresent ? 'border-emerald-500/30 bg-emerald-500/5' : (isLeave ? 'border-sky-500/30 bg-sky-500/5' : (isLate ? 'border-amber-500/30 bg-amber-500/5' : 'border-red-500/30 bg-red-500/5'))} flex items-center justify-between gap-2 text-xs">
+            <!-- Member Info & Note -->
             <div class="min-w-0 flex-1">
               <div class="flex items-center gap-1.5 font-bold text-white truncate">
                 <span class="font-mono text-amber-300">[${m.duty_id}]</span>
@@ -963,20 +1036,23 @@
                 <span class="font-mono font-semibold text-slate-200">${m.class_room}</span>
               </div>
               <div class="mt-1">
-                ${omrBadge}
+                ${badge}
               </div>
             </div>
 
-            <!-- Status Buttons: [มา] [สาย] [ลา] -->
+            <!-- Status Buttons: [มา] [สาย] [ลา] [ขาด] -->
             <div class="flex items-center gap-1 shrink-0">
-              <button onclick="setMemberStatus(${idx}, 'PRESENT')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isPresent ? 'bg-emerald-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'PRESENT')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isPresent ? 'bg-emerald-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 มา
               </button>
-              <button onclick="setMemberStatus(${idx}, 'LATE')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isLate ? 'bg-amber-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'LATE')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isLate ? 'bg-amber-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 สาย
               </button>
-              <button onclick="setMemberStatus(${idx}, 'LEAVE')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isLeave ? 'bg-sky-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'LEAVE')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isLeave ? 'bg-sky-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 ลา
+              </button>
+              <button onclick="setMemberStatus(${idx}, 'ABSENT')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isAbsent ? 'bg-red-500 text-white shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+                ขาด
               </button>
             </div>
           </div>
@@ -1019,7 +1095,7 @@
         quarter: 1,
         duty_date: todayInfo.dateIso,
         week_index: document.getElementById('date-col-select').selectedIndex,
-        scanned_by: 'หัวหน้าเวร (OMR Vision)',
+        scanned_by: 'หัวหน้าเวร (Discord OMR)',
         image_base64: annotatedDataUrl || singleCapturedImage || '',
         records: activeRoster.map(m => ({
           duty_id: m.duty_id,

@@ -190,11 +190,16 @@ app.get('/api/config/supabase-env', (req, res) => {
 // -------------------------------------------------------------
 app.get('/api/leaves', async (req, res) => {
   try {
-    const { data, error } = await supabase
+    const { date, shift } = req.query;
+    let query = supabase
       .from('leave_requests')
       .select('*, members(first_name, last_name, nickname, duty_id, profile_image_url)')
       .order('created_at', { ascending: false });
 
+    if (date) query = query.eq('leave_date', date);
+    if (shift) query = query.eq('duty_day', shift);
+
+    const { data, error } = await query;
     if (error) throw error;
     res.json({ success: true, data: data || [] });
   } catch (err) {

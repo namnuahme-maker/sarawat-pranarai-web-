@@ -166,46 +166,33 @@
       background-color: #e2e8f0;
     }
 
-    /* OMR Micro-Checkboxes: [ ส ] และ [ ล ] */
-    .omr-cell-pair {
+    /* OMR Single Circle: [ ○ ] (ม) มาปฏิบัติหน้าที่ */
+    .omr-circle {
+      width: 15px;
+      height: 15px;
+      border: 1.5px solid #475569;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 2px;
-      width: 100%;
-      height: 100%;
-    }
-    .omr-box {
-      width: 13px;
-      height: 19px;
-      border: 1px solid #64748b;
-      border-radius: 2px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 7pt;
+      font-size: 7.5pt;
       font-family: 'Prompt', sans-serif;
       font-weight: 700;
-      color: #94a3b8;
+      color: #475569;
       cursor: pointer;
       user-select: none;
       background: #ffffff;
-      position: relative;
+      margin: 0 auto;
       transition: all 0.12s ease;
     }
-    .omr-box:hover {
-      border-color: #1e3a8a;
-      box-shadow: 0 0 0 1px rgba(30, 58, 138, 0.3);
+    .omr-circle:hover {
+      border-color: #0f172a;
+      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
     }
-    .omr-box.marked-check {
-      background-color: #1e3a8a !important;
+    .omr-circle.marked-present {
+      background-color: #0f172a !important;
       color: #ffffff !important;
-      border-color: #1e3a8a !important;
-    }
-    .omr-box.marked-crossed {
-      background-color: #000000 !important;
-      color: #ffffff !important;
-      border-color: #000000 !important;
+      border-color: #0f172a !important;
     }
 
     /* Sign-off footer */
@@ -449,7 +436,7 @@
           <div>
             <span><strong>รอบเวร:</strong> <span id="meta-shift-text">เวรวันจันทร์ (M)</span></span>
             <span style="margin-left: 14px;"><strong>จำนวนสมาชิกในเวร:</strong> <span id="meta-count-text">10 นาย</span></span>
-            <span style="margin-left: 14px; color: #047857; font-size: 8pt; font-weight: 600;">* ค่าเริ่มต้น: มาปฏิบัติหน้าที่ (Default) | ติ๊กเฉพาะ: [ส=สาย] [ล=ลา] *</span>
+            <span style="margin-left: 14px; color: #047857; font-size: 8pt; font-weight: 600;">* ฝนดำในวงกลม [○] (ม) = มาปฏิบัติหน้าที่ | ช่องว่าง = มาสาย (ส) | การลาเวรให้แจ้งผ่านระบบ Discord *</span>
           </div>
 
           <!-- Machine QR Session Anchor (Compact URL) -->
@@ -704,16 +691,9 @@
         let dateCells = '';
         dates12.forEach((dStr, wIdx) => {
           dateCells += `
-            <td style="padding: 1px;">
-              <div class="omr-cell-pair">
-                <!-- Checkbox: สาย [ส] -->
-                <div class="omr-box" data-duty="${m.duty_id}" data-col="${wIdx}" data-type="LATE" onclick="toggleMicroOmr(this)" title="${m.duty_id} วันที่ ${dStr}: มาสาย (ส)">
-                  ส
-                </div>
-                <!-- Checkbox: ลา [ล] -->
-                <div class="omr-box" data-duty="${m.duty_id}" data-col="${wIdx}" data-type="LEAVE" onclick="toggleMicroOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ลาเวร (ล)">
-                  ล
-                </div>
+            <td style="padding: 2px 1px; text-align: center; vertical-align: middle;">
+              <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
+                ม
               </div>
             </td>
           `;
@@ -732,51 +712,26 @@
       }).join('');
     }
 
-    // Interactive OMR Marking
-    // Click 1: marked-check (สาย หรือ ลา)
-    // Click 2: marked-crossed (ระบายทึบดำ ขาดเวร / ขีดฆ่า)
-    // Click 3: clear (ปล่อยว่าง = มาปกติ Default)
-    function toggleMicroOmr(boxEl) {
-      const cell = boxEl.closest('.omr-cell-pair');
-      const otherBox = cell.querySelector('.omr-box:not([data-type="' + boxEl.dataset.type + '"])');
-
-      if (boxEl.classList.contains('marked-check')) {
-        boxEl.classList.remove('marked-check');
-        boxEl.classList.add('marked-crossed');
-      } else if (boxEl.classList.contains('marked-crossed')) {
-        boxEl.classList.remove('marked-crossed');
-      } else {
-        if (otherBox) {
-          otherBox.classList.remove('marked-check');
-          otherBox.classList.remove('marked-crossed');
-        }
-        boxEl.classList.add('marked-check');
-      }
+    // Interactive Single OMR Circle Marking:
+    // Click: toggle marked-present (ฝนดำ = มาปฏิบัติหน้าที่ / ปล่อยว่าง = มาสาย)
+    function toggleSingleOmr(circleEl) {
+      circleEl.classList.toggle('marked-present');
     }
 
-    // Simulate occasional late or leave
+    // Simulate marking: 90% present, 10% empty (late)
     function simulateQuarter() {
       clearAllMarks();
-      const cells = document.querySelectorAll('.omr-cell-pair');
-      cells.forEach(c => {
-        const rand = Math.random();
-        if (rand < 0.05) {
-          // 5% chance of Late
-          c.querySelector('[data-type="LATE"]').classList.add('marked-check');
-        } else if (rand < 0.08) {
-          // 3% chance of Leave
-          c.querySelector('[data-type="LEAVE"]').classList.add('marked-check');
-        } else if (rand < 0.09) {
-          // 1% chance of Absent (solid black fill)
-          c.querySelector('[data-type="LATE"]').classList.add('marked-crossed');
+      const circles = document.querySelectorAll('.omr-circle');
+      circles.forEach(c => {
+        if (Math.random() > 0.12) {
+          c.classList.add('marked-present');
         }
       });
     }
 
     function clearAllMarks() {
-      document.querySelectorAll('.omr-box').forEach(b => {
-        b.classList.remove('marked-check');
-        b.classList.remove('marked-crossed');
+      document.querySelectorAll('.omr-circle').forEach(c => {
+        c.classList.remove('marked-present');
       });
     }
 
