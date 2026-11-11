@@ -1338,6 +1338,13 @@ app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
 });
 
 // -------------------------------------------------------------
+// 7.2.2 หน้าแบบฟอร์มใบเช็คชื่อ A4 มาตรฐาน AI/OMR (/attendance-sheet, /print-attendance)
+// -------------------------------------------------------------
+app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
+});
+
+// -------------------------------------------------------------
 // 7.3 หน้าเว็บ Modern SaaS Landing Page (/, /landing)
 // -------------------------------------------------------------
 app.get(['/', '/landing', '/landing.html'], (req, res) => {

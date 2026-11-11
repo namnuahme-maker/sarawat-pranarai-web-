@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>แบบบันทึกการปฏิบัติหน้าที่ประจำวัน สารวัตรนักเรียน // SARAWAT A4 OMR</title>
+
+  <!-- Google Fonts: Sarabun & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600;700&family=Prompt:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <!-- QRCode.js Library -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+  <style>
+    /* ========================================================== */
+    /* 📄 STRICT A4 PRINT RULES (ISO 216 STANDARD: 210 x 297 mm)  */
+    /* ========================================================== */
+    @page {
+      size: A4 portrait;
+      margin: 10mm 12mm 10mm 12mm;
+    }
+
+    * {
+      box-sizing: border-box;
+      -webkit-print-color-adjust: exact !important;
+      print-color-adjust: exact !important;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #0f172a;
+      color: #0f172a;
+      font-family: 'Sarabun', 'Prompt', sans-serif;
+      font-size: 11pt;
+      line-height: 1.3;
+    }
+
+    /* Screen Wrapper */
+    .screen-wrapper {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px;
+    }
+
+    /* A4 Page Container on Screen */
+    .a4-sheet {
+      width: 210mm;
+      min-height: 297mm;
+      padding: 12mm 14mm;
+      background: #ffffff;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+      border-radius: 4px;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    /* Corner Fiducial Markers for Computer Vision */
+    .fiducial-marker {
+      position: absolute;
+      width: 14mm;
+      height: 14mm;
+      pointer-events: none;
+    }
+    .fiducial-tl { top: 6mm; left: 6mm; }
+    .fiducial-tr { top: 6mm; right: 6mm; }
+    .fiducial-bl { bottom: 6mm; left: 6mm; }
+    .fiducial-br { bottom: 6mm; right: 6mm; }
+
+    /* Crosshair Graphic inside marker */
+    .crosshair {
+      width: 100%;
+      height: 100%;
+      position: relative;
+    }
+    .crosshair::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: #000000;
+      transform: translateY(-50%);
+    }
+    .crosshair::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #000000;
+      transform: translateX(-50%);
+    }
+    .corner-target {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 6mm;
+      height: 6mm;
+      background: #000000;
+      transform: translate(-50%, -50%);
+    }
+
+    /* Machine-Readable Table Styles */
+    table.attendance-table {
+      width: 100%;
+      border-collapse: collapse;
+      border: 1.5px solid #000000;
+      margin-top: 6px;
+      font-size: 9pt;
+    }
+
+    table.attendance-table th {
+      background-color: #1e293b;
+      color: #ffffff;
+      border: 1px solid #334155;
+      padding: 5px 3px;
+      font-weight: 600;
+      text-align: center;
+      font-family: 'Prompt', 'Sarabun', sans-serif;
+    }
+
+    table.attendance-table td {
+      border: 1px solid #cbd5e1;
+      padding: 4px 4px;
+      vertical-align: middle;
+    }
+
+    /* Zebra Striping (Prevents Row-Slippage in AI Vision) */
+    table.attendance-table tr.row-even {
+      background-color: #ffffff;
+    }
+    table.attendance-table tr.row-odd {
+      background-color: #f1f5f9;
+    }
+
+    /* OMR Checkbox Container */
+    .omr-box {
+      width: 24px;
+      height: 24px;
+      border: 1.5px solid #0f172a;
+      border-radius: 3px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      background: #ffffff;
+    }
+
+    /* Faint Watermark Binding Code inside Checkbox */
+    .omr-box-watermark {
+      font-size: 7px;
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      color: #94a3b8;
+      text-align: center;
+      line-height: 1;
+      letter-spacing: -0.5px;
+      user-select: none;
+    }
+
+    /* Duty ID Monospace Style */
+    .duty-code {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
+      font-size: 10pt;
+      color: #0f172a;
+    }
+
+    /* Print Overrides */
+    @media print {
+      body {
+        background: transparent !important;
+      }
+      .screen-wrapper {
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .a4-sheet {
+        width: 100% !important;
+        min-height: 100% !important;
+        padding: 0 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================== -->
+  <!-- 🖥️ TOP CONTROL TOOLBAR (SCREEN ONLY / HIDDEN ON PRINT)     -->
+  <!-- ========================================================== -->
+  <div class="no-print w-full bg-slate-900 border-b border-slate-800 text-white p-3.5 sticky top-0 z-50 shadow-xl">
+    <div class="max-w-5xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <a href="/" class="px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition flex items-center gap-1.5 border border-slate-700">
+          <span>←</span> ศูนย์บัญชาการ
+        </a>
+        <h1 class="text-xs sm:text-sm font-bold flex items-center gap-2 text-white">
+          <span>📋</span> แบบฟอร์มใบเช็คชื่อ A4 มาตรฐาน AI/OMR
+        </h1>
+      </div>
+
+      <div class="flex items-center gap-2 flex-wrap text-xs">
+        <!-- Shift Selector -->
+        <div class="flex items-center gap-1.5 bg-slate-800 rounded-lg px-2.5 py-1 border border-slate-700">
+          <span class="text-slate-400">เลือกกะเวร:</span>
+          <select id="select-shift" onchange="switchShift(this.value)" class="bg-transparent text-amber-400 font-bold outline-none cursor-pointer">
+            <option value="M" class="bg-slate-900 text-white">วันจันทร์ (M)</option>
+            <option value="T" class="bg-slate-900 text-white">วันอังคาร (T)</option>
+            <option value="W" class="bg-slate-900 text-white">วันพุธ (W)</option>
+            <option value="Ts" class="bg-slate-900 text-white">วันพฤหัสบดี (Ts)</option>
+            <option value="F" class="bg-slate-900 text-white">วันศุกร์ (F)</option>
+            <option value="S" class="bg-slate-900 text-white">เวรพิเศษเสาร์/กิจกรรม (S)</option>
+          </select>
+        </div>
+
+        <!-- Date Input -->
+        <input type="date" id="select-date" onchange="updateDate(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 outline-none text-xs font-mono">
+
+        <!-- Print Button -->
+        <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition">
+          <span>🖨️</span> สั่งพิมพ์เอกสาร A4
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 📄 PHYSICAL A4 SHEET WRAPPER                               -->
+  <!-- ========================================================== -->
+  <div class="screen-wrapper">
+    <div class="a4-sheet" id="printable-sheet">
+
+      <!-- 4 Corner Fiducial Alignment Markers for Computer Vision -->
+      <div class="fiducial-marker fiducial-tl"><div class="crosshair"><div class="corner-target"></div></div></div>
+      <div class="fiducial-marker fiducial-tr"><div class="crosshair"><div class="corner-target"></div></div></div>
+      <div class="fiducial-marker fiducial-bl"><div class="crosshair"><div class="corner-target"></div></div></div>
+      <div class="fiducial-marker fiducial-br"><div class="crosshair"><div class="corner-target"></div></div></div>
+
+      <!-- ========================================================== -->
+      <!-- 1. HEADER SECTION (METADATA & SESSION QR CODE)            -->
+      <!-- ========================================================== -->
+      <div>
+        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 2px solid #000000; padding-bottom: 8px;">
+          
+          <!-- Left: School & Marshall Emblems -->
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <img src="/assets/school_emblem.png" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราโรงเรียน">
+            <img src="/assets/logo.png" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราสารวัตร">
+            <div>
+              <h2 style="margin: 0; font-size: 13pt; font-weight: 700; color: #000000; line-height: 1.2;">
+                แบบบันทึกเวลาปฏิบัติหน้าที่สารวัตรนักเรียน
+              </h2>
+              <div style="font-size: 9.5pt; color: #334155; margin-top: 2px;">
+                กลุ่มงานสารวัตรนักเรียน • โรงเรียนพระนารายณ์ จังหวัดลพบุรี
+              </div>
+              <div style="font-size: 9pt; font-weight: 600; color: #1e3a8a; margin-top: 2px;" id="header-shift-title">
+                ผลัดปฏิบัติการ: [M] วันจันทร์ • ประจำวันที่ 12 พฤศจิกายน 2569
+              </div>
+            </div>
+          </div>
+
+          <!-- Right: Session Header QR Code (Machine Readable Session Anchor) -->
+          <div style="display: flex; flex-direction: column; align-items: center;">
+            <div style="border: 2px solid #000000; padding: 4px; background: #ffffff; border-radius: 4px;">
+              <div id="session-qrcode" style="width: 78px; height: 78px;"></div>
+            </div>
+            <div style="font-size: 7.5pt; font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #000000; margin-top: 2px;" id="qr-session-label">
+              M-20261112-Q12
+            </div>
+          </div>
+
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- 2. MACHINE-READABLE INSTRUCTION BOX                       -->
+        <!-- ========================================================== -->
+        <div style="background-color: #f8fafc; border: 1px dashed #475569; border-radius: 4px; padding: 5px 8px; margin-top: 6px; display: flex; align-items: center; justify-content: space-between; font-size: 8pt;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="font-weight: 700; color: #b91c1c;">คำชี้แจง:</span>
+            <span>ใช้ปากกาน้ำเงิน/ดำ ติ๊กเครื่องหมายถูก <b>(✔)</b> ในช่อง <b>[มา] [ลา]</b> หรือ <b>[ขาด]</b> | หากติ๊กผิด ให้ระบายทึบดำ <b>(■)</b> ทับช่องเดิม แล้วติ๊กเครื่องหมายถูกลงในช่องใหม่</span>
+          </div>
+          <div style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #475569; font-size: 7.5pt;">
+            OMR-VER: 1.2
+          </div>
+        </div>
+
+        <!-- ========================================================== -->
+        <!-- 3. ATTENDANCE ROSTER TABLE (ZEBRA STRIPED)                 -->
+        <!-- ========================================================== -->
+        <table class="attendance-table" id="roster-table">
+          <thead>
+            <tr>
+              <th style="width: 28px;">#</th>
+              <th style="width: 58px;">รหัสเวร</th>
+              <th style="text-align: left; padding-left: 8px;">ชื่อ - สกุล สารวัตรนักเรียน</th>
+              <th style="width: 60px;">ชื่อเล่น</th>
+              <th style="width: 80px;">ชั้น/ห้อง (เลขที่)</th>
+              <th style="width: 48px; background: #1e3a8a;">[ มา ]</th>
+              <th style="width: 48px; background: #92400e;">[ ลา ]</th>
+              <th style="width: 48px; background: #991b1b;">[ ขาด ]</th>
+              <th style="width: 72px;">เวลาปฏิบัติงาน</th>
+              <th style="width: 130px;">บันทึกเหตุการณ์ / หมายเหตุ</th>
+            </tr>
+          </thead>
+          <tbody id="table-body">
+            <!-- Rendered Dynamically by JS -->
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ========================================================== -->
+      <!-- 4. BOTTOM SUPERVISOR SIGN-OFF ROI BOXES & AUDIT STAMP     -->
+      <!-- ========================================================== -->
+      <div style="margin-top: 10px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+          
+          <!-- ROI: SUPERVISOR_SIGN (หัวหน้าเวร) -->
+          <div style="border: 1.5px solid #000000; border-radius: 4px; padding: 6px 10px; background: #ffffff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; font-size: 8pt; font-weight: 700;">
+              <span>1. ผู้ตรวจเช็ค: หัวหน้าเวรประจำวัน</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 7pt; color: #64748b;">ROI: SUPERVISOR_SIGN</span>
+            </div>
+            <div style="height: 38px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 85%; border-bottom: 1px dotted #64748b; text-align: center; font-size: 8.5pt; color: #64748b;">
+                (ลงลายมือชื่อหัวหน้าเวร)
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; color: #334155; margin-top: 4px;">
+              <span id="sign-supervisor-name">ชื่อ: ....................................................</span>
+              <span>เวลา: ..........:.......... น.</span>
+            </div>
+          </div>
+
+          <!-- ROI: ADVISOR_SIGN (ครูที่ปรึกษา) -->
+          <div style="border: 1.5px solid #000000; border-radius: 4px; padding: 6px 10px; background: #ffffff;">
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #cbd5e1; padding-bottom: 3px; font-size: 8pt; font-weight: 700;">
+              <span>2. ผู้รับรอง: ครูที่ปรึกษางานสารวัตรนักเรียน</span>
+              <span style="font-family: 'JetBrains Mono', monospace; font-size: 7pt; color: #64748b;">ROI: ADVISOR_SIGN</span>
+            </div>
+            <div style="height: 38px; display: flex; align-items: flex-end; justify-content: center;">
+              <div style="width: 85%; border-bottom: 1px dotted #64748b; text-align: center; font-size: 8.5pt; color: #64748b;">
+                (ลงลายมือชื่อครูที่ปรึกษา)
+              </div>
+            </div>
+            <div style="display: flex; justify-content: space-between; font-size: 7.5pt; color: #334155; margin-top: 4px;">
+              <span>ชื่อ: ....................................................</span>
+              <span>สถานะ: [ &nbsp; ] รับทราบผล</span>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- System Machine Stamp Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #94a3b8; padding-top: 4px; margin-top: 8px; font-size: 7pt; font-family: 'JetBrains Mono', monospace; color: #64748b;">
+          <span>SARAWAT PRANARAI OS // A4-OMR-HYBRID PROTOCOL</span>
+          <span>PAGE 1 OF 1 • 210 x 297 mm</span>
+          <span id="checksum-label">SHA256: FORM-M-VERIFIED</span>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 💻 SCRIPT LOGIC (QR CODE GENERATION & SHIFT ROSTER)        -->
+  <!-- ========================================================== -->
+  <script>
+    // Sample / Verified Mock Roster Data for 6 Shifts
+    const ROSTER_DATABASE = {
+      M: [
+        { duty_id: "M1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
+        { duty_id: "M2", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012" },
+        { duty_id: "M3", name: "นายธนวัฒน์ แจ่มใส", nickname: "บอส", class_room: "ม.4/1", student_no: "70114" },
+        { duty_id: "M4", name: "เด็กชายจิรพัฒน์ รุ่งเรือง", nickname: "นนท์", class_room: "ม.3/2", student_no: "71205" },
+        { duty_id: "M5", name: "เด็กชายพงศกร สดใส", nickname: "ปัน", class_room: "ม.3/5", student_no: "71244" },
+        { duty_id: "M6", name: "นายภัทรดนัย บุญมี", nickname: "เบสท์", class_room: "ม.6/3", student_no: "68019" },
+        { duty_id: "M7", name: "เด็กชายวรพล มงคล", nickname: "ไอซ์", class_room: "ม.2/4", student_no: "72091" },
+        { duty_id: "M8", name: "นายศุภกร ยิ้มแย้ม", nickname: "โบ๊ท", class_room: "ม.5/9", student_no: "69201" },
+        { duty_id: "MS1", name: "นายวีรภัทร ชาญชัย", nickname: "วิน", class_room: "ม.5/1", student_no: "69002" },
+        { duty_id: "MS2", name: "เด็กชายชินดนัย แสงแก้ว", nickname: "ภูมิ", class_room: "ม.3/1", student_no: "71015" }
+      ],
+      T: [
+        { duty_id: "T1", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045", is_head: true },
+        { duty_id: "T2", name: "นายณัฐภัทร วัฒนา", nickname: "มิว", class_room: "ม.5/4", student_no: "69112" },
+        { duty_id: "T3", name: "เด็กชายรพีพงศ์ เลิศล้ำ", nickname: "ดิสดิส", class_room: "ม.3/3", student_no: "71155" },
+        { duty_id: "T4", name: "นายสรวิชญ์ เก่งกล้า", nickname: "แบงค์", class_room: "ม.5/8", student_no: "69255" },
+        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055" },
+        { duty_id: "TS2", name: "นายอภิสิทธิ์ ชัยชนะ", nickname: "เบสท์", class_room: "ม.4/5", student_no: "70211" }
+      ],
+      W: [
+        { duty_id: "W1", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001", is_head: true },
+        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "ม.5/3", student_no: "69088" },
+        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "ม.3/4", student_no: "71190" },
+        { duty_id: "W4", name: "นายพงศพัศ รัตนชัย", nickname: "นนท์", class_room: "ม.4/2", student_no: "70155" },
+        { duty_id: "WS1", name: "นายชินภัทร เจริญศิลป์", nickname: "วิน", class_room: "ม.5/5", student_no: "69144" }
+      ],
+      Ts: [
+        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
+        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "ม.5/6", student_no: "69188" },
+        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "ม.3/6", student_no: "71288" },
+        { duty_id: "Ts4", name: "นายธนกร แดนดวง", nickname: "ภูมิ", class_room: "ม.4/4", student_no: "70199" },
+        { duty_id: "TSS1", name: "เด็กชายวรดร สถิต", nickname: "มิว", class_room: "ม.2/1", student_no: "72005" }
+      ],
+      F: [
+        { duty_id: "F1", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115", is_head: true },
+        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "ม.5/2", student_no: "69066" },
+        { duty_id: "F3", name: "เด็กชายศุภวิชญ์ แจ้งสว่าง", nickname: "เบส", class_room: "ม.3/2", student_no: "71089" },
+        { duty_id: "F4", name: "นายอัครพล ยิ่งยง", nickname: "อาร์ม", class_room: "ม.4/6", student_no: "70244" },
+        { duty_id: "FS1", name: "นายสิรภพ อินทร", nickname: "นน", class_room: "ม.5/8", student_no: "69277" }
+      ],
+      S: [
+        { duty_id: "S1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "ม.5/7", student_no: "69055", is_head: true },
+        { duty_id: "S2", name: "นายปัณณธร พลอยดี", nickname: "กาย", class_room: "ม.6/2", student_no: "68045" },
+        { duty_id: "S3", name: "นายธีรภัทร สมบูรณ์", nickname: "บอส", class_room: "ม.6/1", student_no: "68001" },
+        { duty_id: "S4", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "ม.6/4", student_no: "68115" },
+        { duty_id: "S5", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "ม.5/2", student_no: "69012" }
+      ]
+    };
+
+    const SHIFT_NAMES = {
+      M: "วันจันทร์",
+      T: "วันอังคาร",
+      W: "วันพุธ",
+      Ts: "วันพฤหัสบดี",
+      F: "วันศุกร์",
+      S: "เวรพิเศษ (วันเสาร์/กิจกรรม)"
+    };
+
+    let currentShift = 'M';
+    let currentDate = new Date().toISOString().slice(0, 10);
+
+    function initPage() {
+      document.getElementById('select-date').value = currentDate;
+      renderSheet();
+    }
+
+    function switchShift(shiftCode) {
+      currentShift = shiftCode;
+      renderSheet();
+    }
+
+    function updateDate(dateVal) {
+      currentDate = dateVal;
+      renderSheet();
+    }
+
+    function renderSheet() {
+      const roster = ROSTER_DATABASE[currentShift] || ROSTER_DATABASE['M'];
+      const shiftThai = SHIFT_NAMES[currentShift] || currentShift;
+
+      // Format Date to Thai readable
+      const d = new Date(currentDate);
+      const thaiMonths = ["มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน", "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"];
+      const thaiYear = d.getFullYear() + 543;
+      const formattedDateThai = `${d.getDate()} ${thaiMonths[d.getMonth()]} ${thaiYear}`;
+
+      // Update Header Text
+      document.getElementById('header-shift-title').textContent = 
+        `ผลัดปฏิบัติการ: [${currentShift}] ${shiftThai} • ประจำวันที่ ${formattedDateThai}`;
+
+      // Update Head of Shift Name
+      const head = roster.find(m => m.is_head) || roster[0];
+      if (head) {
+        document.getElementById('sign-supervisor-name').textContent = `ชื่อ: [${head.duty_id}] ${head.name} (${head.nickname})`;
+      }
+
+      // Generate Session Header QR Code JSON Payload
+      const qrPayload = JSON.stringify({
+        system: "SARAWAT_OS",
+        form: "A4_OMR_V1",
+        shift: currentShift,
+        date: currentDate,
+        total: roster.length,
+        roster: roster.map(m => m.duty_id)
+      });
+
+      const qrContainer = document.getElementById('session-qrcode');
+      qrContainer.innerHTML = '';
+      new QRCode(qrContainer, {
+        text: qrPayload,
+        width: 78,
+        height: 78,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+
+      const shortDateCode = currentDate.replace(/-/g, '');
+      document.getElementById('qr-session-label').textContent = `${currentShift}-${shortDateCode}-N${roster.length}`;
+      document.getElementById('checksum-label').textContent = `PAYLOAD: ${currentShift}_${shortDateCode}_OMR_READY`;
+
+      // Render Table Rows with Zebra Striping
+      const tbody = document.getElementById('table-body');
+      tbody.innerHTML = roster.map((m, idx) => {
+        const isOdd = idx % 2 === 1;
+        const headBadge = m.is_head ? ' <span style="color:#b91c1c; font-weight:700; font-size:8pt;">(หัวหน้าเวร)</span>' : '';
+        
+        return `
+          <tr class="${isOdd ? 'row-odd' : 'row-even'}">
+            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-weight: 700;">${idx + 1}</td>
+            <td style="text-align: center;"><span class="duty-code">${m.duty_id}</span></td>
+            <td><b>${m.name}</b>${headBadge}</td>
+            <td style="text-align: center; font-weight: 600;">${m.nickname}</td>
+            <td style="text-align: center; font-size: 8.5pt;">${m.class_room} <span style="color:#64748b;">(#${m.student_no})</span></td>
+            
+            <!-- Checkbox: มา (PRESENT) -->
+            <td style="text-align: center;">
+              <div class="omr-box" title="${m.duty_id} มา">
+                <span class="omr-box-watermark">${m.duty_id}<br>มา</span>
+              </div>
+            </td>
+
+            <!-- Checkbox: ลา (LEAVE) -->
+            <td style="text-align: center;">
+              <div class="omr-box" title="${m.duty_id} ลา">
+                <span class="omr-box-watermark">${m.duty_id}<br>ลา</span>
+              </div>
+            </td>
+
+            <!-- Checkbox: ขาด (ABSENT) -->
+            <td style="text-align: center;">
+              <div class="omr-box" title="${m.duty_id} ขาด">
+                <span class="omr-box-watermark">${m.duty_id}<br>ขาด</span>
+              </div>
+            </td>
+
+            <td style="text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 8pt; color: #94a3b8;">
+              .... : .... น.
+            </td>
+            <td style="color: #94a3b8; font-size: 8pt;">
+              &nbsp;
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    window.addEventListener('DOMContentLoaded', initPage);
+  </script>
+</body>
+</html>

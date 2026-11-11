@@ -136,6 +136,9 @@
         <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
           <span>📷</span> บอดี้แคม
         </a>
+        <a href="/attendance-sheet" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>📋</span> ใบเช็คชื่อ A4
+        </a>
       </nav>
 
       <!-- Action Controls & Guide & Mobile Toggle -->
@@ -179,6 +182,9 @@
       </a>
       <a href="/bodycam-upload" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
         <span>📷</span> ส่งภาพบอดี้แคม
+      </a>
+      <a href="/attendance-sheet" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
+        <span>📋</span> พิมพ์ใบเช็คชื่อ A4
       </a>
       <button onclick="toggleMobileNav(); openFeatureGuideModal();" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300 text-left">
         <span>💡</span> แนะนำฟังก์ชัน
@@ -638,6 +644,9 @@
             <option value="S">เวรพิเศษ (S)</option>
             <option value="ALL">รวมสารวัตรทุกคน</option>
           </select>
+          <a href="/attendance-sheet" target="_blank" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center gap-1 shadow transition">
+            <span>📄</span> ฟอร์ม A4 มาตรฐาน AI/OMR
+          </a>
           <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 shadow">
             <span>🖨️</span> พิมพ์ / PDF
           </button>
