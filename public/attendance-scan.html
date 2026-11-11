@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (Auto 3-Burst) // SARAWAT PRANARAI</title>
+  <title>สแกนใบเช็คชื่อ A4 ดิจิทัล (1 ช็อต) // SARAWAT PRANARAI</title>
 
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -27,9 +27,9 @@
       border-radius: 4px;
     }
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
-      70% { transform: scale(1); box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
-      100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+      0% { transform: scale(0.97); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0.6); }
+      70% { transform: scale(1); box-shadow: 0 0 0 14px rgba(234, 179, 8, 0); }
+      100% { transform: scale(0.97); box-shadow: 0 0 0 0 rgba(234, 179, 8, 0); }
     }
     .pulse-btn {
       animation: pulse-ring 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
@@ -51,9 +51,9 @@
           <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
           <div>
             <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
-              <span>📸</span> สแกนเช็คชื่อ (Auto 3-Burst)
+              <span>📸</span> สแกนเช็คชื่อ (ถ่ายรูปเดียว)
             </h1>
-            <p class="text-[10px] text-slate-400">กดครั้งเดียว ถ่าย 3 ช็อตต่อเนื่อง • เจาะจงเฉพาะวันปัจจุบัน</p>
+            <p class="text-[10px] text-slate-400">เลือกผลัดเวรก่อนถ่าย • ไม่ต้องถ่ายเห็นหัวกระดาษหรือ QR</p>
           </div>
         </div>
       </div>
@@ -69,195 +69,238 @@
   <!-- ========================================================== -->
   <main class="max-w-2xl mx-auto w-full px-3.5 py-4 flex-1 space-y-4">
 
-    <!-- 🗓️ CARD 1: ข้อมูลวันเดือนปัจจุบัน (ก่อนถ่ายภาพ) -->
-    <div id="pre-capture-date-card" class="bg-gradient-to-r from-slate-900 via-slate-850 to-slate-900 border border-amber-500/30 rounded-2xl p-4 shadow-xl relative overflow-hidden">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <!-- ====================================================== -->
+    <!-- 🗓️ STEP 1: เลือกผลัดเวรและวันที่ (ก่อนถ่ายภาพ)             -->
+    <!-- ====================================================== -->
+    <div id="step-select-date-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+      
+      <!-- หัวข้อขั้นตอนที่ 1 -->
+      <div class="flex items-center justify-between">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
+          <span>ขั้นตอนที่ 1 จาก 2</span> • เลือกผลัดเวรก่อนถ่าย
+        </div>
+        <div id="badge-today-tag" class="text-[11px] font-mono text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+          วันนี้: พ. 11/11
+        </div>
+      </div>
+
+      <div class="space-y-1">
+        <h2 class="text-sm sm:text-base font-bold text-white">1. เลือกวันประจำสัปดาห์ / ผลัดเวร</h2>
+        <p class="text-xs text-slate-400 leading-relaxed">
+          เลือกรอบเวรที่ต้องการตรวจเช็ค ระบบจะจับคู่รายชื่อสารวัตรและวันที่ให้อัตโนมัติ โดยในรูปถ่าย<strong>ไม่จำเป็นต้องเห็นหัวกระดาษหรือ QR Code</strong>
+        </p>
+      </div>
+
+      <!-- ปุ่มเลือกวันทั้ง 6 ผลัดเวร (Day Selection Chips) -->
+      <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="day-chips-grid">
         
-        <!-- วันที่และคอลัมน์เป้าหมาย -->
-        <div class="space-y-1">
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 text-[11px] font-semibold">
-            <span>📅</span> ข้อมูลวันเวลาปัจจุบัน (เป้าหมายวันนี้)
-          </div>
-          <div class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
-            <span id="label-full-date">กำลังโหลดวันที่...</span>
-          </div>
-          <div class="text-xs text-slate-400 flex items-center gap-2 pt-0.5">
-            <span>คอลัมน์ในกระดาษ:</span>
-            <span id="label-target-col" class="font-mono font-bold text-amber-300 text-sm px-2 py-0.5 bg-amber-500/20 rounded border border-amber-500/40">--/--</span>
-            <span class="text-slate-500">•</span>
-            <span id="label-quarter-week" class="text-slate-300">ไตรมาสที่ 1</span>
-          </div>
-        </div>
+        <!-- วันจันทร์ (M) -->
+        <button onclick="selectShift('M')" id="chip-M" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">จันทร์</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift M</span>
+        </button>
 
-        <!-- ตัวเลือกผลัดเวร -->
-        <div class="bg-slate-800/90 border border-slate-700/80 rounded-xl p-2 sm:p-2.5 min-w-[160px]">
-          <label class="block text-[10px] text-slate-400 font-medium mb-1">ผลัดเวรที่ปฏิบัติหน้าที่:</label>
-          <select id="shift-selector" onchange="onShiftChanged()" class="w-full bg-slate-900 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-amber-300 font-bold focus:outline-none focus:border-amber-400">
-            <option value="M">เวรวันจันทร์ (Shift M)</option>
-            <option value="T">เวรวันอังคาร (Shift T)</option>
-            <option value="W">เวรวันพุธ (Shift W)</option>
-            <option value="Ts">เวรวันพฤหัสบดี (Shift Ts)</option>
-            <option value="F">เวรวันศุกร์ (Shift F)</option>
-            <option value="S">เวรพิเศษเสาร์/อาทิตย์ (Shift S)</option>
-          </select>
-        </div>
+        <!-- วันอังคาร (T) -->
+        <button onclick="selectShift('T')" id="chip-T" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">อังคาร</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift T</span>
+        </button>
+
+        <!-- วันพุธ (W) - ค่าเริ่มต้นวันนี้ -->
+        <button onclick="selectShift('W')" id="chip-W" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">พุธ</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift W</span>
+        </button>
+
+        <!-- วันพฤหัสบดี (Ts) -->
+        <button onclick="selectShift('Ts')" id="chip-Ts" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">พฤหัสฯ</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift Ts</span>
+        </button>
+
+        <!-- วันศุกร์ (F) -->
+        <button onclick="selectShift('F')" id="chip-F" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">ศุกร์</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift F</span>
+        </button>
+
+        <!-- เวรพิเศษ (S) -->
+        <button onclick="selectShift('S')" id="chip-S" class="day-chip p-2.5 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <span class="text-xs font-bold text-slate-200">เวรพิเศษ</span>
+          <span class="text-[10px] text-amber-400 font-mono mt-0.5 font-bold">Shift S</span>
+        </button>
 
       </div>
 
-      <!-- แถบคำแนะนำการถ่ายแบบเจาะจง -->
-      <div class="mt-3 pt-2.5 border-t border-slate-800/80 flex items-start gap-2 text-xs text-slate-300">
-        <span class="text-base leading-none text-amber-400">🎯</span>
-        <div>
-          <span class="font-bold text-amber-300">จุดที่ต้องถ่าย:</span>
-          เล็งเห็นแค่ <strong class="text-white">ชั้น (เลขที่)</strong> และช่อง <strong class="text-amber-300" id="guide-target-col-text">บันทึกการมาปฏิบัติหน้าที่</strong> ของวันนี้เท่านั้น <span class="text-slate-400">(ไม่ต้องถอยไกลถ่ายทั้งใบ A4 หรือหา QR)</span>
+      <!-- สรุปผลัดเวรและวันที่เป้าหมายในกระดาษ -->
+      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-base">🛡️</span>
+            <div>
+              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+                <span>ผลัดเวรที่เลือก:</span>
+                <span id="selected-shift-name" class="text-amber-300">เวรวันพุธ (Shift W)</span>
+              </div>
+              <div class="text-[10px] text-slate-400">กำลังพลประจำผลัด: <span id="selected-member-count" class="text-slate-200 font-semibold font-mono">3 นาย</span></div>
+            </div>
+          </div>
+
+          <!-- ตัวเลือกคอลัมน์วันที่ (สัปดาห์ 1 ถึง 12) -->
+          <div class="text-right">
+            <label class="block text-[10px] text-slate-400 mb-0.5">คอลัมน์ในกระดาษ:</label>
+            <select id="date-col-select" onchange="onDateColChanged()" class="bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 text-xs text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-400">
+              <!-- Dynamic Options Generated via JS -->
+            </select>
+          </div>
+        </div>
+
+        <!-- คำแนะนำการถ่ายแบบเจาะจง -->
+        <div class="border-t border-slate-700/60 pt-2 flex items-start gap-2 text-xs text-slate-300">
+          <span class="text-emerald-400 text-sm">💡</span>
+          <div class="text-[11px] leading-relaxed">
+            ระบบจำผลัดเวรและวันที่ไว้แล้ว: เมื่อกดถ่าย <strong class="text-white">ให้ถ่ายแค่รูปเดียว</strong> เล็งเฉพาะช่วง <strong class="text-amber-300">ชั้น (เลขที่)</strong> และช่องวันที่ <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong> เท่านั้น
+          </div>
         </div>
       </div>
+
+      <!-- ปุ่มเริ่มเปิดกล้องถ่าย 1 รูป -->
+      <button onclick="goToCameraStep()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:from-amber-400 hover:to-amber-300 text-slate-950 font-bold text-sm sm:text-base shadow-lg shadow-amber-500/20 active:scale-[0.98] transition flex items-center justify-center gap-2 pulse-btn">
+        <span>📸</span>
+        <span>เริ่มเปิดกล้องถ่ายภาพ (1 รูป)</span>
+        <span>→</span>
+      </button>
+
     </div>
 
-    <!-- 📹 CARD 2: กล้องถ่ายภาพสด & 1-TAP BURST SHUTTER -->
-    <div id="camera-viewfinder-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3 relative overflow-hidden">
+    <!-- ====================================================== -->
+    <!-- 📹 STEP 2: กล้องถ่ายภาพสด (ถ่ายแค่รูปเดียว)                -->
+    <!-- ====================================================== -->
+    <div id="step-camera-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl space-y-3 relative overflow-hidden">
       
-      <!-- Viewfinder Container -->
+      <!-- Top Action Bar: Back to Day Selection & Info Badge -->
+      <div class="flex items-center justify-between">
+        <button onclick="backToDateSelection()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 transition">
+          <span>←</span> <span>เปลี่ยนผลัดเวร/วัน</span>
+        </button>
+
+        <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 border border-amber-500/40 text-[11px] font-bold text-amber-300">
+          <span id="cam-shift-badge">เวรวันพุธ</span> • คอลัมน์ <span id="cam-col-badge" class="font-mono text-white">11/11</span>
+        </div>
+      </div>
+
+      <!-- Live Viewfinder Container -->
       <div class="relative w-full aspect-[4/3] bg-black rounded-xl overflow-hidden border border-slate-700/80 shadow-inner flex items-center justify-center">
         
         <!-- Video Live Stream -->
         <video id="camera-stream" autoplay playsinline muted class="w-full h-full object-cover"></video>
 
-        <!-- Flash Overlay for Burst Shots -->
+        <!-- Flash Effect Overlay -->
         <div id="flash-overlay" class="absolute inset-0 bg-white opacity-0 pointer-events-none transition-opacity duration-100 z-30"></div>
 
-        <!-- Camera HUD & Target Guidelines -->
-        <div id="camera-hud" class="absolute inset-0 pointer-events-none flex flex-col justify-between p-3.5 z-20">
+        <!-- Camera HUD Guidelines: เล็งแถวรายชื่อ และ วันที่ -->
+        <div class="absolute inset-0 pointer-events-none flex flex-col justify-between p-3.5 z-20">
           
-          <!-- Top Target Badge -->
-          <div class="flex items-center justify-between">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-black/70 backdrop-blur-md border border-amber-500/50 text-amber-300 text-[11px] font-bold">
-              <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
-              <span>เป้าหมายวันนี้: คอลัมน์</span>
-              <span id="hud-col-tag" class="font-mono text-white text-xs">11/11</span>
-            </div>
-            
-            <div id="burst-badge" class="hidden px-2.5 py-1 rounded-full bg-red-600 text-white font-mono text-xs font-bold shadow-lg animate-bounce">
-              📸 กำลังถ่าย...
-            </div>
+          <div class="text-center">
+            <span class="px-2.5 py-1 rounded-full bg-black/75 backdrop-blur-md text-[10px] text-amber-300 font-bold border border-amber-500/40">
+              🎯 เล็งเฉพาะแถวรายชื่อและช่องวันที่ <span id="hud-date-text">11/11</span>
+            </span>
           </div>
 
-          <!-- Center Framing Box: ชั้น(เลขที่) <=====> วันที่ -->
-          <div class="w-full h-36 border-2 border-dashed border-amber-400/70 rounded-xl relative flex items-center justify-between px-3 bg-amber-500/5 backdrop-blur-[1px]">
-            <div class="bg-black/75 px-2 py-1 rounded border border-amber-400/40 text-[10px] text-amber-200 font-bold text-center">
+          <!-- Target Bounding Box -->
+          <div class="w-full h-36 border-2 border-dashed border-amber-400/80 rounded-xl relative flex items-center justify-between px-3 bg-amber-500/5 backdrop-blur-[1px]">
+            <div class="bg-black/80 px-2 py-1 rounded border border-amber-400/50 text-[10px] text-amber-200 font-bold text-center">
               <div>◀ ชั้น (เลขที่)</div>
               <div class="text-[8px] text-slate-300">รหัส/ชื่อ</div>
             </div>
 
             <div class="text-center">
-              <div class="text-[9px] text-amber-300/80 font-mono tracking-widest uppercase">── เล็งแถววันนี้ ──</div>
-              <div class="text-xs text-white/90 font-bold drop-shadow">วางให้ตรงช่องวันที่</div>
+              <div class="text-[9px] text-amber-300/80 font-mono tracking-widest uppercase">── ถ่ายแค่รูปเดียว ──</div>
+              <div class="text-xs text-white font-bold drop-shadow">เล็งแถวรอยกาวันนี้</div>
             </div>
 
-            <div class="bg-black/75 px-2 py-1 rounded border border-amber-400/40 text-[10px] text-amber-200 font-bold text-center">
-              <div id="hud-col-box">คอลัมน์ 11/11 ▶</div>
+            <div class="bg-black/80 px-2 py-1 rounded border border-amber-400/50 text-[10px] text-amber-200 font-bold text-center">
+              <div id="hud-col-text">คอลัมน์ 11/11 ▶</div>
               <div class="text-[8px] text-slate-300">ช่อง [ส] / [ล]</div>
             </div>
           </div>
 
-          <!-- Bottom Camera Tip -->
           <div class="text-center">
-            <span class="px-2.5 py-1 rounded-lg bg-black/70 backdrop-blur-md text-[10px] text-slate-300 border border-slate-700">
-              💡 แนะนำถือกล้องห่างกระดาษ 20-30 ซม. ให้เห็นตัวหนังสือคมชัด
+            <span class="px-2 py-0.5 rounded bg-black/75 text-[9px] text-slate-300 border border-slate-700">
+              💡 ถือกล้องใกล้กระดาษ 20-30 ซม. ให้เห็นตัวหนังสือคมชัด
             </span>
           </div>
 
         </div>
 
-        <!-- Camera Permission / Loading Placeholder -->
+        <!-- Loading State for Camera -->
         <div id="camera-loading" class="absolute inset-0 bg-slate-950 flex flex-col items-center justify-center p-6 text-center z-10 space-y-3">
-          <div class="w-12 h-12 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div>
-          <div>
-            <div class="text-sm font-bold text-white">กำลังเปิดกล้องถ่ายภาพ...</div>
-            <div class="text-xs text-slate-400 mt-1">กรุณากด "อนุญาต" (Allow) หากเบราว์เซอร์ถามการเข้าถึงกล้อง</div>
-          </div>
-          <button onclick="startLiveCamera(true)" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-black text-xs font-bold hover:bg-amber-400 transition">
-            🔄 ลองเปิดกล้องอีกครั้ง
-          </button>
+          <div class="w-10 h-10 rounded-full border-2 border-amber-500 border-t-transparent animate-spin"></div>
+          <div class="text-xs text-slate-300 font-medium">กำลังเปิดกล้องถ่ายภาพ...</div>
         </div>
 
       </div>
 
-      <!-- Shutter Action Panel: 1-Tap 3-Burst Button -->
+      <!-- Shutter Button: ถ่ายแค่รูปเดียว (Single Shot) -->
       <div class="pt-2 text-center space-y-2">
-        <button id="btn-burst-shutter" onclick="triggerBurstCapture()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-red-600 via-amber-500 to-red-600 hover:from-red-500 hover:to-red-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-red-500/20 active:scale-[0.98] transition flex items-center justify-center gap-2.5 pulse-btn">
+        <button id="btn-single-shutter" onclick="triggerSingleCapture()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
           <span class="text-xl">📸</span>
-          <span>กดถ่าย 3 ครั้งรวด (Burst 3 Shots) แล้วส่ง</span>
+          <span>ถ่ายภาพใบเช็คชื่อ (1 รูป)</span>
         </button>
-        
-        <p class="text-[11px] text-slate-400">
-          กดครั้งเดียว กล้องจะบันทึก 3 ภาพต่อเนื่องอัตโนมัติ เพื่อตัดแสงสะท้อนและกันภาพเบลอ
-        </p>
 
-        <!-- Secondary Option: Fallback File Upload -->
+        <!-- Fallback File Input: ถ่ายผ่านแอปกล้องมือถือโดยตรง -->
         <div class="pt-1">
-          <input type="file" id="fallback-file-input" accept="image/*" multiple onchange="onFallbackFilesSelected(event)" class="hidden">
-          <button onclick="document.getElementById('fallback-file-input').click()" class="text-xs text-slate-400 hover:text-amber-300 underline underline-offset-4 transition">
-            📁 หรือเลือกรูปภาพจากเครื่อง (เลือกได้หลายรูป)
+          <input type="file" id="camera-file-input" accept="image/*" capture="environment" onchange="onSingleFileSelected(event)" class="hidden">
+          <button onclick="document.getElementById('camera-file-input').click()" class="text-xs text-slate-400 hover:text-amber-300 underline underline-offset-4 transition">
+            📁 หรือเลือกภาพจากอัลบั้ม / ถ่ายด้วยกล้องมาตรฐานมือถือ
           </button>
         </div>
       </div>
 
     </div>
 
-    <!-- ⏳ CARD 3: BURST PROCESSING OVERLAY (ซ่อนตอนเริ่ม) -->
-    <div id="step-processing" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-6 text-center space-y-4 shadow-xl">
-      <div class="w-14 h-14 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-2xl mx-auto shadow-inner text-amber-400 animate-pulse">
-        ⚡
-      </div>
-      <div class="space-y-1">
-        <h3 id="proc-title" class="text-base font-bold text-white">กำลังถ่ายภาพต่อเนื่อง...</h3>
-        <p id="proc-subtitle" class="text-xs text-slate-400">ช็อตที่ 1 จาก 3 กำลังบันทึก</p>
-      </div>
-      
-      <!-- Progress Bar -->
-      <div class="w-full bg-slate-800 rounded-full h-2 overflow-hidden max-w-xs mx-auto">
-        <div id="proc-bar" class="bg-gradient-to-r from-amber-500 to-emerald-500 h-2 w-1/3 transition-all duration-300"></div>
-      </div>
-    </div>
-
-    <!-- 📋 CARD 4: ข้อมูลวันเดือนและผลการตรวจหลังถ่าย (หลังจากถ่ายภาพ) -->
+    <!-- ====================================================== -->
+    <!-- 📋 STEP 3: ตรวจสอบและยืนยันข้อมูล (หลังจากถ่ายภาพ)          -->
+    <!-- ====================================================== -->
     <div id="step-review-card" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
-      <!-- หัวข้อหลังจากถ่าย: แสดงวันเดือนและผลัดเวรชัดเจน -->
-      <div class="bg-gradient-to-r from-emerald-950/60 via-slate-900 to-emerald-950/60 border border-emerald-500/40 rounded-xl p-3.5 space-y-2">
+      <!-- แบนเนอร์ยืนยันข้อมูลวันที่และผลัดเวร -->
+      <div class="bg-gradient-to-r from-emerald-950/60 via-slate-900 to-emerald-950/60 border border-emerald-500/40 rounded-xl p-3.5 space-y-1.5">
         <div class="flex items-center justify-between">
           <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/40">
-            <span>✅</span> บันทึก 3 ช็อตสำเร็จ
+            <span>✓</span> ถ่ายภาพสำเร็จ (1 รูป)
           </span>
-          <span id="review-post-date-badge" class="font-mono text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
-            11/11 (พ. 11 พ.ย. 69)
+          <span id="review-date-badge" class="font-mono text-xs font-bold text-amber-300 bg-amber-500/20 px-2 py-0.5 rounded border border-amber-500/30">
+            11/11
           </span>
         </div>
 
         <div>
           <div class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
             <span>📅 บันทึกผลสำหรับวันที่:</span>
-            <span id="review-target-date-title" class="text-amber-300">11 พฤศจิกายน 2569</span>
+            <span id="review-full-date-text" class="text-amber-300">11 พฤศจิกายน 2569</span>
           </div>
           <div class="text-xs text-slate-300 mt-0.5">
-            ผลัดเวร: <span id="review-shift-title" class="font-bold text-white">เวรวันพุธ (Shift W)</span> • ไตรมาสที่ 1
+            ผลัดเวร: <span id="review-shift-text" class="font-bold text-white">เวรวันพุธ (Shift W)</span> • ไตรมาสที่ 1
           </div>
         </div>
       </div>
 
-      <!-- 🖼️ Strip Gallery: พรีวิวภาพถ่าย 3 ช็อตต่อเนื่อง -->
+      <!-- พรีวิวรูปภาพ 1 รูปที่เพิ่งถ่าย -->
       <div class="space-y-1.5">
-        <div class="text-xs font-semibold text-slate-300 flex items-center justify-between">
-          <span>ภาพถ่าย 3 ช็อตต่อเนื่อง (Cross-Check):</span>
-          <span class="text-[10px] text-slate-400">แตะรูปเพื่อขยาย</span>
+        <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
+          <span>รูปถ่ายที่บันทึก (1 ช็อต):</span>
+          <span class="text-[10px] text-slate-400">แตะเพื่อขยายดูรูป</span>
         </div>
-        <div class="grid grid-cols-3 gap-2" id="review-gallery-strip">
-          <!-- Dynamic 3 Images Inserted Here -->
+        <div onclick="openSingleImageModal()" class="w-full max-h-48 bg-slate-800 rounded-xl overflow-hidden border border-slate-700 cursor-zoom-in relative group aspect-[16/9] flex items-center justify-center">
+          <img id="review-single-img" src="" class="w-full h-full object-cover group-hover:scale-105 transition" alt="ภาพถ่ายใบเช็คชื่อ">
+          <div class="absolute bottom-0 inset-x-0 bg-black/75 px-2 py-1 text-center text-[10px] font-semibold text-slate-200">
+            แตะเพื่อดูภาพขยาย
+          </div>
         </div>
       </div>
 
-      <!-- 📊 KPI Live Summary Bar -->
+      <!-- สรุปตัวเลข KPI สด -->
       <div class="grid grid-cols-4 gap-2 text-center pt-1">
         <div class="bg-slate-800/80 border border-slate-700/80 rounded-xl p-2">
           <div class="text-[10px] text-slate-400">กำลังพลทั้งหมด</div>
@@ -277,7 +320,7 @@
         </div>
       </div>
 
-      <!-- 👥 Roster Verification List: รายชื่อสารวัตรพร้อมสถานะประจำวัน -->
+      <!-- รายชื่อสารวัตรประจำผลัด (แตะสลับสถานะได้ทันที) -->
       <div class="space-y-2">
         <div class="flex items-center justify-between text-xs">
           <span class="font-bold text-slate-200">รายชื่อสารวัตรที่ตรวจเช็ค:</span>
@@ -289,10 +332,10 @@
         </div>
       </div>
 
-      <!-- Action Buttons: Confirm & Retake -->
+      <!-- Action Buttons: Retake & Submit -->
       <div class="pt-2 flex flex-col sm:flex-row gap-2.5">
-        <button onclick="retakeBurstCapture()" class="w-full sm:w-1/3 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
-          🔄 ถ่ายใหม่ 3 ช็อต
+        <button onclick="retakePhoto()" class="w-full sm:w-1/3 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
+          🔄 ถ่ายใหม่
         </button>
 
         <button id="btn-submit-attendance" onclick="submitAttendanceConfirmation()" class="w-full sm:w-2/3 py-3 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-sm sm:text-base shadow-lg shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
@@ -303,7 +346,9 @@
 
     </div>
 
-    <!-- 🎉 CARD 5: SUCCESS STATE -->
+    <!-- ====================================================== -->
+    <!-- 🎉 STEP 4: SUCCESS STATE                                   -->
+    <!-- ====================================================== -->
     <div id="step-success-card" class="hidden bg-slate-900/90 border border-emerald-500/40 rounded-2xl p-6 text-center space-y-4 shadow-xl">
       <div class="w-16 h-16 rounded-full bg-emerald-500/20 border border-emerald-500/50 flex items-center justify-center text-3xl mx-auto text-emerald-400">
         ✓
@@ -335,8 +380,8 @@
         <a href="/" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs sm:text-sm transition">
           📊 ดูแดชบอร์ดสรุปยอดรวม
         </a>
-        <button onclick="resetToLiveCamera()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
-          📸 ถ่ายรอบต่อไป
+        <button onclick="resetToFirstStep()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition">
+          📸 สแกนรอบต่อไป
         </button>
       </div>
     </div>
@@ -349,7 +394,7 @@
   <div id="image-modal" onclick="closeImageModal()" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4 backdrop-blur-sm cursor-zoom-out">
     <div class="max-w-2xl max-h-[85vh] relative">
       <img id="modal-img" src="" class="max-w-full max-h-[80vh] rounded-xl object-contain border border-slate-700 shadow-2xl" alt="รูปขยาย">
-      <div id="modal-caption" class="text-center text-xs text-slate-300 mt-2 font-medium">--</div>
+      <div id="modal-caption" class="text-center text-xs text-slate-300 mt-2 font-medium">ภาพถ่ายใบเช็คชื่อ (1 รูป)</div>
     </div>
   </div>
 
@@ -361,12 +406,13 @@
     // 1. DATA & GLOBAL STATE
     // ----------------------------------------------------------
     let currentStream = null;
-    let burstFrames = []; // Array of 3 base64 strings
-    let activeRoster = []; // Current shift roster with attendance statuses
+    let singleCapturedImage = null; // Single base64 string
+    let activeRoster = []; // Member list with statuses
     let currentShiftCode = 'W';
+    let currentTargetCol = '11/11';
     let todayInfo = {};
 
-    // ฐานข้อมูลสารวัตรสำรอง (Fallback Database หากออฟไลน์)
+    // ฐานข้อมูลสารวัตรสำรอง (Fallback Database)
     const FALLBACK_ROSTERS = {
       M: [
         { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_head: true },
@@ -415,9 +461,9 @@
     };
 
     // ----------------------------------------------------------
-    // 2. INITIALIZATION & DATE COMPUTATION (ก่อนถ่ายภาพ)
+    // 2. INITIALIZATION & DATE COMPUTATION
     // ----------------------------------------------------------
-    function computeThaiDate() {
+    function computeTodayInfo() {
       const now = new Date();
       const dayNames = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
       const monthNames = [
@@ -448,61 +494,131 @@
         yearBE
       };
 
-      // อัปเดตแสดงผลในหน้าเว็บก่อนถ่าย
-      document.getElementById('label-full-date').textContent = fullThai;
-      document.getElementById('label-target-col').textContent = mmdd;
-      document.getElementById('guide-target-col-text').textContent = `[${mmdd}]`;
-      document.getElementById('hud-col-tag').textContent = mmdd;
-      document.getElementById('hud-col-box').textContent = `คอลัมน์ ${mmdd} ▶`;
+      document.getElementById('badge-today-tag').textContent = `วันนี้: ${dayNames[dayOfWeek].replace('วัน', '')}. ${mmdd}`;
+      currentTargetCol = mmdd;
 
-      // ตั้งค่าผลัดเวรตามวันในสัปดาห์
-      currentShiftCode = defaultShift;
-      document.getElementById('shift-selector').value = defaultShift;
+      // เลือกผลัดเวรของวันนี้เป็นค่าเริ่มต้น
+      selectShift(defaultShift);
     }
 
-    function onShiftChanged() {
-      currentShiftCode = document.getElementById('shift-selector').value;
-      loadRosterForShift(currentShiftCode);
+    // 12 สัปดาห์ประจำผลัดเวร
+    function getQuarter12Dates(shiftKey) {
+      if (shiftKey === 'S') {
+        return Array.from({ length: 12 }).map((_, i) => `ส.${i + 1}`);
+      }
+      const startDates = {
+        M: new Date(2026, 10, 9),  // 11/9 (จันทร์)
+        T: new Date(2026, 10, 10), // 11/10 (อังคาร)
+        W: new Date(2026, 10, 11), // 11/11 (พุธ)
+        Ts: new Date(2026, 10, 12),// 11/12 (พฤหัสฯ)
+        F: new Date(2026, 10, 13)  // 11/13 (ศุกร์)
+      };
+      const base = startDates[shiftKey] || new Date(2026, 10, 9);
+      const dates = [];
+      for (let i = 0; i < 12; i++) {
+        const d = new Date(base.getTime() + (i * 7) * 86400000);
+        dates.push(`${d.getMonth() + 1}/${d.getDate()}`);
+      }
+      return dates;
     }
 
     // ----------------------------------------------------------
-    // 3. LIVE CAMERA WEBRTC STREAMING
+    // 3. SHIFT & DATE SELECTION (ขั้นตอนที่ 1)
     // ----------------------------------------------------------
-    async function startLiveCamera(forceRestart = false) {
-      const video = document.getElementById('camera-stream');
-      const loading = document.getElementById('camera-loading');
-      loading.classList.remove('hidden');
+    function selectShift(shiftKey) {
+      currentShiftCode = shiftKey;
 
-      if (currentStream && !forceRestart) {
-        loading.classList.add('hidden');
-        return;
+      // ไฮไลต์ปุ่มผลัดเวร
+      document.querySelectorAll('.day-chip').forEach(el => {
+        el.classList.remove('bg-amber-500/20', 'border-amber-400', 'shadow');
+        el.classList.add('bg-slate-850', 'border-slate-700');
+      });
+
+      const activeChip = document.getElementById(`chip-${shiftKey}`);
+      if (activeChip) {
+        activeChip.classList.remove('bg-slate-850', 'border-slate-700');
+        activeChip.classList.add('bg-amber-500/20', 'border-amber-400', 'shadow');
       }
 
+      document.getElementById('selected-shift-name').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
+
+      // อัปเดตตัวเลือกคอลัมน์วันที่
+      const dates12 = getQuarter12Dates(shiftKey);
+      const selectEl = document.getElementById('date-col-select');
+      
+      selectEl.innerHTML = dates12.map((dStr, idx) => {
+        const isToday = (dStr === todayInfo.mmdd);
+        return `<option value="${dStr}" ${isToday ? 'selected' : ''}>สัปดาห์ที่ ${idx + 1} (${dStr}) ${isToday ? '★ วันนี้' : ''}</option>`;
+      }).join('');
+
+      // ถ้าในลิสต์มีวันที่ของวันนี้ ให้เลือกวันนั้น
+      if (dates12.includes(todayInfo.mmdd)) {
+        selectEl.value = todayInfo.mmdd;
+        currentTargetCol = todayInfo.mmdd;
+      } else {
+        currentTargetCol = selectEl.value;
+      }
+
+      updateColHighlights();
+      loadRosterForShift(shiftKey);
+    }
+
+    function onDateColChanged() {
+      currentTargetCol = document.getElementById('date-col-select').value;
+      updateColHighlights();
+    }
+
+    function updateColHighlights() {
+      document.getElementById('guide-col-highlight').textContent = `[${currentTargetCol}]`;
+      document.getElementById('cam-shift-badge').textContent = SHIFT_NAMES[currentShiftCode];
+      document.getElementById('cam-col-badge').textContent = currentTargetCol;
+      document.getElementById('hud-date-text').textContent = currentTargetCol;
+      document.getElementById('hud-col-text').textContent = `คอลัมน์ ${currentTargetCol} ▶`;
+    }
+
+    // ----------------------------------------------------------
+    // 4. TRANSITION TO CAMERA (ขั้นตอนที่ 2)
+    // ----------------------------------------------------------
+    function goToCameraStep() {
+      document.getElementById('step-select-date-card').classList.add('hidden');
+      document.getElementById('step-camera-card').classList.remove('hidden');
+      startLiveCamera();
+    }
+
+    function backToDateSelection() {
       if (currentStream) {
         currentStream.getTracks().forEach(track => track.stop());
         currentStream = null;
       }
+      document.getElementById('step-camera-card').classList.add('hidden');
+      document.getElementById('step-select-date-card').classList.remove('hidden');
+    }
+
+    async function startLiveCamera() {
+      const video = document.getElementById('camera-stream');
+      const loading = document.getElementById('camera-loading');
+      loading.classList.remove('hidden');
+
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
+      }
 
       try {
-        const constraints = {
+        const stream = await navigator.mediaDevices.getUserMedia({
           video: {
             facingMode: { ideal: 'environment' },
             width: { ideal: 1920 },
             height: { ideal: 1080 }
           },
           audio: false
-        };
-
-        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        });
         currentStream = stream;
         video.srcObject = stream;
         await video.play();
-
         loading.classList.add('hidden');
       } catch (err) {
-        console.warn('Live Camera error, falling back to 720p or user action:', err.message);
         try {
-          // ลองกล้องพื้นฐานหาก ideal ความละเอียดสูงไม่รองรับ
           const fallbackStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
           currentStream = fallbackStream;
           video.srcObject = fallbackStream;
@@ -511,10 +627,9 @@
         } catch (err2) {
           loading.innerHTML = `
             <div class="text-amber-400 text-3xl">📷</div>
-            <div class="text-sm font-bold text-white">ไม่สามารถเปิดกล้องได้อัตโนมัติ</div>
-            <div class="text-xs text-slate-400 max-w-xs">อาจเกิดจากการไม่อนุญาตสิทธิ์ หรือเปิดในเบราว์เซอร์ที่จำกัด</div>
-            <button onclick="document.getElementById('fallback-file-input').click()" class="mt-2 px-3.5 py-1.5 rounded-lg bg-amber-500 text-black text-xs font-bold hover:bg-amber-400 transition">
-              📁 เลือกภาพจากเครื่อง / ถ่ายด้วยกล้องมือถือ
+            <div class="text-xs text-white font-bold">ไม่สามารถเปิดกล้องได้อัตโนมัติ</div>
+            <button onclick="document.getElementById('camera-file-input').click()" class="mt-2 px-3 py-1.5 rounded-lg bg-amber-500 text-black text-xs font-bold">
+              📁 ถ่ายภาพด้วยกล้องมือถือ / เลือกรูป
             </button>
           `;
         }
@@ -522,150 +637,78 @@
     }
 
     // ----------------------------------------------------------
-    // 4. 1-TAP 3-BURST CAPTURE ENGINE (กดครั้งเดียว ถ่าย 3 ภาพต่อเนื่อง)
+    // 5. CAPTURE SINGLE PHOTO (ถ่ายแค่รูปเดียว)
     // ----------------------------------------------------------
-    async function triggerBurstCapture() {
-      const btn = document.getElementById('btn-burst-shutter');
-      const burstBadge = document.getElementById('burst-badge');
-      const flash = document.getElementById('flash-overlay');
+    async function triggerSingleCapture() {
       const video = document.getElementById('camera-stream');
+      const flash = document.getElementById('flash-overlay');
+      const btn = document.getElementById('btn-single-shutter');
 
       if (!currentStream || !video.videoWidth) {
-        // ถ้าไม่มีสตรีมสด ให้เปิดตัวเลือกถ่ายภาพปกติ
-        document.getElementById('fallback-file-input').click();
+        document.getElementById('camera-file-input').click();
         return;
       }
 
-      // ปิดปุ่มระหว่างเบิร์สต์
       btn.disabled = true;
-      btn.classList.remove('pulse-btn');
-      btn.innerHTML = `<span>⏳</span><span>กำลังถ่าย 3 ช็อตต่อเนื่อง...</span>`;
-      burstBadge.classList.remove('hidden');
-
-      burstFrames = [];
-
-      // ฟังก์ชันช่วยจับภาพจาก Video Frame
-      const captureFrame = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth || 1280;
-        canvas.height = video.videoHeight || 720;
-        const ctx = canvas.getContext('2d');
-        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-        return canvas.toDataURL('image/jpeg', 0.85);
-      };
+      btn.innerHTML = `<span>⏳</span><span>กำลังบันทึกภาพ...</span>`;
 
       // เอฟเฟกต์แฟลชและสั่น
-      const flashScreen = () => {
-        flash.style.opacity = '0.9';
-        if (navigator.vibrate) navigator.vibrate(60);
-        setTimeout(() => { flash.style.opacity = '0'; }, 120);
-      };
+      flash.style.opacity = '0.9';
+      if (navigator.vibrate) navigator.vibrate(60);
+      setTimeout(() => { flash.style.opacity = '0'; }, 120);
 
-      try {
-        // ช็อตที่ 1: ภาพรวมตั้งตรง
-        burstBadge.textContent = '📸 ช็อต 1/3 (มุมตรง)';
-        flashScreen();
-        burstFrames.push(captureFrame());
-        await new Promise(r => setTimeout(r, 500));
+      // จับภาพ 1 รูปจาก Video Frame
+      const canvas = document.createElement('canvas');
+      canvas.width = video.videoWidth || 1280;
+      canvas.height = video.videoHeight || 720;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      singleCapturedImage = canvas.toDataURL('image/jpeg', 0.88);
 
-        // ช็อตที่ 2: ภาพตรวจทานคมชัด
-        burstBadge.textContent = '📸 ช็อต 2/3 (ตรวจทาน)';
-        flashScreen();
-        burstFrames.push(captureFrame());
-        await new Promise(r => setTimeout(r, 500));
-
-        // ช็อตที่ 3: ภาพตัดแสงสะท้อน
-        burstBadge.textContent = '📸 ช็อต 3/3 (ตัดแสงสะท้อน)';
-        flashScreen();
-        burstFrames.push(captureFrame());
-        await new Promise(r => setTimeout(r, 300));
-
-        // จบ 3 ช็อต -> เข้าสู่ขั้นตอนวิเคราะห์และแสดงผล
-        burstBadge.classList.add('hidden');
-        processBurstResults();
-
-      } catch (err) {
-        alert('เกิดข้อผิดพลาดในการถ่ายภาพ: ' + err.message);
-        btn.disabled = false;
-        btn.classList.add('pulse-btn');
-        btn.innerHTML = `<span class="text-xl">📸</span><span>กดถ่าย 3 ครั้งรวด (Burst 3 Shots) แล้วส่ง</span>`;
+      // ปิดกล้องหลังถ่ายเสร็จ
+      if (currentStream) {
+        currentStream.getTracks().forEach(t => t.stop());
+        currentStream = null;
       }
+
+      // ไปยังหน้าตรวจสอบผล
+      showReviewStep();
     }
 
-    // กรณีเลือกไฟล์ภาพแทนกล้องสด
-    function onFallbackFilesSelected(e) {
-      const files = Array.from(e.target.files);
-      if (!files || files.length === 0) return;
+    function onSingleFileSelected(e) {
+      const file = e.target.files[0];
+      if (!file) return;
 
-      burstFrames = [];
-      let loaded = 0;
-      files.slice(0, 3).forEach((file, idx) => {
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-          burstFrames[idx] = evt.target.result;
-          loaded++;
-          if (loaded === Math.min(files.length, 3)) {
-            // ถ้าเลือกภาพเดียว ให้ทำซ้ำเป็น 3 ช็อตเพื่อส่งเข้า Consensus
-            while (burstFrames.length < 3) {
-              burstFrames.push(burstFrames[0]);
-            }
-            processBurstResults();
-          }
-        };
-        reader.readAsDataURL(file);
-      });
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        singleCapturedImage = evt.target.result;
+        showReviewStep();
+      };
+      reader.readAsDataURL(file);
     }
 
     // ----------------------------------------------------------
-    // 5. PROCESS & DISPLAY AFTER CAPTURE (หลังจากถ่ายภาพ)
+    // 6. REVIEW & CONFIRMATION (ขั้นตอนที่ 3)
     // ----------------------------------------------------------
-    async function processBurstResults() {
-      // ซ่อนหน้าจอกล้อง
-      document.getElementById('camera-viewfinder-card').classList.add('hidden');
-      document.getElementById('pre-capture-date-card').classList.add('hidden');
+    function showReviewStep() {
+      document.getElementById('step-camera-card').classList.add('hidden');
+      document.getElementById('step-select-date-card').classList.add('hidden');
+      
+      const reviewCard = document.getElementById('step-review-card');
+      reviewCard.classList.remove('hidden');
 
-      // แสดงหลอดโหลดประมวลผล 0.8 วินาที
-      const proc = document.getElementById('step-processing');
-      proc.classList.remove('hidden');
-      document.getElementById('proc-title').textContent = 'กำลังเปรียบเทียบข้อมูล 3 ช็อต...';
-      document.getElementById('proc-subtitle').textContent = `ดึงข้อมูลคอลัมน์ [${todayInfo.mmdd}] และรายชื่อสารวัตร`;
-      document.getElementById('proc-bar').style.width = '100%';
+      // 1. อัปเดตข้อมูลวันที่และผลัดเวร
+      document.getElementById('review-date-badge').textContent = currentTargetCol;
+      document.getElementById('review-full-date-text').textContent = `${todayInfo.fullThai} (คอลัมน์ ${currentTargetCol})`;
+      document.getElementById('review-shift-text').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
 
-      await new Promise(r => setTimeout(r, 800));
-      proc.classList.add('hidden');
+      // 2. แสดงรูปภาพ 1 รูปที่ถ่ายมา
+      document.getElementById('review-single-img').src = singleCapturedImage;
 
-      // แสดงการ์ดผลลัพธ์หลังจากถ่าย (Card 4)
-      renderReviewScreen();
-    }
-
-    function renderReviewScreen() {
-      const card = document.getElementById('step-review-card');
-      card.classList.remove('hidden');
-
-      // 1. อัปเดตข้อมูลวันที่และผลัดเวรหลังถ่าย
-      document.getElementById('review-post-date-badge').textContent = `${todayInfo.mmdd} (${todayInfo.fullThai.split(' ')[0]})`;
-      document.getElementById('review-target-date-title').textContent = todayInfo.fullThai;
-      document.getElementById('review-shift-title').textContent = `${SHIFT_NAMES[currentShiftCode] || currentShiftCode} (Shift ${currentShiftCode})`;
-
-      // 2. เรนเดอร์ Thumbnail 3 รูปที่เพิ่งถ่าย
-      const gallery = document.getElementById('review-gallery-strip');
-      const labels = ['ช็อต 1: มุมตรง', 'ช็อต 2: ตรวจทาน', 'ช็อต 3: ตัดแสง'];
-      gallery.innerHTML = burstFrames.map((img, i) => `
-        <div onclick="openImageModal('${img}', '${labels[i]}')" class="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 cursor-zoom-in relative group aspect-[4/3]">
-          <img src="${img}" class="w-full h-full object-cover group-hover:scale-105 transition" alt="${labels[i]}">
-          <div class="absolute bottom-0 inset-x-0 bg-black/75 px-1 py-0.5 text-center text-[9px] font-semibold text-slate-200">
-            ${labels[i]}
-          </div>
-        </div>
-      `).join('');
-
-      // 3. เรนเดอร์รายชื่อสารวัตร
+      // 3. แสดงรายชื่อสารวัตร
       renderRosterList();
     }
 
-    // ----------------------------------------------------------
-    // 6. ROSTER LOADING & REALTIME STATUS TOGGLE
-    // ----------------------------------------------------------
     async function loadRosterForShift(shift) {
       try {
         const res = await fetch(`/api/members?duty_day=${shift}`);
@@ -676,22 +719,23 @@
             name: `${m.first_name || ''} ${m.last_name || ''}`.trim(),
             nickname: m.nickname || '',
             class_room: m.grade_class ? `${m.grade_class} (${m.student_no || '-'})` : '-',
-            status: 'PRESENT', // ค่าเริ่มต้นคือ มาปฏิบัติหน้าที่
+            status: 'PRESENT',
             was_edited: false
           }));
+          document.getElementById('selected-member-count').textContent = `${activeRoster.length} นาย`;
           return;
         }
       } catch (e) {
-        console.warn('Cannot fetch members, using fallback database:', e.message);
+        console.warn('Using fallback database:', e.message);
       }
 
-      // Fallback
       const fallbackList = FALLBACK_ROSTERS[shift] || FALLBACK_ROSTERS['W'];
       activeRoster = fallbackList.map(m => ({
         ...m,
         status: 'PRESENT',
         was_edited: false
       }));
+      document.getElementById('selected-member-count').textContent = `${activeRoster.length} นาย`;
     }
 
     function renderRosterList() {
@@ -719,13 +763,13 @@
 
             <!-- Status Buttons: [มา] [สาย] [ลา] -->
             <div class="flex items-center gap-1 shrink-0">
-              <button onclick="setMemberStatus(${idx}, 'PRESENT')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isPresent ? 'bg-emerald-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'PRESENT')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isPresent ? 'bg-emerald-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 มา
               </button>
-              <button onclick="setMemberStatus(${idx}, 'LATE')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isLate ? 'bg-amber-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'LATE')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isLate ? 'bg-amber-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 สาย
               </button>
-              <button onclick="setMemberStatus(${idx}, 'LEAVE')" class="px-2 py-1 rounded text-[11px] font-bold transition ${isLeave ? 'bg-sky-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
+              <button onclick="setMemberStatus(${idx}, 'LEAVE')" class="px-2.5 py-1 rounded text-[11px] font-bold transition ${isLeave ? 'bg-sky-500 text-black shadow' : 'bg-slate-700/60 text-slate-400 hover:text-white'}">
                 ลา
               </button>
             </div>
@@ -768,9 +812,9 @@
         shift_code: currentShiftCode,
         quarter: 1,
         duty_date: todayInfo.dateIso,
-        scanned_by: 'หัวหน้าเวร (Auto 3-Burst)',
-        image_base64: burstFrames[0] || '',
-        additional_images: burstFrames.slice(1),
+        week_index: document.getElementById('date-col-select').selectedIndex,
+        scanned_by: 'หัวหน้าเวร (Single Shot)',
+        image_base64: singleCapturedImage || '',
         records: activeRoster.map(m => ({
           duty_id: m.duty_id,
           status: m.status,
@@ -803,41 +847,31 @@
       const succ = document.getElementById('step-success-card');
       succ.classList.remove('hidden');
 
-      document.getElementById('success-date-str').textContent = `${todayInfo.mmdd} (${todayInfo.fullThai})`;
+      document.getElementById('success-date-str').textContent = `${currentTargetCol} (${SHIFT_NAMES[currentShiftCode]})`;
       document.getElementById('succ-shift').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
       document.getElementById('succ-present').textContent = `${result.summary ? result.summary.present : activeRoster.filter(m => m.status === 'PRESENT').length} นาย`;
       document.getElementById('succ-rate').textContent = `${result.summary ? result.summary.attendance_rate : 100}%`;
     }
 
-    function retakeBurstCapture() {
+    function retakePhoto() {
       document.getElementById('step-review-card').classList.add('hidden');
-      resetToLiveCamera();
+      goToCameraStep();
     }
 
-    function resetToLiveCamera() {
+    function resetToFirstStep() {
       document.getElementById('step-success-card').classList.add('hidden');
       document.getElementById('step-review-card').classList.add('hidden');
-      document.getElementById('step-processing').classList.add('hidden');
-      document.getElementById('pre-capture-date-card').classList.remove('hidden');
-      document.getElementById('camera-viewfinder-card').classList.remove('hidden');
-
-      const btn = document.getElementById('btn-burst-shutter');
-      btn.disabled = false;
-      btn.classList.add('pulse-btn');
-      btn.innerHTML = `<span class="text-xl">📸</span><span>กดถ่าย 3 ครั้งรวด (Burst 3 Shots) แล้วส่ง</span>`;
-
-      startLiveCamera(true);
+      document.getElementById('step-camera-card').classList.add('hidden');
+      document.getElementById('step-select-date-card').classList.remove('hidden');
     }
 
     // ----------------------------------------------------------
-    // 8. IMAGE LIGHTBOX MODAL
+    // 8. LIGHTBOX MODAL
     // ----------------------------------------------------------
-    function openImageModal(src, caption) {
+    function openSingleImageModal() {
       const modal = document.getElementById('image-modal');
       const img = document.getElementById('modal-img');
-      const cap = document.getElementById('modal-caption');
-      img.src = src;
-      cap.textContent = caption;
+      img.src = singleCapturedImage;
       modal.classList.remove('hidden');
       modal.classList.add('flex');
     }
@@ -851,10 +885,8 @@
     // ----------------------------------------------------------
     // 9. ON LOAD
     // ----------------------------------------------------------
-    window.addEventListener('DOMContentLoaded', async () => {
-      computeThaiDate();
-      await loadRosterForShift(currentShiftCode);
-      startLiveCamera();
+    window.addEventListener('DOMContentLoaded', () => {
+      computeTodayInfo();
     });
   </script>
 </body>
