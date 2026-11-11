@@ -136,12 +136,6 @@
         <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
           <span>📷</span> บอดี้แคม
         </a>
-        <a href="/attendance-sheet" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
-          <span>📋</span> ใบเช็คชื่อ A4
-        </a>
-        <a href="/attendance-scan" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 hover:text-white hover:bg-amber-500/25 border border-amber-500/40">
-          <span>📸</span> สแกนเช็คชื่อ
-        </a>
       </nav>
 
       <!-- Action Controls & Guide & Mobile Toggle -->
@@ -185,12 +179,6 @@
       </a>
       <a href="/bodycam-upload" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
         <span>📷</span> ส่งภาพบอดี้แคม
-      </a>
-      <a href="/attendance-sheet" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
-        <span>📋</span> พิมพ์ใบเช็คชื่อ A4
-      </a>
-      <a href="/attendance-scan" class="p-2 rounded-lg bg-amber-500/20 border border-amber-500/40 flex items-center gap-2 text-amber-300 font-bold">
-        <span>📸</span> สแกนใบเช็คชื่อ
       </a>
       <button onclick="toggleMobileNav(); openFeatureGuideModal();" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300 text-left">
         <span>💡</span> แนะนำฟังก์ชัน
@@ -354,13 +342,13 @@
             </div>
             
             <div class="grid grid-cols-2 gap-2 text-xs">
-              <button onclick="openAttendanceSheetModal()" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/40 transition flex items-center gap-2 text-left">
-                <span class="text-base">📋</span>
+              <a href="/verify" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-emerald-500/40 transition flex items-center gap-2">
+                <span class="text-base">🔍</span>
                 <div>
-                  <div class="font-semibold text-slate-200">ออกใบเช็คชื่อ</div>
-                  <div class="text-[10px] text-slate-400">พิมพ์/PDF ประจำเวร</div>
+                  <div class="font-semibold text-slate-200">ตรวจสอบบัตร</div>
+                  <div class="text-[10px] text-slate-400">สแกน QR / ตรวจสถานะ</div>
                 </div>
-              </button>
+              </a>
 
               <a href="/card-studio" class="p-2.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-cyan-500/40 transition flex items-center gap-2">
                 <span class="text-base">🎨</span>
@@ -579,7 +567,7 @@
               <span>🛡️</span> ศูนย์บัญชาการ (Command OS)
             </div>
             <p class="text-[11px] text-slate-400 leading-relaxed">
-              หน้ารวมศูนย์เฝ้าระวังเวร 6 วัน, สถิติความพร้อมปฏิบัติการ (Bento KPIs), ค้นหารายชื่อสารวัตร, ดูบัตรดิจิทัล CR80 พร้อมส่งออกใบเช็คชื่อ และคัดลอกสรุปเวรลงกลุ่มไลน์
+              หน้ารวมศูนย์เฝ้าระวังเวร 6 วัน, สถิติความพร้อมปฏิบัติการ (Bento KPIs), ค้นหารายชื่อสารวัตร, ดูบัตรดิจิทัล CR80 และคัดลอกสรุปเวรลงกลุ่มไลน์
             </p>
           </div>
 
@@ -624,87 +612,6 @@
       </div>
     </div>
   </div>
-
-  <!-- ========================================================== -->
-  <!-- 📋 ATTENDANCE SHEET EXPORT MODAL (PRINT READY) -->
-  <!-- ========================================================== -->
-  <div id="attendance-sheet-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-tactical-900 border border-tactical-border rounded-2xl w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden shadow-2xl">
-      <div class="p-4 border-b border-tactical-border flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span class="text-amber-400 text-lg">📋</span>
-          <div>
-            <h3 class="text-sm font-bold text-white">แบบฟอร์มบันทึกการปฏิบัติหน้าที่ประจำเวร (Attendance Sheet)</h3>
-            <p class="text-[11px] text-slate-400">กลุ่มงานสารวัตรนักเรียน โรงเรียนพระนารายณ์</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-2">
-          <!-- Shift selector for export -->
-          <select id="attendance-shift-select" onchange="renderAttendanceSheetTable(this.value)" class="bg-black border border-tactical-border text-amber-300 text-xs rounded-lg px-2.5 py-1.5 outline-none font-mono">
-            <option value="TODAY">⚡ เวรวันนี้</option>
-            <option value="M">วันจันทร์ (M)</option>
-            <option value="T">วันอังคาร (T)</option>
-            <option value="W">วันพุธ (W)</option>
-            <option value="Ts">วันพฤหัสบดี (Ts)</option>
-            <option value="F">วันศุกร์ (F)</option>
-            <option value="S">เวรพิเศษ (S)</option>
-            <option value="ALL">รวมสารวัตรทุกคน</option>
-          </select>
-          <a href="/attendance-sheet" target="_blank" class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black text-xs font-bold flex items-center gap-1 shadow transition">
-            <span>📄</span> ฟอร์ม A4 มาตรฐาน AI/OMR
-          </a>
-          <button onclick="window.print()" class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold flex items-center gap-1 shadow">
-            <span>🖨️</span> พิมพ์ / PDF
-          </button>
-          <button onclick="closeAttendanceSheetModal()" class="w-8 h-8 rounded-lg bg-tactical-800 text-slate-300 hover:text-white flex items-center justify-center text-sm">✕</button>
-        </div>
-      </div>
-
-      <div class="p-4 sm:p-6 overflow-y-auto flex-1 bg-white text-black font-sans custom-scrollbar" id="printable-attendance-area">
-        <!-- Printable Sheet Header -->
-        <div class="text-center pb-4 border-b-2 border-black flex items-center justify-between">
-          <img src="/assets/school_emblem.png" class="w-12 h-12 object-contain" alt="ตราโรงเรียน">
-          <div class="leading-tight">
-            <h2 class="font-bold text-base sm:text-lg">บันทึกเวลาปฏิบัติหน้าที่สารวัตรนักเรียน</h2>
-            <p class="text-xs text-gray-700">กลุ่มงานบริหารกิจการนักเรียน • โรงเรียนพระนารายณ์ จังหวัดลพบุรี</p>
-            <p id="attendance-shift-subtitle" class="text-xs font-semibold text-blue-900 mt-0.5">เวรประจำวัน: กำลังคำนวณ...</p>
-          </div>
-          <img src="/assets/logo.png" class="w-12 h-12 object-contain" alt="ตราสารวัตร">
-        </div>
-
-        <!-- Attendance Table -->
-        <table class="w-full text-xs border-collapse border border-black mt-4 text-left">
-          <thead>
-            <tr class="bg-gray-100 text-center font-bold">
-              <th class="border border-black p-1 w-10">ลำดับ</th>
-              <th class="border border-black p-1 w-20">รหัสเวร</th>
-              <th class="border border-black p-1">ชื่อ - สกุล</th>
-              <th class="border border-black p-1 w-16">ชื่อเล่น</th>
-              <th class="border border-black p-1 w-16">ชั้น/ห้อง</th>
-              <th class="border border-black p-1 w-24">เวลามา</th>
-              <th class="border border-black p-1 w-24">ลายมือชื่อ</th>
-              <th class="border border-black p-1">ผลการปฏิบัติหน้าที่ / หมายเหตุ</th>
-            </tr>
-          </thead>
-          <tbody id="attendance-table-body">
-            <!-- Rendered by JS -->
-          </tbody>
-        </table>
-
-        <!-- Sign-off signatures -->
-        <div class="grid grid-cols-2 gap-8 mt-10 pt-6 text-xs text-center">
-          <div class="space-y-1">
-            <p class="text-gray-500">...........................................................................</p>
-            <p class="font-bold">(                                        )</p>
-            <p class="text-gray-700">หัวหน้าเวรประจำวันผู้ตรวจเช็ค</p>
-          </div>
-          <div class="space-y-1">
-            <p class="text-gray-500">...........................................................................</p>
-            <p class="font-bold">(                                        )</p>
-            <p class="text-gray-700">ครูที่ปรึกษางานสารวัตรนักเรียน</p>
-          </div>
-        </div>
-      </div>
     </div>
   </div>
 
@@ -1272,72 +1179,6 @@
     }
 
     // ==========================================================
-    // 📋 ATTENDANCE SHEET EXPORT
-    // ==========================================================
-    function openAttendanceSheetModal() {
-      const m = document.getElementById('attendance-sheet-modal');
-      if (m) {
-        renderAttendanceSheetTable('TODAY');
-        m.classList.remove('hidden');
-      }
-    }
-
-    function closeAttendanceSheetModal() {
-      const m = document.getElementById('attendance-sheet-modal');
-      if (m) m.classList.add('hidden');
-    }
-
-    function renderAttendanceSheetTable(selectedShift = 'TODAY') {
-      const tbody = document.getElementById('attendance-table-body');
-      const subtitle = document.getElementById('attendance-shift-subtitle');
-      if (!tbody) return;
-
-      const dayIndex = new Date().getDay();
-      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
-      const currentTodayCode = dayCodeMap[dayIndex] || 'M';
-
-      let targetShift = selectedShift;
-      if (selectedShift === 'TODAY') targetShift = currentTodayCode;
-
-      let officers = allMembers;
-      if (targetShift !== 'ALL') {
-        officers = officers.filter(m => m.duty_day && m.duty_day.startsWith(targetShift));
-      }
-
-      const shiftsNames = {
-        M: 'วันจันทร์',
-        T: 'วันอังคาร',
-        W: 'วันพุธ',
-        Ts: 'วันพฤหัสบดี',
-        F: 'วันศุกร์',
-        S: 'เวรพิเศษ (วันเสาร์/กิจกรรม)',
-        ALL: 'รวมสารวัตรนักเรียนทั้งหมด'
-      };
-
-      if (subtitle) {
-        subtitle.textContent = `สายเวร: [${targetShift}] ${shiftsNames[targetShift] || ''} • จำนวนสารวัตร: ${officers.length} นาย`;
-      }
-
-      if (officers.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" class="text-center p-4 text-gray-500">ไม่มีรายชื่อสารวัตรในสายเวรนี้</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = officers.map((m, idx) => `
-        <tr class="${idx % 2 === 1 ? 'bg-gray-50' : ''}">
-          <td class="border border-black p-1 text-center font-mono">${idx + 1}</td>
-          <td class="border border-black p-1 font-bold font-mono text-center">${m.duty_id || '-'}</td>
-          <td class="border border-black p-1">${m.first_name || ''} ${m.last_name || ''}</td>
-          <td class="border border-black p-1 text-center">${m.nickname || '-'}</td>
-          <td class="border border-black p-1 text-center font-mono">${m.grade_class || '-'}</td>
-          <td class="border border-black p-1 text-center font-mono text-gray-400">....:.... น.</td>
-          <td class="border border-black p-1 text-center font-mono text-gray-400">...................</td>
-          <td class="border border-black p-1 text-gray-400">................................................</td>
-        </tr>
-      `).join('');
-    }
-
-    // ==========================================================
     // 📱 COPY DAILY LINE BRIEF
     // ==========================================================
     function copyDailyLineBrief() {
@@ -1438,7 +1279,7 @@
       {
         targetId: 'daily-ops-controls',
         title: '⚡ เครื่องมือปฏิบัติการด่วน',
-        desc: 'พิมพ์แบบฟอร์มใบเช็คชื่อประจำเวร (Print/PDF), คัดลอกสรุปเวรส่งไลน์, บันทึกเหตุการณ์ด่วน และเข้าสู่สตูดิโอทำบัตร'
+        desc: 'คัดลอกสรุปเวรส่งไลน์, บันทึกเหตุการณ์ด่วน, ตรวจสอบบัตรสารวัตร และเข้าสู่สตูดิโอทำบัตร'
       },
       {
         targetId: 'roster-search-input',

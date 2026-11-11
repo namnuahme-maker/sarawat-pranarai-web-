@@ -1567,23 +1567,20 @@ app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7.2.2 หน้าแบบฟอร์มใบเช็คชื่อ A4 มาตรฐาน AI/OMR (/attendance-sheet, /print-attendance)
+// 7.2.2 ปิดการเข้าถึงหน้าใบเช็คชื่อ/สแกนเช็คชื่อ (Redirect สู่หน้าหลัก)
 // -------------------------------------------------------------
-app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
+app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance', '/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
+  res.redirect('/');
 });
 
 // -------------------------------------------------------------
-// 7.2.3 หน้าเว็บสแกนใบเช็คชื่อ A4 ดิจิทัล (/attendance-scan, /scan-attendance)
+// 7.3 หน้าเว็บ Modern SaaS Landing Page (/landing)
 // -------------------------------------------------------------
-app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'attendance-scan.html'));
+app.get(['/landing', '/landing.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
-// -------------------------------------------------------------
-// 7.3 หน้าเว็บ Modern SaaS Landing Page (/, /landing)
-// -------------------------------------------------------------
-app.get(['/', '/landing', '/landing.html'], (req, res) => {
+app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
