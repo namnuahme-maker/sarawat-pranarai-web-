@@ -225,18 +225,21 @@
       </div>
 
       <!-- Card 3: คดี & คำขอปฏิบัติหน้าที่ -->
-      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-crimson-500/40 transition">
+      <div onclick="switchTab('incidents')" class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 cursor-pointer transition group" title="คลิกเพื่อเปิดดูรายการบันทึกเหตุการณ์และคดีทั้งหมด">
         <div class="flex items-center justify-between text-slate-400 text-xs">
-          <span>คดี & คำขอปฏิบัติ</span>
-          <span class="text-rose-400 text-sm">🚨</span>
+          <span>คดี & คลิป Bodycam</span>
+          <span class="text-rose-400 text-sm group-hover:scale-110 transition">🚨</span>
         </div>
         <div class="mt-1.5 flex items-baseline gap-2">
           <span id="kpi-total-cases" class="counter-value text-2xl font-bold font-mono text-slate-100">0</span>
           <span class="text-xs text-slate-400 font-mono">เรื่อง</span>
         </div>
-        <div class="mt-1 text-[11px] text-amber-400 flex items-center gap-1 font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-          <span id="kpi-cases-pending">รอดำเนินการ 0</span>
+        <div class="mt-1 flex items-center justify-between text-[11px] font-mono">
+          <div class="text-amber-400 flex items-center gap-1">
+            <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
+            <span id="kpi-cases-pending">รอดำเนินการ 0</span>
+          </div>
+          <span class="text-slate-500 group-hover:text-amber-400 transition text-[10px]">ดูสารบบคดี ↗</span>
         </div>
       </div>
 
@@ -460,6 +463,46 @@
     </section>
 
   </main>
+
+  <!-- ========================================================== -->
+  <!-- 📹 EVIDENCE & BODYCAM VIEWER MODAL -->
+  <!-- ========================================================== -->
+  <div id="evidence-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="relative bg-tactical-900 border border-tactical-border rounded-2xl max-w-2xl w-full p-5 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-tactical-border/80 pb-3 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">
+            📹
+          </div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+              <span id="evidence-modal-title">แฟ้มคลิป Bodycam & หลักฐาน</span>
+            </h3>
+            <p class="text-[11px] text-slate-400 font-mono" id="evidence-modal-subtitle">รหัสคดี: CASE-XXXX</p>
+          </div>
+        </div>
+        <button onclick="closeEvidenceModal()" class="w-8 h-8 rounded-lg bg-tactical-800 hover:bg-tactical-700 text-slate-400 hover:text-white flex items-center justify-center transition text-sm">
+          ✕
+        </button>
+      </div>
+
+      <!-- Evidence Items Container (Scrollable) -->
+      <div id="evidence-modal-content" class="space-y-4 overflow-y-auto flex-1 pr-1">
+        <!-- Rendered by JS -->
+      </div>
+
+      <!-- Footer Actions -->
+      <div class="pt-3 border-t border-tactical-border/80 flex items-center justify-between gap-2 flex-shrink-0">
+        <a id="evidence-modal-upload-btn" href="/bodycam-upload" class="px-3.5 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-semibold text-xs flex items-center gap-1.5 transition shadow">
+          <span>+</span> อัปโหลดคลิปเพิ่มเข้าคดีนี้
+        </a>
+        <button onclick="closeEvidenceModal()" class="px-3.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 text-slate-300 hover:text-white text-xs border border-tactical-border transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================== -->
   <!-- 🪪 DIGITAL ID CARD MODAL (SINGLE-VIEW CR80 STANDARD) -->
@@ -1013,7 +1056,7 @@
       renderRoster(allMembers);
     }
 
-    // 8. Render Cases List
+    // 8. Render Cases List with Bodycam Evidence Controls
     function renderCases(cases) {
       const container = document.getElementById('cases-list-container');
       if (!container) return;
@@ -1030,8 +1073,12 @@
 
       container.innerHTML = filtered.map(c => {
         const isPending = (c.status === 'PENDING' || c.status === 'PENDING_APPROVAL');
+        const rawUrls = c.evidence_urls || [];
+        const evidenceUrls = Array.isArray(rawUrls) ? rawUrls : (rawUrls ? [rawUrls] : []);
+        const evidenceCount = evidenceUrls.length;
+
         return `
-          <div class="p-3.5 rounded-xl bg-tactical-900 border ${isPending ? 'border-amber-500/40' : 'border-tactical-border'} space-y-2">
+          <div class="p-3.5 rounded-xl bg-tactical-900 border ${isPending ? 'border-amber-500/40' : 'border-tactical-border'} space-y-2.5">
             <div class="flex items-center justify-between">
               <span class="text-xs font-mono font-bold px-2 py-0.5 rounded bg-tactical-800 text-amber-400 border border-tactical-border">${c.case_id || 'CASE'}</span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded ${isPending ? 'bg-amber-500/20 text-amber-300' : 'bg-emerald-500/20 text-emerald-300'} font-semibold">
@@ -1040,10 +1087,25 @@
             </div>
             <div>
               <div class="font-bold text-xs text-slate-200">${c.category || 'เหตุการณ์ทั่วไป'}</div>
-              <div class="text-[11px] text-slate-400 mt-0.5">${c.description || 'ไม่มีรายละเอียด'}</div>
+              <div class="text-[11px] text-slate-400 mt-0.5 line-clamp-2">${c.description || 'ไม่มีรายละเอียด'}</div>
             </div>
-            <div class="pt-2 border-t border-tactical-border/60 flex items-center justify-between text-[10px] text-slate-400 font-mono">
-              <span>สถานที่: ${c.location || '-'}</span>
+
+            <!-- 📹 Bodycam & Evidence Toolbar -->
+            <div class="pt-2 border-t border-tactical-border/60 flex items-center justify-between gap-2">
+              ${evidenceCount > 0 ? `
+                <button onclick="openEvidenceModal('${c.case_id}')" class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-[11px] font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+                  <span>📹</span> ดูคลิป/หลักฐาน (${evidenceCount})
+                </button>
+              ` : `
+                <span class="text-[10px] text-slate-500 font-mono">ยังไม่มีคลิป Bodycam แนบ</span>
+              `}
+              <a href="/bodycam-upload?caseId=${c.case_id}" class="text-[10px] text-slate-400 hover:text-amber-300 flex items-center gap-1 transition font-mono hover:underline">
+                + แนบคลิปเพิ่ม
+              </a>
+            </div>
+
+            <div class="pt-1.5 border-t border-tactical-border/40 flex items-center justify-between text-[10px] text-slate-500 font-mono">
+              <span>📍 ${c.location || '-'}</span>
               <span>${c.incident_date_time ? new Date(c.incident_date_time).toLocaleDateString('th-TH') : '-'}</span>
             </div>
           </div>
@@ -1100,6 +1162,77 @@
 
     function closeCardModal() {
       document.getElementById('card-modal').classList.add('hidden');
+    }
+
+    // 📹 Open & Close Evidence / Bodycam Modal
+    function openEvidenceModal(caseId) {
+      const c = allCases.find(item => item.case_id === caseId);
+      if (!c) return;
+
+      const modal = document.getElementById('evidence-modal');
+      const title = document.getElementById('evidence-modal-title');
+      const subtitle = document.getElementById('evidence-modal-subtitle');
+      const content = document.getElementById('evidence-modal-content');
+      const uploadBtn = document.getElementById('evidence-modal-upload-btn');
+
+      title.textContent = `แฟ้มคลิป Bodycam & หลักฐาน • ${c.category || 'เหตุการณ์'}`;
+      subtitle.textContent = `รหัสคดี: ${c.case_id} • วันที่: ${c.incident_date_time ? new Date(c.incident_date_time).toLocaleString('th-TH') : '-'}`;
+      uploadBtn.href = `/bodycam-upload?caseId=${c.case_id}`;
+
+      const rawUrls = c.evidence_urls || [];
+      const urls = Array.isArray(rawUrls) ? rawUrls : (rawUrls ? [rawUrls] : []);
+
+      if (urls.length === 0) {
+        content.innerHTML = `
+          <div class="p-8 text-center text-xs text-slate-500 space-y-2">
+            <span class="text-3xl block">📭</span>
+            <p>ยังไม่มีการแนบคลิปหรือไฟล์หลักฐานในคดีนี้</p>
+          </div>
+        `;
+      } else {
+        content.innerHTML = urls.map((url, idx) => {
+          const cleanUrl = (url || '').split('?')[0].toLowerCase();
+          const isVideo = cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.mkv');
+          const isImage = cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.webp');
+
+          return `
+            <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${idx + 1}</span>
+                <a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
+                  เปิดไฟล์เต็มจอ (Direct Link) ↗
+                </a>
+              </div>
+              
+              <div class="rounded-lg overflow-hidden bg-black flex items-center justify-center">
+                ${isVideo ? `
+                  <video controls playsinline class="w-full max-h-72 bg-black rounded-lg">
+                    <source src="${url}">
+                    เบราว์เซอร์ไม่รองรับแท็ก video
+                  </video>
+                ` : isImage ? `
+                  <img src="${url}" alt="หลักฐาน ${idx + 1}" class="w-full max-h-72 object-contain bg-black rounded-lg">
+                ` : `
+                  <div class="p-5 text-center text-xs w-full space-y-2">
+                    <p class="text-slate-300 font-mono break-all">${url}</p>
+                    <a href="${url}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 transition">
+                      เปิดดูไฟล์หลักฐานในแท็บใหม่ ↗
+                    </a>
+                  </div>
+                `}
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeEvidenceModal() {
+      const modal = document.getElementById('evidence-modal');
+      modal.querySelectorAll('video').forEach(v => v.pause());
+      modal.classList.add('hidden');
     }
 
     // Download Card as PNG
