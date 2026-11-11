@@ -129,13 +129,13 @@
         </p>
       </div>
 
-      <!-- ปุ่มเลือกวันทั้ง 6 ผลัดเวร (Day Selection Chips) -->
+      <!-- ปุ่มเลือกวันทั้ง 5 ผลัดเวร (Day Selection Chips) -->
       <div class="space-y-1.5">
         <div class="text-[11px] text-slate-300 font-medium flex items-center justify-between">
-          <span>เลือกรอบเวรประจำวัน (เป็นค่าสำรองกรณีไม่ติด QR):</span>
+          <span>เลือกรอบเวรประจำวัน (5 วันทำการ):</span>
           <span id="selected-shift-badge-text" class="text-amber-400 font-bold">เวรวันพุธ (Shift W)</span>
         </div>
-        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2" id="day-chips-grid">
+        <div class="grid grid-cols-5 gap-1.5 sm:gap-2" id="day-chips-grid">
           
           <button onclick="selectShift('M')" id="chip-M" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">จันทร์</span>
@@ -162,62 +162,38 @@
             <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift F</span>
           </button>
 
-          <button onclick="selectShift('S')" id="chip-S" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
-            <span class="text-xs font-bold text-slate-200">เวรพิเศษ</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift S</span>
-          </button>
-
         </div>
       </div>
 
-      <!-- สรุปผลัดเวร, คอลัมน์วันที่ และกล่องแจ้งเตือนรายการลา Discord -->
-      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-2.5">
-        <div class="flex items-center justify-between">
+      <!-- สรุปผลัดเวร, สัปดาห์/วันที่ และกล่องแจ้งเตือนรายการลา Discord -->
+      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-3">
+        <!-- แถบเวรและตัวเลือกสัปดาห์/วันที่อัตโนมัติ (Unified Minimalist Selector) -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
           <div class="flex items-center gap-2">
-            <span class="text-base">🛡️</span>
+            <span class="text-lg">🛡️</span>
             <div>
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                <span id="selected-shift-name">เวรวันพุธ (Shift W)</span>
-                <span class="text-slate-500">•</span>
+                <span id="selected-shift-name" class="text-amber-400">เวรวันพุธ (Shift W)</span>
+                <span class="text-slate-600">•</span>
                 <span id="selected-member-count" class="text-slate-300 font-semibold font-mono text-[11px]">3 นาย</span>
+              </div>
+              <div class="text-[10px] text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
+                <span>⚡</span>
+                <span id="auto-date-status">วันที่ตรงรอบเวรอัตโนมัติ</span>
               </div>
             </div>
           </div>
-        </div>
 
-        <!-- ตัวเลือกรูปแบบการกรองวันที่เช็คชื่อ (2 รูปแบบตามคำสั่งการ) -->
-        <div class="space-y-1.5 pt-1 border-t border-slate-800">
-          <div class="text-[11px] text-slate-300 font-medium flex items-center justify-between">
-            <span>รูปแบบการระบุวันที่เช็คชื่อ:</span>
-            <span id="date-mode-badge-label" class="text-emerald-400 font-bold font-mono">2. วัน ณ วันนั้น (Default วันนี้)</span>
-          </div>
-
-          <div class="grid grid-cols-2 gap-2 text-xs">
-            <!-- Mode 1: เรียงวันจันทร์ -->
-            <button type="button" onclick="setDateFilterMode('MONDAY')" id="btn-mode-monday" class="p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-slate-850 border-slate-700 text-slate-300 hover:border-amber-500/50">
-              <span class="text-sm">📋</span>
-              <span class="font-bold">1. เรียงวันจันทร์ (A4)</span>
-            </button>
-
-            <!-- Mode 2: วัน ณ วันนั้น (Default) -->
-            <button type="button" onclick="setDateFilterMode('TODAY')" id="btn-mode-today" class="p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-bold shadow-sm">
-              <span class="text-sm">🗓️</span>
-              <span class="font-bold">2. วัน ณ วันนั้น (Default)</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-between pt-1">
-          <div class="text-left" id="exact-date-picker-container">
-            <span class="text-[10px] text-slate-400 block mb-0.5">เลือกวันที่ระบุ (ปฏิทิน):</span>
-            <input type="date" id="exact-date-picker" onchange="onExactDatePicked(this.value)" class="bg-slate-900 border border-slate-700 focus:border-amber-400 rounded-lg px-2 py-1 text-xs text-slate-200 font-mono">
-          </div>
-
-          <div class="text-right">
-            <label class="block text-[10px] text-slate-400 mb-0.5" id="col-select-label">คอลัมน์ในกระดาษ:</label>
-            <select id="date-col-select" onchange="onDateColChanged()" class="bg-slate-900 border border-amber-500/40 rounded-lg px-2 py-1 text-xs text-amber-300 font-mono font-bold focus:outline-none focus:border-amber-400">
+          <!-- ตัวเลือกสัปดาห์ / วันที่ (12 สัปดาห์ A4) -->
+          <div class="flex items-center gap-2 self-start sm:self-auto">
+            <label for="date-col-select" class="text-[11px] font-semibold text-slate-300 whitespace-nowrap flex items-center gap-1">
+              <span>📅</span> สัปดาห์/วันที่:
+            </label>
+            <select id="date-col-select" onchange="onDateColChanged()" class="bg-slate-900 border border-amber-500/50 hover:border-amber-400 rounded-xl px-3 py-1.5 text-xs text-amber-300 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition shadow-inner">
               <!-- Dynamic Options Generated via JS -->
             </select>
+            <!-- Hidden input for exact ISO date storage for backend submission -->
+            <input type="hidden" id="exact-date-picker">
           </div>
         </div>
 
@@ -483,7 +459,6 @@
     let discordLeavesMap = {}; // Map of duty_id -> leave info from Discord
     let currentShiftCode = 'W';
     let currentTargetCol = '11/11';
-    let dateFilterMode = 'TODAY'; // 2 โหมด: 'MONDAY' (เรียงวันจันทร์) | 'TODAY' (วัน ณ วันนั้น Default วันนี้)
     let todayInfo = {};
     let hybridTelemetry = {
       qrFound: false,
@@ -603,7 +578,7 @@
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
       ];
-      const shiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+      const shiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'M', 0: 'M' };
 
       const dayOfWeek = now.getDay();
       const dayNum = now.getDate();
@@ -614,7 +589,7 @@
       const dateIso = `${now.getFullYear()}-${String(monthNum).padStart(2, '0')}-${String(dayNum).padStart(2, '0')}`;
       const mmdd = `${monthNum}/${dayNum}`; // เช่น 11/11
       const fullThai = `${dayNames[dayOfWeek]}ที่ ${dayNum} ${monthNames[monthIdx]} ${yearBE}`;
-      const defaultShift = shiftMap[dayOfWeek] || 'W';
+      const defaultShift = shiftMap[dayOfWeek] || 'M';
 
       todayInfo = {
         now,
@@ -663,120 +638,51 @@
       return dates;
     }
 
-    function get12Mondays(qNumber = currentQuarter, acadYear = currentYear) {
-      const ceYear = acadYear - 543;
-      let baseMonday;
-      if (qNumber === 1) {
-        baseMonday = new Date(ceYear, 10, 9);
-      } else if (qNumber === 2) {
-        baseMonday = new Date(new Date(ceYear, 10, 9).getTime() + 12 * 7 * 86400000);
-      } else if (qNumber === 3) {
-        baseMonday = new Date(ceYear, 4, 18);
-      } else {
-        baseMonday = new Date(new Date(ceYear, 4, 18).getTime() + 12 * 7 * 86400000);
-      }
+    function getCurrentWeekIndex(qNumber = currentQuarter, acadYear = currentYear) {
+      const mondays = getQuarter12Dates('M', qNumber, acadYear);
+      if (!mondays || mondays.length === 0) return 0;
 
-      const items = [];
-      for (let i = 0; i < 12; i++) {
-        const d = new Date(baseMonday.getTime() + (i * 7) * 86400000);
-        const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
-        const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        items.push({ week: i + 1, mmdd, iso });
-      }
-      return items;
-    }
+      const now = new Date();
+      const todayMid = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
 
-    function setDateFilterMode(mode) {
-      dateFilterMode = mode;
-      const btnMonday = document.getElementById('btn-mode-monday');
-      const btnToday = document.getElementById('btn-mode-today');
-      const badgeLabel = document.getElementById('date-mode-badge-label');
-      const colLabel = document.getElementById('col-select-label');
-
-      if (mode === 'MONDAY') {
-        btnMonday.className = "p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-amber-500/20 border-amber-500/50 text-amber-300 font-bold shadow-sm";
-        btnToday.className = "p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-slate-850 border-slate-700 text-slate-300 hover:border-emerald-500/50";
-        badgeLabel.className = "text-amber-400 font-bold font-mono text-[11px]";
-        badgeLabel.textContent = "1. เช็คแบบเรียงวันจันทร์ (12 สัปดาห์ A4)";
-        colLabel.textContent = "คอลัมน์วันจันทร์ในกระดาษ:";
-      } else {
-        dateFilterMode = 'TODAY';
-        btnToday.className = "p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-bold shadow-sm";
-        btnMonday.className = "p-2 rounded-xl border transition flex items-center justify-center gap-1.5 bg-slate-850 border-slate-700 text-slate-300 hover:border-amber-500/50";
-        badgeLabel.className = "text-emerald-400 font-bold font-mono text-[11px]";
-        badgeLabel.textContent = "2. วัน ณ วันนั้น (Default วันนี้)";
-        colLabel.textContent = "วันที่เช็คชื่อ:";
-        
-        const picker = document.getElementById('exact-date-picker');
-        if (picker) picker.value = todayInfo.dateIso;
-      }
-
-      renderDateSelector();
-    }
-
-    function renderDateSelector() {
-      const selectEl = document.getElementById('date-col-select');
-      const picker = document.getElementById('exact-date-picker');
-
-      if (dateFilterMode === 'MONDAY') {
-        const mondays = get12Mondays();
-        selectEl.innerHTML = mondays.map(m => {
-          return `<option value="${m.mmdd}" data-iso="${m.iso}">สัปดาห์ที่ ${m.week} (${m.mmdd})</option>`;
-        }).join('');
-
-        currentTargetCol = mondays[0].mmdd;
-        selectEl.value = mondays[0].mmdd;
-        if (picker) picker.value = mondays[0].iso;
-      } else {
-        // Mode 2: วัน ณ วันนั้น (Default วันนี้)
-        if (picker) picker.value = todayInfo.dateIso;
-        const shiftDates = getQuarter12Dates(currentShiftCode);
-        
-        // ตัวเลือกหลัก: วัน ณ วันนี้
-        let optionsHtml = `<option value="${todayInfo.mmdd}" data-iso="${todayInfo.dateIso}" selected>★ วันนี้ (${todayInfo.mmdd}) - วัน ณ วันนั้น</option>`;
-        
-        // ตัวเลือกรอง: คอลัมน์ประจำสัปดาห์ของผลัดนี้
-        if (Array.isArray(shiftDates)) {
-          shiftDates.forEach(item => {
-            const dVal = (typeof item === 'object') ? item.mmdd : item;
-            const dIso = (typeof item === 'object') ? item.iso : '';
-            const wNum = (typeof item === 'object') ? item.week : '';
-            if (dVal !== todayInfo.mmdd) {
-              optionsHtml += `<option value="${dVal}" data-iso="${dIso}">สัปดาห์ที่ ${wNum} (${dVal})</option>`;
-            }
-          });
+      for (let i = 0; i < mondays.length; i++) {
+        const [y, m, d] = mondays[i].iso.split('-').map(Number);
+        const monTime = new Date(y, m - 1, d).getTime();
+        const sunTime = monTime + (6 * 86400000) + 86399999;
+        if (todayMid >= monTime && todayMid <= sunTime) {
+          return i;
         }
-
-        selectEl.innerHTML = optionsHtml;
-        selectEl.value = todayInfo.mmdd;
-        currentTargetCol = todayInfo.mmdd;
       }
 
-      updateColHighlights();
-      const targetIso = (picker && picker.value) ? picker.value : todayInfo.dateIso;
-      fetchDiscordLeaves(currentShiftCode, targetIso);
+      const [fy, fm, fd] = mondays[0].iso.split('-').map(Number);
+      if (todayMid < new Date(fy, fm - 1, fd).getTime()) return 0;
+      return mondays.length - 1;
     }
 
-    function onExactDatePicked(dateStr) {
-      if (!dateStr) return;
-      const parts = dateStr.split('-');
-      if (parts.length < 3) return;
-      const mmdd = `${parseInt(parts[1], 10)}/${parseInt(parts[2], 10)}`;
-      currentTargetCol = mmdd;
-
+    function renderDateSelector(targetWeekIdx = null) {
       const selectEl = document.getElementById('date-col-select');
-      let opt = Array.from(selectEl.options).find(o => o.value === mmdd);
-      if (!opt) {
-        opt = document.createElement('option');
-        opt.value = mmdd;
-        opt.dataset.iso = dateStr;
-        opt.textContent = `📌 วันที่เลือก: ${mmdd} ${mmdd === todayInfo.mmdd ? '★ วันนี้' : ''}`;
-        selectEl.insertBefore(opt, selectEl.firstChild);
-      }
-      selectEl.value = mmdd;
+      const hiddenPicker = document.getElementById('exact-date-picker');
+      const shiftDates = getQuarter12Dates(currentShiftCode, currentQuarter, currentYear);
+      const currentWeek = getCurrentWeekIndex(currentQuarter, currentYear);
+      const activeIdx = (typeof targetWeekIdx === 'number' && targetWeekIdx >= 0 && targetWeekIdx < shiftDates.length)
+        ? targetWeekIdx
+        : currentWeek;
 
-      updateColHighlights();
-      fetchDiscordLeaves(currentShiftCode, dateStr);
+      selectEl.innerHTML = shiftDates.map((item, idx) => {
+        const isThisWeek = (idx === currentWeek);
+        const isSelected = (idx === activeIdx);
+        const badge = isThisWeek ? ' ★ สัปดาห์นี้' : '';
+        return `<option value="${item.mmdd}" data-iso="${item.iso}" data-week="${item.week}" ${isSelected ? 'selected' : ''}>สัปดาห์ที่ ${item.week} (${item.mmdd})${badge}</option>`;
+      }).join('');
+
+      selectEl.selectedIndex = activeIdx;
+      if (shiftDates[activeIdx]) {
+        currentTargetCol = shiftDates[activeIdx].mmdd;
+        const targetIso = shiftDates[activeIdx].iso;
+        if (hiddenPicker) hiddenPicker.value = targetIso;
+        updateColHighlights();
+        fetchDiscordLeaves(currentShiftCode, targetIso);
+      }
     }
 
     // ----------------------------------------------------------
@@ -799,25 +705,39 @@
       document.getElementById('selected-shift-name').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
       document.getElementById('selected-shift-badge-text').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
 
-      renderDateSelector();
+      // Automatically select the current week for this shift
+      const currentWeekIdx = getCurrentWeekIndex(currentQuarter, currentYear);
+      renderDateSelector(currentWeekIdx);
+
+      const statusEl = document.getElementById('auto-date-status');
+      if (statusEl) {
+        statusEl.textContent = `เลือก ${SHIFT_NAMES[shiftKey]} สัปดาห์นี้อัตโนมัติ`;
+      }
+
       await loadRosterForShift(shiftKey);
     }
 
     function onDateColChanged() {
       const selectEl = document.getElementById('date-col-select');
-      currentTargetCol = selectEl.value;
       const selectedOpt = selectEl.options[selectEl.selectedIndex];
-      if (selectedOpt && selectedOpt.dataset.iso) {
-        const picker = document.getElementById('exact-date-picker');
-        if (picker) picker.value = selectedOpt.dataset.iso;
+      if (selectedOpt) {
+        currentTargetCol = selectedOpt.value;
+        const targetIso = selectedOpt.dataset.iso || '';
+        const hiddenPicker = document.getElementById('exact-date-picker');
+        if (hiddenPicker) hiddenPicker.value = targetIso;
+        updateColHighlights();
+        fetchDiscordLeaves(currentShiftCode, targetIso);
+
+        const statusEl = document.getElementById('auto-date-status');
+        if (statusEl) {
+          statusEl.textContent = `เลือกสัปดาห์ที่ ${selectedOpt.dataset.week} (${selectedOpt.value})`;
+        }
       }
-      updateColHighlights();
-      const targetIso = document.getElementById('exact-date-picker')?.value || todayInfo.dateIso;
-      fetchDiscordLeaves(currentShiftCode, targetIso);
     }
 
     function updateColHighlights() {
-      document.getElementById('guide-col-highlight').textContent = `[${currentTargetCol}]`;
+      const guide = document.getElementById('guide-col-highlight');
+      if (guide) guide.textContent = `[${currentTargetCol}]`;
     }
 
     async function fetchDiscordLeaves(shiftKey, targetDateIso) {
