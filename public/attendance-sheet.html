@@ -549,6 +549,17 @@
 
     // Initialize Page
     function initMonthlySheet() {
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('shift')) {
+        currentShift = urlParams.get('shift');
+        const sSelect = document.getElementById('select-shift');
+        if (sSelect) sSelect.value = currentShift;
+      }
+      if (urlParams.get('month')) {
+        currentMonthStr = urlParams.get('month');
+        const mSelect = document.getElementById('select-month');
+        if (mSelect) mSelect.value = currentMonthStr;
+      }
       renderMonthlySheet();
     }
 
@@ -604,16 +615,11 @@
         document.getElementById('sign-deputy-label').textContent = `ชื่อ: [${deputy.duty_id}] ${deputy.name}`;
       }
 
-      // Generate Session Header QR Code Payload (Monthly Machine-Readable JSON)
-      const qrPayload = JSON.stringify({
-        system: "SARAWAT_OS",
-        type: "MONTHLY_A4_OMR",
-        shift: currentShift,
-        month: currentMonthStr,
-        weeks_count: computedWeeks.length,
-        dates: computedWeeks.map(d => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`),
-        roster: roster.map(m => m.duty_id)
-      });
+      // Clean, High-Readability QR Code (Point phone camera -> Opens web sheet directly)
+      const baseUrl = window.location.protocol.startsWith('http') 
+        ? `${window.location.origin}${window.location.pathname}`
+        : 'https://sarawat-pranarai-web.onrender.com/attendance-sheet';
+      const qrPayload = `${baseUrl}?shift=${currentShift}&month=${currentMonthStr}`;
 
       const qrContainer = document.getElementById('session-qrcode');
       qrContainer.innerHTML = '';
