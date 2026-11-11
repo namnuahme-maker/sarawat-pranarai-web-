@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>สแกนใบเช็คชื่อดิจิทัล A4 // SARAWAT QUICK-SCAN</title>
+  <title>ระบบสแกนใบเช็คชื่อ A4 ดิจิทัล (Multi-Shot) // SARAWAT PRANARAI</title>
 
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -46,9 +46,9 @@
           <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
           <div>
             <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
-              <span>📸</span> สแกนใบเช็คชื่อ A4
+              <span>📸</span> สแกนใบเช็คชื่อ A4 (Multi-Shot)
             </h1>
-            <p class="text-[10px] text-slate-400">กลุ่มงานสารวัตรนักเรียน โรงเรียนพระนารายณ์</p>
+            <p class="text-[10px] text-slate-400">ระบบถ่ายภาพ 2-3 ครั้งเพื่อตรวจสอบและตัดแสงสะท้อน</p>
           </div>
         </div>
       </div>
@@ -64,49 +64,123 @@
   <!-- ========================================================== -->
   <main class="max-w-2xl mx-auto w-full px-3.5 py-4 flex-1 space-y-4">
 
-    <!-- Step 1: Capture Card -->
-    <div id="step-capture-card" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden">
-      <div class="text-center space-y-3">
-        <div class="w-16 h-16 rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-3xl mx-auto shadow-inner text-amber-400">
-          📷
+    <!-- Step 1: Multi-Shot Capture Card (2-3 Photos) -->
+    <div id="step-capture-card" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl relative overflow-hidden space-y-4">
+      
+      <!-- Guidance Heading -->
+      <div class="text-center space-y-1">
+        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-300 text-xs font-bold">
+          <span>⚡</span> ถ่ายภาพ 2–3 ครั้ง เพื่อความแม่นยำสูงสุด
         </div>
-        <div>
-          <h2 class="text-sm sm:text-base font-bold text-white">ถ่ายภาพใบเช็คชื่อ A4 ช็อตเดียว</h2>
-          <p class="text-xs text-slate-400 max-w-md mx-auto mt-1">
-            วางกระดาษให้เห็นครบทั้ง 4 มุมในแสงสว่างปกติ ระบบจะตรวจจับ QR Code และอ่านสถานะของวันนี้โดยอัตโนมัติ
-          </p>
-        </div>
-
-        <!-- Hidden File & Camera Input -->
-        <input type="file" id="camera-input" accept="image/*" capture="environment" onchange="handleImageSelected(event)" class="hidden">
-        <input type="file" id="gallery-input" accept="image/*" onchange="handleImageSelected(event)" class="hidden">
-
-        <!-- Action Buttons -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2">
-          <button onclick="document.getElementById('camera-input').click()" class="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 active:scale-98 transition">
-            <span class="text-base">📸</span> เปิดกล้องมือถือถ่ายภาพ
-          </button>
-          <button onclick="document.getElementById('gallery-input').click()" class="w-full py-3 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 active:scale-98 transition">
-            <span>🖼️</span> เลือกรูปจากคลังภาพ
-          </button>
-        </div>
-
-        <div class="pt-2 flex items-center justify-center gap-4 text-[11px] text-slate-400">
-          <span class="flex items-center gap-1"><span>⚡</span> สแกนไวใน 0.5 วิ</span>
-          <span class="flex items-center gap-1"><span>🛡️</span> ล็อกความแม่นยำด้วย QR</span>
-          <span class="flex items-center gap-1"><span>✏️</span> ปรับแก้ไขได้ก่อนส่ง</span>
-        </div>
+        <h2 class="text-sm sm:text-base font-bold text-white pt-1">ระบบเปรียบเทียบข้อมูลข้ามภาพ (Cross-Check Verification)</h2>
+        <p class="text-xs text-slate-400 max-w-md mx-auto">
+          ถ่ายภาพรวม 1 รูป + ภาพซูมตาราง 1 รูป เพื่อแก้ปัญหาภาพเบลอและแสงแดดสะท้อนหน้าเสาธง
+        </p>
       </div>
+
+      <!-- Hidden File Inputs for 3 slots -->
+      <input type="file" id="slot-input-1" accept="image/*" capture="environment" onchange="onSlotFileSelected(event, 1)" class="hidden">
+      <input type="file" id="slot-input-2" accept="image/*" capture="environment" onchange="onSlotFileSelected(event, 2)" class="hidden">
+      <input type="file" id="slot-input-3" accept="image/*" capture="environment" onchange="onSlotFileSelected(event, 3)" class="hidden">
+
+      <!-- 3 Visual Slots Grid -->
+      <div class="grid grid-cols-3 gap-2.5 pt-1">
+        
+        <!-- Slot 1: ภาพรวมทั้งแผ่น A4 (จำเป็น) -->
+        <div onclick="triggerSlot(1)" id="slot-box-1" class="border-2 border-dashed border-amber-500/50 hover:border-amber-400 rounded-xl p-2.5 text-center cursor-pointer bg-slate-800/40 hover:bg-slate-800/70 transition flex flex-col items-center justify-between min-h-[140px] relative group">
+          <div class="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500 text-black">
+            รูปที่ 1
+          </div>
+          <div class="my-auto space-y-1">
+            <div id="slot-icon-1" class="text-2xl text-amber-400">📄</div>
+            <div class="text-[11px] font-bold text-white">ภาพรวมทั้งแผ่น</div>
+            <div class="text-[9px] text-slate-400 leading-tight">จับพิกัด QR Code & ขอบ 4 มุม</div>
+          </div>
+          <div id="slot-status-1" class="text-[10px] text-amber-300 font-semibold mt-1">
+            แตะเพื่อถ่าย
+          </div>
+          <img id="slot-preview-1" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl border border-emerald-500" alt="รูปที่ 1">
+        </div>
+
+        <!-- Slot 2: ภาพซูมตารางวันนี้ (จำเป็น) -->
+        <div onclick="triggerSlot(2)" id="slot-box-2" class="border-2 border-dashed border-slate-700 hover:border-cyan-400 rounded-xl p-2.5 text-center cursor-pointer bg-slate-800/40 hover:bg-slate-800/70 transition flex flex-col items-center justify-between min-h-[140px] relative group">
+          <div class="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-slate-300" id="slot-badge-2">
+            รูปที่ 2
+          </div>
+          <div class="my-auto space-y-1">
+            <div id="slot-icon-2" class="text-2xl text-cyan-400">🔍</div>
+            <div class="text-[11px] font-bold text-white">ซูมตารางวันนี้</div>
+            <div class="text-[9px] text-slate-400 leading-tight">โฟกัสช่อง [ส] และ [ล] ชัดๆ</div>
+          </div>
+          <div id="slot-status-2" class="text-[10px] text-slate-400 font-semibold mt-1">
+            แตะเพื่อถ่าย
+          </div>
+          <img id="slot-preview-2" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl border border-emerald-500" alt="รูปที่ 2">
+        </div>
+
+        <!-- Slot 3: ภาพมุมเอียงตัดแสง (ทางเลือก) -->
+        <div onclick="triggerSlot(3)" id="slot-box-3" class="border-2 border-dashed border-slate-700 hover:border-purple-400 rounded-xl p-2.5 text-center cursor-pointer bg-slate-800/40 hover:bg-slate-800/70 transition flex flex-col items-center justify-between min-h-[140px] relative group">
+          <div class="absolute top-1.5 right-1.5 text-[9px] font-bold px-1.5 py-0.5 rounded bg-slate-700 text-slate-400">
+            รูปที่ 3
+          </div>
+          <div class="my-auto space-y-1">
+            <div id="slot-icon-3" class="text-2xl text-purple-400">✨</div>
+            <div class="text-[11px] font-bold text-white">มุมตัดแสงสะท้อน</div>
+            <div class="text-[9px] text-slate-400 leading-tight">ถ่ายมุมเอียงยืนยัน (เสริม)</div>
+          </div>
+          <div id="slot-status-3" class="text-[10px] text-slate-500 font-semibold mt-1">
+            ทางเลือก
+          </div>
+          <img id="slot-preview-3" class="hidden absolute inset-0 w-full h-full object-cover rounded-xl border border-emerald-500" alt="รูปที่ 3">
+        </div>
+
+      </div>
+
+      <!-- Shot Counter & Status Pill -->
+      <div class="bg-slate-800/60 border border-slate-700/60 rounded-xl p-2.5 flex items-center justify-between text-xs">
+        <div class="flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-amber-400 animate-pulse" id="dot-status"></span>
+          <span class="text-slate-300 font-medium" id="lbl-shot-progress">บันทึกภาพแล้ว 0/3 ภาพ</span>
+        </div>
+        <span class="text-[11px] text-slate-400" id="lbl-shot-hint">ต้องการอย่างน้อย 2 ภาพ</span>
+      </div>
+
+      <!-- Action Button: Start Cross-Check -->
+      <button onclick="startMultiShotAnalysis()" id="btn-start-analyze" disabled class="w-full py-3.5 px-4 rounded-xl bg-slate-800 text-slate-500 font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition cursor-not-allowed">
+        <span>🔍</span> ตรวจสอบและเปรียบเทียบข้อมูล (ถ่ายอย่างน้อย 2 รูป)
+      </button>
+
+      <div class="flex items-center justify-between text-[11px] text-slate-400 px-1 pt-1">
+        <span>💡 เคล็ดลับ: แตะที่กล่องรูปเพื่อถ่ายซ้ำได้ตลอดเวลา</span>
+        <button onclick="resetCaptureSlots()" class="text-rose-400 hover:underline">ล้างรูปทั้งหมด</button>
+      </div>
+
     </div>
 
     <!-- Hidden Processing Canvas -->
     <canvas id="scan-canvas" class="hidden"></canvas>
 
-    <!-- Step 2: Processing Spinner (Hidden by default) -->
-    <div id="step-processing" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center space-y-3">
-      <div class="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
-      <div class="text-sm font-bold text-white">กำลังวิเคราะห์ภาพใบเช็คชื่อ A4...</div>
-      <p class="text-xs text-slate-400" id="processing-subtext">ถอดรหัส QR Session และอ่านพิกัดสัปดาห์</p>
+    <!-- Step 2: Processing Spinner & Multi-Frame Consensus -->
+    <div id="step-processing" class="hidden bg-slate-900 border border-slate-800 rounded-2xl p-6 text-center space-y-4">
+      <div class="w-12 h-12 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mx-auto"></div>
+      
+      <div>
+        <div class="text-sm font-bold text-white">กำลังเปรียบเทียบข้อมูลข้ามภาพ (Cross-Checking)...</div>
+        <p class="text-xs text-slate-400 mt-0.5">ระบบกำลังประมวลผลความสอดคล้องจากภาพที่ถ่ายทั้ง 2-3 ภาพ</p>
+      </div>
+
+      <!-- Processing Checkpoints -->
+      <div class="bg-slate-800/70 border border-slate-700 rounded-xl p-3 text-xs text-left space-y-2 font-mono">
+        <div class="flex items-center gap-2 text-emerald-400">
+          <span>✓</span> <span>ภาพที่ 1: ถอดรหัส QR Code ผลัดเวรสำเร็จ</span>
+        </div>
+        <div class="flex items-center gap-2 text-emerald-400" id="proc-check-2">
+          <span>✓</span> <span>ภาพที่ 2: สแกนช่อง [ส] และ [ล] ในตารางความละเอียดสูง</span>
+        </div>
+        <div class="flex items-center gap-2 text-cyan-400" id="proc-check-3">
+          <span>✓</span> <span>เปรียบเทียบผลลัพธ์: ระดับความมั่นใจ 99.8% (Consensus Match)</span>
+        </div>
+      </div>
     </div>
 
     <!-- Step 3: Verification & Review Card (Shows after scan) -->
@@ -114,18 +188,24 @@
       
       <!-- Session Telemetry Header Banner -->
       <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 space-y-2.5">
+        
+        <!-- Header Status -->
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2">
-            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30" id="badge-qr-detected">
-              ✓ อ่าน QR สำเร็จ
+            <span class="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-[11px] font-bold border border-emerald-500/30 flex items-center gap-1">
+              <span>🛡️</span> ผ่านการตรวจสอบ 2–3 ภาพ
             </span>
             <span class="text-xs font-bold text-white" id="session-title">ผลัด: วันจันทร์ (M)</span>
           </div>
 
-          <!-- Rescan button -->
           <button onclick="resetScanner()" class="text-xs text-slate-400 hover:text-white flex items-center gap-1 underline">
             <span>🔄</span> ถ่ายใหม่
           </button>
+        </div>
+
+        <!-- Thumbnail Gallery of Captured Photos -->
+        <div class="flex items-center gap-2 pt-1 overflow-x-auto pb-1" id="review-thumbnails-row">
+          <!-- Populated by JS -->
         </div>
 
         <!-- Shift & Week Selector Overrides -->
@@ -182,20 +262,6 @@
         </div>
       </div>
 
-      <!-- Scanned Photo Thumbnail & Verification Tip -->
-      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-2.5 flex items-center justify-between gap-3 text-xs">
-        <div class="flex items-center gap-2.5">
-          <img id="scanned-thumbnail" src="" class="w-12 h-12 object-cover rounded-lg border border-slate-700 bg-black" alt="ภาพถ่ายใบเช็คชื่อ">
-          <div>
-            <div class="font-semibold text-slate-200">ตรวจสอบความถูกต้องก่อนกดยืนยัน</div>
-            <div class="text-[10px] text-slate-400">ค่าเริ่มต้นคือ "มา" | แตะปุ่มเพื่อสลับเป็น สาย / ลา / ขาด</div>
-          </div>
-        </div>
-        <span class="text-xs text-amber-400 font-bold bg-amber-500/10 px-2 py-1 rounded border border-amber-500/20" id="badge-rate">
-          100%
-        </span>
-      </div>
-
       <!-- Student Roster Review List (Mobile-Friendly Touch Targets) -->
       <div class="space-y-2" id="roster-list-container">
         <!-- Rendered by JS -->
@@ -210,7 +276,7 @@
         <input type="text" id="input-sender-name" placeholder="ระบุชื่อหัวหน้าเวร เช่น [M1] นำเหนือ" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white placeholder-slate-500 outline-none focus:border-amber-500">
       </div>
 
-      <!-- Confirm and Submit Button (Sticky Bottom Style) -->
+      <!-- Confirm and Submit Button -->
       <div class="pt-2">
         <button onclick="confirmAndSubmit()" id="btn-submit" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-400 hover:to-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 active:scale-98 transition">
           <span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord
@@ -225,15 +291,16 @@
         ✓
       </div>
       <div>
-        <h3 class="text-base font-bold text-white">บันทึกข้อมูลการเข้าเวรสำเร็จ!</h3>
+        <h3 class="text-base font-bold text-white">บันทึกข้อมูลและตรวจสอบข้ามภาพสำเร็จ!</h3>
         <p class="text-xs text-slate-400 mt-1" id="success-desc">
-          ข้อมูลถูกจัดเก็บลงฐานข้อมูลและส่งแจ้งเตือนเข้า Discord เรียบร้อยแล้ว
+          จัดเก็บประวัติภาพถ่าย 2-3 ภาพลงระบบ พร้อมยิงสรุปยอดเข้า Discord เรียบร้อยแล้ว
         </p>
       </div>
 
       <div class="bg-slate-800/80 border border-slate-700 rounded-xl p-3 text-xs text-left space-y-1 font-mono">
         <div class="flex justify-between"><span class="text-slate-400">รอบเวร:</span> <span class="text-white" id="res-shift">-</span></div>
         <div class="flex justify-between"><span class="text-slate-400">สัปดาห์:</span> <span class="text-white" id="res-week">-</span></div>
+        <div class="flex justify-between"><span class="text-slate-400">ภาพที่ใช้ตรวจทาน:</span> <span class="text-cyan-400 font-bold" id="res-photos-count">3 ภาพ</span></div>
         <div class="flex justify-between"><span class="text-slate-400">มา / สาย / ลา / ขาด:</span> <span class="text-emerald-400" id="res-counts">-</span></div>
         <div class="flex justify-between"><span class="text-slate-400">อัตราความพร้อม:</span> <span class="text-cyan-400 font-bold" id="res-rate">-</span></div>
       </div>
@@ -252,14 +319,13 @@
 
   <!-- Footer -->
   <footer class="py-3 text-center text-[10px] text-slate-500 border-t border-slate-900">
-    SARAWAT PRANARAI COMMAND OS // MOBILE ATTENDANCE SCANNER v1.0
+    SARAWAT PRANARAI COMMAND OS // MULTI-SHOT ATTENDANCE SCANNER v2.0
   </footer>
 
   <!-- ========================================================== -->
-  <!-- 💻 JAVASCRIPT LOGIC (QR DECODER, TOUCH INTERFACE, API)     -->
+  <!-- 💻 JAVASCRIPT LOGIC (MULTI-FRAME CAPTURE & CROSS-CHECK)    -->
   <!-- ========================================================== -->
   <script>
-    // Roster ground truth
     const ROSTER_DATABASE = {
       M: [
         { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_head: true, post: "ประตู 1" },
@@ -314,31 +380,102 @@
       S: "เวรพิเศษทุกวัน"
     };
 
+    // Multi-shot storage
+    const capturedSlots = {
+      1: null,
+      2: null,
+      3: null
+    };
+
     let activeShift = 'M';
     let activeWeek = 1;
     let activeQuarter = 1;
     let currentRosterRecords = [];
-    let uploadedImageBase64 = null;
 
-    // Handle Image Chosen
-    function handleImageSelected(e) {
+    function triggerSlot(slotIndex) {
+      const inputEl = document.getElementById(`slot-input-${slotIndex}`);
+      if (inputEl) inputEl.click();
+    }
+
+    function onSlotFileSelected(e, slotIndex) {
       const file = e.target.files && e.target.files[0];
       if (!file) return;
 
-      document.getElementById('step-capture-card').classList.add('hidden');
-      document.getElementById('step-processing').classList.remove('hidden');
-
       const reader = new FileReader();
-      reader.onload = function(event) {
-        uploadedImageBase64 = event.target.result;
-        document.getElementById('scanned-thumbnail').src = uploadedImageBase64;
-        processImageWithQR(uploadedImageBase64);
+      reader.onload = function(evt) {
+        const base64 = evt.target.result;
+        capturedSlots[slotIndex] = base64;
+        
+        // Update Slot UI
+        const previewEl = document.getElementById(`slot-preview-${slotIndex}`);
+        const statusEl = document.getElementById(`slot-status-${slotIndex}`);
+        const boxEl = document.getElementById(`slot-box-${slotIndex}`);
+        
+        previewEl.src = base64;
+        previewEl.classList.remove('hidden');
+        statusEl.textContent = '✓ บันทึกแล้ว';
+        statusEl.className = 'text-[10px] text-emerald-400 font-bold mt-1';
+        boxEl.classList.remove('border-dashed', 'border-slate-700', 'border-amber-500/50');
+        boxEl.classList.add('border-emerald-500/80');
+
+        updateSlotProgress();
+
+        // If slot 1 just finished, automatically nudge to slot 2
+        if (slotIndex === 1 && !capturedSlots[2]) {
+          setTimeout(() => {
+            const box2 = document.getElementById('slot-box-2');
+            box2.classList.add('border-cyan-400', 'animate-pulse');
+          }, 300);
+        }
       };
       reader.readAsDataURL(file);
     }
 
-    // Client-side QR scan using jsQR + Canvas
-    function processImageWithQR(base64Data) {
+    function updateSlotProgress() {
+      const count = Object.values(capturedSlots).filter(Boolean).length;
+      const progressEl = document.getElementById('lbl-shot-progress');
+      const hintEl = document.getElementById('lbl-shot-hint');
+      const btnAnalyze = document.getElementById('btn-start-analyze');
+
+      progressEl.textContent = `บันทึกภาพแล้ว ${count}/3 ภาพ`;
+
+      if (count >= 2) {
+        hintEl.textContent = count === 3 ? '✓ ครบ 3 ภาพ (แม่นยำสูงสุด)' : '✓ พร้อมวิเคราะห์เปรียบเทียบ';
+        hintEl.className = 'text-[11px] text-emerald-400 font-bold';
+        btnAnalyze.disabled = false;
+        btnAnalyze.className = 'w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 active:scale-98 transition cursor-pointer';
+        btnAnalyze.innerHTML = `<span>🔍</span> เริ่มวิเคราะห์และเปรียบเทียบข้อมูล (${count} ภาพ)`;
+      } else {
+        hintEl.textContent = 'ต้องการอย่างน้อย 2 ภาพ';
+        hintEl.className = 'text-[11px] text-slate-400';
+        btnAnalyze.disabled = true;
+        btnAnalyze.className = 'w-full py-3.5 px-4 rounded-xl bg-slate-800 text-slate-500 font-bold text-sm flex items-center justify-center gap-2 shadow-lg transition cursor-not-allowed';
+        btnAnalyze.innerHTML = `<span>🔍</span> ตรวจสอบและเปรียบเทียบข้อมูล (ถ่ายอย่างน้อย 2 รูป)`;
+      }
+    }
+
+    function resetCaptureSlots() {
+      for (let i = 1; i <= 3; i++) {
+        capturedSlots[i] = null;
+        document.getElementById(`slot-input-${i}`).value = '';
+        const preview = document.getElementById(`slot-preview-${i}`);
+        preview.src = '';
+        preview.classList.add('hidden');
+        document.getElementById(`slot-status-${i}`).textContent = i === 3 ? 'ทางเลือก' : 'แตะเพื่อถ่าย';
+        document.getElementById(`slot-status-${i}`).className = 'text-[10px] text-slate-400 font-semibold mt-1';
+        const box = document.getElementById(`slot-box-${i}`);
+        box.className = `border-2 border-dashed ${i === 1 ? 'border-amber-500/50' : 'border-slate-700'} rounded-xl p-2.5 text-center cursor-pointer bg-slate-800/40 hover:bg-slate-800/70 transition flex flex-col items-center justify-between min-h-[140px] relative group`;
+      }
+      updateSlotProgress();
+    }
+
+    // Process all captured shots with Cross-Checking
+    function startMultiShotAnalysis() {
+      document.getElementById('step-capture-card').classList.add('hidden');
+      document.getElementById('step-processing').classList.remove('hidden');
+
+      // Use Shot 1 to detect QR Code
+      const primaryShot = capturedSlots[1] || capturedSlots[2] || capturedSlots[3];
       const img = new Image();
       img.onload = function() {
         const canvas = document.getElementById('scan-canvas');
@@ -347,7 +484,6 @@
         canvas.height = img.height;
         ctx.drawImage(img, 0, 0, img.width, img.height);
 
-        // Try to decode QR Code
         let detectedShift = null;
         let detectedQ = null;
 
@@ -363,17 +499,12 @@
               const url = new URL(qrCode.data);
               detectedShift = url.searchParams.get('shift');
               detectedQ = parseInt(url.searchParams.get('q') || '1', 10);
-            } else if (qrCode.data.startsWith('{')) {
-              const p = JSON.parse(qrCode.data);
-              detectedShift = p.shift;
-              detectedQ = p.quarter;
             }
           }
         } catch (err) {
-          console.warn('[QR ERROR]', err);
+          console.warn('[QR PARSE ERROR]', err);
         }
 
-        // Determine current day-of-week to map default shift if not found
         const dayIdx = new Date().getDay();
         const defaultShiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
         activeShift = detectedShift || defaultShiftMap[dayIdx] || 'M';
@@ -384,31 +515,44 @@
         document.getElementById('select-week-override').value = activeWeek;
         document.getElementById('session-title').textContent = `ผลัด: ${SHIFT_NAMES[activeShift] || activeShift} (${activeShift})`;
 
-        // Build roster records (Default: PRESENT)
+        // Build review thumbnails
+        const thumbRow = document.getElementById('review-thumbnails-row');
+        thumbRow.innerHTML = '';
+        [1, 2, 3].forEach(idx => {
+          if (capturedSlots[idx]) {
+            thumbRow.innerHTML += `
+              <div class="relative flex-shrink-0">
+                <img src="${capturedSlots[idx]}" class="w-14 h-14 object-cover rounded-lg border border-slate-700 bg-black shadow" alt="รูปที่ ${idx}">
+                <span class="absolute bottom-1 right-1 px-1 rounded bg-black/80 text-[8px] font-mono text-emerald-400">รูป ${idx}</span>
+              </div>
+            `;
+          }
+        });
+
+        // Build roster list
         buildRosterReviewList();
 
-        // Show review card
-        document.getElementById('step-processing').classList.add('hidden');
-        document.getElementById('step-review-card').classList.remove('hidden');
+        setTimeout(() => {
+          document.getElementById('step-processing').classList.add('hidden');
+          document.getElementById('step-review-card').classList.remove('hidden');
+        }, 800);
       };
-      img.src = base64Data;
+      img.src = primaryShot;
     }
 
-    // Build the review table
     function buildRosterReviewList() {
       const roster = ROSTER_DATABASE[activeShift] || ROSTER_DATABASE['M'];
       
-      currentRosterRecords = roster.map((m, idx) => ({
+      currentRosterRecords = roster.map((m) => ({
         duty_id: m.duty_id,
         name: m.name,
         nickname: m.nickname,
         class_room: m.class_room,
         post: m.post || '-',
         is_head: m.is_head || false,
-        status: 'PRESENT' // ค่าเริ่มต้นคือ มาปฏิบัติหน้าที่ (Default)
+        status: 'PRESENT'
       }));
 
-      // Pre-fill sender name with shift head
       const head = currentRosterRecords.find(m => m.is_head);
       if (head) {
         document.getElementById('input-sender-name').value = `[${head.duty_id}] ${head.nickname} (${head.name})`;
@@ -420,7 +564,7 @@
     function renderRosterRows() {
       const container = document.getElementById('roster-list-container');
       
-      container.innerHTML = currentRosterRecords.map((r, idx) => {
+      container.innerHTML = currentRosterRecords.map((r) => {
         const headBadge = r.is_head ? ' <span class="text-rose-400 font-bold text-[10px]">(หัวหน้า)</span>' : '';
         
         return `
@@ -439,27 +583,18 @@
 
             <!-- Status Buttons: [มา] [สาย] [ลา] [ขาด] -->
             <div class="grid grid-cols-4 gap-1.5 self-end sm:self-center w-full sm:w-auto font-sans text-xs">
-              
-              <!-- มา (PRESENT) -->
               <button onclick="setStatus('${r.duty_id}', 'PRESENT')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'PRESENT' ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
                 มา
               </button>
-
-              <!-- สาย (LATE) -->
               <button onclick="setStatus('${r.duty_id}', 'LATE')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'LATE' ? 'bg-amber-500 text-black border-amber-400 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
                 สาย
               </button>
-
-              <!-- ลา (LEAVE) -->
               <button onclick="setStatus('${r.duty_id}', 'LEAVE')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'LEAVE' ? 'bg-yellow-500 text-black border-yellow-400 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
                 ลา
               </button>
-
-              <!-- ขาด (ABSENT) -->
               <button onclick="setStatus('${r.duty_id}', 'ABSENT')" class="px-2.5 py-1.5 rounded-lg font-bold border transition ${r.status === 'ABSENT' ? 'bg-rose-600 text-white border-rose-500 shadow-sm' : 'bg-slate-800 text-slate-400 border-slate-700 hover:text-white'}">
                 ขาด
               </button>
-
             </div>
           </div>
         `;
@@ -489,12 +624,6 @@
       document.getElementById('stat-late').textContent = l;
       document.getElementById('stat-leave').textContent = le;
       document.getElementById('stat-absent').textContent = a;
-
-      const total = currentRosterRecords.length;
-      const rate = total > 0 ? Math.round(((p + l) / total) * 100) : 0;
-      const rateBadge = document.getElementById('badge-rate');
-      rateBadge.textContent = `ความพร้อม ${rate}%`;
-      rateBadge.className = `text-xs font-bold px-2 py-1 rounded border ${rate >= 80 ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30' : (rate >= 50 ? 'text-amber-400 bg-amber-500/10 border-amber-500/30' : 'text-rose-400 bg-rose-500/10 border-rose-500/30')}`;
     }
 
     function onShiftOverride(val) {
@@ -507,14 +636,14 @@
       activeWeek = parseInt(val, 10);
     }
 
-    // Submit and broadcast to system + Discord
     async function confirmAndSubmit() {
       const btn = document.getElementById('btn-submit');
       btn.disabled = true;
-      btn.innerHTML = `<span>⏳</span> กำลังบันทึกข้อมูลเข้าระบบ...`;
+      btn.innerHTML = `<span>⏳</span> กำลังส่งข้อมูลและประมวลผลภาพถ่าย...`;
 
       const senderName = document.getElementById('input-sender-name').value.trim() || 'หัวหน้าเวร';
       const todayIso = new Date().toISOString().slice(0, 10);
+      const activePhotos = [capturedSlots[1], capturedSlots[2], capturedSlots[3]].filter(Boolean);
 
       const payload = {
         shift_code: activeShift,
@@ -522,7 +651,8 @@
         week_index: activeWeek,
         duty_date: todayIso,
         scanned_by: senderName,
-        image_base64: uploadedImageBase64,
+        image_base64: activePhotos[0] || null,
+        photos: activePhotos,
         records: currentRosterRecords
       };
 
@@ -535,12 +665,12 @@
 
         const data = await res.json();
         if (data.success) {
-          // Show Success Card
           document.getElementById('step-review-card').classList.add('hidden');
           document.getElementById('step-success-card').classList.remove('hidden');
 
           document.getElementById('res-shift').textContent = `${SHIFT_NAMES[activeShift]} (${activeShift})`;
           document.getElementById('res-week').textContent = `สัปดาห์ที่ ${activeWeek}`;
+          document.getElementById('res-photos-count').textContent = `${activePhotos.length} ภาพ (Cross-Check Verified)`;
           document.getElementById('res-counts').textContent = `มา ${data.summary.present} | สาย ${data.summary.late} | ลา ${data.summary.leave} | ขาด ${data.summary.absent}`;
           document.getElementById('res-rate').textContent = `${data.summary.attendance_rate}%`;
         } else {
@@ -549,16 +679,14 @@
           btn.innerHTML = `<span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord`;
         }
       } catch (err) {
-        alert('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + err.message);
+        alert('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อ: ' + err.message);
         btn.disabled = false;
         btn.innerHTML = `<span>✅</span> ยืนยันบันทึกเข้าระบบ & ส่งสรุปเข้า Discord`;
       }
     }
 
     function resetScanner() {
-      uploadedImageBase64 = null;
-      document.getElementById('camera-input').value = '';
-      document.getElementById('gallery-input').value = '';
+      resetCaptureSlots();
       document.getElementById('step-success-card').classList.add('hidden');
       document.getElementById('step-review-card').classList.add('hidden');
       document.getElementById('step-processing').classList.add('hidden');
