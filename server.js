@@ -1567,10 +1567,14 @@ app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 7.2.2 ปิดการเข้าถึงหน้าใบเช็คชื่อ/สแกนเช็คชื่อ (Redirect สู่หน้าหลัก)
+// 7.2.2 หน้าพิมพ์ใบเช็คชื่อ A4 และระบบสแกนเช็คชื่อ Multi-Shot
 // -------------------------------------------------------------
-app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance', '/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
-  res.redirect('/');
+app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
+});
+
+app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'attendance-scan.html'));
 });
 
 // -------------------------------------------------------------
