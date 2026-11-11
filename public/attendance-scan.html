@@ -96,12 +96,28 @@
     <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
       <!-- หัวข้อระบบ Hybrid QR + Vision AI -->
-      <div class="flex items-center justify-between">
+      <div class="flex items-center justify-between flex-wrap gap-2">
         <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
           <span>⚡ ระบบควบรวม Hybrid</span> • QR Anchor + Vision AI
         </div>
-        <div id="badge-today-tag" class="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-          วันนี้: พ. 11/11
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <div class="flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-lg px-2 py-0.5 text-[11px] font-mono text-cyan-300">
+            <span class="text-slate-400">ไตรมาส:</span>
+            <select id="scan-select-quarter" onchange="onScanQuarterChange(this.value)" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
+              <option value="1" class="bg-slate-900 text-white">ไตรมาส 1 (พ.ย.-ม.ค.)</option>
+              <option value="2" class="bg-slate-900 text-white">ไตรมาส 2 (ก.พ.-เม.ย.)</option>
+              <option value="3" class="bg-slate-900 text-white">ไตรมาส 3 (พ.ค.-ก.ค.)</option>
+              <option value="4" class="bg-slate-900 text-white">ไตรมาส 4 (ส.ค.-ต.ค.)</option>
+            </select>
+            <select id="scan-select-year" onchange="onScanYearChange(this.value)" class="bg-transparent text-cyan-300 font-bold outline-none cursor-pointer ml-1">
+              <option value="2568" class="bg-slate-900 text-white">2568</option>
+              <option value="2569" class="bg-slate-900 text-white" selected>2569</option>
+              <option value="2570" class="bg-slate-900 text-white">2570</option>
+            </select>
+          </div>
+          <div id="badge-today-tag" class="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+            วันนี้: พ. 11/11
+          </div>
         </div>
       </div>
 
@@ -528,8 +544,60 @@
     // ----------------------------------------------------------
     // 2. INITIALIZATION & DATE COMPUTATION
     // ----------------------------------------------------------
+    let currentQuarter = 1;
+    let currentYear = 2569;
+
+    function getCurrentQuarterAndYear(d = new Date()) {
+      const thaiDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+      const month = thaiDate.getMonth() + 1; // 1 - 12
+      const ceYear = thaiDate.getFullYear();
+
+      let quarter = 1;
+      let semester = 2;
+      let academicYear = ceYear + 543;
+
+      if (month >= 11 || month === 1) {
+        quarter = 1;
+        semester = 2;
+        academicYear = month === 1 ? (ceYear - 1) + 543 : ceYear + 543;
+      } else if (month >= 2 && month <= 4) {
+        quarter = 2;
+        semester = 2;
+        academicYear = (ceYear - 1) + 543;
+      } else if (month >= 5 && month <= 7) {
+        quarter = 3;
+        semester = 1;
+        academicYear = ceYear + 543;
+      } else {
+        quarter = 4;
+        semester = 1;
+        academicYear = ceYear + 543;
+      }
+
+      return { quarter, semester, academicYear, ceYear };
+    }
+
+    function onScanQuarterChange(q) {
+      currentQuarter = parseInt(q, 10) || 1;
+      renderDateSelector();
+    }
+
+    function onScanYearChange(y) {
+      currentYear = parseInt(y, 10) || 2569;
+      renderDateSelector();
+    }
+
     function computeTodayInfo() {
       const now = new Date();
+      const auto = getCurrentQuarterAndYear(now);
+      currentQuarter = auto.quarter;
+      currentYear = auto.academicYear;
+
+      const qEl = document.getElementById('scan-select-quarter');
+      if (qEl) qEl.value = currentQuarter;
+      const yEl = document.getElementById('scan-select-year');
+      if (yEl) yEl.value = currentYear;
+
       const dayNames = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
       const monthNames = [
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
@@ -565,21 +633,29 @@
       selectShift(defaultShift);
     }
 
-    function getQuarter12Dates(shiftKey) {
+    function getQuarter12Dates(shiftKey, qNumber = currentQuarter, acadYear = currentYear) {
       if (shiftKey === 'S') {
         return Array.from({ length: 12 }).map((_, i) => ({ mmdd: `ส.${i + 1}`, iso: '', week: i + 1 }));
       }
-      const startDates = {
-        M: new Date(2026, 10, 9),  // 11/9 (จันทร์)
-        T: new Date(2026, 10, 10), // 11/10 (อังคาร)
-        W: new Date(2026, 10, 11), // 11/11 (พุธ)
-        Ts: new Date(2026, 10, 12),// 11/12 (พฤหัสฯ)
-        F: new Date(2026, 10, 13)  // 11/13 (ศุกร์)
-      };
-      const base = startDates[shiftKey] || new Date(2026, 10, 9);
+      const ceYear = acadYear - 543;
+      const dayOffsetMap = { M: 0, T: 1, W: 2, Ts: 3, F: 4 };
+      const offsetDays = dayOffsetMap[shiftKey] ?? 0;
+
+      let baseMonday;
+      if (qNumber === 1) {
+        baseMonday = new Date(ceYear, 10, 9);
+      } else if (qNumber === 2) {
+        baseMonday = new Date(new Date(ceYear, 10, 9).getTime() + 12 * 7 * 86400000);
+      } else if (qNumber === 3) {
+        baseMonday = new Date(ceYear, 4, 18);
+      } else {
+        baseMonday = new Date(new Date(ceYear, 4, 18).getTime() + 12 * 7 * 86400000);
+      }
+
+      const start = new Date(baseMonday.getTime() + offsetDays * 86400000);
       const dates = [];
       for (let i = 0; i < 12; i++) {
-        const d = new Date(base.getTime() + (i * 7) * 86400000);
+        const d = new Date(start.getTime() + (i * 7) * 86400000);
         const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         dates.push({ mmdd, iso, week: i + 1 });
@@ -587,11 +663,22 @@
       return dates;
     }
 
-    function get12Mondays() {
-      const base = new Date(2026, 10, 9); // 11/9 (จันทร์แรกของไตรมาส)
+    function get12Mondays(qNumber = currentQuarter, acadYear = currentYear) {
+      const ceYear = acadYear - 543;
+      let baseMonday;
+      if (qNumber === 1) {
+        baseMonday = new Date(ceYear, 10, 9);
+      } else if (qNumber === 2) {
+        baseMonday = new Date(new Date(ceYear, 10, 9).getTime() + 12 * 7 * 86400000);
+      } else if (qNumber === 3) {
+        baseMonday = new Date(ceYear, 4, 18);
+      } else {
+        baseMonday = new Date(new Date(ceYear, 4, 18).getTime() + 12 * 7 * 86400000);
+      }
+
       const items = [];
       for (let i = 0; i < 12; i++) {
-        const d = new Date(base.getTime() + (i * 7) * 86400000);
+        const d = new Date(baseMonday.getTime() + (i * 7) * 86400000);
         const mmdd = `${d.getMonth() + 1}/${d.getDate()}`;
         const iso = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         items.push({ week: i + 1, mmdd, iso });
@@ -1416,7 +1503,8 @@
 
       const payload = {
         shift_code: currentShiftCode,
-        quarter: 1,
+        quarter: currentQuarter,
+        academic_year: currentYear,
         duty_date: document.getElementById('exact-date-picker')?.value || todayInfo.dateIso,
         week_index: document.getElementById('date-col-select').selectedIndex,
         scanned_by: 'หัวหน้าเวร (Hybrid QR + Vision AI)',

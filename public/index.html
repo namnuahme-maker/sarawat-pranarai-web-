@@ -307,9 +307,10 @@
         <div class="lg:col-span-8 p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-3">
           <div class="flex items-center justify-between border-b border-tactical-border pb-2.5">
             <div>
-              <h2 class="font-bold text-sm text-slate-100 flex items-center gap-2">
+              <h2 class="font-bold text-sm text-slate-100 flex items-center gap-2 flex-wrap">
                 <span class="text-amber-400">📅</span>
                 <span>ตารางกำลังพลประจำเวร 6 ผลัด (Shift Matrix)</span>
+                <span id="badge-matrix-quarter" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">กำลังคำนวณไตรมาส...</span>
               </h2>
               <p class="text-xs text-slate-400">ตารางปฏิบัติหน้าที่สารวัตรนักเรียนประจำสัปดาห์</p>
             </div>
@@ -770,6 +771,24 @@
       const thaiDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
       const thaiMonths = ['ม.ค.', 'ก.พ.', 'มี.ค.', 'เม.ย.', 'พ.ค.', 'มิ.ย.', 'ก.ค.', 'ส.ค.', 'ก.ย.', 'ต.ค.', 'พ.ย.', 'ธ.ค.'];
 
+      function getCurrentQuarterAndYear(d = new Date()) {
+        const thaiDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+        const month = thaiDate.getMonth() + 1;
+        const ceYear = thaiDate.getFullYear();
+        let quarter = 1, semester = 2, academicYear = ceYear + 543;
+        if (month >= 11 || month === 1) {
+          quarter = 1; semester = 2; academicYear = month === 1 ? (ceYear - 1) + 543 : ceYear + 543;
+        } else if (month >= 2 && month <= 4) {
+          quarter = 2; semester = 2; academicYear = (ceYear - 1) + 543;
+        } else if (month >= 5 && month <= 7) {
+          quarter = 3; semester = 1; academicYear = ceYear + 543;
+        } else {
+          quarter = 4; semester = 1; academicYear = ceYear + 543;
+        }
+        const quarterMonths = { 1: 'พ.ย. - ม.ค.', 2: 'ก.พ. - เม.ย.', 3: 'พ.ค. - ก.ค.', 4: 'ส.ค. - ต.ค.' };
+        return { quarter, semester, academicYear, label: `ไตรมาสที่ ${quarter} (${quarterMonths[quarter]}) • ปีการศึกษา ${academicYear}` };
+      }
+
       function update() {
         const now = new Date();
         const d = thaiDays[now.getDay()];
@@ -778,6 +797,13 @@
         const y = now.getFullYear() + 543;
         const time = now.toLocaleTimeString('th-TH', { hour12: false });
         if (el) el.textContent = `วัน${d} ${date} ${m} ${y} • ${time} น.`;
+
+        const qBadge = document.getElementById('badge-matrix-quarter');
+        if (qBadge && !qBadge.dataset.updated) {
+          const p = getCurrentQuarterAndYear(now);
+          qBadge.textContent = p.label;
+          qBadge.dataset.updated = "true";
+        }
       }
       update();
       setInterval(update, 1000);

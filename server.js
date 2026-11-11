@@ -185,6 +185,152 @@ app.get('/api/config/supabase-env', (req, res) => {
   });
 });
 
+// ==========================================================
+// 📅 ACADEMIC PERIOD & QUARTER SYSTEM (ระบบปีการศึกษาและไตรมาส)
+// ==========================================================
+const PERIOD_SETTINGS_PATHS = [
+  path.join(__dirname, 'settings.json'),
+  path.join(__dirname, '..', 'bot', 'settings.json')
+];
+
+function getCurrentQuarterAndYear(d = new Date()) {
+  const thaiDate = new Date(d.toLocaleString('en-US', { timeZone: 'Asia/Bangkok' }));
+  const month = thaiDate.getMonth() + 1; // 1 - 12
+  const ceYear = thaiDate.getFullYear();
+
+  let quarter = 1;
+  let semester = 2;
+  let academicYear = ceYear + 543;
+
+  if (month >= 11 || month === 1) {
+    quarter = 1;
+    semester = 2;
+    academicYear = month === 1 ? (ceYear - 1) + 543 : ceYear + 543;
+  } else if (month >= 2 && month <= 4) {
+    quarter = 2;
+    semester = 2;
+    academicYear = (ceYear - 1) + 543;
+  } else if (month >= 5 && month <= 7) {
+    quarter = 3;
+    semester = 1;
+    academicYear = ceYear + 543;
+  } else {
+    quarter = 4;
+    semester = 1;
+    academicYear = ceYear + 543;
+  }
+
+  const quarterMonths = {
+    1: 'พ.ย. - ม.ค.',
+    2: 'ก.พ. - เม.ย.',
+    3: 'พ.ค. - ก.ค.',
+    4: 'ส.ค. - ต.ค.'
+  };
+
+  return {
+    quarter,
+    semester,
+    academicYear,
+    buddhistYear: ceYear + 543,
+    ceYear,
+    quarterName: `ไตรมาสที่ ${quarter} (${quarterMonths[quarter]})`,
+    semesterName: `ภาคเรียนที่ ${semester} ปีการศึกษา ${academicYear}`,
+    fullLabel: `ภาคเรียนที่ ${semester} / ปีการศึกษา ${academicYear} • ประจำไตรมาสที่ ${quarter} (12 สัปดาห์)`
+  };
+}
+
+function getPeriodSettings() {
+  for (const p of PERIOD_SETTINGS_PATHS) {
+    if (fs.existsSync(p)) {
+      try {
+        return JSON.parse(fs.readFileSync(p, 'utf8'));
+      } catch (e) {}
+    }
+  }
+  const auto = getCurrentQuarterAndYear();
+  return {
+    mode: 'auto',
+    academic_year: auto.academicYear,
+    quarter: auto.quarter,
+    current_semester: auto.semesterName
+  };
+}
+
+function getAcademicPeriod() {
+  const auto = getCurrentQuarterAndYear(new Date());
+  const settings = getPeriodSettings();
+
+  if (settings.mode === 'manual' && settings.academic_year && settings.quarter) {
+    const q = parseInt(settings.quarter, 10) || auto.quarter;
+    const y = parseInt(settings.academic_year, 10) || auto.academicYear;
+    const sem = (q === 3 || q === 4) ? 1 : 2;
+    const quarterMonths = { 1: 'พ.ย. - ม.ค.', 2: 'ก.พ. - เม.ย.', 3: 'พ.ค. - ก.ค.', 4: 'ส.ค. - ต.ค.' };
+    return {
+      quarter: q,
+      semester: sem,
+      academicYear: y,
+      isAuto: false,
+      quarterName: `ไตรมาสที่ ${q} (${quarterMonths[q] || ''})`,
+      semesterName: settings.current_semester || `ภาคเรียนที่ ${sem} ปีการศึกษา ${y}`,
+      fullLabel: `ภาคเรียนที่ ${sem} / ปีการศึกษา ${y} • ประจำไตรมาสที่ ${q} (12 สัปดาห์)`
+    };
+  }
+
+  return {
+    ...auto,
+    isAuto: true
+  };
+}
+
+function savePeriodSettings(data) {
+  for (const p of PERIOD_SETTINGS_PATHS) {
+    try {
+      fs.writeFileSync(p, JSON.stringify(data, null, 2), 'utf8');
+    } catch (e) {}
+  }
+}
+
+app.get('/api/academic-period', (req, res) => {
+  const auto = getCurrentQuarterAndYear(new Date());
+  const period = getAcademicPeriod();
+  res.json({
+    success: true,
+    auto_detected: auto,
+    current: period,
+    settings: getPeriodSettings()
+  });
+});
+
+app.post('/api/academic-period', (req, res) => {
+  try {
+    const { mode, academic_year, quarter, current_semester } = req.body;
+    const settings = getPeriodSettings();
+    if (mode === 'auto') {
+      settings.mode = 'auto';
+      delete settings.academic_year;
+      delete settings.quarter;
+      const auto = getCurrentQuarterAndYear(new Date());
+      settings.current_semester = auto.semesterName;
+    } else {
+      settings.mode = 'manual';
+      if (academic_year) settings.academic_year = parseInt(academic_year, 10);
+      if (quarter) settings.quarter = parseInt(quarter, 10);
+      if (current_semester) {
+        settings.current_semester = current_semester;
+      } else {
+        const q = settings.quarter || 1;
+        const sem = (q === 3 || q === 4) ? 1 : 2;
+        settings.current_semester = `ภาคเรียนที่ ${sem} ปีการศึกษา ${settings.academic_year}`;
+      }
+    }
+    settings.updated_at = new Date().toISOString();
+    savePeriodSettings(settings);
+    res.json({ success: true, period: getAcademicPeriod() });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // 2.1 API: ข้อมูลการขอลาเวร (Leave Requests)
 // -------------------------------------------------------------
