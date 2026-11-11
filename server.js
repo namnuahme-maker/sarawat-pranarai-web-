@@ -1390,6 +1390,204 @@ async function notifyAttendanceToDiscord(sessionData, summary) {
   }
 }
 
+// -------------------------------------------------------------
+// 6.8.0 ฐานข้อมูลสำรอง & API วิเคราะห์ภาพสแกนด้วย Gemini Vision
+// -------------------------------------------------------------
+const ATTENDANCE_FALLBACK_ROSTERS = {
+  M: [
+    { duty_id: "MS1", first_name: "มัลลิกา", last_name: "เลื่อนลอย", nickname: "ไอซ์", grade_class: "5/7", student_no: 14 },
+    { duty_id: "MS2", first_name: "ศรัณยพงศ์", last_name: "วงศ์สุวรรณ", nickname: "นาย", grade_class: "5/7", student_no: 33 },
+    { duty_id: "MS3", first_name: "พรนัชชา", last_name: "ประสมพงค์", nickname: "น้ำชา", grade_class: "5/5", student_no: 3 },
+    { duty_id: "MS4", first_name: "พิมพิพัฒณ์", last_name: "รักษาทางดี", nickname: "พิมมี่", grade_class: "5/7", student_no: 27 },
+    { duty_id: "M1", first_name: "ณิชกานต์", last_name: "คำไชย", nickname: "นำเหนือ", grade_class: "5/7", student_no: 36 },
+    { duty_id: "M2", first_name: "กิตติคุณ", last_name: "สุขสม", nickname: "อาร์ม", grade_class: "5/2", student_no: 12 }
+  ],
+  T: [
+    { duty_id: "TS1", first_name: "ณิชกานต์", last_name: "คำไชย", nickname: "น้ำเหนือ", grade_class: "5/7", student_no: 36 },
+    { duty_id: "TS2", first_name: "คณิศร", last_name: "ตะพานแก้ว", nickname: "คิว", grade_class: "5/8", student_no: 5 },
+    { duty_id: "TS3", first_name: "พงศ์ภัค", last_name: "ทองคำใส", nickname: "แบงก์", grade_class: "5/7", student_no: 38 },
+    { duty_id: "TS4", first_name: "นนท์ธวัตร", last_name: "แย้มอำพล", nickname: "กานต์", grade_class: "5/7", student_no: 32 },
+    { duty_id: "TS5", first_name: "ปัณณวัฒน์", last_name: "ปานฮวด", nickname: "ปัน", grade_class: "5/7", student_no: 22 }
+  ],
+  W: [
+    { duty_id: "W1", first_name: "ธีรภัทร", last_name: "พรหมดิสาร", nickname: "บีม", grade_class: "4/7", student_no: 19 },
+    { duty_id: "W2", first_name: "ก้องภพ", last_name: "ทองใบ", nickname: "อาร์ม", grade_class: "5/3", student_no: 15 },
+    { duty_id: "W3", first_name: "ธราเทพ", last_name: "พงษ์สวัสดิ์", nickname: "ปัน", grade_class: "3/4", student_no: 20 }
+  ],
+  Ts: [
+    { duty_id: "Ts1", first_name: "ณิชกานต์", last_name: "คำไชย", nickname: "นำเหนือ", grade_class: "5/7", student_no: 36 },
+    { duty_id: "Ts2", first_name: "ปรเมศวร์", last_name: "ดวงดี", nickname: "โบ๊ท", grade_class: "5/6", student_no: 8 },
+    { duty_id: "Ts3", first_name: "อภิวัฒน์", last_name: "มีทรัพย์", nickname: "ไอซ์", grade_class: "3/6", student_no: 14 }
+  ],
+  F: [
+    { duty_id: "FS1", first_name: "ภัทรพล", last_name: "บุญวิเศษ", nickname: "ภีมะ", grade_class: "5/7", student_no: 4 },
+    { duty_id: "F1", first_name: "กฤษฎา", last_name: "พรหมมา", nickname: "แบงค์", grade_class: "6/4", student_no: 10 },
+    { duty_id: "F2", first_name: "ชาญชัย", last_name: "มิ่งขวัญ", nickname: "กาย", grade_class: "5/2", student_no: 16 }
+  ],
+  S: [
+    { duty_id: "FS1", first_name: "ภัทรพล", last_name: "บุญวิเศษ", nickname: "ภีมะ", grade_class: "5/7", student_no: 4 },
+    { duty_id: "MS1", first_name: "มัลลิกา", last_name: "เลื่อนลอย", nickname: "ไอซ์", grade_class: "5/7", student_no: 14 },
+    { duty_id: "MS2", first_name: "ศรัณยพงศ์", last_name: "วงศ์สุวรรณ", nickname: "นาย", grade_class: "5/7", student_no: 33 }
+  ]
+};
+
+app.post('/api/attendance/scan-vision', async (req, res) => {
+  try {
+    const { image, shift, target_date, date_col_index } = req.body;
+    if (!image) {
+      return res.status(400).json({ success: false, error: 'ไม่พบข้อมูลรูปภาพ (Missing image data)' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ success: false, error: 'GEMINI_API_KEY ไม่ได้ถูกตั้งค่าใน Environment' });
+    }
+
+    let mimeType = 'image/jpeg';
+    let base64Data = image;
+    const match = image.match(/^data:(image\/[a-zA-Z0-9.+-]+);base64,(.+)$/);
+    if (match) {
+      mimeType = match[1];
+      base64Data = match[2];
+    }
+
+    // 1. ดึงรายชื่อสารวัตรในเวรนี้
+    let roster = [];
+    try {
+      const { data: dbMembers } = await supabase
+        .from('members')
+        .select('id, duty_id, first_name, last_name, nickname, grade_class, student_no, duty_day')
+        .eq('duty_day', shift || 'M')
+        .eq('status', 'ACTIVE')
+        .order('student_no', { ascending: true });
+      if (dbMembers && dbMembers.length > 0) {
+        roster = dbMembers;
+      }
+    } catch (e) {}
+
+    if (roster.length === 0) {
+      roster = ATTENDANCE_FALLBACK_ROSTERS[shift || 'M'] || ATTENDANCE_FALLBACK_ROSTERS['M'];
+    }
+
+    // 2. ดึงประวัติการลาจาก Discord Cloud (leave_requests)
+    const discordLeavesMap = {};
+    try {
+      let lQuery = supabase.from('leave_requests').select('*, members(duty_id)');
+      if (shift) lQuery = lQuery.eq('duty_day', shift);
+      const { data: leaves } = await lQuery;
+      (leaves || []).forEach(l => {
+        const did = l.members?.duty_id || l.duty_id;
+        if (did) discordLeavesMap[did] = l;
+      });
+    } catch (e) {}
+
+    // 3. สร้าง Prompt ละเอียดและรัดกุมสำหรับ Gemini Vision
+    const rosterListStr = roster.map((m, idx) => 
+      `${idx + 1}. [${m.duty_id}] ${m.nickname ? m.nickname + ' - ' : ''}${m.first_name || ''} ${m.last_name || ''} (${m.grade_class || ''} เลขที่ ${m.student_no || ''})`
+    ).join('\n');
+
+    const prompt = `You are an expert Optical Mark Recognition (OMR) system for an attendance sheet (ใบเช็คชื่อ A4) of student inspectors (กองสารวัตรนักเรียน).
+Target Shift: "${shift}"
+Target Date Column: "${target_date || 'วันนี้'}" (which is the ${Number(date_col_index) + 1 || 1}st weekly date column, header: "${target_date || ''}").
+
+Expected student roster:
+${rosterListStr}
+
+CRITICAL RULES FOR ACCURACY:
+1. Identify the exact horizontal column span [xmin, xmax] of the target date column "${target_date}".
+   - For example, if target is "${target_date}", find that specific date column header.
+   - ALL bounding boxes in your output MUST have their xmin and xmax strictly within this column's horizontal span. DO NOT return marks from adjacent columns.
+2. For each student row:
+   - Identify the student by Duty ID (MS1, MS2...), Name, or Class/Room (e.g. 5/7 (14)).
+   - Inspect the cell strictly at the intersection of this student's row and the target date column.
+   - "box_2d": return normalized bounding box [ymin, xmin, ymax, xmax] (0-1000) strictly enclosing the cell of THIS SPECIFIC column for this student.
+   - "is_filled": set true if the cell is dark/shaded with ink [●], or false if the cell is mostly white/unfilled [○] with only faint text.
+
+Return JSON strictly matching this schema:
+{
+  "detected_date_column": "${target_date}",
+  "results": [
+    {
+      "duty_id": "MS1",
+      "name": "มัลลิกา เลื่อนลอย",
+      "is_filled": true,
+      "confidence": 99,
+      "box_2d": [ymin, xmin, ymax, xmax]
+    }
+  ]
+}`;
+
+    // 4. เรียกโมเดล Gemini Flash
+    const candidateModels = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
+    let geminiData = null;
+    let usedModel = candidateModels[0];
+
+    for (const m of candidateModels) {
+      try {
+        const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${m}:generateContent?key=${apiKey}`;
+        const gRes = await fetch(geminiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  { text: prompt },
+                  { inlineData: { mimeType, data: base64Data } }
+                ]
+              }
+            ],
+            generationConfig: {
+              responseMimeType: 'application/json'
+            }
+          })
+        });
+
+        const data = await gRes.json();
+        if (data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+          geminiData = data;
+          usedModel = m;
+          break;
+        } else if (data.error) {
+          console.warn(`[GEMINI-VISION] Model ${m} error:`, data.error.message);
+        }
+      } catch (err) {
+        console.warn(`[GEMINI-VISION] Model ${m} fetch failed:`, err.message);
+      }
+    }
+
+    if (!geminiData) {
+      throw new Error('ไม่สามารถประมวลผลผ่าน Gemini Vision ได้ในขณะนี้');
+    }
+
+    const rawText = geminiData.candidates[0].content.parts[0].text;
+    const aiParsed = JSON.parse(rawText || '{}');
+    const aiResults = Array.isArray(aiParsed.results) ? aiParsed.results : [];
+
+    res.json({
+      success: true,
+      model: usedModel,
+      shift,
+      target_date,
+      date_col_index,
+      ai_results: aiResults,
+      roster: roster.map(m => ({
+        duty_id: m.duty_id,
+        name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.duty_id,
+        nickname: m.nickname || '',
+        class_room: m.grade_class ? `${m.grade_class} (${m.student_no || ''})` : (m.class_room || ''),
+        grade_class: m.grade_class || '',
+        student_no: m.student_no || ''
+      })),
+      discord_leaves: discordLeavesMap
+    });
+
+  } catch (err) {
+    console.error('[API-SCAN-VISION-ERROR]', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // 6.8.1 บันทึกผลยืนยันการสแกนใบเช็คชื่อ (/api/attendance/confirm)
 app.post('/api/attendance/confirm', async (req, res) => {
   try {

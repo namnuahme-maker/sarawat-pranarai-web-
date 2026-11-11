@@ -139,12 +139,58 @@
     }
 
     /* Table Styles */
+    .attendance-table-wrapper {
+      position: relative;
+      margin-top: 4px;
+    }
+    .table-fiducial {
+      position: absolute;
+      width: 5mm;
+      height: 5mm;
+      pointer-events: none;
+      z-index: 10;
+    }
+    .table-fiducial-tl {
+      top: -2.5mm;
+      left: -2.5mm;
+      border-top: 2.5px solid #000;
+      border-left: 2.5px solid #000;
+    }
+    .table-fiducial-tr {
+      top: -2.5mm;
+      right: -2.5mm;
+      border-top: 2.5px solid #000;
+      border-right: 2.5px solid #000;
+    }
+    .table-fiducial-bl {
+      bottom: -2.5mm;
+      left: -2.5mm;
+      border-bottom: 2.5px solid #000;
+      border-left: 2.5px solid #000;
+    }
+    .table-fiducial-br {
+      bottom: -2.5mm;
+      right: -2.5mm;
+      border-bottom: 2.5px solid #000;
+      border-right: 2.5px solid #000;
+    }
+    .table-fiducial::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2.2mm;
+      height: 2.2mm;
+      background: #000;
+      transform: translate(-50%, -50%);
+    }
+
     table.attendance-table {
       width: 100%;
       border-collapse: collapse;
       border: 1.5px solid #000000;
       font-size: 8.5pt;
-      margin-top: 4px;
+      margin-top: 0;
     }
     table.attendance-table th, table.attendance-table td {
       border: 1px solid #334155;
@@ -454,14 +500,22 @@
         <!-- ========================================================== -->
         <!-- 12-WEEK QUARTER ATTENDANCE TABLE (MATCHING PDF STRUCTURE) -->
         <!-- ========================================================== -->
-        <table class="attendance-table" id="table-quarter">
-          <thead id="quarter-table-head">
-            <!-- Rendered by JS -->
-          </thead>
-          <tbody id="quarter-table-body">
-            <!-- Rendered by JS -->
-          </tbody>
-        </table>
+        <div class="attendance-table-wrapper">
+          <!-- 4 Table Corner Fiducial Markers -->
+          <div class="table-fiducial table-fiducial-tl" title="TL Marker"></div>
+          <div class="table-fiducial table-fiducial-tr" title="TR Marker"></div>
+          <div class="table-fiducial table-fiducial-bl" title="BL Marker"></div>
+          <div class="table-fiducial table-fiducial-br" title="BR Marker"></div>
+
+          <table class="attendance-table" id="table-quarter">
+            <thead id="quarter-table-head">
+              <!-- Rendered by JS -->
+            </thead>
+            <tbody id="quarter-table-body">
+              <!-- Rendered by JS -->
+            </tbody>
+          </table>
+        </div>
 
       </div>
 

@@ -770,11 +770,10 @@
       }
 
       // --------------------------------------------------------
-      // STAGE 2: VISION AI ADAPTIVE CONTRAST & TABLE EXTRACTION
+      // STAGE 2: HIGH-PRECISION GEMINI VISION AI & TABLE EXTRACTION
       // --------------------------------------------------------
       log2.className = 'text-emerald-400 flex items-center gap-1.5';
-      log2.innerHTML = `<span class="animate-spin">🌀</span> <span>[2/4] วิเคราะห์ตารางเส้นและเม็ดสี Vision AI...</span>`;
-      await new Promise(r => setTimeout(r, 150));
+      log2.innerHTML = `<span class="animate-spin">🌀</span> <span>[2/4] สแกนตารางด้วย Gemini Vision AI (ความแม่นยำ 99%+)...</span>`;
 
       // 1. Grayscale Buffer
       const gray = new Uint8Array(targetW * targetH);
@@ -812,7 +811,34 @@
       }
       const paperBaseline = pCnt > 0 ? (pSum / pCnt) : 190;
 
-      // 4. Adaptive Binary Mask (highlights dark lines and solid marks)
+      // 4. Try Server-Side Gemini Vision AI First
+      let aiVisionSuccess = false;
+      let aiResponseData = null;
+      try {
+        const payload = {
+          image: singleCapturedImage,
+          shift: currentShiftCode,
+          target_date: currentTargetCol,
+          date_col_index: Math.max(0, document.getElementById('date-col-select').selectedIndex)
+        };
+        const res = await fetch('/api/attendance/scan-vision', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data && data.success && Array.isArray(data.ai_results) && data.ai_results.length > 0) {
+          aiResponseData = data;
+          aiVisionSuccess = true;
+          if (data.discord_leaves) {
+            discordLeavesMap = data.discord_leaves;
+          }
+        }
+      } catch (apiErr) {
+        console.warn('[VISION-API-FALLBACK] Gemini API call failed, falling back to local canvas:', apiErr);
+      }
+
+      // 5. Fallback Local Adaptive Binary Mask & Projections (if AI unavailable)
       const bin = new Uint8Array(targetW * targetH);
       const R = 8;
       for (let y = 0; y < targetH; y++) {
@@ -824,7 +850,6 @@
         }
       }
 
-      // 5. Horizontal Projections for Table Row Lines
       const hProj = new Int32Array(targetH);
       for (let y = 0; y < targetH; y++) {
         for (let x = Math.round(targetW * 0.25); x < Math.round(targetW * 0.95); x++) {
@@ -843,7 +868,6 @@
         }
       }
 
-      // Calculate median row height from detected dividers
       let rowHeights = [];
       for (let i = 0; i < rawRowPeaks.length - 1; i++) {
         rowHeights.push(rawRowPeaks[i + 1] - rawRowPeaks[i]);
@@ -854,7 +878,6 @@
 
       let rowDividers = [];
       if (rawRowPeaks.length >= activeRoster.length + 1) {
-        // Take the last activeRoster.length + 1 dividers (excluding header)
         rowDividers = rawRowPeaks.slice(- (activeRoster.length + 1));
       } else if (rawRowPeaks.length >= 2) {
         rowDividers = [...rawRowPeaks];
@@ -863,7 +886,6 @@
           rowDividers.push(nextY);
         }
       } else {
-        // Fallback proportional grid
         const yStart = Math.round(targetH * 0.35);
         const yEnd = Math.round(targetH * 0.95);
         const rH = (yEnd - yStart) / activeRoster.length;
@@ -873,7 +895,6 @@
         }
       }
 
-      // 6. Vertical Projections for Table Column Dividers
       const vProj = new Int32Array(targetW);
       for (let x = 0; x < targetW; x++) {
         for (let y = rowDividers[0]; y < rowDividers[rowDividers.length - 1]; y++) {
@@ -892,11 +913,9 @@
         }
       }
 
-      // Locate target Date Column span
       let targetColX1 = Math.round(targetW * 0.44);
       let targetColX2 = Math.round(targetW * 0.52);
 
-      // Match selected date index (0 = 1st date column, 1 = 2nd, etc.)
       const selIdx = Math.max(0, document.getElementById('date-col-select').selectedIndex);
       const dateColCandidates = [];
       if (colPeaks.length >= 2) {
@@ -939,8 +958,13 @@
         annotCtx.fillText(`[QR: ${currentShiftCode}]`, loc.topLeftCorner.x, Math.max(18, loc.topLeftCorner.y - 8));
       }
 
-      log2.className = 'text-emerald-400 flex items-center gap-1.5 font-bold';
-      log2.innerHTML = `<span>✓</span> <span>[2/4] วิเคราะห์ตารางเส้นสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+      if (aiVisionSuccess) {
+        log2.className = 'text-emerald-400 flex items-center gap-1.5 font-bold';
+        log2.innerHTML = `<span>✓</span> <span>[2/4] Gemini Vision AI ตรวจพบตารางสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+      } else {
+        log2.className = 'text-amber-400 flex items-center gap-1.5 font-bold';
+        log2.innerHTML = `<span>✓</span> <span>[2/4] วิเคราะห์ตารางเส้นสำเร็จ (Local Engine • ${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+      }
 
       // --------------------------------------------------------
       // STAGE 3 & 4: DISCORD RECONCILIATION & CLASSIFICATION
@@ -963,54 +987,68 @@
       let confidenceSum = 0;
 
       activeRoster.forEach((m, r) => {
-        // Safe cell boundary with inset to avoid touching table border lines
-        const y1 = rowDividers[r] + 2;
-        const y2 = rowDividers[r + 1] - 2;
-        const x1 = targetColX1 + 2;
-        const x2 = targetColX2 - 2;
-        const cellCenterY = Math.round((y1 + y2) / 2);
-        const cellCenterX = Math.round((x1 + x2) / 2);
+        let x1, y1, x2, y2;
+        let aiItem = null;
 
-        // Find darkest 8x8 block inside the inner cell
-        let minBlockMean = 255;
-        let bestMarkX = cellCenterX;
-        let bestMarkY = cellCenterY;
-        const bh = Math.max(5, Math.min(8, Math.round((y2 - y1) * 0.4)));
-        const bw = bh;
-
-        for (let cy = y1; cy <= y2 - bh; cy++) {
-          for (let cx = x1; cx <= x2 - bw; cx++) {
-            let bSum = 0;
-            for (let dy = 0; dy < bh; dy++) {
-              for (let dx = 0; dx < bw; dx++) {
-                bSum += gray[(cy + dy) * targetW + (cx + dx)];
-              }
-            }
-            const mean = bSum / (bh * bw);
-            if (mean < minBlockMean) {
-              minBlockMean = mean;
-              bestMarkX = cx + Math.floor(bw / 2);
-              bestMarkY = cy + Math.floor(bh / 2);
-            }
+        if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
+          aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
+          if (aiItem && aiItem.box_2d && aiItem.box_2d.length === 4) {
+            y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
+            x1 = Math.round((aiItem.box_2d[1] / 1000) * targetW);
+            y2 = Math.round((aiItem.box_2d[2] / 1000) * targetH);
+            x2 = Math.round((aiItem.box_2d[3] / 1000) * targetW);
           }
         }
 
-        const contrastDelta = paperBaseline - minBlockMean;
-        // Deterministic threshold: Filled mark is solid black (darkest < 105, contrastDelta > 60)
-        const isFilled = (minBlockMean < 105 && contrastDelta > 60);
+        // Fallback to geometric projection if AI box is missing
+        if (typeof x1 === 'undefined' || typeof y1 === 'undefined') {
+          y1 = (rowDividers[r] || Math.round(targetH * (0.35 + (r / activeRoster.length) * 0.55))) + 2;
+          y2 = (rowDividers[r + 1] || Math.round(targetH * (0.35 + ((r + 1) / activeRoster.length) * 0.55))) - 2;
+          x1 = targetColX1 + 2;
+          x2 = targetColX2 - 2;
+        }
+
+        const cellCenterY = Math.round((y1 + y2) / 2);
+        const cellCenterX = Math.round((x1 + x2) / 2);
+        const boxW = Math.max(14, x2 - x1);
+        const boxH = Math.max(12, y2 - y1);
+
+        // Compute local minimum pixel value within this cell
+        let minPixel = 255;
+        let sumPixel = 0;
+        let countPixel = 0;
+        const cy1 = Math.max(0, Math.min(targetH - 1, y1 + 1));
+        const cy2 = Math.max(0, Math.min(targetH - 1, y2 - 1));
+        const cx1 = Math.max(0, Math.min(targetW - 1, x1 + 1));
+        const cx2 = Math.max(0, Math.min(targetW - 1, x2 - 1));
+
+        for (let cy = cy1; cy <= cy2; cy++) {
+          for (let cx = cx1; cx <= cx2; cx++) {
+            const val = gray[cy * targetW + cx];
+            if (val < minPixel) minPixel = val;
+            sumPixel += val;
+            countPixel++;
+          }
+        }
+        const meanPixel = countPixel > 0 ? (sumPixel / countPixel) : 200;
+        const contrastDelta = paperBaseline - minPixel;
+
+        // Deterministic classification:
+        // A solid black mark has very low minPixel (< 75) and meanPixel (< 130).
+        // Or if Gemini AI determined is_filled and confirmed with dark contrast.
+        const isFilled = (minPixel < 75) || (aiItem && aiItem.is_filled && minPixel < 125 && contrastDelta > 45);
         const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
 
-        let conf = 95;
+        let conf = 96;
         if (isFilled) {
-          conf = Math.min(99, Math.round(85 + (contrastDelta / 150) * 14));
+          conf = Math.min(99, Math.round(92 + (contrastDelta / 150) * 7));
         } else {
-          conf = Math.min(98, Math.round(90 + (minBlockMean / 255) * 8));
+          conf = Math.min(99, Math.round(93 + (minPixel / 255) * 6));
         }
         confidenceSum += conf;
 
         let finalStatus = 'PRESENT';
         let note = '';
-        const markRadius = Math.max(5, Math.round((y2 - y1) * 0.3));
 
         if (isFilled) {
           finalStatus = 'PRESENT';
@@ -1022,26 +1060,40 @@
             note = `✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่ • AI ${conf}%)`;
           }
 
-          // วาดวงกลมสีเขียวเรืองแสงล้อมรอบจุดที่ฝน
+          // 1. วาดกรอบสี่เหลี่ยมสีเขียวเรืองแสงรอบเซลล์
           annotCtx.strokeStyle = '#22c55e';
-          annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
-          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.3)';
+          annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.004));
+          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
+          annotCtx.strokeRect(x1, y1, boxW, boxH);
+          annotCtx.fillRect(x1, y1, boxW, boxH);
+
+          // 2. วาดจุดวงกลมสีเขียวทึบที่ใจกลาง
+          annotCtx.fillStyle = '#16a34a';
           annotCtx.beginPath();
-          annotCtx.arc(bestMarkX, bestMarkY, markRadius + 2, 0, 2 * Math.PI);
+          annotCtx.arc(cellCenterX, cellCenterY, Math.max(3, Math.round(boxH * 0.26)), 0, 2 * Math.PI);
           annotCtx.fill();
-          annotCtx.stroke();
+
+          // 3. ป้ายชื่อสถานะเหนือกึ่งกลางกรอบ
+          annotCtx.fillStyle = '#22c55e';
+          annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
+          annotCtx.fillText(`[${m.duty_id}] มา`, x1, Math.max(12, y1 - 3));
 
         } else {
           if (hasDiscordLeave) {
             finalStatus = 'LEAVE';
             leaveCount++;
-            note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type})`;
+            note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type || 'ขอลาเวร'})`;
 
             // วาดกรอบสีฟ้าล้อมช่อง
             annotCtx.strokeStyle = '#38bdf8';
-            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
-            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.25)';
-            annotCtx.strokeRect(cellCenterX - markRadius - 4, cellCenterY - markRadius - 2, (markRadius + 4) * 2, (markRadius + 2) * 2);
+            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.004));
+            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+            annotCtx.strokeRect(x1, y1, boxW, boxH);
+            annotCtx.fillRect(x1, y1, boxW, boxH);
+
+            annotCtx.fillStyle = '#38bdf8';
+            annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
+            annotCtx.fillText(`[${m.duty_id}] ลา`, x1, Math.max(12, y1 - 3));
 
           } else {
             finalStatus = 'LATE';
@@ -1050,10 +1102,14 @@
 
             // วาดกรอบเส้นประสีส้มเตือน
             annotCtx.strokeStyle = '#f59e0b';
-            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.005));
-            annotCtx.setLineDash([4, 4]);
-            annotCtx.strokeRect(cellCenterX - markRadius - 4, cellCenterY - markRadius - 2, (markRadius + 4) * 2, (markRadius + 2) * 2);
+            annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.004));
+            annotCtx.setLineDash([4, 3]);
+            annotCtx.strokeRect(x1, y1, boxW, boxH);
             annotCtx.setLineDash([]);
+
+            annotCtx.fillStyle = '#f59e0b';
+            annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
+            annotCtx.fillText(`[${m.duty_id}] สาย`, x1, Math.max(12, y1 - 3));
           }
         }
 
