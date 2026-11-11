@@ -154,6 +154,35 @@
       justify-content: center;
       position: relative;
       background: #ffffff;
+      cursor: pointer;
+      user-select: none;
+      transition: all 0.15s ease;
+    }
+    .omr-box:hover {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    }
+    .omr-box.marked-check::after {
+      content: '✔';
+      position: absolute;
+      font-size: 19px;
+      font-weight: 900;
+      color: #1e3a8a; /* Deep blue pen ink */
+      line-height: 1;
+      transform: translate(1px, -2px);
+      pointer-events: none;
+    }
+    .omr-box.marked-crossed {
+      background-color: #0f172a !important;
+    }
+    .omr-box.marked-crossed::after {
+      content: '✖';
+      position: absolute;
+      font-size: 14px;
+      font-weight: 900;
+      color: #ffffff;
+      line-height: 1;
+      pointer-events: none;
     }
 
     /* Faint Watermark Binding Code inside Checkbox */
@@ -231,9 +260,24 @@
         <!-- Date Input -->
         <input type="date" id="select-date" onchange="updateDate(this.value)" class="bg-slate-800 border border-slate-700 text-slate-200 rounded-lg px-2.5 py-1 outline-none text-xs font-mono">
 
+        <!-- Live Mark Counter Badge -->
+        <div class="hidden md:flex items-center gap-2 bg-slate-800/90 border border-slate-700 rounded-lg px-2.5 py-1 font-mono text-[11px]">
+          <span class="text-emerald-400 font-bold" id="badge-present">มา: 0</span>
+          <span class="text-amber-400 font-bold" id="badge-leave">ลา: 0</span>
+          <span class="text-rose-400 font-bold" id="badge-absent">ขาด: 0</span>
+        </div>
+
+        <!-- Simulation Tools -->
+        <button onclick="simulateMarks()" class="px-2.5 py-1.5 rounded-lg bg-indigo-600/80 hover:bg-indigo-600 text-white font-semibold text-xs flex items-center gap-1 transition active:scale-95" title="สุ่มจำลองการใช้ปากกาติ๊กช่องมา/ลา/ขาด เพื่อทดสอบการแสดงผล">
+          <span>✏️</span> จำลองติ๊ก
+        </button>
+        <button onclick="clearMarks()" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-xs transition active:scale-95 border border-slate-700" title="ล้างรอยติ๊กทั้งหมดเป็นกระดาษเปล่า">
+          <span>🔄</span> ล้างรอย
+        </button>
+
         <!-- Print Button -->
         <button onclick="window.print()" class="px-4 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center gap-1.5 shadow-lg active:scale-95 transition">
-          <span>🖨️</span> สั่งพิมพ์เอกสาร A4
+          <span>🖨️</span> สั่งพิมพ์ A4
         </button>
       </div>
     </div>
@@ -259,8 +303,8 @@
           
           <!-- Left: School & Marshall Emblems -->
           <div style="display: flex; align-items: center; gap: 10px;">
-            <img src="/assets/school_emblem.png" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราโรงเรียน">
-            <img src="/assets/logo.png" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราสารวัตร">
+            <img src="assets/school_emblem.png" onerror="this.onerror=null; this.src='/assets/school_emblem.png';" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราโรงเรียน">
+            <img src="assets/logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" style="width: 52px; height: 52px; object-fit: contain;" alt="ตราสารวัตร">
             <div>
               <h2 style="margin: 0; font-size: 13pt; font-weight: 700; color: #000000; line-height: 1.2;">
                 แบบบันทึกเวลาปฏิบัติหน้าที่สารวัตรนักเรียน
@@ -520,21 +564,21 @@
             
             <!-- Checkbox: มา (PRESENT) -->
             <td style="text-align: center;">
-              <div class="omr-box" title="${m.duty_id} มา">
+              <div class="omr-box" data-type="PRESENT" onclick="toggleOmr(this, '${m.duty_id}', 'PRESENT')" title="${m.duty_id} มา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
                 <span class="omr-box-watermark">${m.duty_id}<br>มา</span>
               </div>
             </td>
 
             <!-- Checkbox: ลา (LEAVE) -->
             <td style="text-align: center;">
-              <div class="omr-box" title="${m.duty_id} ลา">
+              <div class="omr-box" data-type="LEAVE" onclick="toggleOmr(this, '${m.duty_id}', 'LEAVE')" title="${m.duty_id} ลา (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
                 <span class="omr-box-watermark">${m.duty_id}<br>ลา</span>
               </div>
             </td>
 
             <!-- Checkbox: ขาด (ABSENT) -->
             <td style="text-align: center;">
-              <div class="omr-box" title="${m.duty_id} ขาด">
+              <div class="omr-box" data-type="ABSENT" onclick="toggleOmr(this, '${m.duty_id}', 'ABSENT')" title="${m.duty_id} ขาด (คลิกเพื่อติ๊ก ✔ หรือขีดฆ่า ■)">
                 <span class="omr-box-watermark">${m.duty_id}<br>ขาด</span>
               </div>
             </td>
@@ -548,6 +592,72 @@
           </tr>
         `;
       }).join('');
+
+      updateCounters();
+    }
+
+    function toggleOmr(boxEl, dutyId, type) {
+      const row = boxEl.closest('tr');
+      const allBoxesInRow = row.querySelectorAll('.omr-box');
+
+      // 1st click: marked-check (✔)
+      // 2nd click: marked-crossed (■/✖ scribble override)
+      // 3rd click: clear
+      if (boxEl.classList.contains('marked-check')) {
+        boxEl.classList.remove('marked-check');
+        boxEl.classList.add('marked-crossed');
+      } else if (boxEl.classList.contains('marked-crossed')) {
+        boxEl.classList.remove('marked-crossed');
+      } else {
+        allBoxesInRow.forEach(b => {
+          b.classList.remove('marked-check');
+          b.classList.remove('marked-crossed');
+        });
+        boxEl.classList.add('marked-check');
+      }
+      updateCounters();
+    }
+
+    function updateCounters() {
+      const presentCount = document.querySelectorAll('.omr-box[data-type="PRESENT"].marked-check').length;
+      const leaveCount = document.querySelectorAll('.omr-box[data-type="LEAVE"].marked-check').length;
+      const absentCount = document.querySelectorAll('.omr-box[data-type="ABSENT"].marked-check').length;
+
+      const bp = document.getElementById('badge-present');
+      const bl = document.getElementById('badge-leave');
+      const ba = document.getElementById('badge-absent');
+      if (bp) bp.textContent = `มา: ${presentCount}`;
+      if (bl) bl.textContent = `ลา: ${leaveCount}`;
+      if (ba) ba.textContent = `ขาด: ${absentCount}`;
+    }
+
+    function simulateMarks() {
+      const rows = document.querySelectorAll('#table-body tr');
+      rows.forEach(row => {
+        const boxes = row.querySelectorAll('.omr-box');
+        boxes.forEach(b => {
+          b.classList.remove('marked-check');
+          b.classList.remove('marked-crossed');
+        });
+
+        const rand = Math.random();
+        if (rand < 0.8) {
+          boxes[0].classList.add('marked-check'); // มา
+        } else if (rand < 0.9) {
+          boxes[1].classList.add('marked-check'); // ลา
+        } else {
+          boxes[2].classList.add('marked-check'); // ขาด
+        }
+      });
+      updateCounters();
+    }
+
+    function clearMarks() {
+      document.querySelectorAll('.omr-box').forEach(b => {
+        b.classList.remove('marked-check');
+        b.classList.remove('marked-crossed');
+      });
+      updateCounters();
     }
 
     window.addEventListener('DOMContentLoaded', initPage);
