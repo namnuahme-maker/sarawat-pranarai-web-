@@ -1704,36 +1704,40 @@ Expected student roster:
 ${rosterListStr}
 
 CRITICAL RULES FOR ACCURACY:
-1. Identify the exact horizontal column span [xmin, xmax] of the target date column "${target_date}".
-   - For example, if target is "${target_date}", find that specific date column header.
-   - ALL bounding boxes in your output MUST have their xmin and xmax strictly within this column's horizontal span. DO NOT return marks from adjacent columns.
-2. For each student row:
-   - Identify the student by Duty ID (MS1, MS2...), Name, or Class/Room (e.g. 5/7 (14)).
-   - Inspect the cell strictly at the intersection of this student's row and the target date column.
-   - The cell contains a printed circle with Thai letter "(ม)".
-   - CRITICAL FILL RULE:
-     * If the circle is EMPTY/UNFILLED (showing only the printed faint "(ม)"): "is_filled": false, "fill_percentage": 5-15.
-     * If the circle is HEAVILY SHADED/FILLED with pen or pencil ink: "is_filled": true, "fill_percentage": 60-95.
-     * DO NOT classify an empty circle containing "(ม)" as filled.
-   - "box_2d": return normalized bounding box [ymin, xmin, ymax, xmax] (0-1000) tightly enclosing the circle of THIS SPECIFIC column for this student.
+1. Locate the main attendance table on the page.
+   The table header row has: "ห้อง/เลขที่", "ชื่อเล่น", "ชื่อ - สกุลจริง", "รหัสประจำตัว", followed by 12 date columns starting with "11/10", "11/17", "11/24", etc.
+2. Locate the target date column "${target_date}" (immediately to the right of "รหัสประจำตัว" for the 1st date column, or at the corresponding weekly position).
+3. For each student row:
+   - Identify the student by Duty ID (${roster.map(r => r.duty_id).join(', ')}), Name, or Class/Room.
+   - Locate the cell at the intersection of this student's row and the target date column "${target_date}".
+   - Return "box_2d": [ymin, xmin, ymax, xmax] (normalized 0-1000) tightly enclosing the circle inside that cell.
+   - Determine if the circle has been shaded/filled with pen or pencil:
+     * Solid black or dark shaded circle: "is_filled": true, "fill_percentage": 75-100.
+     * Empty/unshaded circle (only showing faint Thai letter "(ม)" or blank): "is_filled": false, "fill_percentage": 0-15.
+     * DO NOT mark an unfilled circle containing faint "(ม)" as filled.
 
 Return JSON strictly matching this schema:
 {
   "detected_date_column": "${target_date}",
   "results": [
     {
-      "duty_id": "MS1",
-      "name": "มัลลิกา เลื่อนลอย",
+      "duty_id": "TS1",
+      "name": "ณิชกานต์ คำไชย",
       "is_filled": true,
-      "fill_percentage": 82,
-      "confidence": 99,
+      "fill_percentage": 90,
+      "confidence": 98,
       "box_2d": [ymin, xmin, ymax, xmax]
     }
   ]
 }`;
 
-    // 4. เรียกโมเดล Gemini Flash
-    const candidateModels = ['gemini-3-flash-preview', 'gemini-3.5-flash-lite', 'gemini-flash-lite-latest'];
+    // 4. เรียกโมเดล Gemini Flash พร้อมระบบ Failover อัตโนมัติ (Fast & Stable)
+    const candidateModels = [
+      'gemini-flash-lite-latest',
+      'gemini-3.5-flash-lite',
+      'gemini-flash-latest',
+      'gemini-3.8-flash'
+    ];
     let geminiData = null;
     let usedModel = candidateModels[0];
 
@@ -1755,7 +1759,8 @@ Return JSON strictly matching this schema:
             generationConfig: {
               responseMimeType: 'application/json'
             }
-          })
+          }),
+          signal: AbortSignal.timeout(18000)
         });
 
         const data = await gRes.json();
@@ -1767,7 +1772,7 @@ Return JSON strictly matching this schema:
           console.warn(`[GEMINI-VISION] Model ${m} error:`, data.error.message);
         }
       } catch (err) {
-        console.warn(`[GEMINI-VISION] Model ${m} fetch failed:`, err.message);
+        console.warn(`[GEMINI-VISION] Model ${m} attempt failed:`, err.message);
       }
     }
 

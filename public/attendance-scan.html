@@ -1249,15 +1249,16 @@
         }
       }
 
-      let targetColX1 = Math.round(targetW * 0.44);
-      let targetColX2 = Math.round(targetW * 0.52);
+      // 1. กำหนดพิกัดเริ่มต้นของคอลัมน์วันที่ (อิงตามอัตราส่วนสไตล์ชีตจริง 44.12% ถึง 47.8%)
+      let targetColX1 = Math.round(targetW * (323 / 732));
+      let targetColX2 = Math.round(targetW * ((323 + 27) / 732));
 
       const selIdx = Math.max(0, document.getElementById('date-col-select').selectedIndex);
       const dateColCandidates = [];
       if (colPeaks.length >= 2) {
         for (let c = 0; c < colPeaks.length - 1; c++) {
           const w = colPeaks[c + 1] - colPeaks[c];
-          if (w >= 18 && w <= 75 && colPeaks[c] >= targetW * 0.38) {
+          if (w >= 14 && w <= 80 && colPeaks[c] >= targetW * 0.40) {
             dateColCandidates.push({ x1: colPeaks[c], x2: colPeaks[c + 1] });
           }
         }
@@ -1279,11 +1280,24 @@
       let H_unwarp = null;
       let useWarp = false;
 
-      // คำนวณขอบเขตตารางจาก Projection Peaks
-      let tableYTop = rawRowPeaks.length > 0 ? Math.max(10, rawRowPeaks[0] - Math.round(avgRowH * 0.9)) : Math.round(targetH * 0.20);
-      let tableYBot = rawRowPeaks.length > 0 ? Math.min(targetH - 10, rawRowPeaks[rawRowPeaks.length - 1] + 10) : Math.round(targetH * 0.92);
-      let tableXLeft = colPeaks.length > 0 ? Math.max(10, colPeaks[0] - 20) : Math.round(targetW * 0.15);
-      let tableXRight = colPeaks.length > 0 ? Math.min(targetW - 10, colPeaks[colPeaks.length - 1] + 25) : Math.round(targetW * 0.96);
+      // คำนวณขอบเขตตารางอย่างแม่นยำ ไม่ให้ล้นไปจับแถบเบราว์เซอร์หรือทาสก์บาร์
+      let tableYTop, tableYBot;
+      if (rowDividers.length >= 2) {
+        tableYTop = Math.max(10, rowDividers[0] - Math.round(avgRowH * 1.2));
+        tableYBot = Math.min(targetH - 10, rowDividers[rowDividers.length - 1] + 6);
+      } else {
+        tableYTop = Math.round(targetH * 0.40);
+        tableYBot = Math.round(targetH * 0.65);
+      }
+
+      let tableXLeft, tableXRight;
+      if (colPeaks.length >= 4) {
+        tableXLeft = Math.max(10, colPeaks[0] - 15);
+        tableXRight = Math.min(targetW - 10, colPeaks[colPeaks.length - 1] + 20);
+      } else {
+        tableXLeft = Math.round(targetW * 0.05);
+        tableXRight = Math.round(targetW * 0.95);
+      }
 
       let srcCorners = [
         { x: tableXLeft, y: tableYTop },
@@ -1386,27 +1400,59 @@
         let fillRatio = 0;
         let fillPercentage = 0;
 
-        if (useWarp && warpedGray) {
-          // คำนวณพิกัดแถวและคอลัมน์บนภาพตารางที่ดึงตรงแล้ว (ล็อกขนาดตายตัว ไม่มีปัญหาไหลตกขอบ)
+        // 🎯 TIER 1: ลำดับความสำคัญสูงสุด - ใช้พิกัดกรอบจาก Gemini Vision AI
+        let aiItem = null;
+        if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
+          aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
+        }
+
+        if (aiItem && Array.isArray(aiItem.box_2d) && aiItem.box_2d.length === 4) {
+          // แปลง Normalized box_2d [ymin, xmin, ymax, xmax] (0-1000) สู่พิกัดจริงบน Canvas
+          y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
+          x1 = Math.round((aiItem.box_2d[1] / 1000) * targetW);
+          y2 = Math.round((aiItem.box_2d[2] / 1000) * targetH);
+          x2 = Math.round((aiItem.box_2d[3] / 1000) * targetW);
+
+          cellCenterX = Math.round((x1 + x2) / 2);
+          cellCenterY = Math.round((y1 + y2) / 2);
+          boxW = Math.max(14, x2 - x1);
+          boxH = Math.max(12, y2 - y1);
+
+          // ตรวจสอบความทึบแสงของพิกเซลจริงด้วย Circular Mask + Morphological Erosion
+          const radius = Math.min(boxW, boxH) * 0.30;
+          const omrResult = computeCircleFillRatio(gray, targetW, targetH, cellCenterX, cellCenterY, radius);
+
+          const isAiFilled = aiItem.is_filled === true || (aiItem.fill_percentage >= 50);
+          const isOmrFilled = omrResult.percentage >= 35;
+          const isFilledConsensus = isAiFilled || isOmrFilled;
+
+          if (isFilledConsensus) {
+            fillPercentage = Math.max(omrResult.percentage, aiItem.fill_percentage || 80);
+          } else {
+            fillPercentage = Math.min(omrResult.percentage, aiItem.fill_percentage || 5);
+          }
+          fillRatio = fillPercentage / 100;
+
+        } else if (useWarp && warpedGray) {
+          // 🎯 TIER 2: Perspective Warp Fallback ด้วยสัดส่วนคอลัมน์มาตรฐาน CSS ที่ถูกต้อง (44.12% Date Start)
           const headerH = 48;
           const rowH_warp = (TH - headerH) / N;
           const y1_warp = headerH + r * rowH_warp;
           const y2_warp = headerH + (r + 1) * rowH_warp;
           const cy_warp = (y1_warp + y2_warp) / 2;
 
-          // 12 คอลัมน์วันที่อยู่ในช่วง X = 415 ถึง X = 1115 (ความกว้าง ~700px)
-          const colW_warp = 700 / 12;
-          const x1_warp = 415 + selIdx * colW_warp;
-          const x2_warp = 415 + (selIdx + 1) * colW_warp;
+          // สัดส่วนตารางจริง: คอลัมน์ซ้าย 323px / 732px (44.125%), แต่ละสัปดาห์ 27px / 732px (3.688%)
+          const dateStartX_warp = TW * (323 / 732); // ~529.5px
+          const colW_warp = TW * (27 / 732);        // ~44.26px
+          const x1_warp = dateStartX_warp + selIdx * colW_warp;
+          const x2_warp = x1_warp + colW_warp;
           const cx_warp = (x1_warp + x2_warp) / 2;
           const radius_warp = Math.min(colW_warp, rowH_warp) * 0.28;
 
-          // ประมวลผล OMR ด้วย Gaussian Blur 5x5 + 3x3 Morphological Erosion + Circular Mask
           const omrResult = computeCircleFillRatio(warpedGray, TW, TH, Math.round(cx_warp), Math.round(cy_warp), radius_warp);
           fillRatio = omrResult.ratio;
           fillPercentage = omrResult.percentage;
 
-          // แปลงพิกัดกลับสู่ภาพต้นฉบับด้วย Inverse Homography เพื่อวาดกรอบสีเขียวให้ตรงตำแหน่งจริงบนภาพถ่าย
           const pTL = transformPoint(H_unwarp, x1_warp + 2, y1_warp + 2);
           const pBR = transformPoint(H_unwarp, x2_warp - 2, y2_warp - 2);
           const pCenter = transformPoint(H_unwarp, cx_warp, cy_warp);
@@ -1419,25 +1465,13 @@
           cellCenterY = Math.round(pCenter.y);
           boxW = Math.max(14, x2 - x1);
           boxH = Math.max(12, y2 - y1);
-        } else {
-          // โหมดสำรองหากภาพบิดเบี้ยวจน Perspective Transform ล้มเหลว
-          let aiItem = null;
-          if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
-            aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
-            if (aiItem && aiItem.box_2d && aiItem.box_2d.length === 4) {
-              y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
-              x1 = Math.round((aiItem.box_2d[1] / 1000) * targetW);
-              y2 = Math.round((aiItem.box_2d[2] / 1000) * targetH);
-              x2 = Math.round((aiItem.box_2d[3] / 1000) * targetW);
-            }
-          }
 
-          if (typeof x1 === 'undefined' || typeof y1 === 'undefined') {
-            y1 = (rowDividers[r] || Math.round(targetH * (0.35 + (r / N) * 0.55))) + 2;
-            y2 = (rowDividers[r + 1] || Math.round(targetH * (0.35 + ((r + 1) / N) * 0.55))) - 2;
-            x1 = targetColX1 + 2;
-            x2 = targetColX2 - 2;
-          }
+        } else {
+          // 🎯 TIER 3: Local projection divider fallback
+          y1 = (rowDividers[r] || Math.round(targetH * (0.42 + (r / N) * 0.22))) + 2;
+          y2 = (rowDividers[r + 1] || Math.round(targetH * (0.42 + ((r + 1) / N) * 0.22))) - 2;
+          x1 = targetColX1 + 2;
+          x2 = targetColX2 - 2;
 
           cellCenterX = Math.round((x1 + x2) / 2);
           cellCenterY = Math.round((y1 + y2) / 2);
@@ -1450,21 +1484,10 @@
           fillPercentage = omrResult.percentage;
         }
 
-        // หากมีผลจาก Gemini AI นำมาประสาน (Reconcile) เพิ่มความเสถียร
-        if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
-          const aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
-          if (aiItem && typeof aiItem.fill_percentage === 'number') {
-            if (aiItem.is_filled && fillRatio < 0.35 && aiItem.fill_percentage > 70) {
-              fillPercentage = Math.round((fillPercentage + aiItem.fill_percentage) / 2);
-              if (fillPercentage >= 48) fillRatio = fillPercentage / 100;
-            }
-          }
-        }
-
         // ------------------------------------------------------
-        // TASK 3: เกณฑ์การตัดสิน (Decision Threshold: 45% - 55%)
+        // TASK 3: เกณฑ์การตัดสิน (Decision Threshold: 40%)
         // ------------------------------------------------------
-        const isFilled = (fillRatio >= 0.48);
+        const isFilled = (fillRatio >= 0.40) || (fillPercentage >= 40);
         const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
 
         let conf = isFilled
