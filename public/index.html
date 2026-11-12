@@ -127,6 +127,9 @@
         <a href="/attendance-scan" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-emerald-300 hover:text-white hover:bg-emerald-600/20 border border-emerald-500/40">
           <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
         </a>
+        <a href="/analytics" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-cyan-300 hover:text-white hover:bg-cyan-600/20 border border-cyan-500/40">
+          <span>📊</span> สถิติ & คลังข้อมูล
+        </a>
         <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
           <span>🎨</span> ทำบัตร
         </a>
@@ -173,6 +176,9 @@
       </a>
       <a href="/attendance-scan" class="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-2 text-emerald-300 font-bold">
         <span>⚡</span> สแกนเช็คชื่อ AI
+      </a>
+      <a href="/analytics" class="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center gap-2 text-cyan-300 font-bold">
+        <span>📊</span> สถิติ & คลังข้อมูล
       </a>
       <a href="/attendance-sheet" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300">
         <span>📄</span> แบบฟอร์ม A4
@@ -255,17 +261,18 @@
       </div>
 
       <!-- Card 4: การลาเวร & ความพร้อม -->
-      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-emerald-500/40 transition">
+      <div onclick="window.location.href='/analytics'" class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-cyan-500/50 hover:bg-tactical-850 cursor-pointer transition group" title="คลิกเพื่อดูสถิติการลา มา ขาด และคลังข้อมูลทั้งหมด">
         <div class="flex items-center justify-between text-slate-400 text-xs">
           <span>ความพร้อมปฏิบัติหน้าที่</span>
-          <span class="text-emerald-400 text-sm">⚡</span>
+          <span class="text-emerald-400 text-sm group-hover:scale-110 transition">⚡</span>
         </div>
         <div class="mt-1.5 flex items-baseline gap-2">
           <span id="kpi-readiness-rate" class="counter-value text-2xl font-bold font-mono text-emerald-400">100%</span>
           <span class="text-xs text-slate-400 font-mono">พร้อม</span>
         </div>
-        <div class="mt-1 text-[11px] text-slate-400 truncate font-mono" id="kpi-today-leaves">
-          แจ้งลาเวรวันนี้: 0 ราย
+        <div class="mt-1 flex items-center justify-between text-[11px] font-mono">
+          <span class="text-slate-400 truncate" id="kpi-today-leaves">แจ้งลาเวรวันนี้: 0 ราย</span>
+          <span class="text-slate-500 group-hover:text-cyan-400 transition text-[10px]">ดูสถิติรวม ↗</span>
         </div>
       </div>
 

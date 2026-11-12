@@ -1945,6 +1945,298 @@ app.get('/api/attendance/records', async (req, res) => {
 });
 
 // -------------------------------------------------------------
+// 6.8.3 ศูนย์วิเคราะห์ข้อมูลและสถิติภาพรวม (/api/analytics/overview)
+// -------------------------------------------------------------
+app.get('/api/analytics/overview', async (req, res) => {
+  try {
+    const { startDate, endDate, preset = 'all' } = req.query;
+
+    // 1. Fetch Members
+    let members = [];
+    try {
+      const { data: mData, error: mErr } = await supabase
+        .from('members')
+        .select('*')
+        .order('duty_id', { ascending: true });
+      if (!mErr && Array.isArray(mData) && mData.length > 0) {
+        members = mData;
+      }
+    } catch (e) {}
+
+    if (members.length === 0) {
+      members = Object.entries(ATTENDANCE_FALLBACK_ROSTERS).flatMap(([shift, list]) => 
+        list.map((m, idx) => ({
+          ...m,
+          duty_day: shift,
+          is_head: idx === 0,
+          is_deputy: idx === 1
+        }))
+      );
+    }
+
+    // 2. Fetch Attendance Records
+    let attendance = [];
+    try {
+      let q = supabase.from('attendance_records').select('*');
+      if (startDate) q = q.gte('duty_date', startDate);
+      if (endDate) q = q.lte('duty_date', endDate);
+      const { data: aData, error: aErr } = await q;
+      if (!aErr && Array.isArray(aData)) attendance = aData;
+    } catch (e) {}
+
+    const localDb = getAttendanceData();
+    if (attendance.length === 0 && localDb.records && localDb.records.length > 0) {
+      attendance = localDb.records.filter(r => {
+        if (startDate && r.duty_date < startDate) return false;
+        if (endDate && r.duty_date > endDate) return false;
+        return true;
+      });
+    }
+
+    // 3. Fetch Leave Requests
+    let leaves = [];
+    try {
+      let lq = supabase.from('leave_requests').select('*, members(duty_id, first_name, last_name, nickname, duty_day, grade_class)');
+      if (startDate) lq = lq.gte('leave_date', startDate);
+      if (endDate) lq = lq.lte('leave_date', endDate);
+      const { data: lData, error: lErr } = await lq;
+      if (!lErr && Array.isArray(lData)) leaves = lData;
+    } catch (e) {}
+
+    // 4. Fetch Cases
+    let cases = [];
+    try {
+      let cq = supabase.from('cases').select('*').order('incident_date', { ascending: false });
+      if (startDate) cq = cq.gte('incident_date', startDate);
+      if (endDate) cq = cq.lte('incident_date', endDate);
+      const { data: cData, error: cErr } = await cq;
+      if (!cErr && Array.isArray(cData)) cases = cData;
+    } catch (e) {}
+
+    // 5. Fetch Lost & Found Items
+    let lostItems = [];
+    try {
+      let iq = supabase.from('lost_items').select('*').order('created_at', { ascending: false });
+      if (startDate) iq = iq.gte('created_at', startDate);
+      if (endDate) iq = iq.lte('created_at', endDate + 'T23:59:59.999Z');
+      const { data: iData, error: iErr } = await iq;
+      if (!iErr && Array.isArray(iData)) lostItems = iData;
+    } catch (e) {}
+
+    // 6. Aggregate Member Metrics
+    const memberMap = {};
+    members.forEach(m => {
+      memberMap[m.duty_id] = {
+        duty_id: m.duty_id,
+        name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.duty_id,
+        nickname: m.nickname || '',
+        class_room: m.grade_class || m.room || '',
+        duty_day: m.duty_day || 'M',
+        is_head: !!m.is_head,
+        is_deputy: !!m.is_deputy,
+        photo_url: m.photo_url || '',
+        present_count: 0,
+        late_count: 0,
+        leave_count: 0,
+        absent_count: 0,
+        total_attendance: 0,
+        leave_types: {}
+      };
+    });
+
+    attendance.forEach(rec => {
+      if (!memberMap[rec.duty_id]) {
+        memberMap[rec.duty_id] = {
+          duty_id: rec.duty_id,
+          name: rec.name || rec.duty_id,
+          nickname: rec.nickname || '',
+          class_room: rec.class_room || '',
+          duty_day: rec.shift_code || 'M',
+          is_head: false,
+          is_deputy: false,
+          photo_url: '',
+          present_count: 0,
+          late_count: 0,
+          leave_count: 0,
+          absent_count: 0,
+          total_attendance: 0,
+          leave_types: {}
+        };
+      }
+      const st = rec.status;
+      memberMap[rec.duty_id].total_attendance++;
+      if (st === 'PRESENT') memberMap[rec.duty_id].present_count++;
+      else if (st === 'LATE') memberMap[rec.duty_id].late_count++;
+      else if (st === 'LEAVE') memberMap[rec.duty_id].leave_count++;
+      else if (st === 'ABSENT') memberMap[rec.duty_id].absent_count++;
+    });
+
+    leaves.forEach(l => {
+      const dutyId = (l.members && l.members.duty_id) ? l.members.duty_id : l.duty_id;
+      if (dutyId && memberMap[dutyId]) {
+        const lType = l.leave_type || 'ขอลา';
+        memberMap[dutyId].leave_types[lType] = (memberMap[dutyId].leave_types[lType] || 0) + 1;
+        if (attendance.length === 0) {
+          memberMap[dutyId].leave_count++;
+          memberMap[dutyId].total_attendance++;
+        }
+      }
+    });
+
+    let totalAttendance = attendance.length;
+    let totalPresent = attendance.filter(r => r.status === 'PRESENT').length;
+    let totalLate = attendance.filter(r => r.status === 'LATE').length;
+    let totalLeave = attendance.filter(r => r.status === 'LEAVE').length || leaves.length;
+    let totalAbsent = attendance.filter(r => r.status === 'ABSENT').length;
+
+    if (totalAttendance === 0) {
+      Object.values(memberMap).forEach(m => {
+        totalPresent += m.present_count;
+        totalLate += m.late_count;
+        totalLeave += m.leave_count;
+        totalAbsent += m.absent_count;
+      });
+      totalAttendance = totalPresent + totalLate + totalLeave + totalAbsent;
+    }
+
+    const readinessRate = totalAttendance > 0 
+      ? Math.round(((totalPresent + totalLeave) / totalAttendance) * 100) 
+      : 100;
+
+    const shiftStats = {
+      M: { present: 0, late: 0, leave: 0, absent: 0 },
+      T: { present: 0, late: 0, leave: 0, absent: 0 },
+      W: { present: 0, late: 0, leave: 0, absent: 0 },
+      Ts: { present: 0, late: 0, leave: 0, absent: 0 },
+      F: { present: 0, late: 0, leave: 0, absent: 0 }
+    };
+    attendance.forEach(r => {
+      const sh = r.shift_code || (memberMap[r.duty_id] ? memberMap[r.duty_id].duty_day : 'M');
+      if (shiftStats[sh]) {
+        if (r.status === 'PRESENT') shiftStats[sh].present++;
+        else if (r.status === 'LATE') shiftStats[sh].late++;
+        else if (r.status === 'LEAVE') shiftStats[sh].leave++;
+        else if (r.status === 'ABSENT') shiftStats[sh].absent++;
+      }
+    });
+
+    const leaveTypes = { 'ลาป่วย': 0, 'ลากิจ': 0, 'ลากิจกรรม': 0, 'อื่นๆ': 0 };
+    leaves.forEach(l => {
+      const t = l.leave_type || '';
+      if (t.includes('ป่วย')) leaveTypes['ลาป่วย']++;
+      else if (t.includes('กิจ') && !t.includes('กรรม')) leaveTypes['ลากิจ']++;
+      else if (t.includes('กรรม')) leaveTypes['ลากิจกรรม']++;
+      else leaveTypes['อื่นๆ']++;
+    });
+
+    const leaderboard = Object.values(memberMap)
+      .map(m => {
+        const topType = Object.entries(m.leave_types).sort((a,b) => b[1]-a[1])[0];
+        return {
+          ...m,
+          total_penalties: m.leave_count + m.late_count + m.absent_count,
+          frequent_leave_type: topType ? topType[0] : (m.leave_count > 0 ? 'ลากิจ/ป่วย' : '-')
+        };
+      })
+      .sort((a, b) => {
+        if (b.leave_count !== a.leave_count) return b.leave_count - a.leave_count;
+        if (b.absent_count !== a.absent_count) return b.absent_count - a.absent_count;
+        return b.late_count - a.late_count;
+      });
+
+    const SHIFT_TITLES = {
+      M: { name: 'เวรวันจันทร์', color: 'amber', dutyDesc: 'ควบคุมแถวเข้าแถวเคารพธงชาติ & จุดประตู 1' },
+      T: { name: 'เวรวันอังคาร', color: 'pink', dutyDesc: 'ตรวจเครื่องแต่งกายและทรงผม & โรงอาหาร' },
+      W: { name: 'เวรวันพุธ', color: 'emerald', dutyDesc: 'ตรวจบัตรนักเรียน & ดูแลความเรียบร้อยรอบอาคาร' },
+      Ts: { name: 'เวรวันพฤหัสบดี', color: 'orange', dutyDesc: 'สายตรวจอาคารเรียน & เฝ้าระวังจุดอับ' },
+      F: { name: 'เวรวันศุกร์', color: 'cyan', dutyDesc: 'ตรวจสัมภาระ & ดูแลความเรียบร้อยช่วงเลิกเรียน' }
+    };
+
+    const organization = ['M', 'T', 'W', 'Ts', 'F'].map(shiftKey => {
+      const shiftMembers = members.filter(m => m.duty_day === shiftKey);
+      const head = shiftMembers.find(m => m.is_head) || shiftMembers[0] || null;
+      const deputy = shiftMembers.find(m => m.is_deputy && m !== head) || shiftMembers[1] || null;
+      const officers = shiftMembers.filter(m => m !== head && m !== deputy);
+
+      return {
+        shift_code: shiftKey,
+        shift_name: SHIFT_TITLES[shiftKey]?.name || `เวรผลัด ${shiftKey}`,
+        duty_desc: SHIFT_TITLES[shiftKey]?.dutyDesc || 'ปฏิบัติหน้าที่สารวัตรนักเรียน',
+        color: SHIFT_TITLES[shiftKey]?.color || 'amber',
+        total_members: shiftMembers.length,
+        head: head ? {
+          duty_id: head.duty_id,
+          name: `${head.first_name || ''} ${head.last_name || ''}`.trim(),
+          nickname: head.nickname || '',
+          class_room: head.grade_class || head.room || '',
+          role: 'หัวหน้าผลัดเวร 👑',
+          photo_url: head.photo_url || ''
+        } : null,
+        deputy: deputy ? {
+          duty_id: deputy.duty_id,
+          name: `${deputy.first_name || ''} ${deputy.last_name || ''}`.trim(),
+          nickname: deputy.nickname || '',
+          class_room: deputy.grade_class || deputy.room || '',
+          role: 'รองหัวหน้าผลัดเวร 🥈',
+          photo_url: deputy.photo_url || ''
+        } : null,
+        officers: officers.map(o => ({
+          duty_id: o.duty_id,
+          name: `${o.first_name || ''} ${o.last_name || ''}`.trim(),
+          nickname: o.nickname || '',
+          class_room: o.grade_class || o.room || '',
+          role: 'สารวัตรประจำจุด',
+          photo_url: o.photo_url || ''
+        }))
+      };
+    });
+
+    res.json({
+      success: true,
+      query: { startDate: startDate || null, endDate: endDate || null, preset },
+      data: {
+        summary: {
+          totalAttendance,
+          totalPresent,
+          totalLate,
+          totalLeave,
+          totalAbsent,
+          readinessRate,
+          totalMembers: members.length
+        },
+        shiftStats,
+        leaveTypes,
+        leaderboard,
+        cases: {
+          total: cases.length,
+          pending: cases.filter(c => c.status === 'PENDING').length,
+          investigating: cases.filter(c => c.status === 'INVESTIGATING').length,
+          resolved: cases.filter(c => c.status === 'RESOLVED').length,
+          recent: cases.slice(0, 5)
+        },
+        lostFound: {
+          total: lostItems.length,
+          waiting: lostItems.filter(i => i.status === 'WAITING_OWNER').length,
+          claimed: lostItems.filter(i => i.status === 'CLAIMED').length,
+          recent: lostItems.slice(0, 5)
+        },
+        organization
+      }
+    });
+  } catch (err) {
+    console.error('Analytics API error:', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// 6.8.4 หน้าเว็บศูนย์สถิติและคลังข้อมูลรวม (/analytics)
+// -------------------------------------------------------------
+app.get(['/analytics', '/analytics.html', '/stats-overview', '/records'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
+});
+
+// -------------------------------------------------------------
 // 7. หน้าเว็บระบบของหาย (/lost-found)
 // -------------------------------------------------------------
 app.get(['/lost-found', '/lost-found.html'], (req, res) => {

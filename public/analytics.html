@@ -1,0 +1,1024 @@
+<!DOCTYPE html>
+<html lang="th" class="h-full bg-black text-slate-100 antialiased selection:bg-amber-500 selection:text-black">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SARAWAT ANALYTICS - ศูนย์วิเคราะห์ข้อมูลและสถิติภาพรวม โรงเรียนพระนารายณ์</title>
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  
+  <!-- Tailwind CSS & Google Fonts -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,700&family=Prompt:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+  <!-- Chart.js 4.4 -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Chakra Petch', 'Prompt', 'sans-serif'],
+            mono: ['Chakra Petch', 'monospace'],
+          },
+          colors: {
+            tactical: {
+              950: '#000000',
+              900: '#060B13',
+              850: '#0A101D',
+              800: '#101A2E',
+              700: '#182744',
+              border: '#162238',
+              hover: '#1B2A4A'
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #000000; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #334155; }
+
+    body {
+      background-color: #000000;
+      background-image: 
+        radial-gradient(circle at 50% 0%, rgba(6, 182, 212, 0.06) 0%, transparent 60%),
+        linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+      background-size: 100% 100%, 32px 32px, 32px 32px;
+    }
+
+    .counter-value {
+      font-variant-numeric: tabular-nums;
+      transition: all 0.4s ease-out;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-200">
+
+  <!-- ========================================================== -->
+  <!-- 🛡️ TACTICAL GLOBAL HUD HEADER                             -->
+  <!-- ========================================================== -->
+  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-tactical-border px-3 sm:px-4 py-2.5 transition">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+      
+      <!-- Brand & School Logo -->
+      <a href="/" class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group">
+        <div class="relative flex-shrink-0">
+          <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน" class="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
+          <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-cyan-400 rounded-full border-2 border-black animate-pulse"></span>
+        </div>
+        <div class="leading-tight">
+          <div class="flex items-center gap-1.5 sm:gap-2">
+            <span class="font-bold text-xs sm:text-sm md:text-base tracking-wider text-slate-100 uppercase">SARAWAT COMMAND</span>
+            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 font-semibold">INTELLIGENCE</span>
+          </div>
+          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block">ศูนย์วิเคราะห์ข้อมูลและสถิติภาพรวม • โรงเรียนพระนารายณ์</p>
+        </div>
+      </a>
+
+      <!-- Desktop Navigation Links -->
+      <nav class="hidden lg:flex items-center gap-1.5 bg-tactical-900/90 border border-tactical-border rounded-xl p-1 font-sans text-xs">
+        <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>🛡️</span> หน้าหลัก
+        </a>
+        <a href="/attendance-scan" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-emerald-300 hover:text-white hover:bg-emerald-600/20 border border-emerald-500/30">
+          <span>⚡</span> สแกนเช็คชื่อ
+        </a>
+        <a href="/analytics" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow font-bold">
+          <span>📊</span> สถิติ & คลังข้อมูล
+        </a>
+        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>🎨</span> ทำบัตร
+        </a>
+        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>📦</span> ของหาย
+        </a>
+        <a href="/verify" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>🔍</span> ตรวจบัตร
+        </a>
+        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+          <span>📷</span> บอดี้แคม
+        </a>
+      </nav>
+
+      <!-- Sync Button & Mobile Hamburger -->
+      <div class="flex items-center gap-2">
+        <button onclick="loadAnalyticsData()" class="px-2.5 sm:px-3 py-1.5 rounded-lg bg-tactical-900 hover:bg-tactical-800 text-cyan-300 border border-cyan-500/30 text-xs flex items-center gap-1.5 transition active:scale-95 shadow-sm">
+          <svg id="icon-refresh" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+          <span class="font-mono text-[11px] font-bold">รีเฟรชสถิติ</span>
+        </button>
+
+        <button onclick="toggleMobileNav()" class="lg:hidden p-1.5 rounded-lg bg-tactical-900 text-slate-300 hover:text-white border border-tactical-border text-xs flex items-center justify-center transition">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Mobile Navigation Drawer -->
+    <div id="mobile-nav-drawer" class="hidden lg:hidden pt-3 pb-2 border-t border-tactical-border/70 mt-2.5 grid grid-cols-2 gap-2 text-xs">
+      <a href="/" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200">
+        <span>🛡️</span> หน้าหลัก
+      </a>
+      <a href="/analytics" class="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center gap-2 text-cyan-300 font-bold">
+        <span>📊</span> สถิติ & คลังข้อมูล
+      </a>
+      <a href="/attendance-scan" class="p-2 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center gap-2 text-emerald-300">
+        <span>⚡</span> สแกนเช็คชื่อ
+      </a>
+      <a href="/attendance-sheet" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300">
+        <span>📄</span> แบบฟอร์ม A4
+      </a>
+      <a href="/card-studio" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200">
+        <span>🎨</span> ทำบัตร
+      </a>
+      <a href="/lost-found" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200">
+        <span>📦</span> ของหาย
+      </a>
+      <a href="/verify" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200">
+        <span>🔍</span> ตรวจบัตร
+      </a>
+      <a href="/bodycam-upload" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200">
+        <span>📷</span> บอดี้แคม
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================== -->
+  <!-- 🎛️ TIMEFRAME FILTER BAR (แถบเลือกช่วงเวลา)                 -->
+  <!-- ========================================================== -->
+  <section class="max-w-7xl mx-auto w-full px-4 pt-4">
+    <div class="p-3.5 rounded-2xl bg-gradient-to-r from-tactical-900 via-tactical-850 to-tactical-900 border border-tactical-border space-y-3 shadow-xl">
+      
+      <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+        <!-- Title & Range Badge -->
+        <div class="flex items-center gap-2 flex-wrap">
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📅</span>
+            <div>
+              <h1 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+                <span>เลือกช่วงเวลาวิเคราะห์ข้อมูล</span>
+                <span id="active-range-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold">
+                  ทั้งหมด (All-Time)
+                </span>
+              </h1>
+              <p class="text-[11px] text-slate-400">กรองสถิติการเช็คชื่อ, ขาด-ลา-มา-สาย, คดี และของหายตามช่วงเวลา</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Presets -->
+        <div class="flex items-center gap-1.5 flex-wrap">
+          <button onclick="setTimeframePreset('all')" id="btn-preset-all" class="preset-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition bg-cyan-500/20 text-cyan-300 border border-cyan-500/50 shadow-sm">
+            🌐 ทั้งหมด
+          </button>
+          <button onclick="setTimeframePreset('3m')" id="btn-preset-3m" class="preset-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition bg-tactical-850 text-slate-300 border border-tactical-border hover:border-cyan-500/40">
+            🗓️ 3 เดือนย้อนหลัง
+          </button>
+          <button onclick="setTimeframePreset('1m')" id="btn-preset-1m" class="preset-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition bg-tactical-850 text-slate-300 border border-tactical-border hover:border-cyan-500/40">
+            📅 1 เดือนย้อนหลัง
+          </button>
+          <button onclick="setTimeframePreset('30d')" id="btn-preset-30d" class="preset-btn px-2.5 sm:px-3 py-1.5 rounded-xl text-xs font-bold transition bg-tactical-850 text-slate-300 border border-tactical-border hover:border-cyan-500/40">
+            ⚡ 30 วันล่าสุด
+          </button>
+        </div>
+      </div>
+
+      <!-- Custom Date Inputs -->
+      <div class="pt-2 border-t border-tactical-border/70 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div class="flex items-center gap-2 flex-wrap">
+          <span class="text-slate-400 font-medium">หรือกำหนดช่วงวันเอง:</span>
+          <div class="flex items-center gap-1.5 bg-tactical-950 border border-tactical-border rounded-xl px-2.5 py-1">
+            <span class="text-slate-500">จาก</span>
+            <input type="date" id="input-start-date" class="bg-transparent text-slate-200 font-mono text-xs outline-none focus:text-cyan-300">
+            <span class="text-slate-500">ถึง</span>
+            <input type="date" id="input-end-date" class="bg-transparent text-slate-200 font-mono text-xs outline-none focus:text-cyan-300">
+          </div>
+          <button onclick="applyCustomDateRange()" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs transition active:scale-95 shadow">
+            🔍 กรองข้อมูล
+          </button>
+        </div>
+
+        <div class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="range-details-text">กำลังโหลดสถิติฐานข้อมูล...</span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ========================================================== -->
+  <!-- 📊 BENTO KPI METRICS ROW                                  -->
+  <!-- ========================================================== -->
+  <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-1 space-y-4">
+
+    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      
+      <!-- KPI 1: เข้าเวรทั้งหมด -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-cyan-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>เข้าเวรทั้งหมด</span>
+          <span class="text-cyan-400 text-sm">📋</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span id="kpi-total-att" class="counter-value text-2xl font-bold font-mono text-white">0</span>
+          <span class="text-[11px] text-slate-400 font-mono">ครั้ง</span>
+        </div>
+        <div class="mt-1 text-[10px] text-slate-400 truncate">
+          บันทึกตามช่วงเวลา
+        </div>
+      </div>
+
+      <!-- KPI 2: มาปฏิบัติหน้าที่ -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-emerald-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>มาปฏิบัติหน้าที่</span>
+          <span class="text-emerald-400 text-sm">✓</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span id="kpi-present" class="counter-value text-2xl font-bold font-mono text-emerald-400">0</span>
+          <span class="text-[11px] text-slate-400 font-mono">ครั้ง</span>
+        </div>
+        <div class="mt-1 text-[10px] text-emerald-400 flex items-center gap-1 font-mono" id="kpi-present-pct">
+          100% ของรอบเวร
+        </div>
+      </div>
+
+      <!-- KPI 3: ขอลาเวร -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-sky-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>ขอลาเวร (Leave)</span>
+          <span class="text-sky-400 text-sm">📝</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span id="kpi-leave" class="counter-value text-2xl font-bold font-mono text-sky-300">0</span>
+          <span class="text-[11px] text-slate-400 font-mono">ครั้ง</span>
+        </div>
+        <div class="mt-1 text-[10px] text-sky-400 font-mono truncate" id="kpi-top-leave-type">
+          มีใบลาถูกต้อง
+        </div>
+      </div>
+
+      <!-- KPI 4: มาสาย -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>มาสาย (Late)</span>
+          <span class="text-amber-400 text-sm">⚡</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span id="kpi-late" class="counter-value text-2xl font-bold font-mono text-amber-300">0</span>
+          <span class="text-[11px] text-slate-400 font-mono">ครั้ง</span>
+        </div>
+        <div class="mt-1 text-[10px] text-amber-400 font-mono">
+          ช่องว่าง OMR
+        </div>
+      </div>
+
+      <!-- KPI 5: ขาดเวร -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-rose-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>ขาดเวร (Absent)</span>
+          <span class="text-rose-400 text-sm">❌</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1.5">
+          <span id="kpi-absent" class="counter-value text-2xl font-bold font-mono text-rose-400">0</span>
+          <span class="text-[11px] text-slate-400 font-mono">ครั้ง</span>
+        </div>
+        <div class="mt-1 text-[10px] text-rose-400 font-mono">
+          ไม่มาปฏิบัติหน้าที่
+        </div>
+      </div>
+
+      <!-- KPI 6: อัตราความพร้อมภาพรวม -->
+      <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-emerald-500/40 transition">
+        <div class="flex items-center justify-between text-slate-400 text-xs">
+          <span>ความพร้อมภาพรวม</span>
+          <span class="text-emerald-400 text-sm">🛡️</span>
+        </div>
+        <div class="mt-1 flex items-baseline gap-1">
+          <span id="kpi-readiness" class="counter-value text-2xl font-bold font-mono text-emerald-400">100%</span>
+        </div>
+        <div class="mt-1 text-[10px] text-slate-400 font-mono truncate" id="kpi-member-count">
+          กำลังพล 12 นาย
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 📈 SECTION 1: GRAPHS & VISUAL CHARTS                       -->
+    <!-- ========================================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+      
+      <!-- Chart 1: สถิติแยกตามผลัดเวร (5 ผลัด จันทร์-ศุกร์) -->
+      <div class="lg:col-span-7 p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2">
+          <div>
+            <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
+              <span>📊</span> สถิติเข้าเวรแยกตามผลัด (จันทร์ - ศุกร์)
+            </h3>
+            <p class="text-[11px] text-slate-400">เปรียบเทียบสัดส่วน มาปกติ, มาสาย, ลา และขาดเวรในแต่ละวัน</p>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-tactical-850 text-cyan-300 border border-tactical-border">
+            5 ผลัดเวร
+          </span>
+        </div>
+        <div class="relative h-60 w-full">
+          <canvas id="chart-shift-comparison"></canvas>
+        </div>
+      </div>
+
+      <!-- Chart 2: สัดส่วนประเภทการลาเวร (Doughnut) -->
+      <div class="lg:col-span-5 p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2">
+          <div>
+            <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
+              <span>🍩</span> จำแนกประเภทการลาเวร
+            </h3>
+            <p class="text-[11px] text-slate-400">สัดส่วนเหตุผลการลา (ลาป่วย, ลากิจ, กิจกรรม, อื่นๆ)</p>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-tactical-850 text-amber-300 border border-tactical-border">
+            Leave Breakdown
+          </span>
+        </div>
+        <div class="relative h-60 w-full flex items-center justify-center">
+          <canvas id="chart-leave-types"></canvas>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 🏆 SECTION 2: จัดอันดับ "ใครลาบ่อยสุด" (LEADERBOARD)          -->
+    <!-- ========================================================== -->
+    <div class="p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-tactical-border pb-2.5">
+        <div>
+          <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+            <span>🏆</span>
+            <span>ทำเนียบสถิติการลา & ขาดเวรรายบุคคล (ใครลาบ่อยสุด)</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
+              Discipline Leaderboard
+            </span>
+          </h2>
+          <p class="text-xs text-slate-400">จัดอันดับสารวัตรนักเรียนตามจำนวนครั้งที่แจ้งลา มาสาย และขาดเวร</p>
+        </div>
+
+        <!-- Search Filter -->
+        <div class="relative w-full sm:w-64">
+          <input type="text" id="leaderboard-search" oninput="filterLeaderboard()" placeholder="ค้นหาชื่อ, รหัสเวร, ห้อง..." class="w-full bg-tactical-950 border border-tactical-border rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition font-mono">
+          <svg class="w-4 h-4 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        </div>
+      </div>
+
+      <!-- Leaderboard Table -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs font-sans">
+          <thead>
+            <tr class="border-b border-tactical-border text-slate-400 text-[11px] font-mono uppercase">
+              <th class="py-2 px-3">อันดับ</th>
+              <th class="py-2 px-3">สารวัตรนักเรียน</th>
+              <th class="py-2 px-3">ผลัดเวร</th>
+              <th class="py-2 px-3 text-center">ยอดลา (ครั้ง)</th>
+              <th class="py-2 px-3 text-center">มาสาย</th>
+              <th class="py-2 px-3 text-center">ขาดเวร</th>
+              <th class="py-2 px-3">ประเภทที่ลาบ่อยสุด</th>
+              <th class="py-2 px-3 text-center">สถานะระเบียบ</th>
+            </tr>
+          </thead>
+          <tbody id="leaderboard-tbody" class="divide-y divide-tactical-border/50">
+            <tr>
+              <td colspan="8" class="text-center py-6 text-slate-500 font-mono">กำลังประมวลผลข้อมูลสารวัตร...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 📦 SECTION 3: สรุปสารบบคดี & ของหาย (CASES & LOST ITEMS)     -->
+    <!-- ========================================================== -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      
+      <!-- Box 1: คดี & พฤติกรรมนักเรียน -->
+      <div class="p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🚨</span>
+            <div>
+              <h3 class="font-bold text-xs sm:text-sm text-slate-100">สารบบคดี & บันทึกเหตุการณ์</h3>
+              <p class="text-[11px] text-slate-400">คดีที่เกิดขึ้นและดำเนินการในช่วงเวลาที่เลือก</p>
+            </div>
+          </div>
+          <a href="/bodycam-upload" class="text-xs text-rose-400 hover:text-rose-300 font-mono">
+            ส่งคลิปหลักฐาน ↗
+          </a>
+        </div>
+
+        <!-- Case Counters -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="p-2.5 rounded-xl bg-tactical-950 border border-tactical-border">
+            <div class="text-[10px] text-slate-400">คดีทั้งหมด</div>
+            <div id="cases-total" class="text-lg font-bold font-mono text-white mt-0.5">0</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+            <div class="text-[10px] text-amber-400">รอดำเนินการ</div>
+            <div id="cases-pending" class="text-lg font-bold font-mono text-amber-300 mt-0.5">0</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+            <div class="text-[10px] text-emerald-400">คลี่คลายแล้ว</div>
+            <div id="cases-resolved" class="text-lg font-bold font-mono text-emerald-300 mt-0.5">0</div>
+          </div>
+        </div>
+
+        <!-- Recent Cases List -->
+        <div class="space-y-1.5 pt-1">
+          <div class="text-[11px] font-semibold text-slate-300">รายการคดีล่าสุดในช่วงนี้:</div>
+          <div id="cases-recent-list" class="space-y-1.5 text-xs">
+            <div class="p-2 text-center text-slate-500 text-xs">กำลังโหลดข้อมูล...</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Box 2: ของหาย & ส่งคืนเจ้าของ -->
+      <div class="p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">📦</span>
+            <div>
+              <h3 class="font-bold text-xs sm:text-sm text-slate-100">คลังของหาย & ส่งคืนเจ้าของ</h3>
+              <p class="text-[11px] text-slate-400">ทรัพย์สินที่พบและส่งมอบคืนในช่วงเวลาที่เลือก</p>
+            </div>
+          </div>
+          <a href="/lost-found" class="text-xs text-amber-400 hover:text-amber-300 font-mono">
+            ไปที่คลังของหาย ↗
+          </a>
+        </div>
+
+        <!-- Lost Items Counters -->
+        <div class="grid grid-cols-3 gap-2 text-center">
+          <div class="p-2.5 rounded-xl bg-tactical-950 border border-tactical-border">
+            <div class="text-[10px] text-slate-400">ของหายทั้งหมด</div>
+            <div id="lost-total" class="text-lg font-bold font-mono text-white mt-0.5">0</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30">
+            <div class="text-[10px] text-sky-400">รอมารับคืน</div>
+            <div id="lost-waiting" class="text-lg font-bold font-mono text-sky-300 mt-0.5">0</div>
+          </div>
+          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+            <div class="text-[10px] text-emerald-400">ส่งคืนสำเร็จ</div>
+            <div id="lost-claimed" class="text-lg font-bold font-mono text-emerald-300 mt-0.5">0</div>
+          </div>
+        </div>
+
+        <!-- Recent Lost Items List -->
+        <div class="space-y-1.5 pt-1">
+          <div class="text-[11px] font-semibold text-slate-300">รายการของหายล่าสุดในช่วงนี้:</div>
+          <div id="lost-recent-list" class="space-y-1.5 text-xs">
+            <div class="p-2 text-center text-slate-500 text-xs">กำลังโหลดข้อมูล...</div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- 👑 SECTION 4: โครงสร้างกำลังพลและหน้าที่ ("ใครเป็นหัวหน้า ใครทำอะไร") -->
+    <!-- ========================================================== -->
+    <div class="p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-4">
+      
+      <div class="flex items-center justify-between border-b border-tactical-border pb-2.5">
+        <div>
+          <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+            <span>👑</span>
+            <span>ทำเนียบโครงสร้างกำลังพล & บทบาทหน้าที่ 5 ผลัดเวร</span>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
+              Organization Matrix
+            </span>
+          </h2>
+          <p class="text-xs text-slate-400">ระบุผู้ดำรงตำแหน่งหัวหน้าเวร, รองหัวหน้า และกำลังพลผู้ปฏิบัติหน้าที่ประจำจุด</p>
+        </div>
+        <a href="/attendance-sheet" class="text-xs text-cyan-400 hover:text-cyan-300 font-mono hidden sm:inline-block">
+          พิมพ์ใบเช็คชื่อ A4 ↗
+        </a>
+      </div>
+
+      <!-- Shift Structure Grid (5 Cards: จันทร์ ถึง ศุกร์) -->
+      <div id="organization-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+        <!-- Rendered dynamically via JS -->
+        <div class="col-span-full py-8 text-center text-slate-500 text-xs font-mono">
+          กำลังจัดทำเนียบโครงสร้างกำลังพล...
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <!-- ========================================================== -->
+  <!-- ⚙️ JAVASCRIPT LOGIC & TELEMETRY ENGINE                     -->
+  <!-- ========================================================== -->
+  <script>
+    let activePreset = 'all';
+    let currentAnalyticsData = null;
+    let chartShift = null;
+    let chartTypes = null;
+
+    // ----------------------------------------------------------
+    // 1. DATE HELPERS & PRESETS
+    // ----------------------------------------------------------
+    function formatDateIso(d) {
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${year}-${month}-${day}`;
+    }
+
+    function setTimeframePreset(preset) {
+      activePreset = preset;
+      
+      // Update UI button styles
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm');
+        btn.classList.add('bg-tactical-850', 'text-slate-300', 'border-tactical-border');
+      });
+      const activeBtn = document.getElementById(`btn-preset-${preset}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-tactical-850', 'text-slate-300', 'border-tactical-border');
+        activeBtn.classList.add('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm');
+      }
+
+      const now = new Date();
+      let start = null;
+      let end = formatDateIso(now);
+      let label = 'ทั้งหมด (All-Time)';
+
+      if (preset === '30d') {
+        const d = new Date(now.getTime() - 30 * 86400000);
+        start = formatDateIso(d);
+        label = `30 วันล่าสุด (${start} ถึง ${end})`;
+      } else if (preset === '1m') {
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - 1);
+        start = formatDateIso(d);
+        label = `1 เดือนย้อนหลัง (${start} ถึง ${end})`;
+      } else if (preset === '3m') {
+        const d = new Date(now);
+        d.setMonth(d.getMonth() - 3);
+        start = formatDateIso(d);
+        label = `3 เดือนย้อนหลัง (${start} ถึง ${end})`;
+      }
+
+      document.getElementById('input-start-date').value = start || '';
+      document.getElementById('input-end-date').value = end;
+      document.getElementById('active-range-badge').textContent = label;
+
+      loadAnalyticsData(start, end, preset);
+    }
+
+    function applyCustomDateRange() {
+      const start = document.getElementById('input-start-date').value;
+      const end = document.getElementById('input-end-date').value;
+
+      if (!start || !end) {
+        alert('กรุณาเลือกทั้งวันที่เริ่มต้นและสิ้นสุด');
+        return;
+      }
+      if (start > end) {
+        alert('วันที่เริ่มต้นต้องไม่มากกว่าวันที่สิ้นสุด');
+        return;
+      }
+
+      activePreset = 'custom';
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.classList.remove('bg-cyan-500/20', 'text-cyan-300', 'border-cyan-500/50', 'shadow-sm');
+        btn.classList.add('bg-tactical-850', 'text-slate-300', 'border-tactical-border');
+      });
+
+      document.getElementById('active-range-badge').textContent = `กำหนดเอง: ${start} ถึง ${end}`;
+      loadAnalyticsData(start, end, 'custom');
+    }
+
+    // ----------------------------------------------------------
+    // 2. FETCH & RENDER ANALYTICS
+    // ----------------------------------------------------------
+    async function loadAnalyticsData(startDate = null, endDate = null, preset = activePreset) {
+      const icon = document.getElementById('icon-refresh');
+      if (icon) icon.classList.add('animate-spin');
+
+      let url = `/api/analytics/overview?preset=${preset}`;
+      if (startDate) url += `&startDate=${startDate}`;
+      if (endDate) url += `&endDate=${endDate}`;
+
+      try {
+        const res = await fetch(url);
+        const json = await res.json();
+
+        if (json.success && json.data) {
+          currentAnalyticsData = json.data;
+          renderDashboard(json.data);
+          document.getElementById('range-details-text').textContent = 
+            `อัปเดตล่าสุด: ${new Date().toLocaleTimeString('th-TH')} • ประมวลผล ${json.data.summary.totalAttendance} บันทึก`;
+        }
+      } catch (err) {
+        console.error('Failed to load analytics:', err);
+      } finally {
+        if (icon) icon.classList.remove('animate-spin');
+      }
+    }
+
+    function renderDashboard(data) {
+      const s = data.summary || {};
+
+      // 1. Render KPIs
+      document.getElementById('kpi-total-att').textContent = s.totalAttendance || 0;
+      document.getElementById('kpi-present').textContent = s.totalPresent || 0;
+      document.getElementById('kpi-late').textContent = s.totalLate || 0;
+      document.getElementById('kpi-leave').textContent = s.totalLeave || 0;
+      document.getElementById('kpi-absent').textContent = s.totalAbsent || 0;
+      document.getElementById('kpi-readiness').textContent = `${s.readinessRate || 100}%`;
+      document.getElementById('kpi-member-count').textContent = `กำลังพล ${s.totalMembers || 0} นาย`;
+
+      const presentRate = s.totalAttendance > 0 ? Math.round((s.totalPresent / s.totalAttendance) * 100) : 100;
+      document.getElementById('kpi-present-pct').textContent = `${presentRate}% ของรอบเวร`;
+
+      // 2. Render Charts
+      renderShiftComparisonChart(data.shiftStats);
+      renderLeaveTypesChart(data.leaveTypes);
+
+      // 3. Render Leaderboard
+      renderLeaderboard(data.leaderboard);
+
+      // 4. Render Cases & Lost Items
+      renderCases(data.cases);
+      renderLostItems(data.lostFound);
+
+      // 5. Render Organization Structure
+      renderOrganization(data.organization);
+    }
+
+    // ----------------------------------------------------------
+    // 3. CHART.JS RENDERING
+    // ----------------------------------------------------------
+    function renderShiftComparisonChart(shiftStats = {}) {
+      const ctx = document.getElementById('chart-shift-comparison')?.getContext('2d');
+      if (!ctx || !window.Chart) return;
+
+      const labels = ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Ts)', 'ศุกร์ (F)'];
+      const keys = ['M', 'T', 'W', 'Ts', 'F'];
+
+      const presentData = keys.map(k => (shiftStats[k] ? shiftStats[k].present : 0));
+      const lateData = keys.map(k => (shiftStats[k] ? shiftStats[k].late : 0));
+      const leaveData = keys.map(k => (shiftStats[k] ? shiftStats[k].leave : 0));
+      const absentData = keys.map(k => (shiftStats[k] ? shiftStats[k].absent : 0));
+
+      if (chartShift) chartShift.destroy();
+
+      chartShift = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [
+            {
+              label: 'มาปกติ',
+              data: presentData,
+              backgroundColor: 'rgba(16, 185, 129, 0.8)',
+              borderRadius: 4
+            },
+            {
+              label: 'มาสาย',
+              data: lateData,
+              backgroundColor: 'rgba(245, 158, 11, 0.8)',
+              borderRadius: 4
+            },
+            {
+              label: 'ขอลา',
+              data: leaveData,
+              backgroundColor: 'rgba(56, 189, 248, 0.8)',
+              borderRadius: 4
+            },
+            {
+              label: 'ขาดเวร',
+              data: absentData,
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
+              borderRadius: 4
+            }
+          ]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              labels: { color: '#94a3b8', font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              backgroundColor: '#060B13',
+              titleColor: '#38bdf8',
+              bodyColor: '#e2e8f0',
+              borderColor: '#1e293b',
+              borderWidth: 1
+            }
+          },
+          scales: {
+            x: {
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', font: { family: 'Chakra Petch', size: 10 } }
+            },
+            y: {
+              beginAtZero: true,
+              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              ticks: { color: '#94a3b8', stepSize: 1, font: { family: 'Chakra Petch', size: 10 } }
+            }
+          }
+        }
+      });
+    }
+
+    function renderLeaveTypesChart(types = {}) {
+      const ctx = document.getElementById('chart-leave-types')?.getContext('2d');
+      if (!ctx || !window.Chart) return;
+
+      const labels = Object.keys(types);
+      const dataValues = Object.values(types);
+      const hasData = dataValues.some(v => v > 0);
+
+      if (chartTypes) chartTypes.destroy();
+
+      chartTypes = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: hasData ? labels : ['ไม่มีประวัติการลา'],
+          datasets: [{
+            data: hasData ? dataValues : [1],
+            backgroundColor: hasData 
+              ? ['#ef4444', '#f59e0b', '#06b6d4', '#8b5cf6']
+              : ['#1e293b'],
+            borderColor: '#060B13',
+            borderWidth: 3
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: { color: '#94a3b8', font: { family: 'Prompt', size: 11 }, boxWidth: 12 }
+            },
+            tooltip: {
+              backgroundColor: '#060B13',
+              borderColor: '#1e293b',
+              borderWidth: 1
+            }
+          }
+        }
+      });
+    }
+
+    // ----------------------------------------------------------
+    // 4. LEADERBOARD RENDERING
+    // ----------------------------------------------------------
+    function renderLeaderboard(list = []) {
+      const tbody = document.getElementById('leaderboard-tbody');
+      if (!tbody) return;
+
+      if (!list || list.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="8" class="text-center py-6 text-slate-500 font-mono">ไม่มีข้อมูลสารวัตรในช่วงเวลานี้</td></tr>`;
+        return;
+      }
+
+      const shiftColors = {
+        M: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
+        T: 'bg-pink-500/15 text-pink-300 border-pink-500/30',
+        W: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
+        Ts: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
+        F: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
+      };
+
+      tbody.innerHTML = list.map((m, idx) => {
+        let rankBadge = `<span class="font-mono font-bold text-slate-400">#${idx + 1}</span>`;
+        if (idx === 0) rankBadge = `<span class="text-base" title="อันดับ 1 ลา/ขาดมากที่สุด">🥇</span>`;
+        else if (idx === 1) rankBadge = `<span class="text-base" title="อันดับ 2">🥈</span>`;
+        else if (idx === 2) rankBadge = `<span class="text-base" title="อันดับ 3">🥉</span>`;
+
+        // Discipline status
+        let statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">✓ ปกติ</span>`;
+        if (m.absent_count > 0 || m.leave_count >= 3) {
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">⚠️ เฝ้าระวัง</span>`;
+        } else if (m.leave_count >= 1 || m.late_count >= 2) {
+          statusBadge = `<span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-300 border border-amber-500/30">⚡ ติดตาม</span>`;
+        }
+
+        const shiftBadge = shiftColors[m.duty_day] || 'bg-slate-800 text-slate-300 border-slate-700';
+
+        return `
+          <tr class="hover:bg-tactical-850/60 transition font-sans member-row" data-search="${m.name} ${m.nickname} ${m.duty_id} ${m.class_room}">
+            <td class="py-2.5 px-3">${rankBadge}</td>
+            <td class="py-2.5 px-3">
+              <div class="flex items-center gap-2">
+                <span class="font-mono font-bold text-amber-400">[${m.duty_id}]</span>
+                <span class="font-bold text-white">${m.nickname ? m.nickname : ''}</span>
+                <span class="text-slate-400 text-xs">(${m.name})</span>
+                ${m.is_head ? '<span class="text-[9px] px-1 py-0.2 rounded bg-amber-500/20 text-amber-300 font-bold border border-amber-500/30">หัวหน้า</span>' : ''}
+              </div>
+              <div class="text-[10px] text-slate-500 font-mono">ห้อง: ${m.class_room || '-'}</div>
+            </td>
+            <td class="py-2.5 px-3">
+              <span class="px-2 py-0.5 rounded border text-[10px] font-mono font-bold ${shiftBadge}">
+                ${m.duty_day}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold ${m.leave_count > 0 ? 'text-sky-300' : 'text-slate-500'}">
+              ${m.leave_count}
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold ${m.late_count > 0 ? 'text-amber-300' : 'text-slate-500'}">
+              ${m.late_count}
+            </td>
+            <td class="py-2.5 px-3 text-center font-mono font-bold ${m.absent_count > 0 ? 'text-rose-400' : 'text-slate-500'}">
+              ${m.absent_count}
+            </td>
+            <td class="py-2.5 px-3 text-slate-300 text-xs">
+              ${m.frequent_leave_type}
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              ${statusBadge}
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function filterLeaderboard() {
+      const q = document.getElementById('leaderboard-search')?.value.toLowerCase().trim() || '';
+      document.querySelectorAll('.member-row').forEach(row => {
+        const text = row.getAttribute('data-search')?.toLowerCase() || '';
+        row.style.display = text.includes(q) ? '' : 'none';
+      });
+    }
+
+    // ----------------------------------------------------------
+    // 5. CASES & LOST ITEMS RENDERING
+    // ----------------------------------------------------------
+    function renderCases(cases = {}) {
+      document.getElementById('cases-total').textContent = cases.total || 0;
+      document.getElementById('cases-pending').textContent = cases.pending || 0;
+      document.getElementById('cases-resolved').textContent = cases.resolved || 0;
+
+      const list = document.getElementById('cases-recent-list');
+      if (!list) return;
+
+      if (!cases.recent || cases.recent.length === 0) {
+        list.innerHTML = `<div class="p-2 text-center text-slate-500">ไม่มีรายการคดีในช่วงเวลานี้</div>`;
+        return;
+      }
+
+      list.innerHTML = cases.recent.map(c => `
+        <div class="p-2 rounded-xl bg-tactical-950 border border-tactical-border flex items-center justify-between gap-2">
+          <div class="truncate">
+            <div class="font-bold text-white text-xs truncate">${c.title || 'เหตุการณ์ทั่วไป'}</div>
+            <div class="text-[10px] text-slate-400 font-mono">${c.incident_date || ''} • ${c.location || 'ในโรงเรียน'}</div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono shrink-0 ${c.status === 'RESOLVED' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">
+            ${c.status === 'RESOLVED' ? 'สิ้นสุด' : 'รอดำเนินการ'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    function renderLostItems(lost = {}) {
+      document.getElementById('lost-total').textContent = lost.total || 0;
+      document.getElementById('lost-waiting').textContent = lost.waiting || 0;
+      document.getElementById('lost-claimed').textContent = lost.claimed || 0;
+
+      const list = document.getElementById('lost-recent-list');
+      if (!list) return;
+
+      if (!lost.recent || lost.recent.length === 0) {
+        list.innerHTML = `<div class="p-2 text-center text-slate-500">ไม่มีรายการของหายในช่วงเวลานี้</div>`;
+        return;
+      }
+
+      list.innerHTML = lost.recent.map(item => `
+        <div class="p-2 rounded-xl bg-tactical-950 border border-tactical-border flex items-center justify-between gap-2">
+          <div class="truncate">
+            <div class="font-bold text-white text-xs truncate">${item.title || 'ของหายไม่ระบุชื่อ'}</div>
+            <div class="text-[10px] text-slate-400 font-mono">รหัส: ${item.item_code || '-'} • พบที่: ${item.found_location || 'บริเวณโรงเรียน'}</div>
+          </div>
+          <span class="px-2 py-0.5 rounded text-[10px] font-mono shrink-0 ${item.status === 'CLAIMED' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-sky-500/15 text-sky-300'}">
+            ${item.status === 'CLAIMED' ? 'ส่งมอบแล้ว' : 'รอมารับ'}
+          </span>
+        </div>
+      `).join('');
+    }
+
+    // ----------------------------------------------------------
+    // 6. ORGANIZATION & DUTIES RENDERING
+    // ----------------------------------------------------------
+    function renderOrganization(orgList = []) {
+      const grid = document.getElementById('organization-grid');
+      if (!grid) return;
+
+      if (!orgList || orgList.length === 0) {
+        grid.innerHTML = `<div class="col-span-full py-8 text-center text-slate-500 text-xs">ไม่พบข้อมูลทำเนียบกำลังพล</div>`;
+        return;
+      }
+
+      grid.innerHTML = orgList.map(shift => {
+        const head = shift.head;
+        const deputy = shift.deputy;
+        const officers = shift.officers || [];
+
+        return `
+          <div class="p-3.5 rounded-2xl bg-tactical-950 border border-tactical-border flex flex-col justify-between space-y-3 shadow-md hover:border-amber-500/40 transition">
+            
+            <!-- Shift Header -->
+            <div class="border-b border-tactical-border/70 pb-2">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-white">${shift.shift_name}</span>
+                <span class="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-tactical-800 text-amber-300 border border-tactical-border">
+                  ${shift.shift_code} (${shift.total_members} นาย)
+                </span>
+              </div>
+              <p class="text-[10px] text-slate-400 mt-1 line-clamp-2">${shift.duty_desc}</p>
+            </div>
+
+            <!-- Leadership Role 1: หัวหน้าเวร (Head 👑) -->
+            <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="font-bold text-amber-400 flex items-center gap-1">
+                  <span>👑</span> หัวหน้าผลัดเวร
+                </span>
+                <span class="font-mono text-amber-300 font-bold">${head ? head.duty_id : '-'}</span>
+              </div>
+              <div class="text-xs font-bold text-white truncate">
+                ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${head ? head.class_room : '-'}</div>
+            </div>
+
+            <!-- Leadership Role 2: รองหัวหน้าเวร (Deputy 🥈) -->
+            <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 space-y-1">
+              <div class="flex items-center justify-between text-[10px]">
+                <span class="font-bold text-sky-400 flex items-center gap-1">
+                  <span>🥈</span> รองหัวหน้าผลัดเวร
+                </span>
+                <span class="font-mono text-sky-300 font-bold">${deputy ? deputy.duty_id : '-'}</span>
+              </div>
+              <div class="text-xs font-bold text-white truncate">
+                ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${deputy ? deputy.class_room : '-'}</div>
+            </div>
+
+            <!-- Officer Members List -->
+            <div class="space-y-1 pt-1 border-t border-tactical-border/70">
+              <div class="text-[10px] font-semibold text-slate-400">สารวัตรประจำจุด:</div>
+              <div class="space-y-1 max-h-36 overflow-y-auto pr-1">
+                ${officers.length > 0 ? officers.map(o => `
+                  <div class="text-[11px] flex items-center justify-between bg-tactical-900/60 p-1.5 rounded-lg border border-tactical-border/50">
+                    <div class="truncate">
+                      <span class="font-mono text-amber-300 text-[10px]">[${o.duty_id}]</span>
+                      <span class="text-slate-200">${o.nickname || o.name}</span>
+                    </div>
+                    <span class="text-[10px] font-mono text-slate-400">${o.class_room}</span>
+                  </div>
+                `).join('') : '<div class="text-[10px] text-slate-500 text-center py-1">ไม่มีกำลังพลเพิ่มเติม</div>'}
+              </div>
+            </div>
+
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) drawer.classList.toggle('hidden');
+    }
+
+    // ----------------------------------------------------------
+    // 7. INITIALIZATION
+    // ----------------------------------------------------------
+    window.addEventListener('DOMContentLoaded', () => {
+      setTimeframePreset('all');
+    });
+  </script>
+</body>
+</html>
