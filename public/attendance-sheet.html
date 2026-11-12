@@ -194,7 +194,7 @@
     }
     table.attendance-table th, table.attendance-table td {
       border: 1px solid #334155;
-      padding: 4px 3px;
+      padding: 5.5px 3px;
       text-align: center;
       vertical-align: middle;
     }
@@ -212,19 +212,19 @@
       background-color: #e2e8f0;
     }
 
-    /* OMR Single Circle: [ ○ ] (ม) มาปฏิบัติหน้าที่ */
+    /* OMR Single Circle: [ ○ ] (ม) มาปฏิบัติหน้าที่ (สีเทาอ่อน #BFBFBF เพื่อไม่รบกวนการตรวจจับรอยฝนดำ) */
     .omr-circle {
       width: 15px;
       height: 15px;
-      border: 1.5px solid #475569;
+      border: 1.5px solid #bfbfbf;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       font-size: 7.5pt;
       font-family: 'Prompt', sans-serif;
-      font-weight: 700;
-      color: #475569;
+      font-weight: 500;
+      color: #bfbfbf;
       cursor: pointer;
       user-select: none;
       background: #ffffff;
@@ -858,7 +858,7 @@
         let dateCells = '';
         dates12.forEach((dStr, wIdx) => {
           dateCells += `
-            <td style="padding: 2px 1px; text-align: center; vertical-align: middle;">
+            <td style="padding: 5px 2px; text-align: center; vertical-align: middle;">
               <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
                 ม
               </div>

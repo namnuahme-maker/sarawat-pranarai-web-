@@ -1710,8 +1710,12 @@ CRITICAL RULES FOR ACCURACY:
 2. For each student row:
    - Identify the student by Duty ID (MS1, MS2...), Name, or Class/Room (e.g. 5/7 (14)).
    - Inspect the cell strictly at the intersection of this student's row and the target date column.
-   - "box_2d": return normalized bounding box [ymin, xmin, ymax, xmax] (0-1000) strictly enclosing the cell of THIS SPECIFIC column for this student.
-   - "is_filled": set true if the cell is dark/shaded with ink [●], or false if the cell is mostly white/unfilled [○] with only faint text.
+   - The cell contains a printed circle with Thai letter "(ม)".
+   - CRITICAL FILL RULE:
+     * If the circle is EMPTY/UNFILLED (showing only the printed faint "(ม)"): "is_filled": false, "fill_percentage": 5-15.
+     * If the circle is HEAVILY SHADED/FILLED with pen or pencil ink: "is_filled": true, "fill_percentage": 60-95.
+     * DO NOT classify an empty circle containing "(ม)" as filled.
+   - "box_2d": return normalized bounding box [ymin, xmin, ymax, xmax] (0-1000) tightly enclosing the circle of THIS SPECIFIC column for this student.
 
 Return JSON strictly matching this schema:
 {
@@ -1721,6 +1725,7 @@ Return JSON strictly matching this schema:
       "duty_id": "MS1",
       "name": "มัลลิกา เลื่อนลอย",
       "is_filled": true,
+      "fill_percentage": 82,
       "confidence": 99,
       "box_2d": [ymin, xmin, ymax, xmax]
     }

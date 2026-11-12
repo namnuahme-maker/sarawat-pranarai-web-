@@ -825,6 +825,198 @@
     }
 
     // ----------------------------------------------------------
+    // 📐 ADVANCED OMR PIPELINE: PERSPECTIVE WARP, GAUSSIAN BLUR,
+    //    3x3 MORPHOLOGICAL EROSION & CIRCULAR FILL DETECTION
+    // ----------------------------------------------------------
+    function getPerspectiveTransform(src, dst) {
+      const A = [];
+      const b = [];
+      for (let i = 0; i < 4; i++) {
+        const sx = src[i].x, sy = src[i].y;
+        const dx = dst[i].x, dy = dst[i].y;
+        A.push([sx, sy, 1, 0, 0, 0, -dx * sx, -dx * sy]);
+        b.push(dx);
+        A.push([0, 0, 0, sx, sy, 1, -dy * sx, -dy * sy]);
+        b.push(dy);
+      }
+      const n = 8;
+      for (let i = 0; i < n; i++) {
+        let maxRow = i;
+        for (let k = i + 1; k < n; k++) {
+          if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+        }
+        const tmpA = A[i]; A[i] = A[maxRow]; A[maxRow] = tmpA;
+        const tmpB = b[i]; b[i] = b[maxRow]; b[maxRow] = tmpB;
+        for (let k = i + 1; k < n; k++) {
+          const c = A[k][i] / A[i][i];
+          for (let j = i; j < n; j++) A[k][j] -= c * A[i][j];
+          b[k] -= c * b[i];
+        }
+      }
+      const h = new Array(8);
+      for (let i = n - 1; i >= 0; i--) {
+        let sum = 0;
+        for (let j = i + 1; j < n; j++) sum += A[i][j] * h[j];
+        h[i] = (b[i] - sum) / A[i][i];
+      }
+      return [
+        [h[0], h[1], h[2]],
+        [h[3], h[4], h[5]],
+        [h[6], h[7], 1.0]
+      ];
+    }
+
+    function transformPoint(M, x, y) {
+      const d = M[2][0] * x + M[2][1] * y + M[2][2];
+      return {
+        x: (M[0][0] * x + M[0][1] * y + M[0][2]) / d,
+        y: (M[1][0] * x + M[1][1] * y + M[1][2]) / d
+      };
+    }
+
+    function warpGrayPerspective(srcGray, srcW, srcH, dstW, dstH, Hinv) {
+      const dstGray = new Uint8Array(dstW * dstH);
+      for (let y = 0; y < dstH; y++) {
+        for (let x = 0; x < dstW; x++) {
+          const d = Hinv[2][0] * x + Hinv[2][1] * y + Hinv[2][2];
+          const u = (Hinv[0][0] * x + Hinv[0][1] * y + Hinv[0][2]) / d;
+          const v = (Hinv[1][0] * x + Hinv[1][1] * y + Hinv[1][2]) / d;
+
+          const x0 = Math.floor(u);
+          const y0 = Math.floor(v);
+          const x1 = Math.min(srcW - 1, x0 + 1);
+          const y1 = Math.min(srcH - 1, y0 + 1);
+
+          if (x0 >= 0 && x0 < srcW && y0 >= 0 && y0 < srcH) {
+            const dx = u - x0;
+            const dy = v - y0;
+            const p00 = srcGray[y0 * srcW + x0];
+            const p10 = srcGray[y0 * srcW + x1];
+            const p01 = srcGray[y1 * srcW + x0];
+            const p11 = srcGray[y1 * srcW + x1];
+            dstGray[y * dstW + x] = Math.round((1 - dx) * (1 - dy) * p00 + dx * (1 - dy) * p10 + (1 - dx) * dy * p01 + dx * dy * p11);
+          } else {
+            dstGray[y * dstW + x] = 255;
+          }
+        }
+      }
+      return dstGray;
+    }
+
+    function gaussianBlur5x5(srcGray, w, h) {
+      const kernel = [1, 4, 6, 4, 1];
+      const tmp = new Float32Array(w * h);
+      const out = new Uint8Array(w * h);
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let sum = 0;
+          for (let k = -2; k <= 2; k++) {
+            const px = Math.min(w - 1, Math.max(0, x + k));
+            sum += srcGray[y * w + px] * kernel[k + 2];
+          }
+          tmp[y * w + x] = sum / 16;
+        }
+      }
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          let sum = 0;
+          for (let k = -2; k <= 2; k++) {
+            const py = Math.min(h - 1, Math.max(0, y + k));
+            sum += tmp[py * w + x] * kernel[k + 2];
+          }
+          out[y * w + x] = Math.round(sum / 16);
+        }
+      }
+      return out;
+    }
+
+    function binaryErode3x3(binMask, w, h) {
+      const out = new Uint8Array(w * h);
+      for (let y = 1; y < h - 1; y++) {
+        for (let x = 1; x < w - 1; x++) {
+          if (binMask[y * w + x] === 1 &&
+              binMask[(y - 1) * w + x] === 1 &&
+              binMask[(y + 1) * w + x] === 1 &&
+              binMask[y * w + (x - 1)] === 1 &&
+              binMask[y * w + (x + 1)] === 1 &&
+              binMask[(y - 1) * w + (x - 1)] === 1 &&
+              binMask[(y - 1) * w + (x + 1)] === 1 &&
+              binMask[(y + 1) * w + (x - 1)] === 1 &&
+              binMask[(y + 1) * w + (x + 1)] === 1) {
+            out[y * w + x] = 1;
+          }
+        }
+      }
+      return out;
+    }
+
+    /**
+     * คำนวณความทึบของวงกลม OMR (Gaussian Blur 5x5 -> Contrast Threshold -> 3x3 Erosion -> Circular Mask)
+     */
+    function computeCircleFillRatio(grayImg, imgW, imgH, cx, cy, radius) {
+      const halfSize = Math.max(16, Math.round(radius * 1.5));
+      const x0 = Math.max(0, cx - halfSize);
+      const y0 = Math.max(0, cy - halfSize);
+      const x1 = Math.min(imgW - 1, cx + halfSize);
+      const y1 = Math.min(imgH - 1, cy + halfSize);
+      const patchW = x1 - x0 + 1;
+      const patchH = y1 - y0 + 1;
+
+      if (patchW < 8 || patchH < 8) return { ratio: 0, percentage: 0 };
+
+      const patch = new Uint8Array(patchW * patchH);
+      for (let py = 0; py < patchH; py++) {
+        for (let px = 0; px < patchW; px++) {
+          patch[py * patchW + px] = grayImg[(y0 + py) * imgW + (x0 + px)];
+        }
+      }
+
+      // 1. ลดสัญญาณรบกวนและลายคลื่น (Moire) ด้วย 5x5 Gaussian Blur
+      const blurred = gaussianBlur5x5(patch, patchW, patchH);
+
+      // 2. คำนวณ Paper Baseline
+      let sumBg = 0, countBg = 0;
+      for (let i = 0; i < blurred.length; i++) {
+        if (blurred[i] > 140) { sumBg += blurred[i]; countBg++; }
+      }
+      const bg = countBg > 0 ? (sumBg / countBg) : 210;
+      const thresh = bg - 28;
+
+      // 3. Binary Thresholding (พิกเซลที่ถูกฝนดำ = 1, พื้นกระดาษขาว = 0)
+      const bin = new Uint8Array(patchW * patchH);
+      for (let i = 0; i < patchW * patchH; i++) {
+        bin[i] = blurred[i] < thresh ? 1 : 0;
+      }
+
+      // 4. ลบเส้นบาง (ตัวอักษร ม และขอบวงกลม) ด้วย 3x3 Morphological Erosion
+      const eroded = binaryErode3x3(bin, patchW, patchH);
+
+      // 5. Circular Mask (Inner Padding หดขอบ 28% ไม่ให้แตะขอบหรือเส้นตาราง)
+      const innerR = radius * 0.72;
+      let nonZero = 0;
+      let totalArea = 0;
+      const localCx = cx - x0;
+      const localCy = cy - y0;
+
+      for (let py = 0; py < patchH; py++) {
+        for (let px = 0; px < patchW; px++) {
+          if (Math.hypot(px - localCx, py - localCy) <= innerR) {
+            totalArea++;
+            if (eroded[py * patchW + px] === 1) nonZero++;
+          }
+        }
+      }
+
+      const ratio = totalArea > 0 ? (nonZero / totalArea) : 0;
+      return {
+        ratio,
+        percentage: Math.round(ratio * 100)
+      };
+    }
+
+    // ----------------------------------------------------------
     // 5. HYBRID QR + VISION AI CORE PROCESSING ENGINE
     // ----------------------------------------------------------
     async function runHybridQrVisionEngine(imageBase64) {
@@ -1077,6 +1269,64 @@
         targetColX2 = chosen.x2;
       }
 
+      // --------------------------------------------------------
+      // 📐 TASK 1: PERSPECTIVE WARP ON TABLE (Normalize to 1200x320)
+      // --------------------------------------------------------
+      const TW = 1200;
+      const TH = 320;
+      let warpedGray = null;
+      let H_warp = null;
+      let H_unwarp = null;
+      let useWarp = false;
+
+      // คำนวณขอบเขตตารางจาก Projection Peaks
+      let tableYTop = rawRowPeaks.length > 0 ? Math.max(10, rawRowPeaks[0] - Math.round(avgRowH * 0.9)) : Math.round(targetH * 0.20);
+      let tableYBot = rawRowPeaks.length > 0 ? Math.min(targetH - 10, rawRowPeaks[rawRowPeaks.length - 1] + 10) : Math.round(targetH * 0.92);
+      let tableXLeft = colPeaks.length > 0 ? Math.max(10, colPeaks[0] - 20) : Math.round(targetW * 0.15);
+      let tableXRight = colPeaks.length > 0 ? Math.min(targetW - 10, colPeaks[colPeaks.length - 1] + 25) : Math.round(targetW * 0.96);
+
+      let srcCorners = [
+        { x: tableXLeft, y: tableYTop },
+        { x: tableXRight, y: tableYTop },
+        { x: tableXRight, y: tableYBot },
+        { x: tableXLeft, y: tableYBot }
+      ];
+
+      // หากตรวจพบ QR Anchor ให้ชดเชยมุมเอียง (Perspective/Skew Compensation)
+      if (qrCode && qrCode.location) {
+        const qLoc = qrCode.location;
+        const qrAngle = Math.atan2(qLoc.topRightCorner.y - qLoc.topLeftCorner.y, qLoc.topRightCorner.x - qLoc.topLeftCorner.x);
+        if (Math.abs(qrAngle) > 0.008) {
+          const midX = (tableXLeft + tableXRight) / 2;
+          const midY = (tableYTop + tableYBot) / 2;
+          const cosA = Math.cos(qrAngle);
+          const sinA = Math.sin(qrAngle);
+          srcCorners = [
+            { x: midX + (tableXLeft - midX) * cosA - (tableYTop - midY) * sinA, y: midY + (tableXLeft - midX) * sinA + (tableYTop - midY) * cosA },
+            { x: midX + (tableXRight - midX) * cosA - (tableYTop - midY) * sinA, y: midY + (tableXRight - midX) * sinA + (tableYTop - midY) * cosA },
+            { x: midX + (tableXRight - midX) * cosA - (tableYBot - midY) * sinA, y: midY + (tableXRight - midX) * sinA + (tableYBot - midY) * cosA },
+            { x: midX + (tableXLeft - midX) * cosA - (tableYBot - midY) * sinA, y: midY + (tableXLeft - midX) * sinA + (tableYBot - midY) * cosA }
+          ];
+        }
+      }
+
+      const dstCorners = [
+        { x: 0, y: 0 },
+        { x: TW, y: 0 },
+        { x: TW, y: TH },
+        { x: 0, y: TH }
+      ];
+
+      try {
+        H_warp = getPerspectiveTransform(srcCorners, dstCorners);
+        H_unwarp = getPerspectiveTransform(dstCorners, srcCorners);
+        warpedGray = warpGrayPerspective(gray, targetW, targetH, TW, TH, H_unwarp);
+        useWarp = true;
+      } catch (warpErr) {
+        console.warn('Perspective warp fallback to projection coordinates:', warpErr);
+        useWarp = false;
+      }
+
       // Canvas for Annotated Image
       const annotCanvas = document.getElementById('review-canvas');
       annotCanvas.width = targetW;
@@ -1104,10 +1354,10 @@
 
       if (aiVisionSuccess) {
         log2.className = 'text-emerald-400 flex items-center gap-1.5 font-bold';
-        log2.innerHTML = `<span>✓</span> <span>[2/4] Gemini Vision AI ตรวจพบตารางสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+        log2.innerHTML = `<span>✓</span> <span>[2/4] Gemini Vision AI + Perspective OMR ตรวจพบตารางสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
       } else {
         log2.className = 'text-amber-400 flex items-center gap-1.5 font-bold';
-        log2.innerHTML = `<span>✓</span> <span>[2/4] วิเคราะห์ตารางเส้นสำเร็จ (Local Engine • ${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+        log2.innerHTML = `<span>✓</span> <span>[2/4] Perspective Warp OMR วิเคราะห์สำเร็จ (1200x320 • ${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
       }
 
       // --------------------------------------------------------
@@ -1129,66 +1379,97 @@
       let lateCount = 0;
       let leaveCount = 0;
       let confidenceSum = 0;
+      const N = activeRoster.length || 5;
 
       activeRoster.forEach((m, r) => {
-        let x1, y1, x2, y2;
-        let aiItem = null;
+        let x1, y1, x2, y2, cellCenterX, cellCenterY, boxW, boxH;
+        let fillRatio = 0;
+        let fillPercentage = 0;
 
+        if (useWarp && warpedGray) {
+          // คำนวณพิกัดแถวและคอลัมน์บนภาพตารางที่ดึงตรงแล้ว (ล็อกขนาดตายตัว ไม่มีปัญหาไหลตกขอบ)
+          const headerH = 48;
+          const rowH_warp = (TH - headerH) / N;
+          const y1_warp = headerH + r * rowH_warp;
+          const y2_warp = headerH + (r + 1) * rowH_warp;
+          const cy_warp = (y1_warp + y2_warp) / 2;
+
+          // 12 คอลัมน์วันที่อยู่ในช่วง X = 415 ถึง X = 1115 (ความกว้าง ~700px)
+          const colW_warp = 700 / 12;
+          const x1_warp = 415 + selIdx * colW_warp;
+          const x2_warp = 415 + (selIdx + 1) * colW_warp;
+          const cx_warp = (x1_warp + x2_warp) / 2;
+          const radius_warp = Math.min(colW_warp, rowH_warp) * 0.28;
+
+          // ประมวลผล OMR ด้วย Gaussian Blur 5x5 + 3x3 Morphological Erosion + Circular Mask
+          const omrResult = computeCircleFillRatio(warpedGray, TW, TH, Math.round(cx_warp), Math.round(cy_warp), radius_warp);
+          fillRatio = omrResult.ratio;
+          fillPercentage = omrResult.percentage;
+
+          // แปลงพิกัดกลับสู่ภาพต้นฉบับด้วย Inverse Homography เพื่อวาดกรอบสีเขียวให้ตรงตำแหน่งจริงบนภาพถ่าย
+          const pTL = transformPoint(H_unwarp, x1_warp + 2, y1_warp + 2);
+          const pBR = transformPoint(H_unwarp, x2_warp - 2, y2_warp - 2);
+          const pCenter = transformPoint(H_unwarp, cx_warp, cy_warp);
+
+          x1 = Math.round(Math.min(pTL.x, pBR.x));
+          x2 = Math.round(Math.max(pTL.x, pBR.x));
+          y1 = Math.round(Math.min(pTL.y, pBR.y));
+          y2 = Math.round(Math.max(pTL.y, pBR.y));
+          cellCenterX = Math.round(pCenter.x);
+          cellCenterY = Math.round(pCenter.y);
+          boxW = Math.max(14, x2 - x1);
+          boxH = Math.max(12, y2 - y1);
+        } else {
+          // โหมดสำรองหากภาพบิดเบี้ยวจน Perspective Transform ล้มเหลว
+          let aiItem = null;
+          if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
+            aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
+            if (aiItem && aiItem.box_2d && aiItem.box_2d.length === 4) {
+              y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
+              x1 = Math.round((aiItem.box_2d[1] / 1000) * targetW);
+              y2 = Math.round((aiItem.box_2d[2] / 1000) * targetH);
+              x2 = Math.round((aiItem.box_2d[3] / 1000) * targetW);
+            }
+          }
+
+          if (typeof x1 === 'undefined' || typeof y1 === 'undefined') {
+            y1 = (rowDividers[r] || Math.round(targetH * (0.35 + (r / N) * 0.55))) + 2;
+            y2 = (rowDividers[r + 1] || Math.round(targetH * (0.35 + ((r + 1) / N) * 0.55))) - 2;
+            x1 = targetColX1 + 2;
+            x2 = targetColX2 - 2;
+          }
+
+          cellCenterX = Math.round((x1 + x2) / 2);
+          cellCenterY = Math.round((y1 + y2) / 2);
+          boxW = Math.max(14, x2 - x1);
+          boxH = Math.max(12, y2 - y1);
+
+          const radius = Math.min(boxW, boxH) * 0.28;
+          const omrResult = computeCircleFillRatio(gray, targetW, targetH, cellCenterX, cellCenterY, radius);
+          fillRatio = omrResult.ratio;
+          fillPercentage = omrResult.percentage;
+        }
+
+        // หากมีผลจาก Gemini AI นำมาประสาน (Reconcile) เพิ่มความเสถียร
         if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
-          aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
-          if (aiItem && aiItem.box_2d && aiItem.box_2d.length === 4) {
-            y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
-            x1 = Math.round((aiItem.box_2d[1] / 1000) * targetW);
-            y2 = Math.round((aiItem.box_2d[2] / 1000) * targetH);
-            x2 = Math.round((aiItem.box_2d[3] / 1000) * targetW);
+          const aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
+          if (aiItem && typeof aiItem.fill_percentage === 'number') {
+            if (aiItem.is_filled && fillRatio < 0.35 && aiItem.fill_percentage > 70) {
+              fillPercentage = Math.round((fillPercentage + aiItem.fill_percentage) / 2);
+              if (fillPercentage >= 48) fillRatio = fillPercentage / 100;
+            }
           }
         }
 
-        // Fallback to geometric projection if AI box is missing
-        if (typeof x1 === 'undefined' || typeof y1 === 'undefined') {
-          y1 = (rowDividers[r] || Math.round(targetH * (0.35 + (r / activeRoster.length) * 0.55))) + 2;
-          y2 = (rowDividers[r + 1] || Math.round(targetH * (0.35 + ((r + 1) / activeRoster.length) * 0.55))) - 2;
-          x1 = targetColX1 + 2;
-          x2 = targetColX2 - 2;
-        }
-
-        const cellCenterY = Math.round((y1 + y2) / 2);
-        const cellCenterX = Math.round((x1 + x2) / 2);
-        const boxW = Math.max(14, x2 - x1);
-        const boxH = Math.max(12, y2 - y1);
-
-        // Compute local minimum pixel value within this cell
-        let minPixel = 255;
-        let sumPixel = 0;
-        let countPixel = 0;
-        const cy1 = Math.max(0, Math.min(targetH - 1, y1 + 1));
-        const cy2 = Math.max(0, Math.min(targetH - 1, y2 - 1));
-        const cx1 = Math.max(0, Math.min(targetW - 1, x1 + 1));
-        const cx2 = Math.max(0, Math.min(targetW - 1, x2 - 1));
-
-        for (let cy = cy1; cy <= cy2; cy++) {
-          for (let cx = cx1; cx <= cx2; cx++) {
-            const val = gray[cy * targetW + cx];
-            if (val < minPixel) minPixel = val;
-            sumPixel += val;
-            countPixel++;
-          }
-        }
-        const meanPixel = countPixel > 0 ? (sumPixel / countPixel) : 200;
-        const contrastDelta = paperBaseline - minPixel;
-
-        // Deterministic classification:
-        // A solid black mark has very low minPixel (< 75) and meanPixel (< 130).
-        // Or if Gemini AI determined is_filled and confirmed with dark contrast.
-        const isFilled = (minPixel < 75) || (aiItem && aiItem.is_filled && minPixel < 125 && contrastDelta > 45);
+        // ------------------------------------------------------
+        // TASK 3: เกณฑ์การตัดสิน (Decision Threshold: 45% - 55%)
+        // ------------------------------------------------------
+        const isFilled = (fillRatio >= 0.48);
         const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
 
-        let conf = 96;
-        if (isFilled) {
-          conf = Math.min(99, Math.round(92 + (contrastDelta / 150) * 7));
-        } else {
-          conf = Math.min(99, Math.round(93 + (minPixel / 255) * 6));
-        }
+        let conf = isFilled
+          ? Math.min(99, Math.round(90 + fillRatio * 10))
+          : Math.min(99, Math.round(92 + (1 - fillRatio) * 7));
         confidenceSum += conf;
 
         let finalStatus = 'PRESENT';
@@ -1197,36 +1478,33 @@
         if (isFilled) {
           finalStatus = 'PRESENT';
           presentCount++;
+          note = hasDiscordLeave
+            ? `✓ ฝนดำในช่อง (มาเข้าเวรจริง แม้มีประวัติลาใน Discord • ความทึบ ${fillPercentage}%)`
+            : `✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่ • ความทึบ ${fillPercentage}%)`;
 
-          if (hasDiscordLeave) {
-            note = `✓ ฝนช่อง "ม" (มาเข้าเวรจริง แม้มีประวัติลาใน Discord • AI ${conf}%)`;
-          } else {
-            note = `✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่ • AI ${conf}%)`;
-          }
-
-          // 1. วาดกรอบสี่เหลี่ยมสีเขียวเรืองแสงรอบเซลล์
+          // 1. วาดกรอบสีเขียวเรืองแสงรอบเซลล์
           annotCtx.strokeStyle = '#22c55e';
           annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.004));
           annotCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
           annotCtx.strokeRect(x1, y1, boxW, boxH);
           annotCtx.fillRect(x1, y1, boxW, boxH);
 
-          // 2. วาดจุดวงกลมสีเขียวทึบที่ใจกลาง
+          // 2. วาดหน้ากากวงกลมที่กึ่งกลาง
           annotCtx.fillStyle = '#16a34a';
           annotCtx.beginPath();
           annotCtx.arc(cellCenterX, cellCenterY, Math.max(3, Math.round(boxH * 0.26)), 0, 2 * Math.PI);
           annotCtx.fill();
 
-          // 3. ป้ายชื่อสถานะเหนือกึ่งกลางกรอบ
+          // 3. ป้ายชื่อสถานะเหนือกึ่งกลางกรอบพร้อม % ความทึบ: [TS2] มา (78%)
           annotCtx.fillStyle = '#22c55e';
           annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
-          annotCtx.fillText(`[${m.duty_id}] มา`, x1, Math.max(12, y1 - 3));
+          annotCtx.fillText(`[${m.duty_id}] มา (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
 
         } else {
           if (hasDiscordLeave) {
             finalStatus = 'LEAVE';
             leaveCount++;
-            note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type || 'ขอลาเวร'})`;
+            note = `📝 แจ้งลาผ่าน Discord (${discordLeavesMap[m.duty_id].leave_type || 'ขอลาเวร'} • ความทึบ ${fillPercentage}%)`;
 
             // วาดกรอบสีฟ้าล้อมช่อง
             annotCtx.strokeStyle = '#38bdf8';
@@ -1235,14 +1513,15 @@
             annotCtx.strokeRect(x1, y1, boxW, boxH);
             annotCtx.fillRect(x1, y1, boxW, boxH);
 
+            // ป้ายชื่อสถานะ: [TS3] ลา (5%)
             annotCtx.fillStyle = '#38bdf8';
             annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
-            annotCtx.fillText(`[${m.duty_id}] ลา`, x1, Math.max(12, y1 - 3));
+            annotCtx.fillText(`[${m.duty_id}] ลา (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
 
           } else {
             finalStatus = 'LATE';
             lateCount++;
-            note = `⚡ ช่องว่างเปล่า (มาสาย • AI ${conf}%)`;
+            note = `⚡ ช่องว่างเปล่า (มาสาย • ความทึบ ${fillPercentage}%)`;
 
             // วาดกรอบเส้นประสีส้มเตือน
             annotCtx.strokeStyle = '#f59e0b';
@@ -1251,15 +1530,17 @@
             annotCtx.strokeRect(x1, y1, boxW, boxH);
             annotCtx.setLineDash([]);
 
+            // ป้ายชื่อสถานะ: [TS1] สาย (0%)
             annotCtx.fillStyle = '#f59e0b';
             annotCtx.font = `bold ${Math.max(10, Math.round(targetW * 0.016))}px 'JetBrains Mono', sans-serif`;
-            annotCtx.fillText(`[${m.duty_id}] สาย`, x1, Math.max(12, y1 - 3));
+            annotCtx.fillText(`[${m.duty_id}] สาย (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
           }
         }
 
         m.status = finalStatus;
         m.confidence = conf;
         m.omr_note = note;
+        m.omr_fill_percentage = fillPercentage;
         m.has_discord_leave = hasDiscordLeave;
         m.was_edited = false;
       });
