@@ -1733,11 +1733,11 @@ Return JSON strictly matching this schema:
 
     // 4. เรียกโมเดล Gemini Flash พร้อมระบบ Failover อัตโนมัติ (Fast & Stable)
     const candidateModels = [
-      'gemini-2.5-flash',
-      'gemini-2.0-flash',
-      'gemini-1.5-flash',
+      'gemini-3.5-flash',
+      'gemini-3.1-flash-lite',
+      'gemini-2.5-flash-lite',
       'gemini-flash-latest',
-      'gemini-flash-lite-latest'
+      'gemini-3.8-flash'
     ];
     let geminiData = null;
     let usedModel = candidateModels[0];

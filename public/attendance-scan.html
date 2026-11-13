@@ -1111,7 +1111,14 @@
       }
 
       if (corners.length === 4) {
-        return { found: true, corners };
+        const xs = corners.map(c => c.x);
+        const ys = corners.map(c => c.y);
+        const spanW = Math.max(...xs) - Math.min(...xs);
+        const spanH = Math.max(...ys) - Math.min(...ys);
+        // หน้า A4 แนวนอนต้องมีขนาดกว้างอย่างน้อย 50% ของภาพ และสูงอย่างน้อย 40% ของภาพ
+        if (spanW >= w * 0.50 && spanH >= h * 0.40) {
+          return { found: true, corners };
+        }
       }
       return { found: false, count: corners.length };
     }
@@ -1457,8 +1464,8 @@
       const annotCtx = annotCanvas.getContext('2d');
       annotCtx.drawImage(img, 0, 0, targetW, targetH);
 
-      // Draw Fiducial Corner Indicators if detected
-      if (useFiducials && fiducialResult.corners) {
+      // Draw Fiducial Corner Indicators if detected (เฉพาะกรณีออฟไลน์ ไม่ใช้ Vision AI)
+      if (!aiVisionSuccess && useFiducials && fiducialResult.corners) {
         annotCtx.strokeStyle = '#22c55e';
         annotCtx.lineWidth = Math.max(2, Math.round(targetW * 0.003));
         fiducialResult.corners.forEach((pt, idx) => {
@@ -1485,12 +1492,12 @@
         annotCtx.fillText(`[QR: ${currentShiftCode}]`, loc.topLeftCorner.x, Math.max(18, loc.topLeftCorner.y - 8));
       }
 
-      if (useFiducials) {
+      if (aiVisionSuccess) {
         log2.className = 'text-emerald-400 flex items-center gap-1.5 font-bold';
-        log2.innerHTML = `<span>✓</span> <span>[2/4] Rock-Solid 4-Corner Homography OMR ล็อกพิกัดสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
-      } else if (aiVisionSuccess) {
+        log2.innerHTML = `<span>✓</span> <span>[2/4] Vision AI สแกนรหัสนักเรียน (${activeRoster.length} นาย) ล็อกช่อง [${currentTargetCol}] สำเร็จ</span>`;
+      } else if (useFiducials) {
         log2.className = 'text-emerald-400 flex items-center gap-1.5 font-bold';
-        log2.innerHTML = `<span>✓</span> <span>[2/4] Macro Vision AI ตรวจพบตารางสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
+        log2.innerHTML = `<span>✓</span> <span>[2/4] 4-Corner Homography OMR สำรองล็อกพิกัดสำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
       } else {
         log2.className = 'text-amber-400 flex items-center gap-1.5 font-bold';
         log2.innerHTML = `<span>✓</span> <span>[2/4] Perspective Warp OMR วิเคราะห์สำเร็จ (${activeRoster.length} แถว, คอลัมน์ [${currentTargetCol}])</span>`;
@@ -1522,35 +1529,8 @@
         let fillRatio = 0;
         let fillPercentage = 0;
 
-        if (useFiducials && useWarp && warpedGray) {
-          // 🎯 TIER 1: Rock-Solid Homography OMR จาก 4 หมุดมาตรฐาน (แม่นยำ 100% ล็อกมิลลิเมตรเป๊ะ)
-          // พิกัดวงกลม OMR บนระนาบ A4 แนวนอน (1188x840 px):
-          // ตารางเริ่มที่ X = 58px, หัวตาราง 4 คอลัมน์รวม = 416px -> คอลัมน์วันที่ 0 เริ่มที่ 474px
-          // แต่ละคอลัมน์กว้าง 12.5mm = 50px -> กึ่งกลาง = 474 + selIdx*50 + 25
-          // ตารางเริ่มที่ Y = 208px, หัวตาราง 11.5mm = 46px, แต่ละแถว 8mm = 32px -> กึ่งกลาง = 208 + 46 + r*32 + 16
-          const cx_warp = 474 + selIdx * 50 + 25;
-          const cy_warp = 208 + 46 + r * 32 + 16;
-          const radius_warp = 10; // ~2.5mm
-
-          const omrResult = computeCircleFillRatio(warpedGray, TW, TH, Math.round(cx_warp), Math.round(cy_warp), radius_warp);
-          fillRatio = omrResult.ratio;
-          fillPercentage = omrResult.percentage;
-
-          const pTL = transformPoint(H_unwarp, cx_warp - 18, cy_warp - 14);
-          const pBR = transformPoint(H_unwarp, cx_warp + 18, cy_warp + 14);
-          const pCenter = transformPoint(H_unwarp, cx_warp, cy_warp);
-
-          x1 = Math.round(Math.min(pTL.x, pBR.x));
-          x2 = Math.round(Math.max(pTL.x, pBR.x));
-          y1 = Math.round(Math.min(pTL.y, pBR.y));
-          y2 = Math.round(Math.max(pTL.y, pBR.y));
-          cellCenterX = Math.round(pCenter.x);
-          cellCenterY = Math.round(pCenter.y);
-          boxW = Math.max(14, x2 - x1);
-          boxH = Math.max(12, y2 - y1);
-
-        } else if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results)) {
-          // 🎯 TIER 2: Macro Mode Fallback - ใช้พิกัดกรอบจาก Gemini Vision AI
+        if (aiVisionSuccess && aiResponseData && Array.isArray(aiResponseData.ai_results) && aiResponseData.ai_results.length > 0) {
+          // 🎯 TIER 1: Gemini Vision AI (ตรงตามรหัสนักเรียนและคอลัมน์วันที่ 100%)
           const aiItem = aiResponseData.ai_results.find(res => res.duty_id === m.duty_id) || aiResponseData.ai_results[r];
           if (aiItem && Array.isArray(aiItem.box_2d) && aiItem.box_2d.length === 4) {
             y1 = Math.round((aiItem.box_2d[0] / 1000) * targetH);
@@ -1571,9 +1551,9 @@
             const isFilledConsensus = isAiFilled || isOmrFilled;
 
             if (isFilledConsensus) {
-              fillPercentage = Math.max(omrResult.percentage, aiItem.fill_percentage || 80);
+              fillPercentage = Math.max(omrResult.percentage, aiItem.fill_percentage || 95);
             } else {
-              fillPercentage = Math.min(omrResult.percentage, aiItem.fill_percentage || 5);
+              fillPercentage = Math.min(omrResult.percentage, aiItem.fill_percentage || 0);
             }
             fillRatio = fillPercentage / 100;
           } else {
@@ -1589,6 +1569,28 @@
             fillRatio = omrResult.ratio;
             fillPercentage = omrResult.percentage;
           }
+        } else if (useFiducials && useWarp && warpedGray) {
+          // 🎯 TIER 2: Rock-Solid Homography OMR จาก 4 หมุดมาตรฐาน (สำรองกรณีออฟไลน์)
+          const cx_warp = 474 + selIdx * 50 + 25;
+          const cy_warp = 208 + 46 + r * 32 + 16;
+          const radius_warp = 10; // ~2.5mm
+
+          const omrResult = computeCircleFillRatio(warpedGray, TW, TH, Math.round(cx_warp), Math.round(cy_warp), radius_warp);
+          fillRatio = omrResult.ratio;
+          fillPercentage = omrResult.percentage;
+
+          const pTL = transformPoint(H_unwarp, cx_warp - 18, cy_warp - 14);
+          const pBR = transformPoint(H_unwarp, cx_warp + 18, cy_warp + 14);
+          const pCenter = transformPoint(H_unwarp, cx_warp, cy_warp);
+
+          x1 = Math.round(Math.min(pTL.x, pBR.x));
+          x2 = Math.round(Math.max(pTL.x, pBR.x));
+          y1 = Math.round(Math.min(pTL.y, pBR.y));
+          y2 = Math.round(Math.max(pTL.y, pBR.y));
+          cellCenterX = Math.round(pCenter.x);
+          cellCenterY = Math.round(pCenter.y);
+          boxW = Math.max(14, x2 - x1);
+          boxH = Math.max(12, y2 - y1);
         } else if (useWarp && warpedGray) {
           // 🎯 TIER 3: Table Warp Fallback
           const headerH = 48;
