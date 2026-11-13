@@ -1110,10 +1110,10 @@
       const darkThresh = Math.max(45, meanVal - 30);
 
       const quadrants = [
-        { name: 'TL', xMin: 0, xMax: Math.round(w * 0.40), yMin: 0, yMax: Math.round(h * 0.40), targetX: 0, targetY: 0 },
-        { name: 'TR', xMin: Math.round(w * 0.60), xMax: w, yMin: 0, yMax: Math.round(h * 0.40), targetX: w, targetY: 0 },
-        { name: 'BR', xMin: Math.round(w * 0.60), xMax: w, yMin: Math.round(h * 0.60), yMax: h, targetX: w, targetY: h },
-        { name: 'BL', xMin: 0, xMax: Math.round(w * 0.40), yMin: Math.round(h * 0.60), yMax: h, targetX: 0, targetY: h }
+        { name: 'TL', xMin: 0, xMax: Math.round(w * 0.18), yMin: 0, yMax: Math.round(h * 0.20), targetX: 0, targetY: 0 },
+        { name: 'TR', xMin: Math.round(w * 0.82), xMax: w, yMin: 0, yMax: Math.round(h * 0.20), targetX: w, targetY: 0 },
+        { name: 'BR', xMin: Math.round(w * 0.82), xMax: w, yMin: Math.round(h * 0.80), yMax: h, targetX: w, targetY: h },
+        { name: 'BL', xMin: 0, xMax: Math.round(w * 0.18), yMin: Math.round(h * 0.80), yMax: h, targetX: 0, targetY: h }
       ];
 
       const corners = [];
@@ -1180,8 +1180,8 @@
         const ys = corners.map(c => c.y);
         const spanW = Math.max(...xs) - Math.min(...xs);
         const spanH = Math.max(...ys) - Math.min(...ys);
-        // หน้า A4 แนวนอนต้องมีขนาดกว้างอย่างน้อย 50% ของภาพ และสูงอย่างน้อย 40% ของภาพ
-        if (spanW >= w * 0.50 && spanH >= h * 0.40) {
+        // หน้า A4 แนวนอนต้องมีขนาดกว้างอย่างน้อย 70% ของภาพ และสูงอย่างน้อย 60% ของภาพ
+        if (spanW >= w * 0.70 && spanH >= h * 0.60) {
           return { found: true, corners };
         }
       }
@@ -1418,7 +1418,7 @@
       }
 
       const colPeaks = [];
-      for (let x = Math.round(targetW * 0.25); x < targetW - 5; x++) {
+      for (let x = Math.round(targetW * 0.03); x < targetW - 5; x++) {
         if (vProj[x] > Math.round((rowDividers[rowDividers.length - 1] - rowDividers[0]) * 0.20)) {
           if (colPeaks.length === 0 || x - colPeaks[colPeaks.length - 1] > 14) {
             colPeaks.push(x);

@@ -1699,27 +1699,25 @@ app.post('/api/attendance/scan-vision', async (req, res) => {
     const colNumber = (Number(date_col_index) || 0) + 1;
     const prompt = `You are an expert Optical Mark Recognition (OMR) system for an attendance sheet (ใบเช็คชื่อ A4) of student inspectors (กองสารวัตรนักเรียน).
 Target Shift: "${shift}"
-Target Date Column: "${target_date || 'วันนี้'}" (Column #${colNumber} of the 12 weekly columns under "บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)", date header: "${target_date || ''}").
+Target Date Column: "${target_date || 'วันนี้'}" (Column #${colNumber} of the 12 weekly columns under "บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)", date header text: "${target_date || ''}").
 
 Expected student roster:
 ${rosterListStr}
 
 CRITICAL RULES FOR ACCURACY:
-1. Locate the main attendance table on the page.
+1. LOCATE THE MAIN ATTENDANCE TABLE:
    The table header row has: "ห้อง/เลขที่", "ชื่อเล่น", "ชื่อ - สกุลจริง", "รหัสประจำตัว", followed by 12 date columns under "บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)".
-2. Locate the target date column:
+2. LOCATE TARGET COLUMN #${colNumber} ("${target_date}"):
    - Target Column Number: #${colNumber} out of 12 (1-based from left to right among the 12 date columns).
    - Target Header Text: "${target_date}".
-   - For Column #1, it is immediately to the right of "รหัสประจำตัว".
-   - For Column #${colNumber}, it is the ${colNumber}th date column to the right of "รหัสประจำตัว".
-3. For each student row:
-   - Identify the student by Duty ID (${roster.map(r => r.duty_id).join(', ')}), Name, or Class/Room.
-   - Locate the cell at the intersection of this student's row and Column #${colNumber} ("${target_date}").
+   - For Column #1 ("${target_date}"), it is the FIRST date column located IMMEDIATELY to the right of "รหัสประจำตัว".
+   - For Column #${colNumber}, look at the column directly under the header "${target_date}" (the ${colNumber}th date column from "รหัสประจำตัว").
+3. READ ATTENDANCE IN COLUMN #${colNumber} FOR EACH STUDENT ROW:
+   - Identify each student row by Duty ID (${roster.map(r => r.duty_id).join(', ')}), Name, or Class/Room.
+   - Look at the circle in this student's row at Column #${colNumber} ("${target_date}").
+   - A circle is FILLED (มา / is_filled: true): It has a SOLID BLACK or DARK shaded background (it looks like a black disc, often with inverted white letter "ม" inside). fill_percentage: 85-100.
+   - A circle is UNFILLED (สาย / is_filled: false): It has a WHITE/BLANK background inside the circle (only a thin circular boundary with gray letter "ม"). fill_percentage: 0-15.
    - Return "box_2d": [ymin, xmin, ymax, xmax] (normalized 0-1000) tightly enclosing the circle inside that cell.
-   - Determine if the circle has been shaded/filled with pen or pencil:
-     * Solid black or dark shaded circle: "is_filled": true, "fill_percentage": 75-100.
-     * Empty/unshaded circle (only showing faint Thai letter "(ม)" or blank): "is_filled": false, "fill_percentage": 0-15.
-     * DO NOT mark an unfilled circle containing faint "(ม)" as filled.
 
 Return JSON strictly matching this schema:
 {
@@ -1728,9 +1726,10 @@ Return JSON strictly matching this schema:
     {
       "duty_id": "TS1",
       "name": "ณิชกานต์ คำไชย",
+      "visual_check": "solid black circle with white text",
       "is_filled": true,
-      "fill_percentage": 90,
-      "confidence": 98,
+      "fill_percentage": 95,
+      "confidence": 99,
       "box_2d": [ymin, xmin, ymax, xmax]
     }
   ]
@@ -1738,11 +1737,11 @@ Return JSON strictly matching this schema:
 
     // 4. เรียกโมเดล Gemini Flash พร้อมระบบ Failover อัตโนมัติ (Fast & Stable)
     const candidateModels = [
-      'gemini-3.5-flash',
+      'gemini-3.5-flash-lite',
       'gemini-3.1-flash-lite',
-      'gemini-2.5-flash-lite',
-      'gemini-flash-latest',
-      'gemini-3.8-flash'
+      'gemini-3.5-flash',
+      'gemini-3.8-flash',
+      'gemini-flash-latest'
     ];
     let geminiData = null;
     let usedModel = candidateModels[0];
