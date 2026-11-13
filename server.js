@@ -1696,20 +1696,25 @@ app.post('/api/attendance/scan-vision', async (req, res) => {
       `${idx + 1}. [${m.duty_id}] ${m.nickname ? m.nickname + ' - ' : ''}${m.first_name || ''} ${m.last_name || ''} (${m.grade_class || ''} เลขที่ ${m.student_no || ''})`
     ).join('\n');
 
+    const colNumber = (Number(date_col_index) || 0) + 1;
     const prompt = `You are an expert Optical Mark Recognition (OMR) system for an attendance sheet (ใบเช็คชื่อ A4) of student inspectors (กองสารวัตรนักเรียน).
 Target Shift: "${shift}"
-Target Date Column: "${target_date || 'วันนี้'}" (which is the ${Number(date_col_index) + 1 || 1}st weekly date column, header: "${target_date || ''}").
+Target Date Column: "${target_date || 'วันนี้'}" (Column #${colNumber} of the 12 weekly columns under "บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)", date header: "${target_date || ''}").
 
 Expected student roster:
 ${rosterListStr}
 
 CRITICAL RULES FOR ACCURACY:
 1. Locate the main attendance table on the page.
-   The table header row has: "ห้อง/เลขที่", "ชื่อเล่น", "ชื่อ - สกุลจริง", "รหัสประจำตัว", followed by 12 date columns starting with "11/10", "11/17", "11/24", etc.
-2. Locate the target date column "${target_date}" (immediately to the right of "รหัสประจำตัว" for the 1st date column, or at the corresponding weekly position).
+   The table header row has: "ห้อง/เลขที่", "ชื่อเล่น", "ชื่อ - สกุลจริง", "รหัสประจำตัว", followed by 12 date columns under "บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)".
+2. Locate the target date column:
+   - Target Column Number: #${colNumber} out of 12 (1-based from left to right among the 12 date columns).
+   - Target Header Text: "${target_date}".
+   - For Column #1, it is immediately to the right of "รหัสประจำตัว".
+   - For Column #${colNumber}, it is the ${colNumber}th date column to the right of "รหัสประจำตัว".
 3. For each student row:
    - Identify the student by Duty ID (${roster.map(r => r.duty_id).join(', ')}), Name, or Class/Room.
-   - Locate the cell at the intersection of this student's row and the target date column "${target_date}".
+   - Locate the cell at the intersection of this student's row and Column #${colNumber} ("${target_date}").
    - Return "box_2d": [ymin, xmin, ymax, xmax] (normalized 0-1000) tightly enclosing the circle inside that cell.
    - Determine if the circle has been shaded/filled with pen or pencil:
      * Solid black or dark shaded circle: "is_filled": true, "fill_percentage": 75-100.

@@ -766,7 +766,7 @@
     // ----------------------------------------------------------
     // 3. SHIFT SELECTION & DISCORD LEAVES FETCH
     // ----------------------------------------------------------
-    async function selectShift(shiftKey) {
+    async function selectShift(shiftKey, customWeekIdx = null) {
       currentShiftCode = shiftKey;
 
       document.querySelectorAll('.day-chip').forEach(el => {
@@ -783,13 +783,21 @@
       document.getElementById('selected-shift-name').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
       document.getElementById('selected-shift-badge-text').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
 
-      // Automatically select the current week for this shift
-      const currentWeekIdx = getCurrentWeekIndex(currentQuarter, currentYear);
-      renderDateSelector(currentWeekIdx);
+      // คงสัปดาห์ที่ผู้ใช้เลือกไว้ หากไม่ระบุให้ใช้ค่าเดิมใน dropdown หรือค่าเริ่มต้นสัปดาห์ปัจจุบัน
+      const selectEl = document.getElementById('date-col-select');
+      let weekToSelect = customWeekIdx;
+      if (typeof weekToSelect !== 'number') {
+        if (selectEl && selectEl.selectedIndex >= 0 && selectEl.options.length > 0) {
+          weekToSelect = selectEl.selectedIndex;
+        } else {
+          weekToSelect = getCurrentWeekIndex(currentQuarter, currentYear);
+        }
+      }
+      renderDateSelector(weekToSelect);
 
       const statusEl = document.getElementById('auto-date-status');
       if (statusEl) {
-        statusEl.textContent = `เลือก ${SHIFT_NAMES[shiftKey]} สัปดาห์นี้อัตโนมัติ`;
+        statusEl.textContent = `เลือก ${SHIFT_NAMES[shiftKey]} (สัปดาห์ที่ ${weekToSelect + 1})`;
       }
 
       await loadRosterForShift(shiftKey);
@@ -1241,23 +1249,29 @@
 
       hybridTelemetry.qrFound = !!qrCode;
       if (qrCode && qrCode.data) {
+        let detectedShift = null;
         try {
           const url = new URL(qrCode.data, window.location.origin);
           const shiftParam = url.searchParams.get('shift');
           if (shiftParam && ['M', 'T', 'W', 'Ts', 'F', 'S'].includes(shiftParam)) {
-            hybridTelemetry.qrShift = shiftParam;
-            currentShiftCode = shiftParam; // Auto-lock shift from QR
-            await selectShift(shiftParam);
+            detectedShift = shiftParam;
           }
         } catch (e) {
           try {
             const parsed = JSON.parse(qrCode.data);
-            if (parsed.shift) {
-              hybridTelemetry.qrShift = parsed.shift;
-              currentShiftCode = parsed.shift;
-              await selectShift(parsed.shift);
+            if (parsed.shift && ['M', 'T', 'W', 'Ts', 'F', 'S'].includes(parsed.shift)) {
+              detectedShift = parsed.shift;
             }
           } catch (e2) {}
+        }
+
+        if (detectedShift) {
+          hybridTelemetry.qrShift = detectedShift;
+          const currentWeekIdx = Math.max(0, document.getElementById('date-col-select')?.selectedIndex ?? 0);
+          if (currentShiftCode !== detectedShift) {
+            currentShiftCode = detectedShift;
+            await selectShift(detectedShift, currentWeekIdx);
+          }
         }
         hybridTelemetry.qrLocation = qrCode.location;
         log1.className = 'text-cyan-400 flex items-center gap-1.5 font-bold';
