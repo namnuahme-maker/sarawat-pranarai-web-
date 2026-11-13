@@ -1595,22 +1595,6 @@
           boxW = Math.max(14, x2 - x1);
           boxH = Math.max(12, y2 - y1);
         } else {
-          y1 = (rowDividers[r] || Math.round(targetH * (0.42 + (r / N) * 0.22))) + 2;
-          y2 = (rowDividers[r + 1] || Math.round(targetH * (0.42 + ((r + 1) / N) * 0.22))) - 2;
-          x1 = targetColX1 + 2;
-          x2 = targetColX2 - 2;
-          cellCenterX = Math.round((x1 + x2) / 2);
-          cellCenterY = Math.round((y1 + y2) / 2);
-          boxW = Math.max(14, x2 - x1);
-          boxH = Math.max(12, y2 - y1);
-          const omrResult = computeCircleFillRatio(gray, targetW, targetH, cellCenterX, cellCenterY, Math.min(boxW, boxH) * 0.28);
-          fillRatio = omrResult.ratio;
-          fillPercentage = omrResult.percentage;
-        }
-          boxW = Math.max(14, x2 - x1);
-          boxH = Math.max(12, y2 - y1);
-
-        } else {
           // 🎯 TIER 3: Local projection divider fallback
           y1 = (rowDividers[r] || Math.round(targetH * (0.42 + (r / N) * 0.22))) + 2;
           y2 = (rowDividers[r + 1] || Math.round(targetH * (0.42 + ((r + 1) / N) * 0.22))) - 2;
