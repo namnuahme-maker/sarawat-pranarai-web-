@@ -1075,13 +1075,30 @@
               }
 
               const fillRatio = darkCount / totalSamples;
-              if (fillRatio >= 0.70) {
-                const cx = x + s / 2;
-                const cy = y + s / 2;
-                const dist = Math.hypot(cx - q.targetX, cy - q.targetY);
-                if (dist < bestScore) {
-                  bestScore = dist;
-                  bestPt = { x: Math.round(cx), y: Math.round(cy), size: s };
+              if (fillRatio >= 0.65) {
+                // ตรวจสอบว่ามีพื้นกระดาษขาว/สว่างล้อมรอบ (ไม่ใช่มุมโต๊ะสีดำหรือเงาขอบภาพ)
+                const pad = Math.max(3, Math.round(s * 0.35));
+                const surroundPts = [
+                  { x: x - pad, y: Math.round(y + s / 2) },
+                  { x: x + s + pad, y: Math.round(y + s / 2) },
+                  { x: Math.round(x + s / 2), y: y - pad },
+                  { x: Math.round(x + s / 2), y: y + s + pad }
+                ];
+                let brightSurround = 0;
+                surroundPts.forEach(pt => {
+                  if (pt.x >= 0 && pt.x < w && pt.y >= 0 && pt.y < h) {
+                    if (gray[pt.y * w + pt.x] >= darkThresh) brightSurround++;
+                  }
+                });
+
+                if (brightSurround >= 2) {
+                  const cx = x + s / 2;
+                  const cy = y + s / 2;
+                  const dist = Math.hypot(cx - q.targetX, cy - q.targetY);
+                  if (dist < bestScore) {
+                    bestScore = dist;
+                    bestPt = { x: Math.round(cx), y: Math.round(cy), size: s };
+                  }
                 }
               }
             }
@@ -1330,25 +1347,29 @@
         }
       }
 
-      // 1. กำหนดพิกัดเริ่มต้นของคอลัมน์วันที่ (อิงตามอัตราส่วนสไตล์ชีตจริง 44.12% ถึง 47.8%)
-      let targetColX1 = Math.round(targetW * (323 / 732));
-      let targetColX2 = Math.round(targetW * ((323 + 27) / 732));
-
+      // 1. กำหนดพิกัดเริ่มต้นของคอลัมน์วันที่ตามสัดส่วนจริงของตาราง A4 มาตรฐาน (268mm)
+      // หัวตารางก่อนช่องวันที่ 4 คอลัมน์รวม = 18 + 22 + 48 + 16 = 104mm (38.8%)
+      // แต่ละคอลัมน์วันที่ = 12.5mm (4.66%)
       const selIdx = Math.max(0, document.getElementById('date-col-select').selectedIndex);
-      const dateColCandidates = [];
-      if (colPeaks.length >= 2) {
-        for (let c = 0; c < colPeaks.length - 1; c++) {
-          const w = colPeaks[c + 1] - colPeaks[c];
-          if (w >= 14 && w <= 80 && colPeaks[c] >= targetW * 0.40) {
-            dateColCandidates.push({ x1: colPeaks[c], x2: colPeaks[c + 1] });
-          }
-        }
-      }
+      let tableXLeft = (colPeaks.length >= 4) ? Math.max(10, colPeaks[0] - 15) : Math.round(targetW * 0.05);
+      let tableXRight = (colPeaks.length >= 4) ? Math.min(targetW - 10, colPeaks[colPeaks.length - 1] + 20) : Math.round(targetW * 0.95);
+      let currentTableW = Math.max(100, tableXRight - tableXLeft);
 
-      if (dateColCandidates.length > 0) {
-        const chosen = dateColCandidates[Math.min(selIdx, dateColCandidates.length - 1)];
-        targetColX1 = chosen.x1;
-        targetColX2 = chosen.x2;
+      let targetColX1 = Math.round(tableXLeft + currentTableW * ((104.0 + selIdx * 12.5) / 268.0));
+      let targetColX2 = Math.round(tableXLeft + currentTableW * ((104.0 + (selIdx + 1) * 12.5) / 268.0));
+
+      // Fine-tune ด้วย colPeaks หากพบเส้นแบ่งคอลัมน์ใกล้เคียงในระยะ ±40% ของความกว้างช่อง
+      const colWidthEst = targetColX2 - targetColX1;
+      if (colPeaks.length >= 2) {
+        const nearPeak1 = colPeaks.find(p => Math.abs(p - targetColX1) <= colWidthEst * 0.40);
+        const nearPeak2 = colPeaks.find(p => Math.abs(p - targetColX2) <= colWidthEst * 0.40);
+        if (nearPeak1 && nearPeak2 && nearPeak2 > nearPeak1) {
+          targetColX1 = nearPeak1;
+          targetColX2 = nearPeak2;
+        } else if (nearPeak1) {
+          targetColX1 = nearPeak1;
+          targetColX2 = targetColX1 + colWidthEst;
+        }
       }
 
       // --------------------------------------------------------
@@ -1576,8 +1597,8 @@
           const y2_warp = headerH + (r + 1) * rowH_warp;
           const cy_warp = (y1_warp + y2_warp) / 2;
 
-          const dateStartX_warp = 1200 * (323 / 732);
-          const colW_warp = 1200 * (27 / 732);
+          const dateStartX_warp = 1200 * (104.0 / 268.0);
+          const colW_warp = 1200 * (12.5 / 268.0);
           const x1_warp = dateStartX_warp + selIdx * colW_warp;
           const x2_warp = x1_warp + colW_warp;
           const cx_warp = (x1_warp + x2_warp) / 2;
