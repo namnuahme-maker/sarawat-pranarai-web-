@@ -342,8 +342,10 @@
       <!-- พรีวิวรูปภาพพร้อม Vision AI & QR Bounding Boxes -->
       <div class="space-y-1.5">
         <div class="flex items-center justify-between text-xs font-semibold text-slate-300">
-          <span>ภาพถ่ายพร้อมกรอบวิเคราะห์ Vision AI & QR Anchor:</span>
-          <span class="text-[10px] text-slate-400">แตะเพื่อดูภาพขยาย</span>
+          <span>ภาพถ่ายพร้อมกรอบวิเคราะห์ OMR:</span>
+          <button onclick="open4PointModal()" type="button" class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-[11px] font-bold transition flex items-center gap-1 shadow-sm active:scale-95">
+            <span>🎯</span> <span>ปรับแก้ 4 มุมตาราง (Human-in-the-Loop)</span>
+          </button>
         </div>
         
         <!-- Canvas Container displaying Annotated Image -->
@@ -458,6 +460,51 @@
   </main>
 
   <!-- ========================================================== -->
+  <!-- 🎯 MODAL ปรับแก้ 4 มุมกรอบตาราง (Interactive 4-Point UI)        -->
+  <!-- ========================================================== -->
+  <div id="modal-4point-adjust" class="fixed inset-0 z-50 bg-black/95 hidden flex-col items-center justify-between p-3 sm:p-5 backdrop-blur-md overflow-hidden">
+    <!-- Header -->
+    <div class="w-full max-w-4xl flex items-center justify-between text-white pb-2 border-b border-slate-800">
+      <div class="flex items-center gap-2">
+        <span class="text-xl">🎯</span>
+        <div>
+          <h3 class="text-sm sm:text-base font-bold text-amber-300">ปรับแก้ 4 มุมกรอบตาราง (Interactive Table Contour)</h3>
+          <p class="text-[11px] text-slate-300">ลากจุดมุมสีส้ม 4 จุด (TL, TR, BR, BL) ให้ตรงกับขอบมุมทั้ง 4 ของตาราง</p>
+        </div>
+      </div>
+      <button onclick="close4PointModal()" type="button" class="p-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white transition">
+        ✕
+      </button>
+    </div>
+
+    <!-- Canvas Container with Touch / Mouse Dragging -->
+    <div class="relative w-full max-w-4xl flex-1 my-3 bg-slate-950 rounded-xl border border-slate-700 overflow-hidden flex items-center justify-center select-none" id="adjust-canvas-container" style="touch-action: none;">
+      <canvas id="adjust-canvas" class="max-w-full max-h-[62vh] object-contain cursor-crosshair"></canvas>
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="w-full max-w-4xl flex flex-col sm:flex-row items-center justify-between gap-3 pt-2 border-t border-slate-800">
+      <div class="flex items-center gap-2 text-xs text-slate-400">
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        <span>ลากจุดมุมปรับความเอียง</span>
+        <span class="text-slate-600">|</span>
+        <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-400"></span>
+        <span>กรอบตาราง 12 สัปดาห์</span>
+      </div>
+
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <button onclick="reset4PointsToAuto()" type="button" class="flex-1 sm:flex-none py-2 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition flex items-center justify-center gap-1.5">
+          <span>🔄</span> <span>รีเซ็ตกรอบ</span>
+        </button>
+
+        <button onclick="confirm4PointsAndProcess()" type="button" class="flex-1 sm:flex-none py-2.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 hover:to-teal-400 text-white text-xs sm:text-sm font-bold shadow-lg shadow-emerald-600/30 active:scale-95 transition flex items-center justify-center gap-1.5">
+          <span>✓</span> <span>ยืนยันกรอบตาราง & อ่าน OMR</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
   <!-- 🖼️ MODAL LIGHTBOX พรีวิวรูปภาพขยาย                          -->
   <!-- ========================================================== -->
   <div id="image-modal" onclick="closeImageModal()" class="fixed inset-0 z-50 bg-black/90 hidden items-center justify-center p-4 backdrop-blur-sm cursor-zoom-out">
@@ -488,6 +535,16 @@
       meanConfidence: 98.0,
       mode: 'HYBRID_VISION'
     };
+
+    // 🎯 Interactive 4-Point State (Human-in-the-Loop per omr_4.md)
+    let current4Points = [];
+    let defaultAuto4Points = [];
+    let adjustActivePointIdx = -1;
+    let adjustCanvasImg = null;
+    let rawSourceGray = null;
+    let rawSourceW = 0;
+    let rawSourceH = 0;
+    let listenersAttached = false;
 
     // ฐานข้อมูลสารวัตรสำรอง (Fallback Database)
     const FALLBACK_ROSTERS = {
@@ -1221,6 +1278,9 @@
       for (let i = 0; i < pixels.length; i += 4) {
         gray[i / 4] = Math.round(0.299 * pixels[i] + 0.587 * pixels[i + 1] + 0.114 * pixels[i + 2]);
       }
+      rawSourceGray = gray;
+      rawSourceW = targetW;
+      rawSourceH = targetH;
 
       // 2. Build Integral Image in O(W*H) for instant local window statistics
       const integral = new Float64Array((targetW + 1) * (targetH + 1));
@@ -1361,6 +1421,15 @@
       let tableXLeft = (colPeaks.length >= 4) ? Math.max(10, colPeaks[0] - 15) : Math.round(targetW * 0.05);
       let tableXRight = (colPeaks.length >= 4) ? Math.min(targetW - 10, colPeaks[colPeaks.length - 1] + 20) : Math.round(targetW * 0.95);
       let currentTableW = Math.max(100, tableXRight - tableXLeft);
+      let tableYTop = (rowDividers.length >= 2) ? Math.max(10, rowDividers[0] - Math.round(avgRowH * 1.2)) : Math.round(targetH * 0.28);
+      let tableYBot = (rowDividers.length >= 2) ? Math.min(targetH - 10, rowDividers[rowDividers.length - 1] + 6) : Math.round(targetH * 0.58);
+
+      const initTL = { x: tableXLeft, y: tableYTop };
+      const initTR = { x: tableXRight, y: tableYTop };
+      const initBR = { x: tableXRight, y: tableYBot };
+      const initBL = { x: tableXLeft, y: tableYBot };
+      defaultAuto4Points = [initTL, initTR, initBR, initBL];
+      current4Points = [initTL, initTR, initBR, initBL];
 
       let targetColX1 = Math.round(tableXLeft + currentTableW * ((104.0 + selIdx * 12.5) / 268.0));
       let targetColX2 = Math.round(tableXLeft + currentTableW * ((104.0 + (selIdx + 1) * 12.5) / 268.0));
@@ -2005,6 +2074,320 @@
       const modal = document.getElementById('image-modal');
       modal.classList.add('hidden');
       modal.classList.remove('flex');
+    }
+
+    // ----------------------------------------------------------
+    // 7. INTERACTIVE 4-POINT TABLE CONTOUR ADJUSTMENT (per omr_4.md)
+    // ----------------------------------------------------------
+    function order4Points(pts) {
+      if (!pts || pts.length !== 4) return pts;
+      const sum = pts.map(p => p.x + p.y);
+      const diff = pts.map(p => p.y - p.x);
+
+      const tl = pts[sum.indexOf(Math.min(...sum))];
+      const br = pts[sum.indexOf(Math.max(...sum))];
+      const tr = pts[diff.indexOf(Math.min(...diff))];
+      const bl = pts[diff.indexOf(Math.max(...diff))];
+
+      return [
+        { x: Math.round(tl.x), y: Math.round(tl.y) },
+        { x: Math.round(tr.x), y: Math.round(tr.y) },
+        { x: Math.round(br.x), y: Math.round(br.y) },
+        { x: Math.round(bl.x), y: Math.round(bl.y) }
+      ];
+    }
+
+    function open4PointModal() {
+      if (!singleCapturedImage) return;
+      const modal = document.getElementById('modal-4point-adjust');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+
+      adjustCanvasImg = new Image();
+      adjustCanvasImg.src = singleCapturedImage;
+      adjustCanvasImg.onload = () => {
+        const cvs = document.getElementById('adjust-canvas');
+        cvs.width = adjustCanvasImg.naturalWidth || adjustCanvasImg.width;
+        cvs.height = adjustCanvasImg.naturalHeight || adjustCanvasImg.height;
+
+        if (!current4Points || current4Points.length !== 4) {
+          reset4PointsToAuto();
+        } else {
+          drawAdjustCanvas();
+        }
+        setupAdjustCanvasListeners();
+      };
+    }
+
+    function close4PointModal() {
+      const modal = document.getElementById('modal-4point-adjust');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+    }
+
+    function reset4PointsToAuto() {
+      const cvs = document.getElementById('adjust-canvas');
+      const w = cvs.width, h = cvs.height;
+      if (defaultAuto4Points && defaultAuto4Points.length === 4) {
+        current4Points = defaultAuto4Points.map(p => ({ x: p.x, y: p.y }));
+      } else {
+        current4Points = [
+          { x: Math.round(w * 0.05), y: Math.round(h * 0.26) }, // TL
+          { x: Math.round(w * 0.95), y: Math.round(h * 0.26) }, // TR
+          { x: Math.round(w * 0.95), y: Math.round(h * 0.58) }, // BR
+          { x: Math.round(w * 0.05), y: Math.round(h * 0.58) }  // BL
+        ];
+      }
+      drawAdjustCanvas();
+    }
+
+    function drawAdjustCanvas() {
+      const cvs = document.getElementById('adjust-canvas');
+      if (!cvs || !adjustCanvasImg) return;
+      const ctx = cvs.getContext('2d');
+      const w = cvs.width, h = cvs.height;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(adjustCanvasImg, 0, 0, w, h);
+
+      if (current4Points.length === 4) {
+        const pts = current4Points;
+
+        // Draw green polygon connecting 4 points
+        ctx.fillStyle = 'rgba(34, 197, 94, 0.12)';
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = Math.max(3, Math.round(w * 0.003));
+        ctx.beginPath();
+        ctx.moveTo(pts[0].x, pts[0].y);
+        ctx.lineTo(pts[1].x, pts[1].y);
+        ctx.lineTo(pts[2].x, pts[2].y);
+        ctx.lineTo(pts[3].x, pts[3].y);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // Draw approximate column guides (12 weeks) inside polygon
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([4, 4]);
+        const startRatio = 0.395, endRatio = 0.935;
+        for (let c = 0; c <= 12; c++) {
+          const t = startRatio + (c / 12) * (endRatio - startRatio);
+          const topX = pts[0].x + t * (pts[1].x - pts[0].x);
+          const topY = pts[0].y + t * (pts[1].y - pts[0].y);
+          const botX = pts[3].x + t * (pts[2].x - pts[3].x);
+          const botY = pts[3].y + t * (pts[2].y - pts[3].y);
+          ctx.beginPath();
+          ctx.moveTo(topX, topY);
+          ctx.lineTo(botX, botY);
+          ctx.stroke();
+        }
+        ctx.setLineDash([]);
+
+        // Draw 4 Corner Handles
+        const labels = ['TL (บนซ้าย)', 'TR (บนขวา)', 'BR (ล่างขวา)', 'BL (ล่างซ้าย)'];
+        const handleR = Math.max(12, Math.round(w * 0.015));
+        pts.forEach((pt, idx) => {
+          // Glow outer
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, handleR + 4, 0, 2 * Math.PI);
+          ctx.fillStyle = (idx === adjustActivePointIdx) ? 'rgba(234, 179, 8, 0.4)' : 'rgba(245, 158, 11, 0.25)';
+          ctx.fill();
+
+          // Handle solid
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, handleR, 0, 2 * Math.PI);
+          ctx.fillStyle = '#f59e0b';
+          ctx.fill();
+          ctx.strokeStyle = '#ffffff';
+          ctx.lineWidth = 2.5;
+          ctx.stroke();
+
+          // Label
+          ctx.fillStyle = '#ffffff';
+          ctx.font = `bold ${Math.max(11, Math.round(w * 0.014))}px sans-serif`;
+          ctx.fillText(labels[idx], pt.x + handleR + 6, pt.y + 4);
+        });
+      }
+    }
+
+    function setupAdjustCanvasListeners() {
+      if (listenersAttached) return;
+      listenersAttached = true;
+      const cvs = document.getElementById('adjust-canvas');
+
+      function getPos(e) {
+        const rect = cvs.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+        const scaleX = cvs.width / rect.width;
+        const scaleY = cvs.height / rect.height;
+        return {
+          x: (clientX - rect.left) * scaleX,
+          y: (clientY - rect.top) * scaleY
+        };
+      }
+
+      function onDown(e) {
+        const pos = getPos(e);
+        adjustActivePointIdx = -1;
+        const hitRadius = Math.max(30, Math.round(cvs.width * 0.035));
+        current4Points.forEach((pt, i) => {
+          if (Math.hypot(pt.x - pos.x, pt.y - pos.y) <= hitRadius) {
+            adjustActivePointIdx = i;
+          }
+        });
+        if (adjustActivePointIdx !== -1) {
+          e.preventDefault();
+          drawAdjustCanvas();
+        }
+      }
+
+      function onMove(e) {
+        if (adjustActivePointIdx === -1) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        current4Points[adjustActivePointIdx].x = Math.max(0, Math.min(cvs.width, Math.round(pos.x)));
+        current4Points[adjustActivePointIdx].y = Math.max(0, Math.min(cvs.height, Math.round(pos.y)));
+        drawAdjustCanvas();
+      }
+
+      function onUp() {
+        if (adjustActivePointIdx !== -1) {
+          adjustActivePointIdx = -1;
+          drawAdjustCanvas();
+        }
+      }
+
+      cvs.addEventListener('mousedown', onDown);
+      window.addEventListener('mousemove', onMove);
+      window.addEventListener('mouseup', onUp);
+
+      cvs.addEventListener('touchstart', onDown, { passive: false });
+      window.addEventListener('touchmove', onMove, { passive: false });
+      window.addEventListener('touchend', onUp);
+    }
+
+    async function confirm4PointsAndProcess() {
+      if (!current4Points || current4Points.length !== 4) return;
+      close4PointModal();
+
+      const ordered = order4Points(current4Points);
+      current4Points = ordered;
+
+      const out_w = 1600;
+      const out_h = 400;
+      const dstCorners = [
+        { x: 0, y: 0 },
+        { x: out_w - 1, y: 0 },
+        { x: out_w - 1, y: out_h - 1 },
+        { x: 0, y: out_h - 1 }
+      ];
+
+      const H_unwarp = getPerspectiveTransform(dstCorners, ordered);
+      const warpedGray = warpGrayPerspective(rawSourceGray, rawSourceW, rawSourceH, out_w, out_h, H_unwarp);
+
+      const selIdx = Math.max(0, document.getElementById('date-col-select').selectedIndex);
+      const N = activeRoster.length || 5;
+
+      const start_x = Math.round(out_w * 0.395);
+      const end_x = Math.round(out_w * 0.935);
+      const start_y = Math.round(out_h * 0.260);
+      const end_y = Math.round(out_h * 0.980);
+
+      const num_cols = 12;
+      const num_rows = N;
+      const col_w = (end_x - start_x) / num_cols;
+      const row_h = (end_y - start_y) / num_rows;
+
+      const annotCanvas = document.getElementById('review-canvas');
+      const annotCtx = annotCanvas.getContext('2d');
+      const img = new Image();
+      img.src = singleCapturedImage;
+      await new Promise(r => { img.onload = r; });
+      annotCtx.drawImage(img, 0, 0, rawSourceW, rawSourceH);
+
+      let presentCount = 0, lateCount = 0, leaveCount = 0;
+
+      activeRoster.forEach((m, r) => {
+        const cx_warp = start_x + (selIdx + 0.5) * col_w;
+        const cy_warp = start_y + (r + 0.5) * row_h;
+        const radius_warp = Math.min(col_w, row_h) * 0.28;
+
+        const omrResult = computeCircleFillRatio(warpedGray, out_w, out_h, Math.round(cx_warp), Math.round(cy_warp), radius_warp);
+        const fillPercentage = omrResult.percentage;
+        const isFilled = (fillPercentage >= 40);
+        const hasDiscordLeave = !!discordLeavesMap[m.duty_id];
+
+        const pTL = transformPoint(H_unwarp, cx_warp - radius_warp - 4, cy_warp - radius_warp - 4);
+        const pBR = transformPoint(H_unwarp, cx_warp + radius_warp + 4, cy_warp + radius_warp + 4);
+        const pCenter = transformPoint(H_unwarp, cx_warp, cy_warp);
+
+        const x1 = Math.round(Math.min(pTL.x, pBR.x));
+        const y1 = Math.round(Math.min(pTL.y, pBR.y));
+        const boxW = Math.max(14, Math.round(Math.abs(pBR.x - pTL.x)));
+        const boxH = Math.max(12, Math.round(Math.abs(pBR.y - pTL.y)));
+
+        let finalStatus = 'PRESENT';
+        let note = '';
+
+        if (isFilled) {
+          finalStatus = 'PRESENT';
+          presentCount++;
+          note = hasDiscordLeave ? `✓ ฝนดำในช่อง (มาเข้าเวรจริง • ${fillPercentage}%)` : `✓ ฝนดำในช่อง [○] (มาปฏิบัติหน้าที่ • ${fillPercentage}%)`;
+          annotCtx.strokeStyle = '#22c55e';
+          annotCtx.lineWidth = Math.max(2, Math.round(rawSourceW * 0.004));
+          annotCtx.fillStyle = 'rgba(34, 197, 94, 0.22)';
+          annotCtx.strokeRect(x1, y1, boxW, boxH);
+          annotCtx.fillRect(x1, y1, boxW, boxH);
+
+          annotCtx.fillStyle = '#16a34a';
+          annotCtx.beginPath();
+          annotCtx.arc(pCenter.x, pCenter.y, Math.max(3, Math.round(boxH * 0.26)), 0, 2 * Math.PI);
+          annotCtx.fill();
+
+          annotCtx.fillStyle = '#22c55e';
+          annotCtx.font = `bold ${Math.max(10, Math.round(rawSourceW * 0.016))}px 'JetBrains Mono', sans-serif`;
+          annotCtx.fillText(`[${m.duty_id}] มา (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
+        } else {
+          if (hasDiscordLeave) {
+            finalStatus = 'LEAVE';
+            leaveCount++;
+            note = `📝 แจ้งลาผ่าน Discord (${fillPercentage}%)`;
+            annotCtx.strokeStyle = '#38bdf8';
+            annotCtx.lineWidth = Math.max(2, Math.round(rawSourceW * 0.004));
+            annotCtx.fillStyle = 'rgba(56, 189, 248, 0.22)';
+            annotCtx.strokeRect(x1, y1, boxW, boxH);
+            annotCtx.fillRect(x1, y1, boxW, boxH);
+
+            annotCtx.fillStyle = '#38bdf8';
+            annotCtx.font = `bold ${Math.max(10, Math.round(rawSourceW * 0.016))}px 'JetBrains Mono', sans-serif`;
+            annotCtx.fillText(`[${m.duty_id}] ลา (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
+          } else {
+            finalStatus = 'LATE';
+            lateCount++;
+            note = `⚡ ช่องว่างเปล่า (มาสาย • ${fillPercentage}%)`;
+            annotCtx.strokeStyle = '#f59e0b';
+            annotCtx.lineWidth = Math.max(2, Math.round(rawSourceW * 0.004));
+            annotCtx.setLineDash([4, 3]);
+            annotCtx.strokeRect(x1, y1, boxW, boxH);
+            annotCtx.setLineDash([]);
+
+            annotCtx.fillStyle = '#f59e0b';
+            annotCtx.font = `bold ${Math.max(10, Math.round(rawSourceW * 0.016))}px 'JetBrains Mono', sans-serif`;
+            annotCtx.fillText(`[${m.duty_id}] สาย (${fillPercentage}%)`, x1, Math.max(12, y1 - 3));
+          }
+        }
+
+        m.status = finalStatus;
+        m.confidence = 98;
+        m.omr_note = note;
+        m.omr_fill_percentage = fillPercentage;
+        m.was_edited = false;
+      });
+
+      annotatedDataUrl = annotCanvas.toDataURL('image/jpeg', 0.90);
+      showReviewStep(presentCount, lateCount, leaveCount);
     }
 
     // ----------------------------------------------------------
