@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ใบเช็คชื่อสารวัตรนักเรียน ประจำไตรมาส (12 สัปดาห์) // SARAWAT PRANARAI</title>
 
-  <!-- Google Fonts: Sarabun, Chakra Petch, JetBrains Mono, Bebas Neue -->
+  <!-- Google Fonts: Sarabun -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Chakra+Petch:ital,wght@0,400;0,600;0,700;1,700&family=JetBrains+Mono:wght@600;700&family=Prompt:wght@400;600;700&family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet">
 
   <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -19,11 +19,11 @@
     /* ========================================================== */
     @page {
       size: A4 landscape;
-      margin: 8mm 10mm 8mm 10mm;
+      margin: 6mm 8mm;
     }
 
     * {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       -webkit-print-color-adjust: exact !important;
       print-color-adjust: exact !important;
     }
@@ -33,7 +33,7 @@
       padding: 0;
       background-color: #0b0f19;
       color: #0f172a;
-      font-family: 'Sarabun', 'Prompt', sans-serif;
+      font-family: 'Sarabun', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
       font-size: 11pt;
       line-height: 1.25;
     }
@@ -47,12 +47,13 @@
       gap: 24px;
     }
 
-    /* A4 Landscape Page Container */
+    /* A4 Landscape Page Container (Strict 196mm for single-page print fit) */
     .a4-page {
-      width: 297mm;
-      min-height: 210mm;
-      max-height: 210mm;
-      padding: 8mm 12mm;
+      width: 281mm;
+      height: 196mm;
+      min-height: 196mm;
+      max-height: 196mm;
+      padding: 4mm 5mm;
       background: #ffffff;
       box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
       border-radius: 4px;
@@ -61,179 +62,128 @@
       flex-direction: column;
       justify-content: space-between;
       page-break-after: always;
+      break-after: page;
+      page-break-inside: avoid;
+      break-inside: avoid;
       overflow: hidden;
     }
 
-    /* Corner Fiducial Markers for Computer Vision */
+    /* 4 Corner Fiducial Markers: 8mm Solid Squares with TL orientation white dot */
     .fiducial-marker {
       position: absolute;
-      width: 12mm;
-      height: 12mm;
+      width: 8mm;
+      height: 8mm;
+      background: #000000;
       pointer-events: none;
+      box-sizing: border-box;
+      z-index: 20;
     }
     .fiducial-tl { top: 4mm; left: 4mm; }
+    .fiducial-tl::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      width: 2.6mm;
+      height: 2.6mm;
+      background: #ffffff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+    }
     .fiducial-tr { top: 4mm; right: 4mm; }
     .fiducial-bl { bottom: 4mm; left: 4mm; }
     .fiducial-br { bottom: 4mm; right: 4mm; }
 
-    .crosshair {
-      width: 100%;
-      height: 100%;
-      position: relative;
-    }
-    .crosshair::before {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 0;
-      right: 0;
-      height: 2px;
-      background: #000000;
-      transform: translateY(-50%);
-    }
-    .crosshair::after {
-      content: '';
-      position: absolute;
-      left: 50%;
-      top: 0;
-      bottom: 0;
-      width: 2px;
-      background: #000000;
-      transform: translateX(-50%);
-    }
-    .corner-target {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 5mm;
-      height: 5mm;
-      background: #000000;
-      transform: translate(-50%, -50%);
-    }
-
-    /* Sheet Corner Tag (From PDF) */
+    /* Sheet Corner Tag (Safe Distance from TR Fiducial 8mm) */
     .sheet-corner-tag {
       position: absolute;
-      top: 8mm;
-      right: 12mm;
+      top: 4.5mm;
+      right: 18mm;
       text-align: right;
       border: 1.5px solid #1a5276;
-      border-radius: 6px;
-      padding: 3px 10px;
+      border-radius: 4px;
+      padding: 2px 8px;
       background-color: #f8fafc;
       box-shadow: 0 1px 3px rgba(0,0,0,0.05);
       line-height: 1.1;
+      z-index: 10;
     }
     .sheet-corner-tag .tag-english {
-      font-family: 'Bebas Neue', 'Chakra Petch', sans-serif;
-      font-size: 20px;
-      font-weight: 400;
+      font-size: 13pt;
+      font-weight: 700;
       color: #1a5276;
-      letter-spacing: 1.5px;
+      letter-spacing: 0.5px;
     }
     .sheet-corner-tag .tag-code {
-      font-family: 'Chakra Petch', monospace;
-      font-size: 11px;
+      font-size: 8.5pt;
       font-weight: 700;
       color: #d35400;
     }
 
-    /* Table Styles */
+    /* Table Styles (Locked mm dimensions) */
     .attendance-table-wrapper {
       position: relative;
-      margin-top: 4px;
-    }
-    .table-fiducial {
-      position: absolute;
-      width: 5mm;
-      height: 5mm;
-      pointer-events: none;
-      z-index: 10;
-    }
-    .table-fiducial-tl {
-      top: -2.5mm;
-      left: -2.5mm;
-      border-top: 2.5px solid #000;
-      border-left: 2.5px solid #000;
-    }
-    .table-fiducial-tr {
-      top: -2.5mm;
-      right: -2.5mm;
-      border-top: 2.5px solid #000;
-      border-right: 2.5px solid #000;
-    }
-    .table-fiducial-bl {
-      bottom: -2.5mm;
-      left: -2.5mm;
-      border-bottom: 2.5px solid #000;
-      border-left: 2.5px solid #000;
-    }
-    .table-fiducial-br {
-      bottom: -2.5mm;
-      right: -2.5mm;
-      border-bottom: 2.5px solid #000;
-      border-right: 2.5px solid #000;
-    }
-    .table-fiducial::after {
-      content: '';
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      width: 2.2mm;
-      height: 2.2mm;
-      background: #000;
-      transform: translate(-50%, -50%);
+      margin-top: 2mm;
+      display: flex;
+      justify-content: center;
     }
 
     table.attendance-table {
-      width: 100%;
+      width: 268mm;
+      max-width: 268mm;
       border-collapse: collapse;
-      border: 1.5px solid #000000;
+      border: 1.5px solid #0f172a;
+      table-layout: fixed;
       font-size: 8.5pt;
+      background: #ffffff;
       margin-top: 0;
     }
     table.attendance-table th, table.attendance-table td {
-      border: 1px solid #334155;
-      padding: 5.5px 3px;
+      border: 1px solid #475569;
+      padding: 0;
       text-align: center;
       vertical-align: middle;
+      box-sizing: border-box;
     }
     table.attendance-table th {
       background-color: #f1f5f9;
       color: #0f172a;
       font-weight: 700;
-      font-family: 'Chakra Petch', 'Prompt', sans-serif;
     }
+    table.attendance-table th.col-room { width: 18mm; }
+    table.attendance-table th.col-nick { width: 22mm; }
+    table.attendance-table th.col-name { width: 48mm; text-align: left; padding-left: 3mm; }
+    table.attendance-table th.col-id { width: 16mm; }
     table.attendance-table th.date-header {
+      width: 12.5mm;
       font-size: 7.5pt;
-      font-family: 'JetBrains Mono', monospace;
-      min-width: 25px;
-      width: 27px;
+      font-weight: 700;
       background-color: #e2e8f0;
     }
+    table.attendance-table th.col-note { width: 14mm; }
 
-    /* OMR Single Circle: [ ○ ] (ม) มาปฏิบัติหน้าที่ (สีเทาอ่อน #BFBFBF เพื่อไม่รบกวนการตรวจจับรอยฝนดำ) */
+    /* OMR Circle: 4.2mm crisp boundary */
     .omr-circle {
-      width: 15px;
-      height: 15px;
-      border: 1.5px solid #bfbfbf;
+      width: 4.2mm;
+      height: 4.2mm;
+      border: 0.5mm solid #1e293b;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 7.5pt;
-      font-family: 'Prompt', sans-serif;
-      font-weight: 500;
-      color: #bfbfbf;
+      font-size: 6.5pt;
+      font-weight: 600;
+      color: #64748b;
       cursor: pointer;
       user-select: none;
       background: #ffffff;
       margin: 0 auto;
+      box-sizing: border-box;
       transition: all 0.12s ease;
     }
     .omr-circle:hover {
       border-color: #0f172a;
-      box-shadow: 0 0 0 2px rgba(15, 23, 42, 0.2);
+      box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.3);
     }
     .omr-circle.marked-present {
       background-color: #0f172a !important;
@@ -404,11 +354,11 @@
     <!-- ========================================================== -->
     <div class="a4-page" id="page-cover">
       
-      <!-- Fiducial Markers -->
-      <div class="fiducial-marker fiducial-tl"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-tr"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-bl"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-br"><div class="crosshair"><div class="corner-target"></div></div></div>
+      <!-- 4 Corner Fiducial Markers: 8mm Solid Squares with TL orientation white dot -->
+      <div class="fiducial-marker fiducial-tl"></div>
+      <div class="fiducial-marker fiducial-tr"></div>
+      <div class="fiducial-marker fiducial-bl"></div>
+      <div class="fiducial-marker fiducial-br"></div>
 
       <div class="cover-frame">
         
@@ -456,11 +406,11 @@
     <!-- ========================================================== -->
     <div class="a4-page" id="page-table">
 
-      <!-- Fiducial Markers -->
-      <div class="fiducial-marker fiducial-tl"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-tr"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-bl"><div class="crosshair"><div class="corner-target"></div></div></div>
-      <div class="fiducial-marker fiducial-br"><div class="crosshair"><div class="corner-target"></div></div></div>
+      <!-- 4 Corner Fiducial Markers: 8mm Solid Squares with TL orientation white dot -->
+      <div class="fiducial-marker fiducial-tl"></div>
+      <div class="fiducial-marker fiducial-tr"></div>
+      <div class="fiducial-marker fiducial-bl"></div>
+      <div class="fiducial-marker fiducial-br"></div>
 
       <!-- Top Right Corner Day Tag (Reference: PDF template) -->
       <div class="sheet-corner-tag">
@@ -503,28 +453,22 @@
             <span style="margin-left: 14px; color: #047857; font-size: 8pt; font-weight: 600;">* ฝนดำในวงกลม [○] (ม) = มาปฏิบัติหน้าที่ | ช่องว่าง = มาสาย (ส) | การลาเวรให้แจ้งผ่านระบบ Discord *</span>
           </div>
 
-          <!-- Machine QR Session Anchor (Compact URL) -->
-          <div style="display: flex; align-items: center; gap: 5px;">
-            <div style="font-family: 'JetBrains Mono', monospace; font-size: 6.5pt; text-align: right; line-height: 1.1; color: #64748b;">
-              <span id="qr-label-code">Q1-M-2026</span><br>
-              <span style="color: #047857; font-weight: 700;">DAILY-SCAN OK</span>
+          <!-- Machine QR Session Anchor (Offline Embedded QR) -->
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="font-size: 7.5pt; text-align: right; line-height: 1.2; color: #475569;">
+              <span id="qr-label-code" style="font-weight: 700; color: #0f172a;">Q1-M-2569</span><br>
+              <span>12 WEEKS</span>
             </div>
-            <div style="border: 1px solid #000000; padding: 1.5px; background: #ffffff; border-radius: 2px;">
-              <div id="session-qrcode" style="width: 38px; height: 38px;"></div>
+            <div style="border: 1px solid #0f172a; padding: 0.8mm; background: #ffffff; border-radius: 2px; width: 21.6mm; height: 21.6mm; display: flex; align-items: center; justify-content: center; box-sizing: border-box;">
+              <div id="session-qrcode"></div>
             </div>
           </div>
         </div>
 
         <!-- ========================================================== -->
-        <!-- 12-WEEK QUARTER ATTENDANCE TABLE (MATCHING PDF STRUCTURE) -->
+        <!-- 12-WEEK QUARTER ATTENDANCE TABLE (LOCKED MM DIMENSIONS)    -->
         <!-- ========================================================== -->
         <div class="attendance-table-wrapper">
-          <!-- 4 Table Corner Fiducial Markers -->
-          <div class="table-fiducial table-fiducial-tl" title="TL Marker"></div>
-          <div class="table-fiducial table-fiducial-tr" title="TR Marker"></div>
-          <div class="table-fiducial table-fiducial-bl" title="BL Marker"></div>
-          <div class="table-fiducial table-fiducial-br" title="BR Marker"></div>
-
           <table class="attendance-table" id="table-quarter">
             <thead id="quarter-table-head">
               <!-- Rendered by JS -->
@@ -538,7 +482,7 @@
       </div>
 
       <!-- Signatures Row (Matching PDF: 3 Signatures) -->
-      <div style="margin-top: 6px;">
+      <div style="margin-top: 3mm;">
         <div class="signatures-row">
           <div>
             <div>ลงชื่อ..................................................................</div>
@@ -555,10 +499,10 @@
         </div>
 
         <!-- Footer Machine Stamp -->
-        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 3px; margin-top: 8px; font-size: 6.5pt; font-family: 'JetBrains Mono', monospace; color: #64748b;">
-          <span>SARAWAT PRANARAI COMMAND OS // 12-WEEK QUARTER ATTENDANCE SYSTEM</span>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; padding-top: 2.5mm; margin-top: 3mm; font-size: 7pt; color: #64748b;">
+          <span>SARAWAT PRANARAI COMMAND OS // 12-WEEK ATTENDANCE SYSTEM</span>
           <span>PAGE 1 OF 1 • A4 LANDSCAPE (297 x 210 mm)</span>
-          <span id="checksum-label">SHA256: QUARTER_1_VERIFIED</span>
+          <span id="checksum-label">DOC REF: ATT-Q1-M-2569</span>
         </div>
       </div>
 
@@ -811,14 +755,14 @@
       qrContainer.innerHTML = '';
       new QRCode(qrContainer, {
         text: qrPayload,
-        width: 38,
-        height: 38,
+        width: 76,
+        height: 76,
         colorDark: "#000000",
         colorLight: "#ffffff",
         correctLevel: QRCode.CorrectLevel.M
       });
       document.getElementById('qr-label-code').textContent = `Q${currentQuarter}-${currentShift}-${currentYear}`;
-      document.getElementById('checksum-label').textContent = `SHA256: QUARTER_${currentQuarter}_${currentYear}_${currentShift}_VERIFIED`;
+      document.getElementById('checksum-label').textContent = `DOC REF: ATT-Q${currentQuarter}-${currentShift}-${currentYear}`;
 
       // 4. Render Table Headers (Matching User's PDF Layout)
       const dateColTitle = currentShift === 'S' 
@@ -826,15 +770,15 @@
         : 'บันทึกการมาปฏิบัติหน้าที่ (เดือน/วัน)';
 
       let theadHtml = `
-        <tr>
-          <th rowspan="2" style="width: 58px;">ห้อง/เลขที่</th>
-          <th rowspan="2" style="width: 75px;">ชื่อเล่น</th>
-          <th rowspan="2" style="width: 135px; text-align: left; padding-left: 6px;">ชื่อ - สกุลจริง</th>
-          <th rowspan="2" style="width: 55px;">รหัสประจำตัว</th>
+        <tr style="height: 6mm;">
+          <th rowspan="2" class="col-room">ห้อง/เลขที่</th>
+          <th rowspan="2" class="col-nick">ชื่อเล่น</th>
+          <th rowspan="2" class="col-name">ชื่อ - สกุลจริง</th>
+          <th rowspan="2" class="col-id">รหัสประจำตัว</th>
           <th colspan="12" style="background-color: #f1f5f9; font-weight: bold;">${dateColTitle}</th>
-          <th rowspan="2" style="width: 85px;">หมายเหตุ</th>
+          <th rowspan="2" class="col-note">หมายเหตุ</th>
         </tr>
-        <tr>
+        <tr style="height: 5.5mm;">
       `;
 
       dates12.forEach((dStr, idx) => {
@@ -849,34 +793,50 @@
 
       // 5. Render Table Body (Rows with Micro-OMR Checkboxes)
       const tbody = document.getElementById('quarter-table-body');
-      tbody.innerHTML = roster.map((m, idx) => {
-        const isOdd = idx % 2 === 1;
-        const roleTag = m.is_head 
-          ? ' <span style="color: #b91c1c; font-weight: bold; font-size: 7.5pt;">(หัวหน้า)</span>'
-          : (m.is_deputy ? ' <span style="color: #0284c7; font-weight: bold; font-size: 7.5pt;">(รอง)</span>' : '');
-
-        let dateCells = '';
-        dates12.forEach((dStr, wIdx) => {
-          dateCells += `
-            <td style="padding: 5px 2px; text-align: center; vertical-align: middle;">
-              <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
-                ม
-              </div>
-            </td>
-          `;
-        });
-
-        return `
-          <tr class="${isOdd ? 'bg-slate-50' : 'bg-white'}" data-duty-row="${m.duty_id}">
-            <td style="font-family: 'JetBrains Mono', monospace; font-size: 8pt; font-weight: 600;">${m.class_room}</td>
-            <td style="font-weight: 700; color: #1a5276; white-space: nowrap;">${m.nickname}${roleTag}</td>
-            <td style="text-align: left; padding-left: 6px; white-space: nowrap;">${m.name}</td>
-            <td style="font-family: 'JetBrains Mono', monospace; font-weight: 700; color: #d97706; font-size: 8.5pt;">${m.duty_id}</td>
-            ${dateCells}
-            <td style="font-size: 7.5pt; color: #64748b;">${m.post || '-'}</td>
+      if (roster.length === 0) {
+        const emptyCells = dates12.map(() => `
+          <td style="width: 12.5mm; height: 8mm; padding: 0; text-align: center; color: #cbd5e1; font-size: 8pt; vertical-align: middle;">-</td>
+        `).join('');
+        tbody.innerHTML = Array.from({ length: 3 }).map(() => `
+          <tr style="height: 8mm;">
+            <td style="text-align: center; color: #94a3b8;">-</td>
+            <td style="text-align: center; color: #94a3b8;">-</td>
+            <td style="text-align: center; color: #94a3b8;">(ว่าง)</td>
+            <td style="text-align: center; color: #94a3b8;">-</td>
+            ${emptyCells}
+            <td style="text-align: center; color: #94a3b8;">-</td>
           </tr>
-        `;
-      }).join('');
+        `).join('');
+      } else {
+        tbody.innerHTML = roster.map((m, idx) => {
+          const isOdd = idx % 2 === 1;
+          const roleTag = m.is_head 
+            ? ' <span style="color: #b91c1c; font-weight: bold; font-size: 7.5pt;">(หัวหน้า)</span>'
+            : (m.is_deputy ? ' <span style="color: #0284c7; font-weight: bold; font-size: 7.5pt;">(รอง)</span>' : '');
+
+          let dateCells = '';
+          dates12.forEach((dStr, wIdx) => {
+            dateCells += `
+              <td style="width: 12.5mm; height: 8mm; padding: 0; text-align: center; vertical-align: middle;">
+                <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
+                  ม
+                </div>
+              </td>
+            `;
+          });
+
+          return `
+            <tr style="height: 8mm;" class="${isOdd ? 'bg-slate-50' : 'bg-white'}" data-duty-row="${m.duty_id}">
+              <td style="font-size: 8pt; font-weight: 600; text-align: center;">${m.class_room}</td>
+              <td style="font-weight: 700; color: #1a5276; white-space: nowrap; text-align: center;">${m.nickname}${roleTag}</td>
+              <td style="text-align: left; padding-left: 3mm; white-space: nowrap;">${m.name}</td>
+              <td style="font-weight: 700; color: #d97706; font-size: 8.5pt; text-align: center;">${m.duty_id}</td>
+              ${dateCells}
+              <td style="font-size: 7.5pt; color: #64748b; text-align: center;">${m.post || '-'}</td>
+            </tr>
+          `;
+        }).join('');
+      }
     }
 
     // Interactive Single OMR Circle Marking:
