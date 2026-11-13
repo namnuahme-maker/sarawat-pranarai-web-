@@ -134,13 +134,13 @@
         </p>
       </div>
 
-      <!-- ปุ่มเลือกวันทั้ง 5 ผลัดเวร (Day Selection Chips) -->
+      <!-- ปุ่มเลือกวันทั้ง 6 ผลัดเวร (Day Selection Chips) -->
       <div class="space-y-1.5">
         <div class="text-[11px] text-slate-300 font-medium flex items-center justify-between">
-          <span>เลือกรอบเวรประจำวัน (5 วันทำการ):</span>
+          <span>เลือกรอบเวรประจำวัน:</span>
           <span id="selected-shift-badge-text" class="text-amber-400 font-bold">เวรวันพุธ (Shift W)</span>
         </div>
-        <div class="grid grid-cols-5 gap-1.5 sm:gap-2" id="day-chips-grid">
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2" id="day-chips-grid">
           
           <button onclick="selectShift('M')" id="chip-M" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">จันทร์</span>
@@ -165,6 +165,11 @@
           <button onclick="selectShift('F')" id="chip-F" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">ศุกร์</span>
             <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift F</span>
+          </button>
+
+          <button onclick="selectShift('S')" id="chip-S" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+            <span class="text-xs font-bold text-slate-200">เวรพิเศษ</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift S</span>
           </button>
 
         </div>
