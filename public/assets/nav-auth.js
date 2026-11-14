@@ -61,6 +61,7 @@
 
   function injectUserProfileHeader(user) {
     if (!user) return;
+    if (window.location.pathname.includes('attendance-scan')) return;
     if (document.getElementById('nav-user-profile-badge')) return;
 
     // หาปุ่ม Mobile Hamburger ก่อน

@@ -303,59 +303,50 @@
     <!-- ========================================================== -->
     <section id="tab-operations" class="tab-pane space-y-4">
       
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
-        
-        <!-- Left: ตารางเวร 6 ผลัด (Matrix 6 Shifts) -->
-        <div class="lg:col-span-8 p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-3">
-          <div class="flex items-center justify-between border-b border-tactical-border pb-2.5">
-            <div>
-              <h2 class="font-bold text-sm text-slate-100 flex items-center gap-2 flex-wrap">
-                <span class="text-amber-400">📅</span>
-                <span>ตารางกำลังพลประจำเวร 6 ผลัด (Shift Matrix)</span>
-                <span id="badge-matrix-quarter" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">กำลังคำนวณไตรมาส...</span>
-              </h2>
-              <p class="text-xs text-slate-400">ตารางปฏิบัติหน้าที่สารวัตรนักเรียนประจำสัปดาห์</p>
-            </div>
-            <a href="javascript:void(0)" onclick="switchTab('roster')" class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-mono">
-              ดูรายชื่อทั้งหมด →
+      <!-- สารวัตรเข้าเวรวันนี้ & เครื่องมือด่วน (Quick Hub) - ย้ายขึ้นมาอยู่เหนือตารางกำลังพล -->
+      <div class="p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <h3 class="font-bold text-xs sm:text-sm text-slate-200">สารวัตรเข้าเวรวันนี้</h3>
+            <span id="today-officer-count" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0 นาย</span>
+          </div>
+          <div class="flex items-center gap-1.5">
+            <a href="/attendance-scan" class="px-2.5 py-1 rounded-lg bg-emerald-600/30 hover:bg-emerald-500/40 text-emerald-300 hover:text-white border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="เปิดระบบสแกนเช็คชื่อเวรวันนี้">
+              <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
             </a>
-          </div>
-
-          <!-- Shift Cards Grid -->
-          <div id="shifts-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
-            <!-- Rendered dynamically by renderShiftsGrid() -->
-            <div class="p-4 text-center text-xs text-slate-500 col-span-full">กำลังโหลดตารางเวร...</div>
+            <button onclick="copyDailyLineBrief()" class="px-2.5 py-1 rounded-lg bg-tactical-850 hover:bg-emerald-600/30 text-slate-300 hover:text-emerald-200 border border-tactical-border text-[11px] font-medium flex items-center gap-1 transition active:scale-95" title="คัดลอกสรุปเวรประจำวันสำหรับส่งลงไลน์">
+              <span>📋</span> สรุป
+            </button>
           </div>
         </div>
 
-        <!-- Right: สารวัตรเข้าเวรวันนี้ & เครื่องมือด่วน (Quick Hub) -->
-        <div class="lg:col-span-4 space-y-4">
-          
-          <!-- Today's Active Officers List -->
-          <div class="p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-3">
-            <div class="flex items-center justify-between border-b border-tactical-border pb-2">
-              <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                <h3 class="font-bold text-xs text-slate-200">สารวัตรเข้าเวรวันนี้</h3>
-                <span id="today-officer-count" class="text-[10px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">0 นาย</span>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <a href="/attendance-scan" class="px-2 py-1 rounded bg-emerald-600/30 hover:bg-emerald-500/40 text-emerald-300 hover:text-white border border-emerald-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95" title="เปิดระบบสแกนเช็คชื่อเวรวันนี้">
-                  <span class="animate-pulse">⚡</span> สแกนเช็คชื่อ
-                </a>
-                <button onclick="copyDailyLineBrief()" class="px-2 py-1 rounded bg-tactical-850 hover:bg-emerald-600/30 text-slate-300 hover:text-emerald-200 border border-tactical-border text-[11px] font-medium flex items-center gap-1 transition active:scale-95" title="คัดลอกสรุปเวรประจำวันสำหรับส่งลงไลน์">
-                  <span>📋</span> สรุป
-                </button>
-              </div>
-            </div>
+        <div id="today-officers-list" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
+          <div class="p-3 text-center text-xs text-slate-500 col-span-full">กำลังโหลดรายชื่อ...</div>
+        </div>
+      </div>
 
-            <div id="today-officers-list" class="space-y-1.5 max-h-[220px] overflow-y-auto pr-1 custom-scrollbar">
-              <div class="p-3 text-center text-xs text-slate-500">กำลังโหลดรายชื่อ...</div>
-            </div>
+      <!-- ตารางกำลังพล 6 ผลัด (Matrix 6 Shifts) -->
+      <div class="p-4 rounded-xl bg-tactical-900 border border-tactical-border space-y-3">
+        <div class="flex items-center justify-between border-b border-tactical-border pb-2.5">
+          <div>
+            <h2 class="font-bold text-sm text-slate-100 flex items-center gap-2 flex-wrap">
+              <span class="text-amber-400 text-lg">📅</span>
+              <span style="font-size: 20px;" class="font-bold text-slate-100">ตารางกำลังพล</span>
+              <span id="badge-matrix-quarter" class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/10 text-amber-300 border border-amber-500/30">กำลังคำนวณไตรมาส...</span>
+            </h2>
+            <p class="text-xs text-slate-400">ตารางปฏิบัติหน้าที่สารวัตรนักเรียนประจำสัปดาห์</p>
           </div>
-
+          <a href="javascript:void(0)" onclick="switchTab('roster')" class="text-xs text-cyan-400 hover:text-cyan-300 flex items-center gap-1 font-mono">
+            ดูรายชื่อทั้งหมด →
+          </a>
         </div>
 
+        <!-- Shift Cards Grid -->
+        <div id="shifts-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2.5">
+          <!-- Rendered dynamically by renderShiftsGrid() -->
+          <div class="p-4 text-center text-xs text-slate-500 col-span-full">กำลังโหลดตารางเวร...</div>
+        </div>
       </div>
 
     </section>
@@ -668,12 +659,6 @@
               <div id="dossier-student-no" class="text-sm font-bold text-purple-300 font-mono">เลขที่ 12</div>
             </div>
 
-            <!-- เลขประจำตัวนักเรียน -->
-            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
-              <span class="text-[11px] text-slate-400 font-mono block">เลขประจำตัวนักเรียน (ID)</span>
-              <div id="dossier-student-id" class="text-sm font-bold text-amber-300 font-mono">69055</div>
-            </div>
-
             <!-- ผลัดเวรปฏิบัติหน้าที่ -->
             <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
               <span class="text-[11px] text-slate-400 font-mono block">ผลัดเวรปฏิบัติหน้าที่</span>
@@ -682,15 +667,11 @@
 
           </div>
 
-          <!-- Action Footer: Copy All Info & Verify QR Link -->
-          <div class="pt-3 border-t border-tactical-border flex items-center justify-between gap-2 flex-wrap">
+          <!-- Action Footer: Copy All Info -->
+          <div class="pt-3 border-t border-tactical-border flex items-center justify-start gap-2 flex-wrap">
             <button onclick="copyAllDossierInfo()" class="px-3 py-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-slate-200 text-xs font-mono font-semibold border border-tactical-border flex items-center gap-1.5 transition active:scale-95">
               <span>📋</span>
               <span>คัดลอกข้อมูลทั้งหมด</span>
-            </button>
-            <button onclick="openVerificationPage()" class="px-3 py-2 rounded-xl bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-semibold flex items-center gap-1.5 transition active:scale-95">
-              <span>🔍</span>
-              <span>ตรวจสอบสิทธิ์ดิจิทัล (Verify)</span>
             </button>
           </div>
 

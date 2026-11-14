@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>สแกนใบเช็คชื่อ A4 (Hybrid QR + Vision AI) // SARAWAT PRANARAI</title>
+  <title>เช็คชื่อ // SARAWAT PRANARAI</title>
 
   <!-- Tailwind CSS & Google Fonts -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -52,6 +52,9 @@
       box-shadow: 0 0 14px #22c55e;
       animation: scanline 1.6s ease-in-out infinite alternate;
     }
+    #nav-user-profile-badge {
+      display: none !important;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-amber-500 selection:text-black">
@@ -69,9 +72,8 @@
           <img src="/assets/sarawat_logo.png" onerror="this.onerror=null; this.src='/assets/logo.png';" class="w-7 h-7 object-contain rounded-full border border-slate-700" alt="ตราสารวัตร">
           <div>
             <h1 class="text-xs sm:text-sm font-bold text-white flex items-center gap-1.5 leading-tight">
-              <span>⚡</span> สแกนเช็คชื่อ (Hybrid QR + Vision AI)
+              <span>⚡</span> เช็คชื่อ
             </h1>
-            <p class="text-[10px] text-slate-400">QR Anchor ล็อกรอบเวร • Vision AI ตรวจ [○] • Discord ดึงการลา</p>
           </div>
         </div>
       </div>
@@ -101,27 +103,20 @@
     <!-- ====================================================== -->
     <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
-      <!-- ตัวเลือกไตรมาสและวันที่ -->
-      <div class="flex items-center justify-end flex-wrap gap-2">
-        <div class="flex items-center gap-1.5 flex-wrap">
-          <div class="flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-lg px-2 py-0.5 text-[11px] font-mono text-cyan-300">
-            <span class="text-slate-400">ไตรมาส:</span>
-            <select id="scan-select-quarter" onchange="onScanQuarterChange(this.value)" class="bg-transparent text-amber-300 font-bold outline-none cursor-pointer">
-              <option value="1" class="bg-slate-900 text-white">ไตรมาส 1 (พ.ย.-ม.ค.)</option>
-              <option value="2" class="bg-slate-900 text-white">ไตรมาส 2 (ก.พ.-เม.ย.)</option>
-              <option value="3" class="bg-slate-900 text-white">ไตรมาส 3 (พ.ค.-ก.ค.)</option>
-              <option value="4" class="bg-slate-900 text-white">ไตรมาส 4 (ส.ค.-ต.ค.)</option>
-            </select>
-            <select id="scan-select-year" onchange="onScanYearChange(this.value)" class="bg-transparent text-cyan-300 font-bold outline-none cursor-pointer ml-1">
-              <option value="2568" class="bg-slate-900 text-white">2568</option>
-              <option value="2569" class="bg-slate-900 text-white" selected>2569</option>
-              <option value="2570" class="bg-slate-900 text-white">2570</option>
-            </select>
-          </div>
-          <div id="badge-today-tag" class="text-[11px] font-mono text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
-            วันนี้: พ. 11/11
-          </div>
-        </div>
+      <!-- ตัวเลือกไตรมาสและวันที่ (ซ่อนไว้สำหรับการประมวลผลเบื้องหลัง) -->
+      <div class="hidden">
+        <select id="scan-select-quarter" onchange="onScanQuarterChange(this.value)">
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+        </select>
+        <select id="scan-select-year" onchange="onScanYearChange(this.value)">
+          <option value="2568">2568</option>
+          <option value="2569" selected>2569</option>
+          <option value="2570">2570</option>
+        </select>
+        <div id="badge-today-tag"></div>
       </div>
 
       <!-- ปุ่มเลือกวันทั้ง 6 ผลัดเวร (Day Selection Chips) -->
@@ -165,57 +160,68 @@
         </div>
       </div>
 
-      <!-- สรุปผลัดเวร, สัปดาห์/วันที่ และกล่องแจ้งเตือนรายการลา Discord -->
-      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-3.5 space-y-3">
-        <!-- แถบเวรและตัวเลือกสัปดาห์/วันที่อัตโนมัติ (Unified Minimalist Selector) -->
-        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-          <div class="flex items-center gap-2">
-            <span class="text-lg">🛡️</span>
+      <!-- สรุปผลัดเวร, สัปดาห์/วันที่ และคำอธิบายการตรวจ (เข้าใจง่าย สบายตา) -->
+      <div class="bg-gradient-to-r from-slate-850 via-slate-800 to-slate-850 border border-slate-700 rounded-xl p-4 space-y-3.5">
+        <!-- แถบเวรและตัวเลือกวันที่ตรวจ -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-700/60">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">🛡️</span>
             <div>
-              <div class="text-xs font-bold text-white flex items-center gap-1.5">
+              <div class="text-sm font-bold text-white flex items-center gap-2">
                 <span id="selected-shift-name" class="text-amber-400">เวรวันพุธ</span>
                 <span class="text-slate-600">•</span>
-                <span id="selected-member-count" class="text-slate-300 font-semibold font-mono text-[11px]">3 นาย</span>
+                <span id="selected-member-count" class="text-slate-300 font-semibold font-mono text-xs">3 นาย</span>
               </div>
-              <div class="text-[10px] text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
-                <span>⚡</span>
-                <span id="auto-date-status">วันที่ตรงรอบเวรอัตโนมัติ</span>
+              <div class="text-[11px] text-emerald-400 font-medium flex items-center gap-1 mt-0.5">
+                <span>✓</span>
+                <span id="auto-date-status">เลือกวันที่ตรงรอบเวรอัตโนมัติ</span>
               </div>
             </div>
           </div>
 
-          <!-- ตัวเลือกสัปดาห์ / วันที่ (12 สัปดาห์ A4) -->
+          <!-- ตัวเลือกสัปดาห์ / วันที่ -->
           <div class="flex items-center gap-2 self-start sm:self-auto">
-            <label for="date-col-select" class="text-[11px] font-semibold text-slate-300 whitespace-nowrap flex items-center gap-1">
-              <span>📅</span> สัปดาห์/วันที่:
+            <label for="date-col-select" class="text-xs font-semibold text-slate-300 whitespace-nowrap flex items-center gap-1">
+              <span>📅</span> วันที่ในใบเช็ค:
             </label>
             <select id="date-col-select" onchange="onDateColChanged()" class="bg-slate-900 border border-amber-500/50 hover:border-amber-400 rounded-xl px-3 py-1.5 text-xs text-amber-300 font-mono font-bold focus:outline-none focus:ring-2 focus:ring-amber-500/30 transition shadow-inner">
               <!-- Dynamic Options Generated via JS -->
             </select>
-            <!-- Hidden input for exact ISO date storage for backend submission -->
             <input type="hidden" id="exact-date-picker">
           </div>
         </div>
 
-        <!-- กล่องสถานะการแจ้งลาผ่าน Discord วันนี้ -->
-        <div id="discord-leave-banner" class="p-2.5 rounded-lg bg-sky-500/10 border border-sky-500/30 text-xs space-y-1">
-          <div class="flex items-center justify-between text-sky-300 font-bold">
-            <span class="flex items-center gap-1.5">
-              <span>💬</span> ตรวจพบการแจ้งลาใน Discord:
-            </span>
-            <span id="discord-leave-count-badge" class="font-mono bg-sky-500/20 px-2 py-0.5 rounded text-[10px]">0 รายการ</span>
+        <!-- OMR Simple Visual Legend (เข้าใจง่าย สบายตา) -->
+        <div class="space-y-1.5">
+          <div class="text-[11px] font-semibold text-slate-300 flex items-center justify-between">
+            <span>วิธีตรวจเช็คช่อง <strong class="text-amber-300 font-mono" id="guide-col-highlight">[11/11]</strong>:</span>
           </div>
-          <div id="discord-leave-detail-list" class="text-[11px] text-slate-300 space-y-0.5 pt-0.5">
-            กำลังตรวจสอบฐานข้อมูล Discord...
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
+            <div class="p-2 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center gap-2 text-emerald-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 flex-shrink-0"></span>
+              <span><strong>ฝนดำ [●]</strong> = มาปฏิบัติหน้าที่</span>
+            </div>
+            <div class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center gap-2 text-amber-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400 flex-shrink-0"></span>
+              <span><strong>เว้นว่าง [○]</strong> = มาสาย</span>
+            </div>
+            <div class="p-2 rounded-lg bg-sky-500/10 border border-sky-500/20 flex items-center gap-2 text-sky-300">
+              <span class="w-2.5 h-2.5 rounded-full bg-sky-400 flex-shrink-0"></span>
+              <span><strong>แจ้งใน Discord</strong> = ขอลา</span>
+            </div>
           </div>
         </div>
 
-        <!-- คำแนะนำการถ่ายแบบ Hybrid -->
-        <div class="border-t border-slate-700/60 pt-2 flex items-start gap-2 text-xs text-slate-300">
-          <span class="text-emerald-400 text-sm">💡</span>
-          <div class="text-[11px] leading-relaxed">
-            <strong>กติกา OMR:</strong> วงกลม <strong class="text-amber-300">[○] (ม)</strong> ของวันที่ <strong class="text-amber-300" id="guide-col-highlight">[11/11]</strong>:
-            <br>• ฝนดำ ➔ <strong class="text-emerald-400">มาปฏิบัติหน้าที่</strong> | ช่องว่าง ➔ <strong class="text-amber-400">มาสาย</strong> | มีใบลาใน Discord ➔ <strong class="text-sky-400">ขอลา</strong>
+        <!-- กล่องสถานะการแจ้งลาผ่าน Discord วันนี้ -->
+        <div id="discord-leave-banner" class="p-2.5 rounded-lg bg-slate-900/80 border border-slate-700 text-xs space-y-1">
+          <div class="flex items-center justify-between text-sky-300 font-bold">
+            <span class="flex items-center gap-1.5">
+              <span>💬</span> การแจ้งลาผ่าน Discord:
+            </span>
+            <span id="discord-leave-count-badge" class="font-mono bg-sky-500/20 px-2 py-0.5 rounded text-[10px]">0 รายการ</span>
+          </div>
+          <div id="discord-leave-detail-list" class="text-[11px] text-slate-400 space-y-0.5 pt-0.5">
+            กำลังตรวจสอบฐานข้อมูล Discord...
           </div>
         </div>
       </div>
