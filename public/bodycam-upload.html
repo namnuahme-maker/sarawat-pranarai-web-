@@ -43,19 +43,19 @@
   <!-- ========================================================== -->
   <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (UNIVERSAL NAVIGATION) -->
   <!-- ========================================================== -->
-  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-navy-800 px-3 sm:px-4 py-2.5 transition">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-3">
+  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-navy-800 px-3 sm:px-4 py-2.5 transition w-full max-w-full overflow-hidden">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3">
       
       <!-- Brand & School Logo -->
-      <a href="/" class="flex items-center gap-2.5 sm:gap-3 flex-shrink-0 group">
+      <a href="/" class="flex items-center gap-2 sm:gap-3 flex-shrink-0 min-w-0 group">
         <div class="relative flex-shrink-0">
           <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-8 h-8 sm:w-9 sm:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
           <span class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
         </div>
-        <div class="leading-tight">
+        <div class="leading-tight min-w-0">
           <div class="flex items-center gap-1.5 sm:gap-2">
-            <span class="font-bold text-xs sm:text-sm md:text-base tracking-wider text-slate-100 uppercase">SARAWAT PRANARAI</span>
-            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 font-semibold">BODYCAM</span>
+            <span class="font-bold text-xs sm:text-sm md:text-base tracking-wider text-slate-100 uppercase truncate">SARAWAT PRANARAI</span>
+            <span class="text-[9px] sm:text-[10px] font-mono px-1.5 py-0.5 rounded bg-blue-500/10 text-blue-400 border border-blue-500/30 font-semibold flex-shrink-0">BODYCAM</span>
           </div>
           <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block">ระบบอัปโหลดไฟล์คลิปสายตรวจ • โรงเรียนพระนารายณ์</p>
         </div>
@@ -84,9 +84,9 @@
       </nav>
 
       <!-- Action Controls -->
-      <div class="flex items-center gap-2">
-        <a href="/" class="text-xs text-slate-300 hover:text-white bg-navy-800 hover:bg-navy-700 px-3 py-1.5 rounded-lg border border-navy-700 transition flex items-center gap-1.5">
-          <span>← สู่ศูนย์บัญชาการ</span>
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
+        <a href="/" class="text-xs text-slate-300 hover:text-white bg-navy-800 hover:bg-navy-700 px-2 sm:px-3 py-1.5 rounded-lg border border-navy-700 transition flex items-center gap-1">
+          <span>←</span><span class="hidden sm:inline">สู่ศูนย์บัญชาการ</span><span class="sm:hidden">ศูนย์ฯ</span>
         </a>
         <button onclick="document.getElementById('mobile-bodycam-nav')?.classList.toggle('hidden')" class="lg:hidden p-1.5 rounded-lg bg-navy-900 text-slate-300 hover:text-white border border-navy-800 text-xs flex items-center justify-center transition" aria-label="Toggle navigation">
           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
