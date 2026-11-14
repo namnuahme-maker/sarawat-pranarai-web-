@@ -180,9 +180,6 @@
       <a href="/analytics" class="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center gap-2 text-cyan-300 font-bold">
         <span>📊</span> สถิติ & คลังข้อมูล
       </a>
-      <a href="/attendance-sheet" class="p-2 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-center gap-2 text-amber-300">
-        <span>📄</span> แบบฟอร์ม A4
-      </a>
       <a href="/card-studio" class="p-2 rounded-lg bg-tactical-900 border border-tactical-border flex items-center gap-2 text-slate-200 hover:text-amber-300">
         <span>🎨</span> ทำบัตรสารวัตร
       </a>
@@ -639,17 +636,35 @@
             </p>
           </div>
 
-          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
-            <div class="font-bold text-cyan-300 flex items-center gap-1.5 text-sm">
-              <span>🎨</span> สตูดิโอออกแบบบัตร (Card Studio)
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-emerald-500/30 space-y-1">
+            <div class="font-bold text-emerald-300 flex items-center gap-1.5 text-sm">
+              <span>⚡</span> สแกนเช็คชื่อ AI (Vision Scan)
             </div>
             <p class="text-[11px] text-slate-400 leading-relaxed">
-              ระบบปรับแต่งเลเยอร์บัตรด้วย Fabric.js แบบ 2D ลากย้ายปรับเปลี่ยนฟอนต์, สี, โลโก้, ลายน้ำหนุมาน และบันทึกเป็นเทมเพลตทางการซิงค์ตรงกับบอท Discord ทันที
+              ระบบสแกนใบเช็คชื่อด้วยภาพถ่าย AI ปรับมุม 4 จุด (Perspective Warp) อัตโนมัติและแมนนวล พร้อม OMR ตรวจจับสถานะ มา/ขาด/ลา ซิงค์ฐานข้อมูลและส่งสรุปเข้า Discord ทันที
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-cyan-500/30 space-y-1">
+            <div class="font-bold text-cyan-300 flex items-center gap-1.5 text-sm">
+              <span>📊</span> สถิติ & คลังข้อมูลรวม (Analytics)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              วิเคราะห์ความพร้อมปฏิบัติการ อัตราการเข้าเวร กราฟแนวโน้มการปฏิบัติหน้าที่ สถิติการลาเวรแยกผลัด และทำเนียบโครงสร้างสารวัตรนักเรียน
             </p>
           </div>
 
           <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
-            <div class="font-bold text-emerald-300 flex items-center gap-1.5 text-sm">
+            <div class="font-bold text-amber-200 flex items-center gap-1.5 text-sm">
+              <span>🎨</span> สตูดิโอออกแบบบัตร (Card Studio)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              ระบบปรับแต่งเลเยอร์บัตรด้วย Fabric.js แบบ 2D ลากย้ายปรับเปลี่ยนฟอนต์, สี, โลโก้, ลายน้ำหนุมาน และจัดพิมพ์บัตรหน้า-หลังมาตรฐาน CR80
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-emerald-400 flex items-center gap-1.5 text-sm">
               <span>📦</span> คลังของหาย (Lost & Found)
             </div>
             <p class="text-[11px] text-slate-400 leading-relaxed">
@@ -663,6 +678,24 @@
             </div>
             <p class="text-[11px] text-slate-400 leading-relaxed">
               หน้าสแกน QR Code เพื่อยืนยันสถานะความถูกต้องของบัตรสารวัตรนักเรียนแบบสาธารณะ ตรวจสอบรหัสเวรและข้อมูลตัวจริงได้ทันที
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border space-y-1">
+            <div class="font-bold text-rose-300 flex items-center gap-1.5 text-sm">
+              <span>📷</span> ส่งภาพบอดี้แคม (Bodycam Upload)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              อัปโหลดภาพนิ่งและคลิปวิดีโอบันทึกเหตุการณ์ขณะตรวจเวร ผูกกับสารบบคดีและสำรองข้อมูลเข้าสู่เซิร์ฟเวอร์
+            </p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-tactical-950 border border-indigo-500/30 space-y-1">
+            <div class="font-bold text-indigo-300 flex items-center gap-1.5 text-sm">
+              <span>🤖</span> บอท Discord อัตโนมัติ (Discord Command)
+            </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              ห้องปฏิบัติการประจำเวร (#เช็คชื่อ), บันทึกเหตุการณ์ด่วน, แจ้งเตือนยอดกำลังพลแบบ Realtime พร้อมปุ่มสแกนเช็คชื่ออัตโนมัติ
             </p>
           </div>
         </div>

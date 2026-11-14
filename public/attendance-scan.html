@@ -76,11 +76,11 @@
       </div>
 
       <div class="flex items-center gap-1.5">
+        <a href="/" class="text-[11px] font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 px-2.5 py-1 rounded-lg border border-slate-700 flex items-center gap-1 transition">
+          <span>🛡️</span> หน้าหลัก
+        </a>
         <a href="/analytics" class="text-[11px] font-semibold text-cyan-300 bg-cyan-500/10 hover:bg-cyan-500/20 px-2.5 py-1 rounded-lg border border-cyan-500/30 flex items-center gap-1 transition">
           <span>📊</span> สถิติรวม
-        </a>
-        <a href="/attendance-sheet" class="text-[11px] font-semibold text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 px-2.5 py-1 rounded-lg border border-amber-500/30 flex items-center gap-1 transition">
-          <span>📄</span> ดูแบบฟอร์ม A4
         </a>
       </div>
     </div>
@@ -448,8 +448,8 @@
         <a href="/" class="py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs sm:text-sm transition flex items-center justify-center gap-1.5">
           <span>📊</span> <span>ดูแดชบอร์ดสรุปยอด</span>
         </a>
-        <a id="succ-sheet-link" href="/attendance-sheet" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-amber-300 font-bold text-xs sm:text-sm border border-amber-500/30 transition flex items-center justify-center gap-1.5">
-          <span>📄</span> <span>ดูแบบฟอร์ม A4 ผลัดนี้</span>
+        <a id="succ-sheet-link" href="/analytics" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs sm:text-sm border border-cyan-500/30 transition flex items-center justify-center gap-1.5">
+          <span>📊</span> <span>ดูสถิติผลัดนี้</span>
         </a>
         <button onclick="resetToFirstStep()" class="py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-medium text-xs sm:text-sm border border-slate-700 transition flex items-center justify-center gap-1.5">
           <span>📸</span> <span>สแกนรอบต่อไป</span>
@@ -2056,7 +2056,7 @@
 
       const sheetLink = document.getElementById('succ-sheet-link');
       if (sheetLink) {
-        sheetLink.href = `/attendance-sheet?shift=${currentShiftCode}`;
+        sheetLink.href = `/analytics?shift=${currentShiftCode}`;
       }
 
       const pickedDateIso = document.getElementById('exact-date-picker')?.value;
