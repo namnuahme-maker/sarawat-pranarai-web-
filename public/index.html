@@ -1518,15 +1518,35 @@
       const rawUrls = c.evidence_urls || [];
       const urls = Array.isArray(rawUrls) ? rawUrls : (rawUrls ? [rawUrls] : []);
 
+      // 🌟 ดึงรูปโปรไฟล์ที่สารวัตรส่งในช่องส่งรูปมาแสดงในหน้าดูหลักฐาน
+      const officer = allMembers.find(m => m.id === c.assigned_officer_id || m.duty_id === c.duty_id || (c.reporter_name && c.reporter_name.includes(m.nickname)));
+      const officerPhoto = officer?.profile_image_url || '/assets/logo.png';
+      const officerDisplay = officer
+        ? `[${officer.duty_id || 'สารวัตร'}] คุณ${officer.nickname} (${officer.first_name} ${officer.last_name || ''})`
+        : (c.reporter_name || 'สารวัตรเจ้าของเคส');
+
+      const officerBadgeHtml = `
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-tactical-950/90 border border-tactical-border/90 mb-3 shadow-inner">
+          <img src="${officerPhoto}" class="w-11 h-11 rounded-full object-cover border-2 border-amber-500/60 shadow flex-shrink-0" onerror="this.src='/assets/logo.png'">
+          <div class="leading-tight">
+            <div class="text-xs font-bold text-white flex items-center gap-2">
+              <span>${officerDisplay}</span>
+              <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 font-mono font-medium">เจ้าหน้าที่ผู้ส่งหลักฐาน</span>
+            </div>
+            <div class="text-[11px] text-slate-400 font-sans mt-1">จุดตรวจ/สถานที่เกิดเหตุ: <span class="text-slate-200 font-semibold">${c.location || '-'}</span></div>
+          </div>
+        </div>
+      `;
+
       if (urls.length === 0) {
-        content.innerHTML = `
+        content.innerHTML = officerBadgeHtml + `
           <div class="p-8 text-center text-xs text-slate-500 space-y-2">
             <span class="text-3xl block">📭</span>
             <p>ยังไม่มีการแนบคลิปหรือไฟล์หลักฐานในคดีนี้</p>
           </div>
         `;
       } else {
-        content.innerHTML = urls.map((url, idx) => {
+        content.innerHTML = officerBadgeHtml + urls.map((url, idx) => {
           const cleanUrl = (url || '').split('?')[0].toLowerCase();
           const isVideo = cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.mkv');
           const isImage = cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.webp');

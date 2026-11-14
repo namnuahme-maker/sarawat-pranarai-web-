@@ -163,6 +163,8 @@ async function processDiscordUserLogin(accessToken, res) {
         .from('members')
         .select('*')
         .eq('discord_id', discordId)
+        .order('updated_at', { ascending: false })
+        .limit(1)
         .maybeSingle();
       if (data) memberData = data;
     } catch (e) {}
@@ -174,22 +176,25 @@ async function processDiscordUserLogin(accessToken, res) {
     const isLeader = isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
     const isVerified = roles.includes(process.env.ROLE_VERIFIED) || !!memberData;
 
-    // สร้าง Avatar URL ทางการของ Discord
-    const avatarUrl = discordUser.avatar
-      ? `https://cdn.discordapp.com/avatars/${discordId}/${discordUser.avatar}.png?size=128`
-      : `https://cdn.discordapp.com/embed/avatars/${(parseInt(discordUser.discriminator || '0') % 5)}.png`;
+    // 🌟 เน้นย้ำ: ดึงรูปโปรไฟล์ที่ผู้ใช้งานส่งในช่องส่งรูป (profile_image_url) มาใช้เป็นหลักอันดับ 1
+    const submittedPhoto = memberData?.profile_image_url || memberData?.photo_url || memberData?.profile_photo_url;
+    const avatarUrl = submittedPhoto || (discordUser.avatar
+      ? `https://cdn.discordapp.com/avatars/${discordId}/${discordUser.avatar}.png?size=256`
+      : `https://cdn.discordapp.com/embed/avatars/${(parseInt(discordUser.discriminator || '0') % 5)}.png`);
 
     const authUser = {
       id: discordId,
       username: discordUser.username,
-      displayName: serverNick || discordUser.global_name || discordUser.username,
+      displayName: serverNick || (memberData ? `${memberData.first_name} ${memberData.last_name || ''} (${memberData.nickname || ''})`.trim() : (discordUser.global_name || discordUser.username)),
+      nickname: memberData?.nickname || serverNick || discordUser.global_name || discordUser.username,
       avatar: avatarUrl,
+      officialPhoto: submittedPhoto || null,
       roles: roles,
       isGuildMember,
       isLeader,
       isVerified,
       dutyId: memberData?.duty_id || null,
-      rank: memberData?.rank || (isPresident ? 'ประธาน' : isVicePresident ? 'รองประธาน' : 'สารวัตร'),
+      rank: memberData?.rank || (isPresident ? 'ประธาน' : isVicePresident ? 'รองประธาน' : (memberData?.shift_role || 'สารวัตร')),
       exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // อายุเซสชัน 7 วัน
     };
 
@@ -315,12 +320,44 @@ app.post('/api/auth/discord/token', async (req, res) => {
   return res.json(loginResult);
 });
 
-// ตรวจสอบสถานะ User ปัจจุบัน
-app.get('/api/auth/me', (req, res) => {
+// ตรวจสอบสถานะ User ปัจจุบัน พร้อมซิงค์รูปโปรไฟล์ที่ส่งล่าสุดจาก Supabase
+app.get('/api/auth/me', async (req, res) => {
   const user = getUserFromReq(req);
+  if (!user) {
+    return res.json({
+      loggedIn: false,
+      user: null
+    });
+  }
+
+  // ซิงค์รูปโปรไฟล์ล่าสุดที่ผู้ใช้งานส่งในช่องส่งรูป เพื่อให้เป็นปัจจุบันเสมอ
+  try {
+    const { data: m } = await supabase
+      .from('members')
+      .select('profile_image_url, photo_url, profile_photo_url, nickname, first_name, last_name, duty_id, shift_role, rank')
+      .eq('discord_id', user.id)
+      .order('updated_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (m) {
+      const latestPhoto = m.profile_image_url || m.photo_url || m.profile_photo_url;
+      if (latestPhoto) {
+        user.avatar = latestPhoto;
+        user.officialPhoto = latestPhoto;
+      }
+      if (m.nickname) user.nickname = m.nickname;
+      if (m.duty_id) user.dutyId = m.duty_id;
+      if (m.shift_role || m.rank) user.rank = m.rank || m.shift_role || user.rank;
+      if (m.first_name) {
+        user.displayName = `${m.first_name} ${m.last_name || ''} (${m.nickname || ''})`.trim();
+      }
+    }
+  } catch (e) {}
+
   res.json({
-    loggedIn: !!user,
-    user: user || null
+    loggedIn: true,
+    user
   });
 });
 
