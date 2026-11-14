@@ -82,6 +82,26 @@ function getUserFromReq(req) {
     const user = verifyAuthToken(bearerToken);
     if (user) return user;
   }
+
+  // 3. บน Localhost ข้ามขั้นตอน Login ผ่าน Discord อัตโนมัติ (Dev Mode)
+  const host = (req && req.get) ? (req.get('host') || '') : '';
+  const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1') || process.env.NODE_ENV === 'development' || !process.env.PORT;
+  if (isLocalhost) {
+    return {
+      id: 'dev_local_admin',
+      username: 'Local Developer',
+      nickname: 'ผู้ดูแลระบบ (Local)',
+      discriminator: '0000',
+      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
+      officialPhoto: null,
+      role: 'COMMANDER',
+      isCommander: true,
+      isGuildMember: true,
+      roles: ['1567547042207895664'],
+      serverNick: 'ผู้ดูแลระบบ (Localhost)'
+    };
+  }
+
   return null;
 }
 
