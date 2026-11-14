@@ -514,98 +514,197 @@
   </div>
 
   <!-- ========================================================== -->
-  <!-- 🪪 DIGITAL ID CARD MODAL (SINGLE-VIEW CR80 STANDARD) -->
+  <!-- 🪪 DIGITAL ID CARD & OFFICER DOSSIER MODAL (2-COLUMN VIEW) -->
   <!-- ========================================================== -->
-  <div id="card-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all">
-    <div class="relative max-w-sm w-full bg-tactical-900 border border-tactical-border rounded-2xl p-4 shadow-2xl flex flex-col items-center gap-3">
+  <div id="card-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 transition-all">
+    <div class="relative max-w-4xl w-full bg-tactical-900 border border-tactical-border rounded-2xl p-4 sm:p-6 shadow-2xl flex flex-col max-h-[92vh] overflow-y-auto custom-scrollbar">
       
-      <!-- Modal Close Button -->
-      <button onclick="closeCardModal()" class="absolute top-3 right-3 w-8 h-8 rounded-full bg-tactical-800 hover:bg-tactical-700 text-slate-400 hover:text-white flex items-center justify-center transition">
-        ✕
-      </button>
-
-      <!-- Modal Title -->
-      <div class="text-center">
-        <h3 class="font-bold text-sm text-slate-100 uppercase tracking-wider">บัตรประจำตัวสารวัตรนักเรียนดิจิทัล</h3>
-        <p class="text-[11px] text-slate-400">โรงเรียนพระนารายณ์ • Digital Student Marshall ID</p>
+      <!-- Modal Header (Title + Close Button) -->
+      <div class="flex items-center justify-between pb-3 mb-4 border-b border-tactical-border">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400 text-lg">🪪</div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-slate-100 uppercase tracking-wide">แฟ้มข้อมูลประจำตัวสารวัตรนักเรียน</h3>
+            <p class="text-[11px] text-slate-400">โรงเรียนพระนารายณ์ • Digital Student Marshall ID & Officer Dossier</p>
+          </div>
+        </div>
+        <button onclick="closeCardModal()" class="w-8 h-8 rounded-full bg-tactical-800 hover:bg-tactical-700 text-slate-400 hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
       </div>
 
-      <!-- CR80 Digital Card Container (Front-only, Official Template Standard 430x680 px scaled to 280x442 px) -->
-      <div id="modal-card-render-zone" class="id-card-cr80 relative bg-white text-neutral-900 border border-slate-300 rounded-lg shadow-2xl overflow-hidden select-none text-left" style="width: 280px; height: 442px;">
-        
-        <!-- Left Blue Stripe (left: 0, w: 9px) / Right Red Stripe (right: 0, w: 9px) -->
-        <div class="absolute left-0 top-0 bottom-0 w-[9px] bg-[#002b80] z-30"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-[9px] bg-[#b91c1c] z-30"></div>
+      <!-- 2-Column Responsive Body: Left (CR80 Card + Actions) / Right (Officer Dossier Details) -->
+      <div class="flex flex-col md:flex-row items-center md:items-start justify-center gap-6">
 
-        <!-- Vertical PRANARAI SCHOOL text along red stripe -->
-        <div class="absolute right-[11px] top-[76px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[2.5px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
-          PRANARAI SCHOOL
-        </div>
+        <!-- LEFT COLUMN: CR80 Card Preview + Download / Print Buttons -->
+        <div class="flex flex-col items-center flex-shrink-0">
+          
+          <!-- CR80 Digital Card Container (Front-only, Official Template Standard 430x680 px scaled to 280x442 px) -->
+          <div id="modal-card-render-zone" class="id-card-cr80 relative bg-white text-neutral-900 border border-slate-300 rounded-lg shadow-2xl overflow-hidden select-none text-left" style="width: 280px; height: 442px;">
+            
+            <!-- Left Blue Stripe (left: 0, w: 9px) / Right Red Stripe (right: 0, w: 9px) -->
+            <div class="absolute left-0 top-0 bottom-0 w-[9px] bg-[#002b80] z-30"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-[9px] bg-[#b91c1c] z-30"></div>
 
-        <!-- Top Right Official Sarawat Seal Badge (Watermark element in template: 59x59 scaled to 38x38) -->
-        <img src="/assets/logo.png" alt="Badge" class="absolute right-[17px] top-[6px] w-[38px] h-[38px] object-contain z-20 pointer-events-none">
+            <!-- Vertical PRANARAI SCHOOL text along red stripe -->
+            <div class="absolute right-[11px] top-[76px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[2.5px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
+              PRANARAI SCHOOL
+            </div>
 
-        <!-- Top Header: Wide Bold SARAWAT + Hollow Outline INSPECTOR -->
-        <div class="absolute left-0 right-0 top-[4px] text-center z-20 pointer-events-none">
-          <h1 class="text-[30px] font-bold tracking-[1.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
-            SARAWAT
-          </h1>
-          <p class="text-[16.5px] font-bold tracking-[3px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-0.5 text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
-            INSPECTOR
-          </p>
-        </div>
+            <!-- Top Right Official Sarawat Seal Badge (Watermark element in template: 59x59 scaled to 38x38) -->
+            <img src="/assets/logo.png" alt="Badge" class="absolute right-[17px] top-[6px] w-[38px] h-[38px] object-contain z-20 pointer-events-none">
 
-        <!-- Ambient Side Color Fades (Subtle background gradients) -->
-        <div class="absolute left-0 top-0 bottom-0 w-[60px] bg-gradient-to-r from-[#002b80]/15 via-[#002b80]/05 to-transparent z-[3] pointer-events-none"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-[60px] bg-gradient-to-l from-[#b91c1c]/15 via-[#b91c1c]/05 to-transparent z-[3] pointer-events-none"></div>
+            <!-- Top Header: Wide Bold SARAWAT + Hollow Outline INSPECTOR -->
+            <div class="absolute left-0 right-0 top-[4px] text-center z-20 pointer-events-none">
+              <h1 class="text-[30px] font-bold tracking-[1.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
+                SARAWAT
+              </h1>
+              <p class="text-[16.5px] font-bold tracking-[3px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-0.5 text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
+                INSPECTOR
+              </p>
+            </div>
 
-        <!-- Student Photo (Rectangle, Exactly as in Card Studio Template: 350x360 scaled to 228x235 px) -->
-        <div class="absolute left-[23px] top-[81px] w-[228px] h-[235px] overflow-hidden flex items-center justify-center z-10 pointer-events-none">
-          <img id="card-photo-img" src="/assets/logo.png" alt="Photo" class="w-full h-full object-cover object-top">
-        </div>
+            <!-- Ambient Side Color Fades (Subtle background gradients) -->
+            <div class="absolute left-0 top-0 bottom-0 w-[60px] bg-gradient-to-r from-[#002b80]/15 via-[#002b80]/05 to-transparent z-[3] pointer-events-none"></div>
+            <div class="absolute right-0 top-0 bottom-0 w-[60px] bg-gradient-to-l from-[#b91c1c]/15 via-[#b91c1c]/05 to-transparent z-[3] pointer-events-none"></div>
 
-        <!-- Member Info Lines (Centered directly under the photo, exactly as in official template) -->
-        <div class="absolute left-[12px] right-[12px] top-[322px] text-center z-20 pointer-events-none px-1">
-          <!-- 1. English Nickname -->
-          <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[25px] font-bold text-black uppercase leading-[0.95] tracking-[1px] truncate" style="transform: scaleY(1.05);">
-            NAMNUAH
+            <!-- Student Photo (Rectangle, Exactly as in Card Studio Template: 350x360 scaled to 228x235 px) -->
+            <div class="absolute left-[23px] top-[81px] w-[228px] h-[235px] overflow-hidden flex items-center justify-center z-10 pointer-events-none">
+              <img id="card-photo-img" src="/assets/logo.png" alt="Photo" class="w-full h-full object-cover object-top">
+            </div>
+
+            <!-- Member Info Lines (Centered directly under the photo, exactly as in official template) -->
+            <div class="absolute left-[12px] right-[12px] top-[322px] text-center z-20 pointer-events-none px-1">
+              <!-- 1. English Nickname -->
+              <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[25px] font-bold text-black uppercase leading-[0.95] tracking-[1px] truncate" style="transform: scaleY(1.05);">
+                NAMNUAH
+              </div>
+              <!-- 2. Code Line -->
+              <div id="card-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12px] font-bold text-black uppercase tracking-[0.5px] leading-tight mt-1.5 truncate">
+                M5-7-TS1-0634125121
+              </div>
+              <!-- 3. Thai Nickname -->
+              <div id="card-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13px] font-bold text-black leading-tight mt-1 truncate">
+                นำเหนือ
+              </div>
+              <!-- 4. Thai Full Name -->
+              <div id="card-fullname" class="font-['Prompt','Kanit',sans-serif] text-[10px] font-semibold text-black leading-tight mt-0.5 truncate">
+                นายณิชกานต์ คำไชย
+              </div>
+            </div>
+
+            <!-- Bottom Area: Center Barcode (Code128) + Right Royal School Emblem -->
+            <div class="absolute left-1/2 -translate-x-1/2 bottom-[8px] w-[164px] h-[34px] flex items-center justify-center z-20 pointer-events-none">
+              <svg id="card-barcode-svg" class="w-full h-full"></svg>
+            </div>
+
+            <!-- Bottom Right School Emblem (Royal Phra Narai Emblem) -->
+            <div class="absolute right-[14px] bottom-[6px] w-[42px] h-[52px] flex items-center justify-center z-20 pointer-events-none">
+              <img src="/assets/school_emblem.png" alt="ตราโรงเรียนพระนารายณ์" class="w-full h-full object-contain">
+            </div>
+
           </div>
-          <!-- 2. Code Line -->
-          <div id="card-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12px] font-bold text-black uppercase tracking-[0.5px] leading-tight mt-1.5 truncate">
-            M5-7-TS1-0634125121
+
+          <!-- Modal Action Buttons (Left column under card) -->
+          <div class="w-[280px] grid grid-cols-2 gap-2 mt-3">
+            <button onclick="downloadCardPNG()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95 shadow">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+              <span>บันทึกภาพ PNG</span>
+            </button>
+            <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-tactical-800 hover:bg-tactical-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 border border-tactical-border transition active:scale-95">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+              <span>สั่งพิมพ์</span>
+            </button>
           </div>
-          <!-- 3. Thai Nickname -->
-          <div id="card-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13px] font-bold text-black leading-tight mt-1 truncate">
-            นำเหนือ
-          </div>
-          <!-- 4. Thai Full Name -->
-          <div id="card-fullname" class="font-['Prompt','Kanit',sans-serif] text-[10px] font-semibold text-black leading-tight mt-0.5 truncate">
-            นายณิชกานต์ คำไชย
-          </div>
+
         </div>
 
-        <!-- Bottom Area: Center Barcode (Code128) + Right Royal School Emblem -->
-        <div class="absolute left-1/2 -translate-x-1/2 bottom-[8px] w-[164px] h-[34px] flex items-center justify-center z-20 pointer-events-none">
-          <svg id="card-barcode-svg" class="w-full h-full"></svg>
+        <!-- RIGHT COLUMN: Detailed Officer Dossier Panel (ข้อมูลสมาชิกด้านข้างขวารูปบัตร) -->
+        <div class="flex-1 w-full bg-tactical-950/80 border border-tactical-border rounded-xl p-4 sm:p-5 flex flex-col justify-between space-y-4">
+          
+          <!-- Dossier Header: Badge, Status, Role -->
+          <div class="flex items-center justify-between pb-3 border-b border-tactical-border flex-wrap gap-2">
+            <div class="flex items-center gap-2">
+              <span id="dossier-duty-badge" class="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-400 border border-amber-500/30 font-mono font-bold text-xs">[TS1]</span>
+              <span id="dossier-role-title" class="px-2.5 py-1 rounded-lg bg-blue-500/15 text-blue-300 border border-blue-500/30 font-mono text-xs">สารวัตรนักเรียน</span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[11px] font-mono">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+              ACTIVE พร้อมปฏิบัติหน้าที่
+            </span>
+          </div>
+
+          <!-- Dossier Name & Nickname Block -->
+          <div class="space-y-1">
+            <div class="text-[11px] font-mono text-slate-400">ชื่อ - นามสกุลจริง (Full Name):</div>
+            <div id="dossier-fullname" class="text-lg sm:text-xl font-bold text-white tracking-wide">นายณิชกานต์ คำไชย</div>
+            <div class="text-xs text-slate-300 font-mono flex items-center gap-2 pt-0.5 flex-wrap">
+              <span>ชื่อเล่น: <strong id="dossier-thainick" class="text-amber-300">น้ำเหนือ</strong></span>
+              <span class="text-slate-600">•</span>
+              <span>English: <strong id="dossier-engnick" class="text-cyan-300 uppercase">NAMNUAH</strong></span>
+            </div>
+          </div>
+
+          <!-- Dossier Information Grid: 2 columns -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+            
+            <!-- เบอร์โทรศัพท์ (พร้อมปุ่มโทรออกและคัดลอก) -->
+            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1.5 sm:col-span-2">
+              <span class="text-[11px] text-slate-400 font-mono block">เบอร์โทรศัพท์ติดต่อ (Phone Number)</span>
+              <div class="flex items-center justify-between gap-2 flex-wrap">
+                <span id="dossier-phone-text" class="text-base font-bold font-mono text-white tracking-wider">063-412-5121</span>
+                <div class="flex items-center gap-2">
+                  <a id="dossier-phone-call-btn" href="tel:0634125121" class="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 transition active:scale-95 shadow">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                    <span>โทรออก</span>
+                  </a>
+                  <button onclick="copyDossierPhone()" class="px-2.5 py-1.5 rounded-lg bg-tactical-800 hover:bg-tactical-700 text-slate-300 hover:text-white text-xs border border-tactical-border transition active:scale-95" title="คัดลอกเบอร์โทร">
+                    📋 คัดลอก
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ระดับชั้น / ห้อง -->
+            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
+              <span class="text-[11px] text-slate-400 font-mono block">ระดับชั้น / ห้องเรียน</span>
+              <div id="dossier-class" class="text-sm font-bold text-cyan-300 font-mono">ม.5/7</div>
+            </div>
+
+            <!-- เลขที่นักเรียน -->
+            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
+              <span class="text-[11px] text-slate-400 font-mono block">เลขที่ในห้องเรียน</span>
+              <div id="dossier-student-no" class="text-sm font-bold text-purple-300 font-mono">เลขที่ 12</div>
+            </div>
+
+            <!-- เลขประจำตัวนักเรียน -->
+            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
+              <span class="text-[11px] text-slate-400 font-mono block">เลขประจำตัวนักเรียน (ID)</span>
+              <div id="dossier-student-id" class="text-sm font-bold text-amber-300 font-mono">69055</div>
+            </div>
+
+            <!-- ผลัดเวรปฏิบัติหน้าที่ -->
+            <div class="p-3 rounded-xl bg-tactical-900 border border-tactical-border space-y-1">
+              <span class="text-[11px] text-slate-400 font-mono block">ผลัดเวรปฏิบัติหน้าที่</span>
+              <div id="dossier-shift" class="text-sm font-bold text-slate-100 font-mono">วันอังคาร (TS)</div>
+            </div>
+
+          </div>
+
+          <!-- Action Footer: Copy All Info & Verify QR Link -->
+          <div class="pt-3 border-t border-tactical-border flex items-center justify-between gap-2 flex-wrap">
+            <button onclick="copyAllDossierInfo()" class="px-3 py-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-slate-200 text-xs font-mono font-semibold border border-tactical-border flex items-center gap-1.5 transition active:scale-95">
+              <span>📋</span>
+              <span>คัดลอกข้อมูลทั้งหมด</span>
+            </button>
+            <button onclick="openVerificationPage()" class="px-3 py-2 rounded-xl bg-cyan-950 hover:bg-cyan-900 text-cyan-300 border border-cyan-500/40 text-xs font-mono font-semibold flex items-center gap-1.5 transition active:scale-95">
+              <span>🔍</span>
+              <span>ตรวจสอบสิทธิ์ดิจิทัล (Verify)</span>
+            </button>
+          </div>
+
         </div>
 
-        <!-- Bottom Right School Emblem (Royal Phra Narai Emblem) -->
-        <div class="absolute right-[14px] bottom-[6px] w-[42px] h-[52px] flex items-center justify-center z-20 pointer-events-none">
-          <img src="/assets/school_emblem.png" alt="ตราโรงเรียนพระนารายณ์" class="w-full h-full object-contain">
-        </div>
-
-      </div>
-
-      <!-- Modal Action Buttons -->
-      <div class="w-full grid grid-cols-2 gap-2 pt-1">
-        <button onclick="downloadCardPNG()" class="px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-          <span>บันทึกภาพ PNG</span>
-        </button>
-        <button onclick="window.print()" class="px-3 py-2 rounded-xl bg-tactical-800 hover:bg-tactical-700 text-slate-200 font-semibold text-xs flex items-center justify-center gap-1.5 border border-tactical-border transition active:scale-95">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-          <span>สั่งพิมพ์</span>
-        </button>
       </div>
 
     </div>
@@ -1510,11 +1609,107 @@
         console.warn('Barcode error:', e);
       }
 
+      // Populate Officer Dossier Fields
+      const dBadge = document.getElementById('dossier-duty-badge');
+      if (dBadge) dBadge.textContent = `[${dutyId}]`;
+
+      const dRole = document.getElementById('dossier-role-title');
+      if (dRole) {
+        let roleText = 'สารวัตรนักเรียน';
+        if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
+        else if (m.role === 'VICE_PRESIDENT') roleText = '⭐ รองประธานสารวัตร';
+        else if (m.shift_role === 'SHIFT_HEAD') roleText = '🛡️ หัวหน้าเวรประจำวัน';
+        dRole.textContent = roleText;
+      }
+
+      const dFullName = document.getElementById('dossier-fullname');
+      if (dFullName) dFullName.textContent = fullName;
+
+      const dThaiNick = document.getElementById('dossier-thainick');
+      if (dThaiNick) dThaiNick.textContent = m.thai_nickname || thaiNick;
+
+      const dEngNick = document.getElementById('dossier-engnick');
+      if (dEngNick) dEngNick.textContent = englishNick;
+
+      const phoneRaw = m.phone_number || '-';
+      const dPhoneText = document.getElementById('dossier-phone-text');
+      if (dPhoneText) dPhoneText.textContent = phoneRaw !== '-' ? phoneRaw : 'ไม่ได้ระบุ';
+
+      const dPhoneCallBtn = document.getElementById('dossier-phone-call-btn');
+      if (dPhoneCallBtn) {
+        if (phoneRaw && phoneRaw !== '-') {
+          dPhoneCallBtn.href = `tel:${phoneRaw.replace(/[^0-9+]/g, '')}`;
+          dPhoneCallBtn.classList.remove('opacity-50', 'pointer-events-none');
+        } else {
+          dPhoneCallBtn.href = '#';
+          dPhoneCallBtn.classList.add('opacity-50', 'pointer-events-none');
+        }
+      }
+
+      const dClass = document.getElementById('dossier-class');
+      if (dClass) dClass.textContent = m.grade_class ? (m.grade_class.startsWith('ม.') ? m.grade_class : `ม.${m.grade_class}`) : '-';
+
+      const dStudentNo = document.getElementById('dossier-student-no');
+      if (dStudentNo) dStudentNo.textContent = m.student_no ? `เลขที่ ${m.student_no}` : '-';
+
+      const dStudentID = document.getElementById('dossier-student-id');
+      if (dStudentID) dStudentID.textContent = m.student_id || m.student_code || m.student_no || '-';
+
+      const dShift = document.getElementById('dossier-shift');
+      if (dShift) {
+        const dutyDay = m.duty_day || '-';
+        const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay };
+        dShift.textContent = `${shiftInfo.name} [${dutyDay}]`;
+      }
+
       document.getElementById('card-modal').classList.remove('hidden');
     }
 
     function closeCardModal() {
       document.getElementById('card-modal').classList.add('hidden');
+    }
+
+    function copyDossierPhone() {
+      if (!activeCardMember || !activeCardMember.phone_number) {
+        alert('⚠️ สมาชิกท่านนี้ไม่ได้ระบุเบอร์โทรศัพท์ในระบบ');
+        return;
+      }
+      navigator.clipboard.writeText(activeCardMember.phone_number).then(() => {
+        alert(`📞 คัดลอกเบอร์โทร ${activeCardMember.phone_number} สำเร็จ!`);
+      }).catch(() => {
+        alert(`เบอร์โทรศัพท์: ${activeCardMember.phone_number}`);
+      });
+    }
+
+    function copyAllDossierInfo() {
+      if (!activeCardMember) return;
+      const m = activeCardMember;
+      const thaiNick = m.nickname || 'สารวัตร';
+      const englishNick = m.english_nickname || romanizeThaiNickname(thaiNick);
+      const rawClass = (m.grade_class || '').replace('ม.', '').trim();
+      const classDisplay = rawClass ? `ม.${rawClass}` : '-';
+      const infoText = `📋 ข้อมูลสารวัตรนักเรียน // โรงเรียนพระนารายณ์
+รหัสเวร: [${m.duty_id || '-'}]
+ชื่อ-นามสกุล: ${m.first_name || ''} ${m.last_name || ''}
+ชื่อเล่น: ${m.thai_nickname || thaiNick} (${englishNick})
+ระดับชั้น: ${classDisplay}
+เลขที่: ${m.student_no || '-'}
+รหัสประจำตัว: ${m.student_id || m.student_code || m.student_no || '-'}
+เบอร์โทรศัพท์: ${m.phone_number || '-'}
+ผลัดเวร: ${m.duty_day || '-'}`;
+      navigator.clipboard.writeText(infoText).then(() => {
+        alert('📋 คัดลอกข้อมูลประจำตัวสารวัตรทั้งหมดเรียบร้อย!');
+      }).catch(() => {
+        alert(infoText);
+      });
+    }
+
+    function openVerificationPage() {
+      if (activeCardMember && activeCardMember.id) {
+        window.open(`/verify?id=${activeCardMember.id}`, '_blank');
+      } else {
+        window.open('/verify', '_blank');
+      }
     }
 
     // 📹 Open & Close Evidence / Bodycam Modal
