@@ -483,13 +483,41 @@ app.post('/api/cases/:id/evidence', async (req, res) => {
     let fileUrl = url;
 
     if (base64Data && filename) {
-      const uploadDir = path.join(__dirname, 'public', 'uploads');
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      const safeName = `${caseId}_${Date.now()}_${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
-      const filePath = path.join(uploadDir, safeName);
-      const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
-      fs.writeFileSync(filePath, buffer);
-      fileUrl = `/uploads/${safeName}`;
+      // 1. ตรวจสอบการส่งไฟล์ขึ้น Google Drive อัตโนมัติผ่าน Google Apps Script Web App
+      const gasDriveUrl = process.env.GOOGLE_DRIVE_WEBAPP_URL || process.env.GAS_DRIVE_URL;
+      if (gasDriveUrl) {
+        try {
+          const gasRes = await fetch(gasDriveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              action: 'upload_bodycam',
+              caseId,
+              filename,
+              base64Data: base64Data.split(',').pop(),
+              mimeType: filename.endsWith('.mp4') ? 'video/mp4' : (filename.endsWith('.mov') ? 'video/quicktime' : 'application/octet-stream')
+            })
+          });
+          const gasJson = await gasRes.json().catch(() => null);
+          if (gasJson && gasJson.fileUrl) {
+            fileUrl = gasJson.fileUrl;
+            console.log(`[GOOGLE DRIVE AUTO-UPLOAD] Successfully saved ${filename} to Google Drive: ${fileUrl}`);
+          }
+        } catch (gasErr) {
+          console.warn('[GOOGLE DRIVE UPLOAD WARNING, FALLBACK TO LOCAL]:', gasErr.message);
+        }
+      }
+
+      // ถ้าไม่มี Google Drive URL หรือเกิดข้อผิดพลาด ให้บันทึกลงเครื่อง/เซิร์ฟเวอร์เสมอป้องกันข้อมูลสูญหาย (Failsafe)
+      if (!fileUrl) {
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        const safeName = `${caseId}_${Date.now()}_${filename.replace(/[^a-zA-Z0-9._-]/g, '_')}`;
+        const filePath = path.join(uploadDir, safeName);
+        const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
+        fs.writeFileSync(filePath, buffer);
+        fileUrl = `/uploads/${safeName}`;
+      }
     }
 
     if (!fileUrl) {
