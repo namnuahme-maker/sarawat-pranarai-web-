@@ -1641,6 +1641,41 @@ const ATTENDANCE_FALLBACK_ROSTERS = {
   ]
 };
 
+// ----------------------------------------------------------
+// 📑 ATTENDANCE SCAN SESSIONS (Discord Bot -> Web Handshake)
+// ----------------------------------------------------------
+const scanSessions = new Map(); // id -> { id, image_url, shift, target_date, corners, scanned_by, createdAt }
+
+app.post('/api/attendance/session', (req, res) => {
+  try {
+    const { image_url, shift, target_date, corners, scanned_by } = req.body;
+    const sessionId = `scan-sess-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+    const session = {
+      id: sessionId,
+      image_url,
+      shift: shift || 'M',
+      target_date: target_date || 'วันนี้',
+      corners: corners || null,
+      scanned_by: scanned_by || 'สารวัตรนักเรียน',
+      createdAt: Date.now()
+    };
+    scanSessions.set(sessionId, session);
+    const webUrl = process.env.WEB_URL || `http://localhost:${PORT}`;
+    const sessionUrl = `${webUrl}/attendance-scan?session=${sessionId}&shift=${session.shift}&date=${encodeURIComponent(session.target_date)}`;
+    res.json({ success: true, session_id: sessionId, session_url: sessionUrl, session });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+app.get('/api/attendance/session/:id', (req, res) => {
+  const session = scanSessions.get(req.params.id);
+  if (!session) {
+    return res.status(404).json({ success: false, error: 'ไม่พบ Session การสแกน หรือหมดอายุแล้ว' });
+  }
+  res.json({ success: true, session });
+});
+
 app.post('/api/attendance/scan-vision', async (req, res) => {
   try {
     const { image, shift, target_date, date_col_index } = req.body;

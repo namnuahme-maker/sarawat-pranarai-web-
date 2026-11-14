@@ -1,0 +1,207 @@
+{
+  "sessions": [
+    {
+      "id": "att-sess-1794651363243",
+      "shift_code": "T",
+      "quarter_number": 1,
+      "week_index": 1,
+      "duty_date": "11/14",
+      "raw_image_url": "https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/attendance/attendance_T_1794651362944.jpg",
+      "scanned_by": "ทดสอบระบบ Flowchart (E2E)",
+      "model_used": "gemini-3.5-flash-lite",
+      "total_roster": 5,
+      "present_count": 4,
+      "late_count": 0,
+      "leave_count": 1,
+      "absent_count": 0,
+      "attendance_rate": 80,
+      "created_at": "2026-11-14T10:16:03.243Z"
+    },
+    {
+      "id": "att-sess-1794650483823",
+      "shift_code": "T",
+      "quarter_number": 1,
+      "week_index": 1,
+      "duty_date": "2026-11-14",
+      "raw_image_url": "https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/attendance/attendance_T_1794650483553.jpg",
+      "scanned_by": "ผู้ทดสอบระบบ (SARAWAT Real-time E2E)",
+      "model_used": "gemini-3.5-flash-lite",
+      "total_roster": 5,
+      "present_count": 4,
+      "late_count": 0,
+      "leave_count": 1,
+      "absent_count": 0,
+      "attendance_rate": 80,
+      "created_at": "2026-11-14T10:01:23.823Z"
+    },
+    {
+      "id": "att-sess-1794650332669",
+      "shift_code": "TS",
+      "quarter_number": 1,
+      "week_index": 1,
+      "duty_date": "2026-11-14",
+      "raw_image_url": "https://sarawat-pranarai-web.onrender.com/assets/panel_send_photo.jpg",
+      "scanned_by": "สารวัตรนักเรียน (Discord Photo AI Ingestion)",
+      "total_roster": 5,
+      "present_count": 3,
+      "late_count": 1,
+      "leave_count": 1,
+      "absent_count": 0,
+      "attendance_rate": 80,
+      "created_at": "2026-11-14T09:58:52.670Z"
+    },
+    {
+      "id": "att-sess-1794650304251",
+      "shift_code": "T",
+      "quarter_number": 1,
+      "week_index": 1,
+      "duty_date": "2026-11-14",
+      "raw_image_url": "https://sarawat-pranarai-web.onrender.com/assets/panel_send_photo.jpg",
+      "scanned_by": "หัวหน้าเวร (SARAWAT-BOT Real-time)",
+      "total_roster": 0,
+      "present_count": 0,
+      "late_count": 0,
+      "leave_count": 0,
+      "absent_count": 0,
+      "attendance_rate": 0,
+      "created_at": "2026-11-14T09:58:24.252Z"
+    }
+  ],
+  "records": [
+    {
+      "session_id": "att-sess-1794650332669",
+      "duty_id": "TS1",
+      "member_name": "นายณิชกานต์ คำไชย",
+      "shift_code": "TS",
+      "duty_date": "2026-11-14",
+      "status": "LEAVE",
+      "created_at": "2026-11-14T09:58:52.671Z"
+    },
+    {
+      "session_id": "att-sess-1794650332669",
+      "duty_id": "TS2",
+      "member_name": "นายคณิศร ตะพานแก้ว",
+      "shift_code": "TS",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T09:58:52.671Z"
+    },
+    {
+      "session_id": "att-sess-1794650332669",
+      "duty_id": "TS3",
+      "member_name": "นายพงศ์ภัค ทองคำใส",
+      "shift_code": "TS",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T09:58:52.671Z"
+    },
+    {
+      "session_id": "att-sess-1794650332669",
+      "duty_id": "TS4",
+      "member_name": "นายนนท์ธวัตร แย้มอำพล",
+      "shift_code": "TS",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T09:58:52.671Z"
+    },
+    {
+      "session_id": "att-sess-1794650332669",
+      "duty_id": "TS5",
+      "member_name": "นายปัณณวัฒน์ ปานฮวด",
+      "shift_code": "TS",
+      "duty_date": "2026-11-14",
+      "status": "LATE",
+      "created_at": "2026-11-14T09:58:52.671Z"
+    },
+    {
+      "session_id": "att-sess-1794650483823",
+      "duty_id": "TS1",
+      "member_name": "นายณิชกานต์ คำไชย",
+      "shift_code": "T",
+      "duty_date": "2026-11-14",
+      "status": "LEAVE",
+      "created_at": "2026-11-14T10:01:23.824Z"
+    },
+    {
+      "session_id": "att-sess-1794650483823",
+      "duty_id": "TS2",
+      "member_name": "นายคณิศร ตะพานแก้ว",
+      "shift_code": "T",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:01:23.824Z"
+    },
+    {
+      "session_id": "att-sess-1794650483823",
+      "duty_id": "TS3",
+      "member_name": "นายพงศ์ภัค ทองคำใส",
+      "shift_code": "T",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:01:23.824Z"
+    },
+    {
+      "session_id": "att-sess-1794650483823",
+      "duty_id": "TS4",
+      "member_name": "นายนนท์ธวัตร แย้มอำพล",
+      "shift_code": "T",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:01:23.824Z"
+    },
+    {
+      "session_id": "att-sess-1794650483823",
+      "duty_id": "TS5",
+      "member_name": "นายปัณณวัฒน์ ปานฮวด",
+      "shift_code": "T",
+      "duty_date": "2026-11-14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:01:23.824Z"
+    },
+    {
+      "session_id": "att-sess-1794651363243",
+      "duty_id": "TS1",
+      "member_name": "นายณิชกานต์ คำไชย",
+      "shift_code": "T",
+      "duty_date": "11/14",
+      "status": "LEAVE",
+      "created_at": "2026-11-14T10:16:03.245Z"
+    },
+    {
+      "session_id": "att-sess-1794651363243",
+      "duty_id": "TS2",
+      "member_name": "นายคณิศร ตะพานแก้ว",
+      "shift_code": "T",
+      "duty_date": "11/14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:16:03.246Z"
+    },
+    {
+      "session_id": "att-sess-1794651363243",
+      "duty_id": "TS3",
+      "member_name": "นายพงศ์ภัค ทองคำใส",
+      "shift_code": "T",
+      "duty_date": "11/14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:16:03.246Z"
+    },
+    {
+      "session_id": "att-sess-1794651363243",
+      "duty_id": "TS4",
+      "member_name": "นายนนท์ธวัตร แย้มอำพล",
+      "shift_code": "T",
+      "duty_date": "11/14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:16:03.246Z"
+    },
+    {
+      "session_id": "att-sess-1794651363243",
+      "duty_id": "TS5",
+      "member_name": "นายปัณณวัฒน์ ปานฮวด",
+      "shift_code": "T",
+      "duty_date": "11/14",
+      "status": "PRESENT",
+      "created_at": "2026-11-14T10:16:03.246Z"
+    }
+  ]
+}

@@ -2124,6 +2124,21 @@
         cvs.width = adjustCanvasImg.naturalWidth || adjustCanvasImg.width;
         cvs.height = adjustCanvasImg.naturalHeight || adjustCanvasImg.height;
 
+        rawSourceW = cvs.width;
+        rawSourceH = cvs.height;
+        if (!rawSourceGray || rawSourceGray.length !== rawSourceW * rawSourceH) {
+          const off = document.createElement('canvas');
+          off.width = rawSourceW;
+          off.height = rawSourceH;
+          const octx = off.getContext('2d');
+          octx.drawImage(adjustCanvasImg, 0, 0);
+          const px = octx.getImageData(0, 0, rawSourceW, rawSourceH).data;
+          rawSourceGray = new Uint8Array(rawSourceW * rawSourceH);
+          for (let i = 0, j = 0; i < px.length; i += 4, j++) {
+            rawSourceGray[j] = Math.round(0.299 * px[i] + 0.587 * px[i + 1] + 0.114 * px[i + 2]);
+          }
+        }
+
         if (!current4Points || current4Points.length !== 4) {
           reset4PointsToAuto();
         } else {
@@ -2405,10 +2420,47 @@
     }
 
     // ----------------------------------------------------------
-    // 8. ON PAGE LOAD
+    // 8. ON PAGE LOAD (Auto-Load Session / Image from Discord Bot)
     // ----------------------------------------------------------
-    window.addEventListener('DOMContentLoaded', () => {
+    window.addEventListener('DOMContentLoaded', async () => {
       computeTodayInfo();
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const shiftParam = urlParams.get('shift');
+      if (shiftParam && SHIFT_NAMES[shiftParam]) {
+        selectShift(shiftParam);
+      }
+
+      const dateParam = urlParams.get('date');
+      if (dateParam) {
+        currentTargetCol = dateParam;
+        updateColHighlights();
+      }
+
+      const sessionId = urlParams.get('session');
+      let imageUrl = urlParams.get('image') || urlParams.get('image_url');
+
+      if (sessionId) {
+        try {
+          const res = await fetch(`/api/attendance/session/${sessionId}`);
+          const data = await res.json();
+          if (data && data.success && data.session) {
+            imageUrl = data.session.image_url;
+            if (data.session.shift) selectShift(data.session.shift);
+            if (data.session.target_date) {
+              currentTargetCol = data.session.target_date;
+              updateColHighlights();
+            }
+          }
+        } catch (e) {
+          console.warn('Session load notice:', e);
+        }
+      }
+
+      if (imageUrl) {
+        singleCapturedImage = imageUrl;
+        open4PointModal();
+      }
     });
   </script>
 </body>
