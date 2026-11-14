@@ -185,6 +185,9 @@
         <button onclick="document.getElementById('studio-image-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
           <span>🖼️</span> เพิ่มโลโก้/รูป
         </button>
+        <button onclick="openGoogleFontModal()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>🔤</span> เพิ่ม Google Font
+        </button>
 
         <button onclick="saveStudioTemplate()" id="btn-save-template" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
           <span>💾</span> บันทึกเทมเพลต
@@ -319,7 +322,12 @@
                   <input type="number" id="prop-fontsize" oninput="updateActiveObjectProperty('fontSize', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
                 </div>
                 <div class="space-y-1">
-                  <label class="text-slate-400 font-mono text-[11px]">แบบอักษร (Font):</label>
+                  <div class="flex items-center justify-between">
+                    <label class="text-slate-400 font-mono text-[11px]">แบบอักษร (Font):</label>
+                    <button type="button" onclick="openGoogleFontModal()" class="text-[10px] text-amber-400 hover:text-amber-300 font-mono flex items-center gap-1 transition">
+                      <span>+</span> Google Font
+                    </button>
+                  </div>
                   <select id="prop-fontfamily" onchange="updateActiveObjectProperty('fontFamily', this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 cursor-pointer">
                     <option value="Syncopate">Syncopate (สากล)</option>
                     <option value="Prompt">Prompt (ไทยทันสมัย)</option>
@@ -416,6 +424,119 @@
         <!-- A4 Page Container (Ratio 1:1.414) -->
         <div id="a4-print-sheet" class="bg-white text-black p-6 grid grid-cols-4 gap-3 shadow-2xl" style="width: 794px; min-height: 1123px;">
           <!-- 8 cards rendered dynamically -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 🔤 GOOGLE FONTS IMPORTER MODAL                             -->
+  <!-- ========================================================== -->
+  <div id="google-font-modal" onclick="if(event.target === this) closeGoogleFontModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4 transition-all">
+    <div class="bg-tactical-900 border border-tactical-border rounded-2xl w-full max-w-lg overflow-hidden shadow-2xl flex flex-col">
+      <div class="p-4 sm:p-5 border-b border-tactical-border flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-8 h-8 rounded-lg bg-purple-500/10 border border-purple-500/30 flex items-center justify-center text-purple-400 text-base">🔤</div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base text-white">เพิ่มแบบอักษร Google Fonts</h3>
+            <p class="text-[11px] text-slate-400">นำเข้าฟอนต์จาก fonts.google.com ใช้กับบัตรได้ทันที</p>
+          </div>
+        </div>
+        <button onclick="closeGoogleFontModal()" class="w-8 h-8 rounded-lg bg-tactical-800 text-slate-300 hover:text-white flex items-center justify-center text-sm transition">✕</button>
+      </div>
+
+      <div class="p-5 space-y-4 max-h-[75vh] overflow-y-auto custom-scrollbar text-xs">
+        <!-- Input Box -->
+        <div class="space-y-1.5">
+          <label class="text-slate-300 font-mono text-[11px] font-semibold">พิมพ์ชื่อฟอนต์ Google Fonts หรือวาง URL:</label>
+          <div class="flex items-center gap-2">
+            <input type="text" id="custom-font-input" placeholder="เช่น Kanit, Sarabun, Mitr, Bebas Neue..." class="flex-1 px-3 py-2 rounded-xl bg-black border border-tactical-border text-white text-xs font-mono outline-none focus:border-amber-400 transition" onkeydown="if(event.key === 'Enter') handleAddGoogleFont()">
+            <button onclick="handleAddGoogleFont()" id="btn-import-font" class="px-4 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black text-xs font-bold transition active:scale-95 shadow flex-shrink-0">
+              นำเข้าฟอนต์
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-500">รองรับชื่อฟอนต์จาก Google Fonts หรือลิงก์ CSS Embed</p>
+        </div>
+
+        <!-- Thai Font Presets -->
+        <div class="space-y-1.5 pt-2 border-t border-tactical-border">
+          <span class="text-slate-400 font-mono text-[11px] block font-semibold">ฟอนต์ภาษาไทยยอดนิยม (คลิกเพื่อนำเข้าทันที):</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button type="button" onclick="applyPresetFont('Kanit')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Kanit</span>
+              <span class="text-[10px] text-slate-500 font-mono">คณิต</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Sarabun')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Sarabun</span>
+              <span class="text-[10px] text-slate-500 font-mono">สารบรรณ</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Mitr')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Mitr</span>
+              <span class="text-[10px] text-slate-500 font-mono">มิตร</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Chonburi')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Chonburi</span>
+              <span class="text-[10px] text-slate-500 font-mono">ชลบุรี</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Athiti')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Athiti</span>
+              <span class="text-[10px] text-slate-500 font-mono">อธิษฐาน</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Taviraj')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Taviraj</span>
+              <span class="text-[10px] text-slate-500 font-mono">ทวิราช</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Pridi')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium">Pridi</span>
+              <span class="text-[10px] text-slate-500 font-mono">ปรีดี</span>
+            </button>
+            <button type="button" onclick="applyPresetFont('Bai Jamjuree')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-left transition flex items-center justify-between">
+              <span class="font-medium truncate">Bai Jamjuree</span>
+              <span class="text-[10px] text-slate-500 font-mono">จามจุรี</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- English / Tactical Font Presets -->
+        <div class="space-y-1.5 pt-2 border-t border-tactical-border">
+          <span class="text-slate-400 font-mono text-[11px] block font-semibold">ฟอนต์อังกฤษ / Tactical ยอดนิยม:</span>
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-1.5">
+            <button type="button" onclick="applyPresetFont('Bebas Neue')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Bebas Neue
+            </button>
+            <button type="button" onclick="applyPresetFont('Montserrat')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Montserrat
+            </button>
+            <button type="button" onclick="applyPresetFont('Oswald')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Oswald
+            </button>
+            <button type="button" onclick="applyPresetFont('Cinzel')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Cinzel
+            </button>
+            <button type="button" onclick="applyPresetFont('Rajdhani')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Rajdhani
+            </button>
+            <button type="button" onclick="applyPresetFont('Orbitron')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Orbitron
+            </button>
+            <button type="button" onclick="applyPresetFont('Teko')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Teko
+            </button>
+            <button type="button" onclick="applyPresetFont('Inter')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/50 text-slate-200 text-center transition font-semibold">
+              Inter
+            </button>
+          </div>
+        </div>
+
+        <!-- Preview Box -->
+        <div class="p-3.5 rounded-xl bg-black border border-tactical-border text-center space-y-1">
+          <div class="flex items-center justify-between text-[10px] font-mono text-slate-500">
+            <span>ตัวอย่างฟอนต์ที่เลือก:</span>
+            <span id="preview-font-label" class="text-amber-400 font-bold">Prompt</span>
+          </div>
+          <div id="font-preview-text" class="text-lg sm:text-xl font-bold text-slate-100 py-1 transition-all" style="font-family: 'Prompt', sans-serif;">
+            สารวัตรนักเรียน SARAWAT PRANARAI 12345
+          </div>
         </div>
       </div>
     </div>
@@ -754,6 +875,9 @@
         studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
       }
 
+      // Load saved custom fonts
+      loadSavedCustomFonts();
+
       // Fetch members for preview dropdown
       try {
         const mRes = await fetch('/api/members');
@@ -1012,7 +1136,19 @@
       if (isText) {
         document.getElementById('prop-text').value = obj.text || '';
         document.getElementById('prop-fontsize').value = Math.round(obj.fontSize || 20);
-        document.getElementById('prop-fontfamily').value = obj.fontFamily || 'Prompt';
+        
+        const fontSel = document.getElementById('prop-fontfamily');
+        if (fontSel && obj.fontFamily) {
+          let hasOpt = Array.from(fontSel.options).some(o => o.value.toLowerCase() === obj.fontFamily.toLowerCase());
+          if (!hasOpt) {
+            const opt = document.createElement('option');
+            opt.value = obj.fontFamily;
+            opt.textContent = `${obj.fontFamily} (Google Font)`;
+            fontSel.appendChild(opt);
+          }
+          fontSel.value = obj.fontFamily;
+        }
+
         document.getElementById('prop-charspacing').value = obj.charSpacing || 0;
         document.getElementById('prop-fontweight').value = obj.fontWeight || 'normal';
       }
@@ -1420,6 +1556,152 @@
           reader.readAsDataURL(files[0]);
         }
       });
+    }
+
+    // ----------------------------------------------------------
+    // 🔤 GOOGLE FONTS INTEGRATION
+    // ----------------------------------------------------------
+    function openGoogleFontModal() {
+      const modal = document.getElementById('google-font-modal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        const input = document.getElementById('custom-font-input');
+        if (input) {
+          input.value = '';
+          setTimeout(() => input.focus(), 80);
+        }
+      }
+    }
+
+    function closeGoogleFontModal() {
+      const modal = document.getElementById('google-font-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function extractFontName(input) {
+      if (!input) return '';
+      let str = input.trim();
+      if (str.includes('family=')) {
+        const match = str.match(/family=([^:&]+)/);
+        if (match) str = decodeURIComponent(match[1]).replace(/\+/g, ' ');
+      } else if (str.includes('/specimen/')) {
+        const match = str.match(/\/specimen\/([^/?#]+)/);
+        if (match) str = decodeURIComponent(match[1]).replace(/\+/g, ' ');
+      }
+      str = str.replace(/['"]/g, '').trim();
+      return str;
+    }
+
+    async function loadGoogleFont(fontName, notify = true) {
+      const cleanName = extractFontName(fontName);
+      if (!cleanName) return false;
+
+      const linkId = `gfont-${cleanName.replace(/\s+/g, '-').toLowerCase()}`;
+      if (!document.getElementById(linkId)) {
+        const link = document.createElement('link');
+        link.id = linkId;
+        link.rel = 'stylesheet';
+        link.href = `https://fonts.googleapis.com/css2?family=${encodeURIComponent(cleanName).replace(/%20/g, '+')}:wght@400;600;700;900&display=swap`;
+        document.head.appendChild(link);
+      }
+
+      const prevLabel = document.getElementById('preview-font-label');
+      const prevText = document.getElementById('font-preview-text');
+      if (prevLabel) prevLabel.textContent = cleanName;
+      if (prevText) prevText.style.fontFamily = `"${cleanName}", sans-serif`;
+
+      try {
+        if (document.fonts && document.fonts.load) {
+          await document.fonts.load(`16px "${cleanName}"`);
+        }
+      } catch (e) {
+        console.warn('Font load timeout or error:', e);
+      }
+
+      // Add to prop-fontfamily dropdown
+      const select = document.getElementById('prop-fontfamily');
+      if (select) {
+        let hasOpt = false;
+        for (let opt of select.options) {
+          if (opt.value.toLowerCase() === cleanName.toLowerCase()) {
+            hasOpt = true;
+            opt.selected = true;
+            break;
+          }
+        }
+        if (!hasOpt) {
+          const newOpt = document.createElement('option');
+          newOpt.value = cleanName;
+          newOpt.textContent = `${cleanName} (Google Font)`;
+          newOpt.selected = true;
+          select.appendChild(newOpt);
+        }
+      }
+
+      // Save to custom font list
+      saveCustomFont(cleanName);
+
+      // Apply to active canvas object if text
+      const activeObj = studioCanvas ? studioCanvas.getActiveObject() : null;
+      if (activeObj && (activeObj.type === 'text' || activeObj.text !== undefined)) {
+        updateActiveObjectProperty('fontFamily', cleanName);
+      } else if (studioCanvas) {
+        studioCanvas.renderAll();
+      }
+
+      if (notify) {
+        showToast(`นำเข้าฟอนต์ "${cleanName}" เรียบร้อย!`, '🔤');
+      }
+      return true;
+    }
+
+    async function handleAddGoogleFont() {
+      const input = document.getElementById('custom-font-input');
+      const fontVal = input ? input.value : '';
+      if (!fontVal) {
+        showToast('กรุณาระบุชื่อฟอนต์ Google Fonts หรือวาง URL', '⚠️');
+        return;
+      }
+      const btn = document.getElementById('btn-import-font');
+      if (btn) btn.textContent = '⏳ กำลังดึง...';
+      
+      const success = await loadGoogleFont(fontVal, true);
+      if (btn) btn.textContent = 'นำเข้าฟอนต์';
+      if (success) {
+        closeGoogleFontModal();
+      }
+    }
+
+    async function applyPresetFont(fontName) {
+      await loadGoogleFont(fontName, true);
+      closeGoogleFontModal();
+    }
+
+    function saveCustomFont(cleanName) {
+      try {
+        const list = JSON.parse(localStorage.getItem('sarawat_custom_fonts') || '[]');
+        if (!list.includes(cleanName)) {
+          list.push(cleanName);
+          localStorage.setItem('sarawat_custom_fonts', JSON.stringify(list));
+        }
+        if (!studioConfig) studioConfig = {};
+        if (!Array.isArray(studioConfig.customFonts)) studioConfig.customFonts = [];
+        if (!studioConfig.customFonts.includes(cleanName)) {
+          studioConfig.customFonts.push(cleanName);
+        }
+      } catch (e) {}
+    }
+
+    function loadSavedCustomFonts() {
+      try {
+        const saved = JSON.parse(localStorage.getItem('sarawat_custom_fonts') || '[]');
+        if (Array.isArray(saved)) {
+          saved.forEach(fn => loadGoogleFont(fn, false));
+        }
+        if (studioConfig && Array.isArray(studioConfig.customFonts)) {
+          studioConfig.customFonts.forEach(fn => loadGoogleFont(fn, false));
+        }
+      } catch (e) {}
     }
 
     window.addEventListener('DOMContentLoaded', initStudio);
