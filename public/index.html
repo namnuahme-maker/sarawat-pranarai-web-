@@ -558,13 +558,13 @@
         <div class="absolute left-0 top-0 bottom-0 w-[60px] bg-gradient-to-r from-[#002b80]/15 via-[#002b80]/05 to-transparent z-[3] pointer-events-none"></div>
         <div class="absolute right-0 top-0 bottom-0 w-[60px] bg-gradient-to-l from-[#b91c1c]/15 via-[#b91c1c]/05 to-transparent z-[3] pointer-events-none"></div>
 
-        <!-- Center Photo / Avatar (350x360 scaled to 226x226 circular emblem/portrait) -->
-        <div class="absolute left-1/2 -translate-x-1/2 top-[76px] w-[226px] h-[226px] rounded-full overflow-hidden flex items-center justify-center z-10 pointer-events-none shadow-sm bg-white">
-          <img id="card-photo-img" src="/assets/logo.png" alt="Photo" class="w-full h-full object-cover">
+        <!-- Student Photo (Rectangle, Exactly as in Card Studio Template: 350x360 scaled to 228x235 px) -->
+        <div class="absolute left-[23px] top-[81px] w-[228px] h-[235px] overflow-hidden flex items-center justify-center z-10 pointer-events-none">
+          <img id="card-photo-img" src="/assets/logo.png" alt="Photo" class="w-full h-full object-cover object-top">
         </div>
 
         <!-- Member Info Lines (Centered directly under the photo, exactly as in official template) -->
-        <div class="absolute left-[12px] right-[12px] top-[308px] text-center z-20 pointer-events-none px-1">
+        <div class="absolute left-[12px] right-[12px] top-[322px] text-center z-20 pointer-events-none px-1">
           <!-- 1. English Nickname -->
           <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[25px] font-bold text-black uppercase leading-[0.95] tracking-[1px] truncate" style="transform: scaleY(1.05);">
             NAMNUAH
@@ -1477,8 +1477,14 @@
       if (photoEl) {
         const photoUrl = m.profile_image_url || m.photo_url || m.profile_photo_url || '/assets/logo.png';
         photoEl.src = photoUrl;
+        if (photoUrl === '/assets/logo.png') {
+          photoEl.className = 'w-full h-full object-contain';
+        } else {
+          photoEl.className = 'w-full h-full object-cover object-top';
+        }
         photoEl.onerror = () => {
           photoEl.src = '/assets/logo.png';
+          photoEl.className = 'w-full h-full object-contain';
         };
       }
 
