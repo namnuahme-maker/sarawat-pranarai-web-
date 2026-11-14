@@ -178,12 +178,16 @@
         <!-- Custom Uploads -->
         <input type="file" id="studio-photo-upload-input" accept="image/*" class="hidden" onchange="handleStudentPhotoUpload(event)">
         <input type="file" id="studio-image-upload-input" accept="image/*" class="hidden" onchange="handleCustomImageUpload(event)">
+        <input type="file" id="studio-icon-upload-input" accept="image/*,.svg" class="hidden" onchange="handleCustomIconUpload(event)">
         
         <button onclick="document.getElementById('studio-photo-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
           <span>👤</span> อัปโหลดรูปคน
         </button>
         <button onclick="document.getElementById('studio-image-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-cyan-300 border border-cyan-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95">
           <span>🖼️</span> เพิ่มโลโก้/รูป
+        </button>
+        <button onclick="document.getElementById('studio-icon-upload-input').click()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-pink-300 border border-pink-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
+          <span>✨</span> อัปโหลด Icon
         </button>
         <button onclick="openGoogleFontModal()" class="px-3 py-1.5 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-purple-300 border border-purple-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
           <span>🔤</span> เพิ่ม Google Font
@@ -278,6 +282,44 @@
             <button onclick="document.getElementById('studio-bg-upload-input').click()" class="py-1.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
               <span>📤</span> อัปโหลดรูปพื้นหลังทั้งหมด
             </button>
+          </div>
+        </div>
+
+        <!-- Icon & Badge Assets Section -->
+        <div class="bg-tactical-900 border border-tactical-border rounded-2xl p-4 shadow-xl text-left space-y-3">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-200 flex items-center gap-2 font-mono">
+              <span>✨</span> อัปโหลดรูป Icon / ตราสัญลักษณ์ (Icons & Badges)
+            </h3>
+          </div>
+          <p class="text-[11px] text-slate-400">อัปโหลดรูปไอคอน ตราสัญลักษณ์ หรือเครื่องหมายประดับบัตร (PNG, SVG, WebP) แปะลงบนบัตร</p>
+          
+          <div class="flex items-center gap-2 flex-wrap pt-1">
+            <button type="button" onclick="document.getElementById('studio-icon-upload-input').click()" class="py-1.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-pink-300 hover:text-white border border-pink-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
+              <span>📤</span> อัปโหลดรูป Icon ต่างๆ
+            </button>
+          </div>
+
+          <div class="space-y-1.5 pt-1 border-t border-tactical-border/60">
+            <span class="text-[10px] text-slate-400 font-mono">หรือคลิกเลือกตราสัญลักษณ์มาตรฐาน:</span>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+              <button type="button" onclick="addStandardIcon('school')" class="flex items-center gap-1.5 p-2 rounded-xl bg-tactical-950 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 transition text-left group">
+                <img src="/assets/school_emblem.png" alt="รร." class="w-5 h-5 object-contain group-hover:scale-110 transition shrink-0" onerror="this.style.display='none'">
+                <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">ตราโรงเรียน</span>
+              </button>
+              <button type="button" onclick="addStandardIcon('sarawat')" class="flex items-center gap-1.5 p-2 rounded-xl bg-tactical-950 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 transition text-left group">
+                <img src="/assets/sarawat_logo.png" alt="สารวัตร" class="w-5 h-5 object-contain group-hover:scale-110 transition shrink-0" onerror="this.style.display='none'">
+                <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">ตราสารวัตร</span>
+              </button>
+              <button type="button" onclick="addStandardIcon('logo')" class="flex items-center gap-1.5 p-2 rounded-xl bg-tactical-950 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 transition text-left group">
+                <img src="/assets/logo.png" alt="โลโก้" class="w-5 h-5 object-contain group-hover:scale-110 transition shrink-0" onerror="this.style.display='none'">
+                <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">โลโก้หน่วย</span>
+              </button>
+              <button type="button" onclick="addStandardIcon('star')" class="flex items-center gap-1.5 p-2 rounded-xl bg-tactical-950 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 transition text-left group">
+                <span class="text-sm">⭐</span>
+                <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">ดาวทอง</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1516,6 +1558,79 @@
       };
       reader.readAsDataURL(file);
       e.target.value = '';
+    }
+
+    function handleCustomIconUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        fabric.Image.fromURL(evt.target.result, (img) => {
+          if (!img) return;
+          if (img.width > 80 || img.height > 80) {
+            img.scaleToWidth(75);
+          }
+          const cleanName = file.name.replace(/\.[^/.]+$/, '').slice(0, 15);
+          img.set({
+            left: 175,
+            top: 250,
+            customKey: 'icon_' + Date.now(),
+            customName: `ไอคอน (${cleanName})`
+          });
+          studioCanvas.add(img);
+          studioCanvas.setActiveObject(img);
+          studioCanvas.renderAll();
+          updateLayerListUI();
+          onObjectSelected({ target: img });
+          showToast(`เพิ่มไอคอน ${file.name} สำเร็จ!`, '✨');
+        });
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    function addStandardIcon(type) {
+      const presets = {
+        school: { url: '/assets/school_emblem.png', name: 'ไอคอน (ตรา รร.)', width: 75 },
+        sarawat: { url: '/assets/sarawat_logo.png', name: 'ไอคอน (ตราสารวัตร)', width: 75 },
+        logo: { url: '/assets/logo.png', name: 'ไอคอน (โลโก้)', width: 75 }
+      };
+
+      if (type === 'star') {
+        const star = new fabric.Text('⭐', {
+          fontSize: 48,
+          left: 185,
+          top: 250,
+          customKey: 'icon_' + Date.now(),
+          customName: 'ไอคอน (ดาวทอง)'
+        });
+        studioCanvas.add(star);
+        studioCanvas.setActiveObject(star);
+        studioCanvas.renderAll();
+        updateLayerListUI();
+        onObjectSelected({ target: star });
+        showToast('เพิ่มไอคอนดาวทองสำเร็จ!', '⭐');
+        return;
+      }
+
+      const p = presets[type];
+      if (!p) return;
+      fabric.Image.fromURL(p.url, (img) => {
+        if (!img) return;
+        img.scaleToWidth(p.width);
+        img.set({
+          left: 175,
+          top: 250,
+          customKey: 'icon_' + Date.now(),
+          customName: p.name
+        });
+        studioCanvas.add(img);
+        studioCanvas.setActiveObject(img);
+        studioCanvas.renderAll();
+        updateLayerListUI();
+        onObjectSelected({ target: img });
+        showToast(`เพิ่ม ${p.name} สำเร็จ!`, '✨');
+      });
     }
 
     function setupDragAndDrop() {
