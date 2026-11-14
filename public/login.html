@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>เข้าสู่ระบบสารวัตรนักเรียน - SARAWAT PRANARAI</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="/assets/logo.png">
+  <link rel="shortcut icon" href="/assets/logo.png">
+  <link rel="apple-touch-icon" href="/assets/logo.png">
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            display: ['Chakra Petch', 'sans-serif'],
+            heading: ['Kanit', 'sans-serif'],
+          },
+          colors: {
+            tactical: {
+              950: '#030712',
+              900: '#070b14',
+              850: '#0b1120',
+              800: '#111827',
+              700: '#1e293b',
+              border: '#1e293b',
+            },
+            discord: '#5865F2',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    body {
+      background-color: #030712;
+      background-image: 
+        radial-gradient(at 50% 0%, rgba(88, 101, 242, 0.15) 0px, transparent 60%),
+        radial-gradient(at 100% 100%, rgba(14, 165, 233, 0.1) 0px, transparent 50%),
+        radial-gradient(at 0% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+      background-attachment: fixed;
+      font-family: 'Prompt', sans-serif;
+      color: #f1f5f9;
+    }
+    .tactical-glow {
+      box-shadow: 0 0 50px -10px rgba(88, 101, 242, 0.35);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 selection:bg-indigo-500 selection:text-white">
+
+  <!-- Container -->
+  <div class="w-full max-w-md relative z-10">
+
+    <!-- Ambient glow decorative ring -->
+    <div class="absolute -top-12 -left-12 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-12 -right-12 w-48 h-48 bg-sky-500/15 rounded-full blur-3xl pointer-events-none"></div>
+
+    <!-- Login Main Card -->
+    <div class="bg-tactical-900/90 backdrop-blur-xl border border-slate-800/80 rounded-2xl sm:rounded-3xl p-6 sm:p-8 tactical-glow relative shadow-2xl overflow-hidden">
+      
+      <!-- Top Tactical Bar Accent -->
+      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-500 via-sky-400 to-indigo-600"></div>
+
+      <!-- Header Section -->
+      <div class="text-center mb-6">
+        <!-- School / Inspector Emblem -->
+        <div class="relative inline-block mb-4 group">
+          <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-tactical-850 border border-slate-700/80 p-2 shadow-inner flex items-center justify-center mx-auto transition-transform group-hover:scale-105 duration-300">
+            <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-full h-full object-contain filter drop-shadow">
+          </div>
+          <span class="absolute -bottom-2 -right-1 bg-indigo-600 text-[10px] font-bold text-white px-2 py-0.5 rounded-full border border-indigo-400/40 uppercase tracking-wider shadow">
+            Official
+          </span>
+        </div>
+
+        <!-- System Identification -->
+        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-medium bg-indigo-950/80 text-indigo-300 border border-indigo-800/60 mb-2.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-indigo-400 animate-pulse"></span>
+          RESTRICTED AREA • DISCORD OAUTH2
+        </span>
+
+        <h1 class="text-xl sm:text-2xl font-bold font-heading text-white tracking-wide">
+          ศูนย์บัญชาการสารวัตรนักเรียน
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-400 mt-1 font-sans">
+          โรงเรียนพระนารายณ์ (Pranarai School)
+        </p>
+      </div>
+
+      <!-- Alert / Status Notification Box -->
+      <div id="status-box" class="hidden mb-6 rounded-xl p-3.5 text-xs border transition"></div>
+
+      <!-- Description / Access Policy -->
+      <div class="bg-slate-900/60 border border-slate-800 rounded-xl p-3.5 mb-6 text-xs text-slate-300 leading-relaxed space-y-1.5">
+        <div class="flex items-start gap-2 text-indigo-300 font-semibold">
+          <svg class="w-4 h-4 flex-shrink-0 mt-0.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+          </svg>
+          <span>ระบบปิดเฉพาะกิจสำหรับสารวัตรนักเรียน</span>
+        </div>
+        <p class="text-slate-400">
+          เพื่อความปลอดภัยของข้อมูลนักเรียนและคดี โปรดเข้าสู่ระบบด้วยบัญชี <strong class="text-white">Discord</strong> ที่เป็นสมาชิกของเซิร์ฟเวอร์สารวัตรนักเรียนเท่านั้น
+        </p>
+      </div>
+
+      <!-- Action Area -->
+      <div class="space-y-3">
+        <!-- Main Discord Login Button -->
+        <button id="btn-login" onclick="startDiscordLogin()" class="w-full py-3.5 px-5 rounded-xl font-semibold text-white bg-[#5865F2] hover:bg-[#4752C4] active:scale-[0.98] transition flex items-center justify-center gap-3 shadow-lg shadow-indigo-600/25 border border-indigo-400/30 text-sm group">
+          <svg class="w-5 h-5 flex-shrink-0 transition group-hover:scale-110" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+          </svg>
+          <span id="btn-text">เข้าสู่ระบบด้วยบัญชี Discord</span>
+        </button>
+
+        <!-- Loading indicator (hidden by default) -->
+        <div id="loading-box" class="hidden flex items-center justify-center gap-2 py-3 text-xs text-indigo-300">
+          <svg class="animate-spin w-4 h-4 text-indigo-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          <span id="loading-text">กำลังตรวจสอบสิทธิ์กับ Discord...</span>
+        </div>
+      </div>
+
+      <!-- Footer Info -->
+      <div class="mt-8 pt-4 border-t border-slate-800/80 text-center text-[11px] text-slate-500 space-y-1">
+        <p>SARAWAT PRANARAI OS • v2.6.0</p>
+        <p>หากเข้าสู่ระบบไม่ได้ กรุณาติดต่อประธานฝ่ายสารวัตรนักเรียน</p>
+      </div>
+
+    </div>
+
+    <!-- Security Footnote -->
+    <div class="mt-4 text-center">
+      <span class="text-[11px] text-slate-500 flex items-center justify-center gap-1.5">
+        <svg class="w-3.5 h-3.5 text-emerald-500" fill="currentColor" viewBox="0 0 20 20">
+          <path fill-rule="evenodd" d="M2.166 4.999A11.954 11.954 0 0010 1.944 11.954 11.954 0 0017.834 5c.11.65.166 1.32.166 2.001 0 5.225-3.34 9.67-8 11.317C5.34 16.67 2 12.225 2 7c0-.682.057-1.35.166-2.001zm11.541 3.708a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+        </svg>
+        เชื่อมต่อปลอดภัยด้วยมาตรฐาน OAuth2 End-to-End
+      </span>
+    </div>
+
+  </div>
+
+  <script>
+    let authConfig = null;
+
+    // 1. ตรวจสอบพารามิเตอร์ Error หรือ Token เมื่อโหลดหน้าเว็บ
+    window.addEventListener('DOMContentLoaded', async () => {
+      // โหลดการตั้งค่า Auth จาก Server
+      try {
+        const res = await fetch('/api/auth/config');
+        authConfig = await res.json();
+      } catch (e) {
+        console.warn('Failed to load auth config:', e);
+      }
+
+      // ตรวจสอบ Error จาก Query Params
+      const urlParams = new URLSearchParams(window.location.search);
+      const errorParam = urlParams.get('error');
+      if (errorParam) {
+        handleAuthError(errorParam);
+      }
+
+      // ตรวจสอบ Implicit Grant Token (#access_token=...)
+      if (window.location.hash) {
+        const hashParams = new URLSearchParams(window.location.hash.substring(1));
+        const accessToken = hashParams.get('access_token');
+        if (accessToken) {
+          // เคลียร์ Hash บน URL ทันทีเพื่อความปลอดภัย
+          window.history.replaceState(null, '', window.location.pathname + window.location.search);
+          processImplicitToken(accessToken);
+          return;
+        }
+      }
+
+      // ตรวจสอบว่าเคย Login อยู่แล้วหรือไม่
+      try {
+        const meRes = await fetch('/api/auth/me');
+        const meData = await meRes.json();
+        if (meData.loggedIn) {
+          const redirect = urlParams.get('redirect') || '/';
+          showStatus('success', `ยินดีต้อนรับ ${meData.user.displayName}! กำลังพาท่านเข้าสู่ระบบ...`);
+          setTimeout(() => { window.location.href = redirect; }, 700);
+        }
+      } catch (e) {}
+    });
+
+    // เริ่มต้นกระบวนการ Login
+    function startDiscordLogin() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const redirect = urlParams.get('redirect') || '/';
+
+      const btn = document.getElementById('btn-login');
+      const loading = document.getElementById('loading-box');
+      btn.classList.add('opacity-50', 'pointer-events-none');
+      loading.classList.remove('hidden');
+
+      // ถ้า Server มี Client Secret หรือมี Endpoint /auth/discord/login ให้ใช้ Code Flow
+      if (authConfig && authConfig.hasClientSecret) {
+        window.location.href = `/auth/discord/login?redirect=${encodeURIComponent(redirect)}`;
+      } else {
+        // ใช้ Implicit Grant Flow ตรงไปยัง Discord
+        const clientId = authConfig?.clientId || '1567571996928114898';
+        const redirectUri = encodeURIComponent(window.location.origin + '/login');
+        const state = encodeURIComponent(redirect);
+        const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${clientId}&response_type=token&redirect_uri=${redirectUri}&scope=identify&state=${state}`;
+        window.location.href = discordAuthUrl;
+      }
+    }
+
+    // ประมวลผล Implicit Grant Token
+    async function processImplicitToken(accessToken) {
+      const btn = document.getElementById('btn-login');
+      const loading = document.getElementById('loading-box');
+      const loadingText = document.getElementById('loading-text');
+
+      btn.classList.add('hidden');
+      loading.classList.remove('hidden');
+      loadingText.textContent = 'กำลังยืนยันข้อมูลสมาชิกสารวัตรกับ Discord...';
+
+      try {
+        const res = await fetch('/api/auth/discord/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_token: accessToken })
+        });
+        const result = await res.json();
+
+        if (res.ok && result.success) {
+          loadingText.textContent = `ยืนยันตัวตนสำเร็จ! ยินดีต้อนรับ ${result.user.displayName}`;
+          showStatus('success', `เข้าสู่ระบบสำเร็จ! กำลังนำท่านเข้าสู่ศูนย์บัญชาการ...`);
+          
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirect = urlParams.get('redirect') || '/';
+          setTimeout(() => {
+            window.location.href = redirect;
+          }, 800);
+        } else {
+          btn.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+          loading.classList.add('hidden');
+          handleAuthError(result.error || 'auth_failed', result.message);
+        }
+      } catch (err) {
+        btn.classList.remove('hidden', 'opacity-50', 'pointer-events-none');
+        loading.classList.add('hidden');
+        showStatus('error', 'เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์ กรุณาลองใหม่อีกครั้ง');
+      }
+    }
+
+    // แสดงสถานะข้อผิดพลาด
+    function handleAuthError(errorCode, customMsg) {
+      let msg = '';
+      if (errorCode === 'not_in_guild') {
+        msg = '⛔ <strong>ปฏิเสธการเข้าถึง:</strong> บัญชี Discord ของท่านไม่ได้อยู่ในเซิร์ฟเวอร์สารวัตรนักเรียน โรงเรียนพระนารายณ์ กรุณาเข้าร่วมเซิร์ฟเวอร์และติดต่อผู้ดูแลเพื่อรับยศ';
+      } else if (errorCode === 'no_permission') {
+        msg = '⚠️ <strong>สิทธิ์ไม่เพียงพอ:</strong> บัญชีของท่านยังไม่ได้รับยศสารวัตรนักเรียน กรุณาติดต่อหัวหน้าเวรหรือประธาน';
+      } else if (errorCode === 'token_exchange_failed' || errorCode === 'invalid_token') {
+        msg = '❌ การยืนยันตัวตนกับ Discord ล้มเหลว กรุณาลองใหม่อีกครั้ง';
+      } else if (errorCode === 'cancelled' || errorCode === 'access_denied') {
+        msg = 'ท่านได้ยกเลิกการเข้าสู่ระบบผ่าน Discord';
+      } else {
+        msg = customMsg || `ข้อผิดพลาดในการเข้าสู่ระบบ (${errorCode})`;
+      }
+      showStatus('error', msg);
+    }
+
+    function showStatus(type, html) {
+      const box = document.getElementById('status-box');
+      box.classList.remove('hidden', 'bg-red-950/80', 'border-red-800/80', 'text-red-300', 'bg-emerald-950/80', 'border-emerald-800/80', 'text-emerald-300');
+      
+      if (type === 'error') {
+        box.classList.add('bg-red-950/80', 'border-red-800/80', 'text-red-300');
+      } else {
+        box.classList.add('bg-emerald-950/80', 'border-emerald-800/80', 'text-emerald-300');
+      }
+      box.innerHTML = html;
+    }
+  </script>
+</body>
+</html>

@@ -9,6 +9,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
@@ -24,10 +25,332 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// =============================================================
+// 🔐 DISCORD OAUTH2 AUTHENTICATION & SESSION CONFIGURATION
+// =============================================================
+const AUTH_SECRET = process.env.WEBHOOK_SECRET || 'pranarai_secret_sarawat_2026';
+const DISCORD_CLIENT_ID = process.env.CLIENT_ID || '1567571996928114898';
+const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET || '';
+const DISCORD_BOT_TOKEN = process.env.DISCORD_TOKEN;
+const DISCORD_GUILD_ID = process.env.GUILD_ID || '1567547042207895664';
+
+// Helper: ดึงค่า Cookie จาก Header
+function getCookie(req, name) {
+  const header = req.headers?.cookie;
+  if (!header) return null;
+  const match = header.match(new RegExp('(^|;\\s*)' + name + '=([^;]*)'));
+  return match ? decodeURIComponent(match[2]) : null;
+}
+
+// Helper: สร้าง Token ปลอดภัยด้วย HMAC-SHA256
+function signAuthToken(payload) {
+  const body = Buffer.from(JSON.stringify(payload)).toString('base64url');
+  const sig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  return `${body}.${sig}`;
+}
+
+// Helper: ตรวจสอบความถูกต้องของ Token
+function verifyAuthToken(token) {
+  if (!token || typeof token !== 'string') return null;
+  const parts = token.split('.');
+  if (parts.length !== 2) return null;
+  const [body, sig] = parts;
+  const expectedSig = crypto.createHmac('sha256', AUTH_SECRET).update(body).digest('base64url');
+  try {
+    if (!crypto.timingSafeEqual(Buffer.from(sig), Buffer.from(expectedSig))) return null;
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (payload.exp && Date.now() / 1000 > payload.exp) return null; // หมดอายุ
+    return payload;
+  } catch (err) {
+    return null;
+  }
+}
+
+// Helper: ตรวจหา User ที่ล็อกอินจาก Cookie หรือ Header
+function getUserFromReq(req) {
+  // 1. ตรวจสอบจาก Cookie
+  const cookieToken = getCookie(req, 'sarawat_auth');
+  if (cookieToken) {
+    const user = verifyAuthToken(cookieToken);
+    if (user) return user;
+  }
+  // 2. ตรวจสอบจาก Authorization Bearer
+  const authHeader = req.headers?.authorization;
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    const bearerToken = authHeader.substring(7).trim();
+    const user = verifyAuthToken(bearerToken);
+    if (user) return user;
+  }
+  return null;
+}
+
+// Middleware: บังคับ Login ผ่าน Discord สำหรับ Endpoint หรือหน้าเว็บที่กำหนด
+function requireAuth(req, res, next) {
+  const user = getUserFromReq(req);
+  if (user) {
+    req.user = user;
+    return next();
+  }
+
+  // กรณีเป็นคำขอแบบ API ส่ง 401 Unauthorized JSON
+  const isApi = (req.originalUrl && req.originalUrl.startsWith('/api/')) || req.path.startsWith('/api/');
+  if (isApi) {
+    return res.status(401).json({
+      error: 'Unauthorized',
+      message: 'กรุณาเข้าสู่ระบบด้วย Discord ก่อนใช้งาน',
+      loginUrl: '/login'
+    });
+  }
+
+  // กรณีเป็นหน้าเว็บปกติ Redirect ไปหน้า /login พร้อม Return URL
+  const returnUrl = encodeURIComponent(req.originalUrl || '/');
+  return res.redirect(`/login?redirect=${returnUrl}`);
+}
+
+// Helper: ดึง Base URL ปัจจุบัน
+function getBaseUrl(req) {
+  const forwardedProto = req.headers['x-forwarded-proto'];
+  const protocol = forwardedProto ? forwardedProto.split(',')[0].trim() : (req.secure ? 'https' : req.protocol);
+  const host = req.headers['x-forwarded-host'] || req.get('host');
+  return `${protocol}://${host}`;
+}
+
+// ฟังก์ชันแกนกลาง: ยืนยันตัวตน Discord และตรวจสอบสมาชิกเซิร์ฟเวอร์
+async function processDiscordUserLogin(accessToken, res) {
+  try {
+    // 1. ดึงข้อมูล User จาก Discord API
+    const userRes = await fetch('https://discord.com/api/v10/users/@me', {
+      headers: { Authorization: `Bearer ${accessToken}` }
+    });
+    if (!userRes.ok) {
+      return { success: false, error: 'invalid_token', message: 'Token ไม่ถูกต้องหรือหมดอายุ' };
+    }
+    const discordUser = await userRes.json();
+    const discordId = discordUser.id;
+
+    // 2. ตรวจสอบสมาชิกและยศในเซิร์ฟเวอร์สารวัตร (Discord Guild)
+    let guildMember = null;
+    let roles = [];
+    let isGuildMember = false;
+    let serverNick = null;
+
+    if (DISCORD_BOT_TOKEN && DISCORD_GUILD_ID) {
+      try {
+        const memberRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${discordId}`, {
+          headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+        });
+        if (memberRes.ok) {
+          guildMember = await memberRes.json();
+          isGuildMember = true;
+          roles = guildMember.roles || [];
+          serverNick = guildMember.nick;
+        } else if (memberRes.status === 404) {
+          return {
+            success: false,
+            error: 'not_in_guild',
+            message: `บัญชี Discord (@${discordUser.username}) ไม่ได้อยู่ในเซิร์ฟเวอร์สารวัตรนักเรียน โรงเรียนพระนารายณ์`
+          };
+        }
+      } catch (err) {
+        console.warn('[AUTH] Guild member lookup warning:', err.message);
+      }
+    }
+
+    // 3. ตรวจสอบข้อมูลในฐานข้อมูล Supabase (ตาราง members)
+    let memberData = null;
+    try {
+      const { data } = await supabase
+        .from('members')
+        .select('*')
+        .eq('discord_id', discordId)
+        .maybeSingle();
+      if (data) memberData = data;
+    } catch (e) {}
+
+    const rolePresident = process.env.ROLE_PRESIDENT;
+    const roleVicePresident = process.env.ROLE_VICE_PRESIDENT;
+    const isPresident = roles.includes(rolePresident);
+    const isVicePresident = roles.includes(roleVicePresident);
+    const isLeader = isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+    const isVerified = roles.includes(process.env.ROLE_VERIFIED) || !!memberData;
+
+    // สร้าง Avatar URL ทางการของ Discord
+    const avatarUrl = discordUser.avatar
+      ? `https://cdn.discordapp.com/avatars/${discordId}/${discordUser.avatar}.png?size=128`
+      : `https://cdn.discordapp.com/embed/avatars/${(parseInt(discordUser.discriminator || '0') % 5)}.png`;
+
+    const authUser = {
+      id: discordId,
+      username: discordUser.username,
+      displayName: serverNick || discordUser.global_name || discordUser.username,
+      avatar: avatarUrl,
+      roles: roles,
+      isGuildMember,
+      isLeader,
+      isVerified,
+      dutyId: memberData?.duty_id || null,
+      rank: memberData?.rank || (isPresident ? 'ประธาน' : isVicePresident ? 'รองประธาน' : 'สารวัตร'),
+      exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // อายุเซสชัน 7 วัน
+    };
+
+    // ฝัง Cookie แบบ HttpOnly ปลอดภัยสูง
+    const token = signAuthToken(authUser);
+    res.cookie('sarawat_auth', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      path: '/',
+      maxAge: 7 * 24 * 60 * 60 * 1000
+    });
+
+    return { success: true, user: authUser, token };
+  } catch (error) {
+    console.error('[AUTH] Login processing error:', error);
+    return { success: false, error: 'server_error', message: error.message };
+  }
+}
+
 app.use(cors());
 app.use(express.json({ limit: '100mb' }));
 app.use(express.urlencoded({ limit: '100mb', extended: true }));
-app.use(express.static(path.join(__dirname, 'public')));
+
+// -------------------------------------------------------------
+// 1. Static Assets สาธารณะ (ภาพ, Uploads, Favicon, Scripts)
+// -------------------------------------------------------------
+app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
+app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
+app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'public', 'favicon.ico')));
+
+// -------------------------------------------------------------
+// 2. หน้า Login และ Discord OAuth2 Authentication Endpoints
+// -------------------------------------------------------------
+app.get(['/login', '/login.html'], (req, res) => {
+  const user = getUserFromReq(req);
+  if (user) {
+    return res.redirect(req.query.redirect || '/');
+  }
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// ดึงการตั้งค่า OAuth2 สำหรับ Client-side
+app.get('/api/auth/config', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  res.json({
+    clientId: DISCORD_CLIENT_ID,
+    hasClientSecret: !!DISCORD_CLIENT_SECRET,
+    redirectUri: `${baseUrl}/auth/discord/callback`
+  });
+});
+
+// เริ่มกระบวนการ Login (Redirect ไปยัง Discord OAuth2)
+app.get('/auth/discord/login', (req, res) => {
+  const baseUrl = getBaseUrl(req);
+  const redirectUri = `${baseUrl}/auth/discord/callback`;
+  const state = req.query.redirect ? encodeURIComponent(req.query.redirect) : '';
+
+  if (DISCORD_CLIENT_SECRET) {
+    const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=code&redirect_uri=${encodeURIComponent(redirectUri)}&scope=identify&state=${state}`;
+    return res.redirect(discordAuthUrl);
+  } else {
+    // โหมด Implicit Grant (ส่งตรงไป /login เพื่อรับ #access_token)
+    const tokenRedirectUri = `${baseUrl}/login`;
+    const discordAuthUrl = `https://discord.com/oauth2/authorize?client_id=${DISCORD_CLIENT_ID}&response_type=token&redirect_uri=${encodeURIComponent(tokenRedirectUri)}&scope=identify&state=${state}`;
+    return res.redirect(discordAuthUrl);
+  }
+});
+
+// OAuth2 Callback สำหรับ Authorization Code Flow
+app.get('/auth/discord/callback', async (req, res) => {
+  const { code, state, error, error_description } = req.query;
+  if (error || !code) {
+    return res.redirect(`/login?error=${encodeURIComponent(error || 'cancelled')}&message=${encodeURIComponent(error_description || '')}`);
+  }
+
+  const baseUrl = getBaseUrl(req);
+  const redirectUri = `${baseUrl}/auth/discord/callback`;
+
+  try {
+    const tokenRes = await fetch('https://discord.com/api/v10/oauth2/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID,
+        client_secret: DISCORD_CLIENT_SECRET,
+        grant_type: 'authorization_code',
+        code,
+        redirect_uri: redirectUri
+      })
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok || !tokenData.access_token) {
+      console.error('[AUTH] Token exchange failed:', tokenData);
+      return res.redirect('/login?error=token_exchange_failed');
+    }
+
+    const loginResult = await processDiscordUserLogin(tokenData.access_token, res);
+    if (!loginResult.success) {
+      return res.redirect(`/login?error=${encodeURIComponent(loginResult.error)}&message=${encodeURIComponent(loginResult.message || '')}`);
+    }
+
+    const returnUrl = state ? decodeURIComponent(state) : '/';
+    return res.redirect(returnUrl);
+  } catch (err) {
+    console.error('[AUTH] Callback error:', err);
+    return res.redirect('/login?error=server_error');
+  }
+});
+
+// ยืนยันตัวตนด้วย Access Token จาก Implicit Grant Flow
+app.post('/api/auth/discord/token', async (req, res) => {
+  const { access_token } = req.body;
+  if (!access_token) {
+    return res.status(400).json({ success: false, error: 'missing_token', message: 'กรุณาระบุ access_token' });
+  }
+
+  const loginResult = await processDiscordUserLogin(access_token, res);
+  if (!loginResult.success) {
+    return res.status(403).json(loginResult);
+  }
+  return res.json(loginResult);
+});
+
+// ตรวจสอบสถานะ User ปัจจุบัน
+app.get('/api/auth/me', (req, res) => {
+  const user = getUserFromReq(req);
+  res.json({
+    loggedIn: !!user,
+    user: user || null
+  });
+});
+
+// ออกจากระบบ (Logout)
+app.get(['/logout', '/api/auth/logout'], (req, res) => {
+  res.clearCookie('sarawat_auth', { path: '/' });
+  if (req.path.startsWith('/api/')) {
+    return res.json({ success: true, message: 'ออกจากระบบสำเร็จ' });
+  }
+  return res.redirect('/login');
+});
+
+// ป้องกันการเข้าถึงไฟล์ HTML ทุกไฟล์โดยตรงโดยไม่ล็อกอิน (ยกเว้น login, verify, landing)
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html') && !req.path.includes('login') && !req.path.includes('verify') && !req.path.includes('landing')) {
+    return requireAuth(req, res, next);
+  }
+  next();
+});
+
+// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth และ /api/verify สำหรับสแกน QR บัตร)
+app.use('/api', (req, res, next) => {
+  if (req.path.startsWith('/auth') || req.path.startsWith('/verify')) {
+    return next();
+  }
+  return requireAuth(req, res, next);
+});
+
+// Static files (ปิด index อัตโนมัติ เพื่อให้ผ่านการตรวจสอบสิทธิ์)
+app.use(express.static(path.join(__dirname, 'public'), { index: false }));
 
 // -------------------------------------------------------------
 // 1. Health Check
@@ -2310,53 +2633,53 @@ app.get('/api/analytics/overview', async (req, res) => {
 // -------------------------------------------------------------
 // 6.8.4 หน้าเว็บศูนย์สถิติและคลังข้อมูลรวม (/analytics)
 // -------------------------------------------------------------
-app.get(['/analytics', '/analytics.html', '/stats-overview', '/records'], (req, res) => {
+app.get(['/analytics', '/analytics.html', '/stats-overview', '/records'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'analytics.html'));
 });
 
 // -------------------------------------------------------------
 // 7. หน้าเว็บระบบของหาย (/lost-found)
 // -------------------------------------------------------------
-app.get(['/lost-found', '/lost-found.html'], (req, res) => {
+app.get(['/lost-found', '/lost-found.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'lost-found.html'));
 });
 
 // -------------------------------------------------------------
 // 7.1 หน้าเว็บอัปโหลด Bodycam และหลักฐาน (/bodycam-upload)
 // -------------------------------------------------------------
-app.get('/bodycam-upload', (req, res) => {
+app.get(['/bodycam-upload', '/bodycam-upload.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'bodycam-upload.html'));
 });
 
 // -------------------------------------------------------------
 // 7.1 หน้าเว็บตรวจสอบบัตรทางการ (Public QR Scan Page)
 // -------------------------------------------------------------
-app.get('/verify', (req, res) => {
+app.get(['/verify', '/verify.html'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'verify.html'));
 });
 
 // -------------------------------------------------------------
 // 7.2 สตูดิโอออกแบบเทมเพลตบัตรสารวัตร (/card-studio, /card)
 // -------------------------------------------------------------
-app.get(['/card-studio', '/card-studio.html', '/card', '/card.html'], (req, res) => {
+app.get(['/card-studio', '/card-studio.html', '/card', '/card.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'card-studio.html'));
 });
 
 // -------------------------------------------------------------
 // 7.2.1 หน้าเว็บบอร์ดบัญชาการเดิม (/dashboard, /app, /console)
 // -------------------------------------------------------------
-app.get(['/dashboard', '/dashboard.html', '/app', '/console'], (req, res) => {
+app.get(['/dashboard', '/dashboard.html', '/app', '/console'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'dashboard.html'));
 });
 
 // -------------------------------------------------------------
 // 7.2.2 หน้าพิมพ์ใบเช็คชื่อ A4 และระบบสแกนเช็คชื่อ Multi-Shot
 // -------------------------------------------------------------
-app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], (req, res) => {
+app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
 });
 
-app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], (req, res) => {
+app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'attendance-scan.html'));
 });
 
@@ -2367,12 +2690,12 @@ app.get(['/landing', '/landing.html'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'landing.html'));
 });
 
-app.get('/', (req, res) => {
+app.get(['/', '/index.html'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// หน้าหลักสำรอง
-app.get('*', (req, res) => {
+// หน้าหลักสำรอง (ต้องผ่านการยืนยันตัวตน Discord)
+app.get('*', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
