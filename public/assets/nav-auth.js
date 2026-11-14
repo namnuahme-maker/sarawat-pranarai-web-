@@ -2,6 +2,7 @@
  * 🛡️ SARAWAT PRANARAI - NAV AUTHENTICATION & RESPONSIVE CONTROLLER
  * จัดการสถานะการเข้าสู่ระบบผ่าน Discord และแสดงแถบโปรไฟล์บน Header & Mobile Drawer
  * ป้องกันปัญหา Horizontal Overflow บนอุปกรณ์มือถือ (100% Mobile Responsive)
+ * ป้องกันปัญหา Infinite Redirect Loop อย่างเด็ดขาด
  */
 
 (function () {
@@ -23,6 +24,14 @@
 
     try {
       const res = await fetch('/api/auth/me');
+      if (!res.ok) {
+        if (!isPublicPage && res.status === 401) {
+          const returnUrl = encodeURIComponent(window.location.pathname + window.location.search);
+          window.location.href = `/login?redirect=${returnUrl}`;
+        }
+        return;
+      }
+
       const data = await res.json();
 
       if (!data || !data.loggedIn) {
@@ -37,26 +46,34 @@
       // บันทึก User Profile ใน Window
       window.currentUser = data.user;
 
-      // แทรกแถบโปรไฟล์ใน Header (Desktop & Mobile)
-      injectUserProfileHeader(data.user);
+      // แทรกแถบโปรไฟล์ใน Header (Desktop & Mobile) โดยครอบ try...catch ป้องกันข้อผิดพลาด DOM ไม่ให้กระทบการทำงานของหน้าเว็บ
+      try {
+        injectUserProfileHeader(data.user);
+      } catch (uiErr) {
+        console.warn('[NAV-AUTH] UI insertion glitch handled:', uiErr);
+      }
 
     } catch (err) {
       console.warn('[NAV-AUTH] Auth check failed:', err);
-      if (!isPublicPage) {
-        window.location.href = '/login';
-      }
+      // ห้ามสั่ง redirect ไป /login ใน catch block เพื่อป้องกันลูปวนซ้ำ (Infinite Loop) กรณีมีปัญหาเครือข่าย
     }
   }
 
   function injectUserProfileHeader(user) {
-    // หาตำแหน่งแทรกใน Header
-    const headerActions = document.querySelector('header .flex.items-center.gap-2') ||
-                          document.querySelector('header .flex.items-center.gap-1\\.5') ||
-                          document.querySelector('header .flex.items-center.gap-3');
-    if (!headerActions) return;
-
-    // ถ้ามีอยู่แล้วให้ข้าม
+    if (!user) return;
     if (document.getElementById('nav-user-profile-badge')) return;
+
+    // หาปุ่ม Mobile Hamburger ก่อน
+    const mobileBtn = document.querySelector('header button[onclick*="toggleMobileNav"]') ||
+                      document.querySelector('header button[aria-label="Toggle navigation"]');
+
+    // หา Action Container ที่ถูกต้อง (ถ้าเจอปุ่ม Hamburger ให้เอา Parent ของปุ่มเป็น Container เสมอ เพื่อความปลอดภัยของ DOM)
+    const headerActions = (mobileBtn && mobileBtn.parentElement) ||
+                          document.querySelector('header .flex.items-center.gap-1\\.5.sm\\:gap-2') ||
+                          document.querySelector('header .flex.items-center.gap-2') ||
+                          document.querySelector('header .flex.items-center.gap-3');
+
+    if (!headerActions) return;
 
     const rankBadgeClass = user.isLeader 
       ? 'bg-amber-950/80 text-amber-300 border-amber-800/60' 
@@ -69,14 +86,17 @@
     profileWrapper.id = 'nav-user-profile-badge';
     profileWrapper.className = 'flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 border-l border-slate-800/80 flex-shrink-0';
 
+    const avatarUrl = user.avatar || '/assets/logo.png';
+    const displayName = user.displayName || user.username || 'สารวัตร';
+
     profileWrapper.innerHTML = `
-      <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${user.displayName} (${user.username})" onclick="typeof toggleMobileNav === 'function' ? toggleMobileNav() : null">
+      <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${displayName} (${user.username || ''})" onclick="typeof toggleMobileNav === 'function' ? toggleMobileNav() : null">
         <div class="relative flex-shrink-0">
-          <img src="${user.avatar}" alt="${user.displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-indigo-500/70 shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 transition" onerror="this.src='/assets/logo.png'">
+          <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-indigo-500/70 shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 transition" onerror="this.src='/assets/logo.png'">
           <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-black"></span>
         </div>
         <div class="hidden md:flex flex-col text-left leading-tight">
-          <span class="text-xs font-semibold text-slate-100 truncate max-w-[110px]">${user.displayName}</span>
+          <span class="text-xs font-semibold text-slate-100 truncate max-w-[110px]">${displayName}</span>
           <span class="text-[9px] px-1.5 py-0.2 rounded border ${rankBadgeClass} font-mono font-medium inline-block truncate max-w-[95px]">${rankTitle}</span>
         </div>
       </div>
@@ -86,17 +106,19 @@
       </a>
     `;
 
-    // แทรกก่อนปุ่มเมนูดรอปดาวน์มือถือ (ถ้ามี) หรือต่อท้าย
-    const mobileBtn = headerActions.querySelector('button[onclick*="toggleMobileNav"]') ||
-                      headerActions.querySelector('button[aria-label="Toggle navigation"]');
-    if (mobileBtn) {
+    // ตรวจสอบความถูกต้องของ Parent ก่อนเรียก insertBefore เสมอ
+    if (mobileBtn && mobileBtn.parentNode === headerActions) {
       headerActions.insertBefore(profileWrapper, mobileBtn);
     } else {
       headerActions.appendChild(profileWrapper);
     }
 
     // 2. แทรกการ์ดโปรไฟล์ฉบับเต็มและปุ่มออกจากระบบไว้ที่หัวแถวของ Mobile Drawer
-    injectMobileDrawerUserCard(user, rankTitle, rankBadgeClass);
+    try {
+      injectMobileDrawerUserCard(user, rankTitle, rankBadgeClass);
+    } catch (drawerErr) {
+      console.warn('[NAV-AUTH] Mobile drawer user card insertion glitch:', drawerErr);
+    }
   }
 
   function injectMobileDrawerUserCard(user, rankTitle, rankBadgeClass) {
@@ -107,14 +129,17 @@
     if (!mobileDrawer) return;
     if (document.getElementById('mobile-drawer-user-card')) return;
 
+    const avatarUrl = user.avatar || '/assets/logo.png';
+    const displayName = user.displayName || user.username || 'สารวัตร';
+
     const userCard = document.createElement('div');
     userCard.id = 'mobile-drawer-user-card';
     userCard.className = 'col-span-2 p-2.5 rounded-xl bg-tactical-950/90 border border-indigo-500/30 flex items-center justify-between mb-1 shadow-inner';
     userCard.innerHTML = `
       <div class="flex items-center gap-2.5 min-w-0">
-        <img src="${user.avatar}" alt="${user.displayName}" class="w-9 h-9 rounded-full border border-indigo-500/70 object-cover flex-shrink-0 shadow" onerror="this.src='/assets/logo.png'">
+        <img src="${avatarUrl}" alt="${displayName}" class="w-9 h-9 rounded-full border border-indigo-500/70 object-cover flex-shrink-0 shadow" onerror="this.src='/assets/logo.png'">
         <div class="min-w-0">
-          <div class="text-xs font-bold text-white truncate">${user.displayName}</div>
+          <div class="text-xs font-bold text-white truncate">${displayName}</div>
           <span class="text-[9px] px-1.5 py-0.2 rounded border ${rankBadgeClass} font-mono font-medium inline-block truncate max-w-[150px]">${rankTitle}</span>
         </div>
       </div>

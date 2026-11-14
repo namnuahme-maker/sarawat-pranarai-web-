@@ -13,6 +13,7 @@ const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
+app.set('trust proxy', 1); // รองรับ Reverse Proxy บน Render (HTTPS termination)
 const PORT = process.env.PORT || 10001; // ค่าเริ่มต้นพอร์ตเว็บ 10001 (เพื่อไม่ชนกับบอทพอร์ต 10000 เมื่อรันในเครื่องเดียวกัน)
 
 // เชื่อมต่อ Supabase Database
@@ -103,8 +104,9 @@ function requireAuth(req, res, next) {
   }
 
   // กรณีเป็นหน้าเว็บปกติ Redirect ไปหน้า /login พร้อม Return URL
-  const returnUrl = encodeURIComponent(req.originalUrl || '/');
-  return res.redirect(`/login?redirect=${returnUrl}`);
+  let returnUrl = req.originalUrl || '/';
+  if (returnUrl.includes('/login')) returnUrl = '/';
+  return res.redirect(`/login?redirect=${encodeURIComponent(returnUrl)}`);
 }
 
 // Helper: ดึง Base URL ปัจจุบัน
@@ -232,7 +234,9 @@ app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'public'
 app.get(['/login', '/login.html'], (req, res) => {
   const user = getUserFromReq(req);
   if (user) {
-    return res.redirect(req.query.redirect || '/');
+    let redirect = req.query.redirect || '/';
+    if (redirect.includes('login')) redirect = '/';
+    return res.redirect(redirect);
   }
   res.sendFile(path.join(__dirname, 'public', 'login.html'));
 });

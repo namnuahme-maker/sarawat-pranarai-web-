@@ -191,7 +191,8 @@
         const meRes = await fetch('/api/auth/me');
         const meData = await meRes.json();
         if (meData.loggedIn) {
-          const redirect = urlParams.get('redirect') || '/';
+          let redirect = urlParams.get('redirect') || '/';
+          if (redirect.includes('login')) redirect = '/';
           showStatus('success', `ยินดีต้อนรับ ${meData.user.displayName}! กำลังพาท่านเข้าสู่ระบบ...`);
           setTimeout(() => { window.location.href = redirect; }, 700);
         }
