@@ -1446,7 +1446,7 @@ app.post('/api/lost-found/claims', async (req, res) => {
     const db = getLostFoundData();
     const currentYear = new Date().getFullYear();
     const claimNum = String((db.claims?.length || 0) + 1).padStart(3, '0');
-    const claimCode = `CLM-${currentYear}-${claimNum}`;
+    const claimCode = payload.claim_code || `CLM-${currentYear}-${claimNum}`;
 
     const newClaim = {
       claim_code: claimCode,
@@ -1477,6 +1477,65 @@ app.post('/api/lost-found/claims', async (req, res) => {
     db.claims = db.claims || [];
     db.claims.unshift(savedClaim);
     saveLostFoundData(db);
+
+    // ส่งการ์ดแจ้งเตือนเข้า Discord ห้อง #📦│แจ้งพบของหาย
+    (async () => {
+      try {
+        const token = process.env.DISCORD_TOKEN;
+        const guildId = process.env.GUILD_ID || '1567547042207895664';
+        if (!token) return;
+
+        const chRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
+          headers: { Authorization: `Bot ${token}` }
+        });
+        const channels = await chRes.json();
+        const chTarget = Array.isArray(channels)
+          ? (channels.find(c => c.name.includes('ของหาย')) || channels.find(c => c.name.includes('แจ้งพบ')))
+          : null;
+        if (!chTarget) return;
+
+        const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
+        await fetch(`https://discord.com/api/v10/channels/${chTarget.id}/messages`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bot ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            content: `📢 **[แจ้งเตือนสารวัตรทุกนาย]** มีคำร้องแจ้งของตัวเองหายใหม่เข้ามาในระบบ!`,
+            embeds: [{
+              title: `🔔 [คำร้องแจ้งของหาย] รหัส: ${savedClaim.claim_code}`,
+              description:
+                `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+                `📦 **สิ่งของ:** ${savedClaim.item_type}\n` +
+                `🏷️ **หมวดหมู่:** ${savedClaim.category}\n` +
+                `📍 **จุดที่คาดว่าทำหาย:** ${savedClaim.lost_location}\n` +
+                `📅 **วันที่ทำหาย:** ${savedClaim.lost_date}\n` +
+                `🔍 **ลักษณะเด่น:** ${savedClaim.characteristics}\n` +
+                `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+                `👤 **ผู้แจ้ง:** ${savedClaim.claimant_name} (ชั้น ${savedClaim.claimant_class})\n` +
+                `📞 **ติดต่อ:** ${savedClaim.claimant_contact}\n` +
+                `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+                `⚡ *ตรวจสอบและสแกนจับคู่กับของในคลังได้ทันทีที่หน้าเว็บ*`,
+              color: 0xF39C12,
+              footer: { text: 'ระบบบริหารงานสารวัตรนักเรียน • โรงเรียนพระนารายณ์' },
+              timestamp: new Date().toISOString()
+            }],
+            components: [{
+              type: 1,
+              components: [{
+                type: 2,
+                style: 5,
+                label: '🌐 เปิดดูคำร้องใน Web Dashboard',
+                url: `${webUrl}/lost-found`
+              }]
+            }]
+          })
+        });
+      } catch (dErr) {
+        console.warn('[LOST_CLAIM] Failed to notify Discord:', dErr.message);
+      }
+    })().catch(() => {});
 
     res.status(201).json({
       success: true,
