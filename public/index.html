@@ -529,71 +529,68 @@
         <p class="text-[11px] text-slate-400">โรงเรียนพระนารายณ์ • Digital Student Marshall ID</p>
       </div>
 
-      <!-- CR80 Digital Card Container (Front-only, Official Template Standard) -->
+      <!-- CR80 Digital Card Container (Front-only, Official Template Standard 430x680 px scaled to 280x442 px) -->
       <div id="modal-card-render-zone" class="id-card-cr80 relative bg-white text-neutral-900 border border-slate-300 rounded-lg shadow-2xl overflow-hidden select-none text-left" style="width: 280px; height: 442px;">
         
-        <!-- Left Blue Stripe / Right Red Stripe -->
+        <!-- Left Blue Stripe (left: 0, w: 9px) / Right Red Stripe (right: 0, w: 9px) -->
         <div class="absolute left-0 top-0 bottom-0 w-[9px] bg-[#002b80] z-30"></div>
         <div class="absolute right-0 top-0 bottom-0 w-[9px] bg-[#b91c1c] z-30"></div>
 
-        <!-- Vertical PRANARAI SCHOOL text alongside red stripe -->
-        <div class="absolute right-[11px] top-[70px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[3px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
+        <!-- Vertical PRANARAI SCHOOL text along red stripe -->
+        <div class="absolute right-[11px] top-[76px] font-['Syncopate',sans-serif] font-bold text-[8.5px] tracking-[2.5px] text-black uppercase z-20 pointer-events-none" style="writing-mode: vertical-rl;">
           PRANARAI SCHOOL
         </div>
 
-        <!-- Circular Watermark Emblem behind left shoulder -->
-        <img src="/assets/logo.png" alt="Watermark" class="absolute -left-3 top-[48px] w-[165px] h-[165px] object-contain opacity-45 pointer-events-none z-[2]" style="transform: rotate(-14deg);">
-
-        <!-- Student Photo with soft bottom gradient fade-out (No black/gold border) -->
-        <div class="absolute left-[22px] right-[28px] top-[78px] h-[235px] flex items-center justify-center pointer-events-none z-[5]">
-          <img id="card-photo-img" src="" alt="Photo" class="w-full h-full object-cover hidden" style="-webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);">
-          <span id="card-photo-placeholder" class="text-5xl text-slate-400">👤</span>
-        </div>
-
-        <!-- Ambient Color Fades (Over profile photo, strictly behind all text) -->
-        <div class="absolute left-0 top-0 bottom-0 w-[90px] bg-gradient-to-r from-[#002b80]/22 via-[#002b80]/08 to-transparent z-[8] pointer-events-none"></div>
-        <div class="absolute right-0 top-0 bottom-0 w-[90px] bg-gradient-to-l from-[#b91c1c]/22 via-[#b91c1c]/08 to-transparent z-[8] pointer-events-none"></div>
-        <div class="absolute left-0 right-0 top-[200px] h-[115px] bg-gradient-to-t from-white/95 via-white/50 to-transparent z-[8] pointer-events-none"></div>
+        <!-- Top Right Official Sarawat Seal Badge (Watermark element in template: 59x59 scaled to 38x38) -->
+        <img src="/assets/logo.png" alt="Badge" class="absolute right-[17px] top-[6px] w-[38px] h-[38px] object-contain z-20 pointer-events-none">
 
         <!-- Top Header: Wide Bold SARAWAT + Hollow Outline INSPECTOR -->
-        <div class="absolute left-[9px] right-[9px] top-[6px] text-center z-20 pointer-events-none">
-          <h1 class="text-[31px] font-bold tracking-[2.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
+        <div class="absolute left-0 right-0 top-[4px] text-center z-20 pointer-events-none">
+          <h1 class="text-[30px] font-bold tracking-[1.5px] text-black font-['Syncopate','Chakra_Petch',sans-serif] leading-[0.9] uppercase w-full text-center" style="transform: scaleY(1.05);">
             SARAWAT
           </h1>
-          <p class="text-[17px] font-bold tracking-[4.5px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-[-1px] text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
+          <p class="text-[16.5px] font-bold tracking-[3px] font-['Syncopate','Chakra_Petch',sans-serif] uppercase leading-none mt-0.5 text-center" style="color: transparent; -webkit-text-stroke: 1px #94a3b8;">
             INSPECTOR
           </p>
         </div>
 
-        <!-- Middle Text: Giant Nickname + Code Line -->
-        <div class="absolute left-[9px] right-[9px] bottom-[78px] text-center z-20 px-1 pointer-events-none">
-          <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[31px] font-bold text-black uppercase leading-[0.9] tracking-[3px] truncate" style="transform: scaleY(1.05);">
+        <!-- Ambient Side Color Fades (Subtle background gradients) -->
+        <div class="absolute left-0 top-0 bottom-0 w-[60px] bg-gradient-to-r from-[#002b80]/15 via-[#002b80]/05 to-transparent z-[3] pointer-events-none"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-[60px] bg-gradient-to-l from-[#b91c1c]/15 via-[#b91c1c]/05 to-transparent z-[3] pointer-events-none"></div>
+
+        <!-- Center Photo / Avatar (350x360 scaled to 226x226 circular emblem/portrait) -->
+        <div class="absolute left-1/2 -translate-x-1/2 top-[76px] w-[226px] h-[226px] rounded-full overflow-hidden flex items-center justify-center z-10 pointer-events-none shadow-sm bg-white">
+          <img id="card-photo-img" src="/assets/logo.png" alt="Photo" class="w-full h-full object-cover">
+        </div>
+
+        <!-- Member Info Lines (Centered directly under the photo, exactly as in official template) -->
+        <div class="absolute left-[12px] right-[12px] top-[308px] text-center z-20 pointer-events-none px-1">
+          <!-- 1. English Nickname -->
+          <div id="card-nickname" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[25px] font-bold text-black uppercase leading-[0.95] tracking-[1px] truncate" style="transform: scaleY(1.05);">
             NAMNUAH
           </div>
-          <div id="card-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12.5px] font-bold text-black uppercase tracking-[1.5px] leading-tight mt-1 truncate">
+          <!-- 2. Code Line -->
+          <div id="card-codeline" class="font-['Syncopate','Chakra_Petch',sans-serif] text-[12px] font-bold text-black uppercase tracking-[0.5px] leading-tight mt-1.5 truncate">
             M5-7-TS1-0634125121
+          </div>
+          <!-- 3. Thai Nickname -->
+          <div id="card-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13px] font-bold text-black leading-tight mt-1 truncate">
+            นำเหนือ
+          </div>
+          <!-- 4. Thai Full Name -->
+          <div id="card-fullname" class="font-['Prompt','Kanit',sans-serif] text-[10px] font-semibold text-black leading-tight mt-0.5 truncate">
+            นายณิชกานต์ คำไชย
           </div>
         </div>
 
-        <!-- Bottom Row: Left (Thai Nick + Full Name + Barcode) / Right (School Emblem) -->
-        <div class="absolute left-[9px] right-[9px] bottom-[6px] px-2 flex items-end justify-between z-20 pointer-events-none">
-          <!-- Left Column -->
-          <div class="flex flex-col items-center justify-end flex-1 text-center pr-1">
-            <div id="card-thainick" class="font-['Prompt','Kanit',sans-serif] text-[13.5px] font-bold text-black leading-none">
-              นำเหนือ
-            </div>
-            <div id="card-fullname" class="font-['Prompt','Kanit',sans-serif] text-[10.5px] font-semibold text-black leading-tight mt-0.5 whitespace-nowrap">
-              นายณิชกานต์ คำไชย
-            </div>
-            <div class="mt-1 flex items-center justify-center w-[120px] h-[32px]">
-              <svg id="card-barcode-svg" class="w-full h-8"></svg>
-            </div>
-          </div>
+        <!-- Bottom Area: Center Barcode (Code128) + Right Royal School Emblem -->
+        <div class="absolute left-1/2 -translate-x-1/2 bottom-[8px] w-[164px] h-[34px] flex items-center justify-center z-20 pointer-events-none">
+          <svg id="card-barcode-svg" class="w-full h-full"></svg>
+        </div>
 
-          <!-- Right Column (School Emblem without black box) -->
-          <div class="flex items-center justify-center flex-shrink-0 pb-0.5">
-            <img src="/assets/school_emblem.png" alt="ตราโรงเรียน" class="w-[52px] h-[64px] object-contain">
-          </div>
+        <!-- Bottom Right School Emblem (Royal Phra Narai Emblem) -->
+        <div class="absolute right-[14px] bottom-[6px] w-[42px] h-[52px] flex items-center justify-center z-20 pointer-events-none">
+          <img src="/assets/school_emblem.png" alt="ตราโรงเรียนพระนารายณ์" class="w-full h-full object-contain">
         </div>
 
       </div>
@@ -1477,20 +1474,12 @@
       if (nameEl) nameEl.textContent = fullName;
 
       const photoEl = document.getElementById('card-photo-img');
-      const placeholderEl = document.getElementById('card-photo-placeholder');
-      if (m.profile_image_url) {
-        photoEl.src = m.profile_image_url;
-        photoEl.onload = () => {
-          photoEl.classList.remove('hidden');
-          if (placeholderEl) placeholderEl.classList.add('hidden');
-        };
+      if (photoEl) {
+        const photoUrl = m.profile_image_url || m.photo_url || m.profile_photo_url || '/assets/logo.png';
+        photoEl.src = photoUrl;
         photoEl.onerror = () => {
-          photoEl.classList.add('hidden');
-          if (placeholderEl) placeholderEl.classList.remove('hidden');
+          photoEl.src = '/assets/logo.png';
         };
-      } else {
-        photoEl.classList.add('hidden');
-        if (placeholderEl) placeholderEl.classList.remove('hidden');
       }
 
       // Generate Barcode Code128
@@ -1499,8 +1488,8 @@
         JsBarcode("#card-barcode-svg", barcodeText, {
           format: "CODE128",
           lineColor: "#050505",
-          width: 1.2,
-          height: 30,
+          width: 1.4,
+          height: 34,
           displayValue: false,
           margin: 0
         });
