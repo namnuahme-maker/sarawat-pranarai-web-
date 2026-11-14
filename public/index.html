@@ -113,56 +113,41 @@
   <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (UNIVERSAL NAVIGATION) -->
   <!-- ========================================================== -->
   <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-tactical-border px-3 sm:px-4 py-2 sm:py-2.5 transition w-full max-w-full overflow-hidden">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full">
+    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full flex-nowrap">
       
       <!-- Brand & School Logo -->
-      <a href="/" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group flex-shrink">
+      <a href="/" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group flex-shrink-0">
         <div class="relative flex-shrink-0">
           <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.src='/assets/school_emblem.png'">
           <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
         </div>
         <div class="leading-tight min-w-0">
-          <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
+          <div class="flex items-center gap-1 sm:gap-1.5 flex-nowrap">
             <span class="font-bold text-xs sm:text-sm tracking-wide text-slate-100 uppercase font-tactical truncate">SARAWAT PRANARAI</span>
-            <span class="hidden sm:inline-flex text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-semibold">COMMAND OS</span>
           </div>
           <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block truncate">ศูนย์บัญชาการสารวัตรนักเรียน • โรงเรียนพระนารายณ์</p>
         </div>
       </a>
 
-      <!-- Desktop Core Navigation Links -->
-      <nav id="main-nav-bar" class="hidden lg:flex items-center gap-1.5 bg-tactical-900/90 border border-tactical-border rounded-xl p-1 font-sans text-xs">
-        <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow">
-          <span>🛡️</span> หน้าหลัก
-        </a>
-        <a href="/analytics" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-cyan-300 hover:text-white hover:bg-cyan-600/20 border border-cyan-500/40">
+      <!-- Desktop Core Navigation Links (1 บรรทัด ห้าม 2 บรรทัด) -->
+      <nav id="main-nav-bar" class="hidden lg:flex items-center flex-nowrap whitespace-nowrap gap-1.5 bg-tactical-900/90 border border-tactical-border rounded-xl p-1 font-sans text-xs flex-shrink-0">
+        <a href="/analytics" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-cyan-300 hover:text-white hover:bg-cyan-600/20 border border-cyan-500/40 whitespace-nowrap flex-shrink-0">
           <span>📊</span> สถิติ & คลังข้อมูล
         </a>
-        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800 whitespace-nowrap flex-shrink-0">
           <span>🎨</span> ทำบัตร
         </a>
-        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800 whitespace-nowrap flex-shrink-0">
           <span>📦</span> ของหาย
         </a>
-        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
+        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800 whitespace-nowrap flex-shrink-0">
           <span>📷</span> บอดี้แคม
         </a>
       </nav>
 
-      <!-- Action Controls & Guide & Mobile Toggle -->
-      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <!-- Feature Guide Launcher Button (Desktop only) -->
-        <button onclick="openFeatureGuideModal()" class="hidden md:inline-flex px-2.5 sm:px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-semibold items-center gap-1.5 transition active:scale-95 shadow-sm" title="เปิดคู่มือแนะนำฟังก์ชันและความสามารถของระบบ">
-          <span class="animate-pulse">💡</span> <span class="hidden lg:inline">แนะนำฟังก์ชัน</span>
-        </button>
-
-        <!-- Refresh Sync Button -->
-        <button onclick="fetchData(true)" id="btn-refresh" title="ซิงค์ข้อมูลล่าสุด" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-tactical-900 hover:bg-tactical-800 text-slate-300 hover:text-white border border-tactical-border text-xs flex items-center gap-1.5 transition active:scale-95">
-          <svg id="icon-refresh" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-          <span class="hidden md:inline">ซิงค์</span>
-        </button>
-
-        <a href="https://discord.com/app" target="_blank" rel="noopener noreferrer" class="hidden xl:inline-flex px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs items-center gap-1.5 transition">
+      <!-- Action Controls & Mobile Toggle -->
+      <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0 flex-nowrap">
+        <a href="https://discord.com/app" target="_blank" rel="noopener noreferrer" class="hidden xl:inline-flex px-2.5 py-1.5 rounded-lg bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-300 hover:text-white border border-indigo-500/40 text-xs items-center gap-1.5 transition whitespace-nowrap">
           <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M20.317 4.37a19.791 19.791 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028c.462-.63.874-1.295 1.226-1.994.021-.041.001-.09-.041-.106a13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.929 1.793 8.18 1.793 12.061 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.894.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>
           <span class="hidden md:inline">Discord</span>
         </a>
