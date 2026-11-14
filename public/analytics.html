@@ -169,7 +169,6 @@
                   ทั้งหมด (All-Time)
                 </span>
               </h1>
-              <p class="text-[11px] text-slate-400">กรองสถิติการเช็คชื่อ, ขาด-ลา-มา-สาย, คดี และของหายตามช่วงเวลา</p>
             </div>
           </div>
         </div>
@@ -373,34 +372,43 @@
           <p class="text-xs text-slate-400">จัดอันดับสารวัตรนักเรียนตามจำนวนครั้งที่แจ้งลา มาสาย และขาดเวร</p>
         </div>
 
+        <button id="toggle-leaderboard-btn" onclick="toggleLeaderboard()" class="self-start sm:self-center px-3 py-1.5 rounded-xl bg-tactical-800 hover:bg-tactical-700 border border-tactical-border text-xs text-cyan-300 font-medium flex items-center gap-1.5 transition">
+          <span id="toggle-leaderboard-text">ดูข้อมูลเพิ่มเติม</span>
+          <svg id="toggle-leaderboard-icon" class="w-4 h-4 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+          </svg>
+        </button>
+      </div>
+
+      <div id="leaderboard-collapse-container" class="hidden space-y-3">
         <!-- Search Filter -->
         <div class="relative w-full sm:w-64">
           <input type="text" id="leaderboard-search" oninput="filterLeaderboard()" placeholder="ค้นหาชื่อ, รหัสเวร, ห้อง..." class="w-full bg-tactical-950 border border-tactical-border rounded-xl pl-8 pr-3 py-1.5 text-xs text-slate-200 placeholder-slate-500 focus:outline-none focus:border-cyan-400 transition font-mono">
           <svg class="w-4 h-4 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
         </div>
-      </div>
 
-      <!-- Leaderboard Table -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-xs font-sans">
-          <thead>
-            <tr class="border-b border-tactical-border text-slate-400 text-[11px] font-mono uppercase">
-              <th class="py-2 px-3">อันดับ</th>
-              <th class="py-2 px-3">สารวัตรนักเรียน</th>
-              <th class="py-2 px-3">ผลัดเวร</th>
-              <th class="py-2 px-3 text-center">ยอดลา (ครั้ง)</th>
-              <th class="py-2 px-3 text-center">มาสาย</th>
-              <th class="py-2 px-3 text-center">ขาดเวร</th>
-              <th class="py-2 px-3">ประเภทที่ลาบ่อยสุด</th>
-              <th class="py-2 px-3 text-center">สถานะระเบียบ</th>
-            </tr>
-          </thead>
-          <tbody id="leaderboard-tbody" class="divide-y divide-tactical-border/50">
-            <tr>
-              <td colspan="8" class="text-center py-6 text-slate-500 font-mono">กำลังประมวลผลข้อมูลสารวัตร...</td>
-            </tr>
-          </tbody>
-        </table>
+        <!-- Leaderboard Table -->
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs font-sans">
+            <thead>
+              <tr class="border-b border-tactical-border text-slate-400 text-[11px] font-mono uppercase">
+                <th class="py-2 px-3">อันดับ</th>
+                <th class="py-2 px-3">สารวัตรนักเรียน</th>
+                <th class="py-2 px-3">ผลัดเวร</th>
+                <th class="py-2 px-3 text-center">ยอดลา (ครั้ง)</th>
+                <th class="py-2 px-3 text-center">มาสาย</th>
+                <th class="py-2 px-3 text-center">ขาดเวร</th>
+                <th class="py-2 px-3">ประเภทที่ลาบ่อยสุด</th>
+                <th class="py-2 px-3 text-center">สถานะระเบียบ</th>
+              </tr>
+            </thead>
+            <tbody id="leaderboard-tbody" class="divide-y divide-tactical-border/50">
+              <tr>
+                <td colspan="8" class="text-center py-6 text-slate-500 font-mono">กำลังประมวลผลข้อมูลสารวัตร...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
     </div>
@@ -866,6 +874,23 @@
         const text = row.getAttribute('data-search')?.toLowerCase() || '';
         row.style.display = text.includes(q) ? '' : 'none';
       });
+    }
+
+    function toggleLeaderboard() {
+      const container = document.getElementById('leaderboard-collapse-container');
+      const text = document.getElementById('toggle-leaderboard-text');
+      const icon = document.getElementById('toggle-leaderboard-icon');
+      if (!container) return;
+      const isHidden = container.classList.contains('hidden');
+      if (isHidden) {
+        container.classList.remove('hidden');
+        if (text) text.textContent = 'ย่อข้อมูล';
+        if (icon) icon.classList.add('rotate-180');
+      } else {
+        container.classList.add('hidden');
+        if (text) text.textContent = 'ดูข้อมูลเพิ่มเติม';
+        if (icon) icon.classList.remove('rotate-180');
+      }
     }
 
     // ----------------------------------------------------------

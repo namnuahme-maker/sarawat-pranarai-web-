@@ -112,17 +112,10 @@
         <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
           <span>📦</span> ของหาย
         </a>
-        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-tactical-800">
-          <span>📷</span> บอดี้แคม
-        </a>
       </nav>
 
       <!-- Action Controls & Guide & Mobile Toggle -->
       <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-        <button onclick="openFeatureGuideModal()" class="hidden md:inline-flex px-2.5 sm:px-3 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 hover:text-amber-200 border border-amber-500/40 text-xs font-semibold items-center gap-1.5 transition active:scale-95 shadow-sm" title="เปิดคู่มือแนะนำฟังก์ชันและความสามารถของระบบ">
-          <span class="animate-pulse">💡</span> <span class="hidden sm:inline">แนะนำฟังก์ชัน</span>
-        </button>
-
         <button onclick="location.reload()" class="p-1.5 sm:px-2.5 sm:py-1.5 rounded-lg bg-tactical-900 hover:bg-tactical-800 text-slate-300 hover:text-white border border-tactical-border text-xs flex items-center gap-1.5 transition active:scale-95" title="รีเฟรชสตูดิโอ">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 2v6h-6"/><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M3 22v-6h6"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/></svg>
         </button>
@@ -169,7 +162,7 @@
           <span class="text-amber-400">🎨</span> CARD STUDIO // สตูดิโอออกแบบเทมเพลตบัตร
         </h1>
         <p class="text-xs text-slate-400 mt-1">
-          คลิกเลือกเลเยอร์บนบัตรเพื่อลากย้าย หมุน ย่อขยาย หรือปรับสี | มาตรฐาน CR80 (430 × 680 px) พร้อมบันทึกเทมเพลตขึ้นเซิร์ฟเวอร์
+          CR80 430*680 px
         </p>
       </div>
 
@@ -212,22 +205,7 @@
     </div>
 
     <!-- Presets & Quick Style Bar -->
-    <div class="flex flex-wrap items-center justify-between gap-3 bg-tactical-900 border border-tactical-border rounded-2xl p-3 px-4 text-xs">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="font-bold text-slate-300 flex items-center gap-1.5 font-mono">
-          <span>🎨</span> เทมเพลตสำเร็จรูป:
-        </span>
-        <button onclick="applyPreset('tactical')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-blue-500/40 text-blue-400 hover:text-blue-300 font-bold transition active:scale-95">
-          🛡️ Tactical Standard
-        </button>
-        <button onclick="applyPreset('executive')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-amber-500/40 text-amber-400 hover:text-amber-300 font-bold transition active:scale-95">
-          👑 Executive Gold
-        </button>
-        <button onclick="applyPreset('academic')" class="px-2.5 py-1 rounded-lg bg-black hover:bg-tactical-800 border border-cyan-500/40 text-cyan-400 hover:text-cyan-300 font-bold transition active:scale-95">
-          🎓 Formal Academic
-        </button>
-      </div>
-
+    <div class="flex flex-wrap items-center justify-end gap-3 bg-tactical-900 border border-tactical-border rounded-2xl p-3 px-4 text-xs">
       <div class="flex items-center gap-2 flex-wrap">
         <span class="font-bold text-slate-300 flex items-center gap-1 font-mono">
           <span>🏅</span> ตราเวร:
@@ -255,8 +233,6 @@
       <div class="lg:col-span-7 p-4 sm:p-6 rounded-2xl bg-tactical-950 border border-tactical-border flex flex-col items-center justify-center relative min-h-[740px]">
         
         <div class="text-[11px] font-mono text-slate-400 mb-3 flex items-center gap-3">
-          <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> Canvas Active</span>
-          <span>•</span>
           <span>430 × 680 px (CR80)</span>
           <span>•</span>
           <span class="text-amber-400">คลิกที่ข้อความหรือรูปเพื่อจัดตำแหน่ง</span>
@@ -280,6 +256,28 @@
       <!-- Right Inspector & Controls -->
       <div class="lg:col-span-5 space-y-4">
         
+        <!-- Card Full Background Upload Section -->
+        <div class="bg-tactical-900 border border-tactical-border rounded-2xl p-4 shadow-xl text-left space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h3 class="text-xs font-bold text-slate-200 flex items-center gap-2 font-mono">
+              <span>🖼️</span> รูปพื้นหลังบัตรทั้งหมด (Card Background)
+            </h3>
+            <button onclick="removeCardBackground()" id="btn-remove-bg" class="hidden text-[11px] text-rose-400 hover:text-rose-300 font-mono transition">
+              ลบพื้นหลัง ✕
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400">อัปโหลดภาพพื้นหลังเต็มใบ (430 × 680 px) สำหรับเป็น Background ของบัตรสารวัตรทุกคน</p>
+          
+          <input type="file" id="studio-bg-upload-input" accept="image/*" class="hidden" onchange="handleCardBackgroundUpload(event)">
+          
+          <div class="flex items-center justify-between gap-3 pt-1">
+            <span id="bg-status-indicator" class="text-[11px] text-slate-500 font-mono">ยังไม่มีรูปพื้นหลัง (ใช้สีขาว)</span>
+            <button onclick="document.getElementById('studio-bg-upload-input').click()" class="py-1.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-amber-300 hover:text-white border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow">
+              <span>📤</span> อัปโหลดรูปพื้นหลังทั้งหมด
+            </button>
+          </div>
+        </div>
+
         <!-- Inspector Panel -->
         <div class="bg-tactical-900 border border-tactical-border rounded-2xl p-5 shadow-xl text-left space-y-4">
           <div class="flex items-center justify-between border-b border-tactical-border pb-3">
@@ -771,6 +769,7 @@
 
       // Initial Canvas Render
       await renderConfigToCanvas(SAMPLE_MEMBER);
+      updateBgStatusUI();
 
       // Event Listeners
       studioCanvas.on('selection:created', onObjectSelected);
@@ -826,7 +825,28 @@
     async function renderConfigToCanvas(member = SAMPLE_MEMBER) {
       if (!studioCanvas) return;
       studioCanvas.clear();
-      studioCanvas.setBackgroundColor('#ffffff', studioCanvas.renderAll.bind(studioCanvas));
+
+      if (studioConfig && studioConfig.canvas && studioConfig.canvas.backgroundImage) {
+        await new Promise((resolve) => {
+          fabric.Image.fromURL(studioConfig.canvas.backgroundImage, (img) => {
+            if (img) {
+              img.set({ originX: 'left', originY: 'top', left: 0, top: 0 });
+              img.scaleToWidth(430);
+              img.scaleToHeight(680);
+              studioCanvas.setBackgroundImage(img, () => {
+                studioCanvas.renderAll();
+                resolve();
+              });
+            } else {
+              studioCanvas.setBackgroundColor('#ffffff', studioCanvas.renderAll.bind(studioCanvas));
+              resolve();
+            }
+          }, { crossOrigin: 'anonymous' });
+        });
+      } else {
+        studioCanvas.setBackgroundImage(null, studioCanvas.renderAll.bind(studioCanvas));
+        studioCanvas.setBackgroundColor('#ffffff', studioCanvas.renderAll.bind(studioCanvas));
+      }
 
       const rawClass = (member.grade_class || '').replace('ม.', '').trim();
       const classDisplay = rawClass ? `M${rawClass.replace('/', '-')}` : 'M5-7';
@@ -1139,7 +1159,45 @@
       if (confirm('ต้องการคืนค่าเทมเพลตกลับเป็นค่าเริ่มต้นทางการใช่หรือไม่?')) {
         studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
         renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+        updateBgStatusUI();
         showToast('คืนค่าเทมเพลตเริ่มต้นเรียบร้อย', '🔄');
+      }
+    }
+
+    function handleCardBackgroundUpload(e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        if (!studioConfig) studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
+        if (!studioConfig.canvas) studioConfig.canvas = { width: 430, height: 680 };
+        studioConfig.canvas.backgroundImage = evt.target.result;
+        await renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+        updateBgStatusUI();
+        showToast('อัปโหลดรูปพื้นหลังทั้งหมดเรียบร้อย!', '🖼️');
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
+    }
+
+    async function removeCardBackground() {
+      if (!studioConfig) return;
+      if (studioConfig.canvas) {
+        delete studioConfig.canvas.backgroundImage;
+      }
+      await renderConfigToCanvas(activeStudioMember || SAMPLE_MEMBER);
+      updateBgStatusUI();
+      showToast('ลบรูปพื้นหลังเรียบร้อย', '🗑️');
+    }
+
+    function updateBgStatusUI() {
+      const removeBtn = document.getElementById('btn-remove-bg');
+      const bgStatus = document.getElementById('bg-status-indicator');
+      const hasBg = !!(studioConfig && studioConfig.canvas && studioConfig.canvas.backgroundImage);
+      if (removeBtn) removeBtn.classList.toggle('hidden', !hasBg);
+      if (bgStatus) {
+        bgStatus.textContent = hasBg ? 'ใช้งานพื้นหลังแบบกำหนดเอง' : 'ยังไม่มีรูปพื้นหลัง (ใช้สีขาว)';
+        bgStatus.className = hasBg ? 'text-[11px] text-emerald-400 font-mono' : 'text-[11px] text-slate-500 font-mono';
       }
     }
 

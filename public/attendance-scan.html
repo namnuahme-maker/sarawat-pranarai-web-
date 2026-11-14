@@ -101,11 +101,8 @@
     <!-- ====================================================== -->
     <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
-      <!-- หัวข้อระบบ Hybrid QR + Vision AI -->
-      <div class="flex items-center justify-between flex-wrap gap-2">
-        <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold">
-          <span>⚡ ระบบควบรวม Hybrid</span> • QR Anchor + Vision AI
-        </div>
+      <!-- ตัวเลือกไตรมาสและวันที่ -->
+      <div class="flex items-center justify-end flex-wrap gap-2">
         <div class="flex items-center gap-1.5 flex-wrap">
           <div class="flex items-center gap-1 bg-slate-800/90 border border-slate-700 rounded-lg px-2 py-0.5 text-[11px] font-mono text-cyan-300">
             <span class="text-slate-400">ไตรมาส:</span>
@@ -127,50 +124,42 @@
         </div>
       </div>
 
-      <div class="space-y-1">
-        <h2 class="text-sm sm:text-base font-bold text-white">ระบบสแกนอัจฉริยะ 2 โหมดในตัวเดียว</h2>
-        <p class="text-xs text-slate-400 leading-relaxed">
-          • <strong>โหมดเต็มใบ (QR Lock):</strong> หากภาพถ่ายติด QR Code มุมขวาบน ระบบจะล็อกรอบเวรและแก้ความเอียงให้อัตโนมัติ<br>
-          • <strong>โหมดซูมตาราง (Macro Vision):</strong> หากถ่ายเห็นแค่ตาราง ระบบจะใช้ผลัดเวรที่เลือกด้านล่างร่วมกับ Vision AI
-        </p>
-      </div>
-
       <!-- ปุ่มเลือกวันทั้ง 6 ผลัดเวร (Day Selection Chips) -->
       <div class="space-y-1.5">
         <div class="text-[11px] text-slate-300 font-medium flex items-center justify-between">
           <span>เลือกรอบเวรประจำวัน:</span>
-          <span id="selected-shift-badge-text" class="text-amber-400 font-bold">เวรวันพุธ (Shift W)</span>
+          <span id="selected-shift-badge-text" class="text-amber-400 font-bold">เวรวันพุธ</span>
         </div>
         <div class="grid grid-cols-3 sm:grid-cols-6 gap-1.5 sm:gap-2" id="day-chips-grid">
           
           <button onclick="selectShift('M')" id="chip-M" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">จันทร์</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift M</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">M</span>
           </button>
 
           <button onclick="selectShift('T')" id="chip-T" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">อังคาร</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift T</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">T</span>
           </button>
 
           <button onclick="selectShift('W')" id="chip-W" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">พุธ</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift W</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">W</span>
           </button>
 
           <button onclick="selectShift('Ts')" id="chip-Ts" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">พฤหัสฯ</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift Ts</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Ts</span>
           </button>
 
           <button onclick="selectShift('F')" id="chip-F" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">ศุกร์</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift F</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">F</span>
           </button>
 
           <button onclick="selectShift('S')" id="chip-S" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">เวรพิเศษ</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Shift S</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">S</span>
           </button>
 
         </div>
@@ -184,7 +173,7 @@
             <span class="text-lg">🛡️</span>
             <div>
               <div class="text-xs font-bold text-white flex items-center gap-1.5">
-                <span id="selected-shift-name" class="text-amber-400">เวรวันพุธ (Shift W)</span>
+                <span id="selected-shift-name" class="text-amber-400">เวรวันพุธ</span>
                 <span class="text-slate-600">•</span>
                 <span id="selected-member-count" class="text-slate-300 font-semibold font-mono text-[11px]">3 นาย</span>
               </div>
@@ -235,7 +224,7 @@
       <div class="pt-2 space-y-2 text-center">
         <button onclick="launchNativeCamera()" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-base sm:text-lg shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2.5 pulse-btn">
           <span class="text-2xl">📸</span>
-          <span>เปิดแอปกล้องมือถือถ่ายภาพ (Hybrid Ingest)</span>
+          <span>ถ่ายรูปเช็คชื่อ</span>
         </button>
 
         <p class="text-[11px] text-slate-400">
@@ -317,7 +306,7 @@
           </div>
           <div class="text-xs text-slate-300 mt-0.5 flex items-center gap-2">
             <span>ผลัดเวร:</span>
-            <span id="review-shift-text" class="font-bold text-white">เวรวันพุธ (Shift W)</span>
+            <span id="review-shift-text" class="font-bold text-white">เวรวันพุธ</span>
             <span class="text-slate-500">•</span>
             <span id="review-ingest-mode-text" class="text-emerald-400">โหมด Hybrid Ingestion</span>
           </div>
@@ -781,8 +770,8 @@
         activeChip.classList.add('bg-emerald-500/20', 'border-emerald-400', 'shadow');
       }
 
-      document.getElementById('selected-shift-name').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
-      document.getElementById('selected-shift-badge-text').textContent = `${SHIFT_NAMES[shiftKey]} (Shift ${shiftKey})`;
+      document.getElementById('selected-shift-name').textContent = `${SHIFT_NAMES[shiftKey]}`;
+      document.getElementById('selected-shift-badge-text').textContent = `${SHIFT_NAMES[shiftKey]}`;
 
       // คงสัปดาห์ที่ผู้ใช้เลือกไว้ หากไม่ระบุให้ใช้ค่าเดิมใน dropdown หรือค่าเริ่มต้นสัปดาห์ปัจจุบัน
       const selectEl = document.getElementById('date-col-select');
@@ -1831,7 +1820,7 @@
 
       document.getElementById('review-date-badge').textContent = currentTargetCol;
       document.getElementById('review-full-date-text').textContent = `${todayInfo.fullThai} (คอลัมน์ ${currentTargetCol})`;
-      document.getElementById('review-shift-text').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
+      document.getElementById('review-shift-text').textContent = `${SHIFT_NAMES[currentShiftCode]}`;
 
       // Telemetry Badges
       const qrBadge = document.getElementById('telemetry-qr-badge');
@@ -2062,7 +2051,7 @@
 
       const pickedDateIso = document.getElementById('exact-date-picker')?.value;
       document.getElementById('success-date-str').textContent = pickedDateIso ? `${currentTargetCol} (${pickedDateIso})` : currentTargetCol;
-      document.getElementById('succ-shift').textContent = `${SHIFT_NAMES[currentShiftCode]} (Shift ${currentShiftCode})`;
+      document.getElementById('succ-shift').textContent = `${SHIFT_NAMES[currentShiftCode]}`;
       document.getElementById('succ-present').textContent = `${present} นาย`;
       document.getElementById('succ-late').textContent = `${late} นาย`;
       document.getElementById('succ-leave').textContent = `${leave} นาย`;
