@@ -395,9 +395,10 @@
           <span class="text-slate-700 hidden sm:inline">|</span>
 
           <!-- Education Level & Today's Duty Chips -->
-          <button onclick="filterRosterLevel('JUNIOR')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-cyan-400 hover:text-cyan-300 bg-tactical-850 border border-cyan-500/30" data-level="JUNIOR">ม.ต้น (1-3)</button>
-          <button onclick="filterRosterLevel('SENIOR')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-purple-400 hover:text-purple-300 bg-tactical-850 border border-purple-500/30" data-level="SENIOR">ม.ปลาย (4-6)</button>
-          <button onclick="filterRosterLevel('TODAY')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-emerald-400 hover:text-emerald-300 bg-tactical-850 border border-emerald-500/30" data-level="TODAY">⚡ เวรวันนี้</button>
+          <button onclick="filterRosterLevel('M4')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-sky-400 hover:text-sky-300 bg-tactical-850 border border-sky-500/30 transition" data-level="M4" data-color="text-sky-400">ม.4</button>
+          <button onclick="filterRosterLevel('M5')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-purple-400 hover:text-purple-300 bg-tactical-850 border border-purple-500/30 transition" data-level="M5" data-color="text-purple-400">ม.5</button>
+          <button onclick="filterRosterLevel('M6')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-amber-400 hover:text-amber-300 bg-tactical-850 border border-amber-500/30 transition" data-level="M6" data-color="text-amber-400">ม.6</button>
+          <button onclick="filterRosterLevel('TODAY')" class="roster-level-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-emerald-400 hover:text-emerald-300 bg-tactical-850 border border-emerald-500/30 transition" data-level="TODAY" data-color="text-emerald-400">⚡ เวรวันนี้</button>
         </div>
 
       </div>
@@ -1054,15 +1055,20 @@
         filtered = filtered.filter(m => m.duty_day && m.duty_day.startsWith(currentShiftFilter));
       }
 
-      if (currentLevelFilter === 'JUNIOR') {
+      if (currentLevelFilter === 'M4') {
         filtered = filtered.filter(m => {
-          const g = (m.grade_class || '').replace('ม.', '').trim();
-          return g.startsWith('1') || g.startsWith('2') || g.startsWith('3');
+          const g = (m.grade_class || '').toLowerCase().replace('ม.', '').replace('ม', '').replace('m', '').trim();
+          return g.startsWith('4');
         });
-      } else if (currentLevelFilter === 'SENIOR') {
+      } else if (currentLevelFilter === 'M5') {
         filtered = filtered.filter(m => {
-          const g = (m.grade_class || '').replace('ม.', '').trim();
-          return g.startsWith('4') || g.startsWith('5') || g.startsWith('6');
+          const g = (m.grade_class || '').toLowerCase().replace('ม.', '').replace('ม', '').replace('m', '').trim();
+          return g.startsWith('5');
+        });
+      } else if (currentLevelFilter === 'M6') {
+        filtered = filtered.filter(m => {
+          const g = (m.grade_class || '').toLowerCase().replace('ม.', '').replace('ม', '').replace('m', '').trim();
+          return g.startsWith('6');
         });
       } else if (currentLevelFilter === 'TODAY') {
         const dayIndex = new Date().getDay();
@@ -1238,12 +1244,13 @@
     function filterRosterLevel(levelCode) {
       currentLevelFilter = (currentLevelFilter === levelCode) ? 'ALL' : levelCode;
       document.querySelectorAll('.roster-level-btn').forEach(btn => {
+        const defaultColor = btn.dataset.color || 'text-slate-400';
         if (btn.dataset.level === currentLevelFilter) {
-          btn.classList.add('bg-cyan-500', 'text-black', 'font-bold');
-          btn.classList.remove('bg-tactical-850');
+          btn.classList.add('bg-amber-500', 'text-black', 'font-bold');
+          btn.classList.remove(defaultColor, 'bg-tactical-850');
         } else {
-          btn.classList.remove('bg-cyan-500', 'text-black', 'font-bold');
-          btn.classList.add('bg-tactical-850');
+          btn.classList.remove('bg-amber-500', 'text-black', 'font-bold');
+          btn.classList.add(defaultColor, 'bg-tactical-850');
         }
       });
       renderRoster(allMembers);
@@ -1778,7 +1785,7 @@
       {
         targetId: 'roster-search-input',
         title: '👥 ทำเนียบสารวัตร & บัตรดิจิทัล',
-        desc: 'ค้นหารายชื่ออย่างรวดเร็ว กรอง ม.ต้น / ม.ปลาย / สายเวร และคลิกที่การ์ดเพื่อเปิดดูบัตรประจำตัว CR80 พร้อมดาวน์โหลดรูป HD'
+        desc: 'ค้นหารายชื่ออย่างรวดเร็ว กรอง ม.4 / ม.5 / ม.6 / เวรวันนี้ / สายเวร และคลิกที่การ์ดเพื่อเปิดดูบัตรประจำตัว CR80 พร้อมดาวน์โหลดรูป HD'
       },
       {
         targetId: 'main-nav-bar',
