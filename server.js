@@ -11,6 +11,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
+const { uploadToGoogleDrive } = require('./services/gdrive_service');
 
 const app = express();
 app.set('trust proxy', 1); // รองรับ Reverse Proxy บน Render (HTTPS termination)
@@ -247,6 +248,11 @@ app.use(express.urlencoded({ limit: '100mb', extended: true }));
 app.use('/assets', express.static(path.join(__dirname, 'public', 'assets')));
 app.use('/uploads', express.static(path.join(__dirname, 'public', 'uploads')));
 app.get('/favicon.ico', (req, res) => res.sendFile(path.join(__dirname, 'public', 'favicon.ico')));
+
+// หน้าเว็บเครื่องมือครอปรูปถ่ายสารวัตรนักเรียน (1:1 Aspect Ratio)
+app.get(['/crop', '/crop.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'crop.html'));
+});
 
 // -------------------------------------------------------------
 // 2. หน้า Login และ Discord OAuth2 Authentication Endpoints
@@ -734,6 +740,147 @@ app.get('/api/leaves', async (req, res) => {
     res.json({ success: true, data: data || [] });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// =============================================================
+// 🔲 PROFILE PHOTO CROPPER & GOOGLE DRIVE INTEGRATION
+// =============================================================
+
+// ตรวจสอบ Token ชั่วคราวสำหรับการครอปรูป
+app.get('/api/crop/session/:token', async (req, res) => {
+  const { token } = req.params;
+  if (!token) return res.status(400).json({ valid: false, error: 'Token missing' });
+
+  try {
+    const { data, error } = await supabase
+      .from('crop_tokens')
+      .select('token, member_id, source_image_url, expires_at, used_at, members(id, first_name, last_name, nickname, duty_id)')
+      .eq('token', token)
+      .maybeSingle();
+
+    if (error || !data) {
+      return res.status(404).json({ valid: false, error: 'ไม่พบ Token นี้ หรือหมดอายุแล้ว' });
+    }
+
+    if (data.used_at) {
+      return res.status(400).json({ valid: false, error: 'ลิงก์นี้ถูกใช้งานไปแล้ว' });
+    }
+
+    if (new Date(data.expires_at) < new Date()) {
+      return res.status(400).json({ valid: false, error: 'ลิงก์นี้หมดอายุแล้ว (อายุใช้งาน 15 นาที)' });
+    }
+
+    const member = data.members || {};
+    const memberName = `${member.first_name || ''} ${member.last_name || ''} (${member.nickname || member.duty_id || ''})`.trim();
+
+    return res.json({
+      valid: true,
+      imageUrl: data.source_image_url,
+      memberName: memberName
+    });
+  } catch (err) {
+    console.error('[CROP] Session check error:', err);
+    return res.status(500).json({ valid: false, error: 'Internal server error' });
+  }
+});
+
+// บันทึกรูปที่ครอปแล้ว (1:1), อัปโหลด Supabase Storage + Google Drive
+app.post('/api/crop/submit', async (req, res) => {
+  const { token, imageBase64 } = req.body;
+  if (!token || !imageBase64) {
+    return res.status(400).json({ success: false, error: 'Missing token or image data' });
+  }
+
+  try {
+    // 1. ดึงข้อมูล Token
+    const { data: cropSession, error: sErr } = await supabase
+      .from('crop_tokens')
+      .select('*, members(id, first_name, last_name, nickname, duty_id)')
+      .eq('token', token)
+      .maybeSingle();
+
+    if (sErr || !cropSession) {
+      return res.status(404).json({ success: false, error: 'Invalid token' });
+    }
+
+    if (cropSession.used_at) {
+      return res.status(400).json({ success: false, error: 'Token already used' });
+    }
+
+    if (new Date(cropSession.expires_at) < new Date()) {
+      return res.status(400).json({ success: false, error: 'Token expired' });
+    }
+
+    // 2. แปลง Base64 เป็น Buffer และบันทึกลง Local Uploads
+    const uploadDir = path.join(__dirname, 'public', 'uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+    const member = cropSession.members || {};
+    const safeDutyId = (member.duty_id || member.id || 'SW').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `profile_cropped_${safeDutyId}_${Date.now()}.jpg`;
+    const buf = Buffer.from(imageBase64.split(',').pop(), 'base64');
+    fs.writeFileSync(path.join(uploadDir, filename), buf);
+    let finalImageUrl = `/uploads/${filename}`;
+
+    // 3. อัปโหลดเข้าสู่ Supabase Storage (Bucket: sarawat-photos)
+    try {
+      const storagePath = `profile-photos/${filename}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('sarawat-photos')
+        .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
+
+      if (!uploadErr) {
+        const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+        finalImageUrl = publicUrl;
+      }
+    } catch (storageEx) {
+      console.warn('[CROP] Supabase storage upload warning:', storageEx.message);
+    }
+
+    // 4. สำรองไฟล์ภาพเข้าสู่ Google Drive (Zero-dependency Service Account)
+    let gdriveId = null;
+    let gdriveUrl = null;
+    try {
+      const gdriveRes = await uploadToGoogleDrive(buf, filename, {
+        memberName: `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'สารวัตรนักเรียน',
+        dutyId: member.duty_id || '-'
+      });
+      if (gdriveRes && gdriveRes.success) {
+        gdriveId = gdriveRes.fileId;
+        gdriveUrl = gdriveRes.webViewLink;
+      }
+    } catch (gdriveEx) {
+      console.warn('[CROP] Google Drive backup warning:', gdriveEx.message);
+    }
+
+    // 5. อัปเดตข้อมูลตาราง members
+    const updatePayload = {
+      profile_image_url: finalImageUrl,
+      photo_cropped_at: new Date().toISOString()
+    };
+    if (gdriveId) updatePayload.gdrive_file_id = gdriveId;
+    if (gdriveUrl) updatePayload.gdrive_file_url = gdriveUrl;
+
+    await supabase
+      .from('members')
+      .update(updatePayload)
+      .eq('id', cropSession.member_id);
+
+    // 6. ทำเครื่องหมาย Token ว่าถูกใช้งานแล้ว
+    await supabase
+      .from('crop_tokens')
+      .update({ used_at: new Date().toISOString() })
+      .eq('token', token);
+
+    return res.json({
+      success: true,
+      imageUrl: finalImageUrl,
+      gdriveUrl: gdriveUrl
+    });
+  } catch (err) {
+    console.error('[CROP] Submit error:', err);
+    return res.status(500).json({ success: false, error: err.message });
   }
 });
 

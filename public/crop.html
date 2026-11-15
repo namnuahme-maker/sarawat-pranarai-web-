@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>จัดตำแหน่งและครอปรูปโปรไฟล์สารวัตร | SARAWAT PRANARAI</title>
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            tactical: {
+              950: '#0a0d14',
+              900: '#0f1422',
+              850: '#141c30',
+              800: '#1a243e',
+              border: '#253354'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Cropper.js CSS & JS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <style>
+    /* ปรับแต่งกรอบตัดรูป Cropper ให้เข้ากับธีม Tactical */
+    .cropper-view-box, .cropper-face {
+      border-radius: 8px;
+    }
+    .cropper-line, .cropper-point {
+      background-color: #f59e0b !important;
+    }
+    .cropper-view-box {
+      outline: 2px solid #f59e0b !important;
+      outline-color: rgba(245, 158, 11, 0.9) !important;
+    }
+  </style>
+</head>
+<body class="bg-tactical-950 text-slate-100 min-h-screen flex flex-col items-center justify-center p-3 sm:p-6 font-sans">
+
+  <!-- Main Container -->
+  <div class="max-w-xl w-full bg-tactical-900 border border-tactical-border rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5">
+    
+    <!-- Header -->
+    <div class="text-center space-y-1.5 border-b border-tactical-border/60 pb-4">
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
+        <span>🛡️</span> SARAWAT PROFILE PHOTO STUDIO
+      </div>
+      <h1 class="text-lg sm:text-xl font-extrabold text-white">จัดตำแหน่งและครอปรูปโปรไฟล์</h1>
+      <p id="member-name-display" class="text-xs text-slate-400">ลาก เลื่อน และซูม ให้ใบหน้าอยู่กึ่งกลางกรอบสี่เหลี่ยมจัตุรัส</p>
+    </div>
+
+    <!-- Cropper Container -->
+    <div class="relative w-full h-80 sm:h-96 bg-black rounded-2xl overflow-hidden border border-tactical-border flex items-center justify-center">
+      <img id="image-to-crop" class="max-h-full max-w-full" style="display: none;" alt="รูปต้นฉบับ">
+      
+      <div id="loading-spinner" class="flex flex-col items-center gap-2 text-slate-400 text-xs font-mono">
+        <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+        </svg>
+        <span>กำลังตรวจสอบ Token และโหลดรูปภาพ...</span>
+      </div>
+
+      <div id="error-display" class="hidden flex flex-col items-center gap-2 text-rose-400 text-center px-4">
+        <span class="text-3xl">⚠️</span>
+        <p id="error-message" class="text-sm font-semibold">ลิงก์นี้หมดอายุหรือไม่ถูกต้อง</p>
+        <p class="text-xs text-slate-400">กรุณากลับไปที่ Discord แล้วส่งรูปภาพใหม่อีกครั้ง</p>
+      </div>
+    </div>
+
+    <!-- Control Toolbar -->
+    <div id="controls-toolbar" class="grid grid-cols-4 gap-2 text-xs font-semibold">
+      <button type="button" onclick="cropper && cropper.rotate(-90)" class="py-2.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5 active:scale-95">
+        <span>↺</span> หมุนซ้าย
+      </button>
+      <button type="button" onclick="cropper && cropper.rotate(90)" class="py-2.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5 active:scale-95">
+        <span>↻</span> หมุนขวา
+      </button>
+      <button type="button" onclick="cropper && cropper.zoom(0.1)" class="py-2.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5 active:scale-95">
+        <span>➕</span> ซูมเข้า
+      </button>
+      <button type="button" onclick="cropper && cropper.reset()" class="py-2.5 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1.5 active:scale-95">
+        <span>🔄</span> รีเซ็ต
+      </button>
+    </div>
+
+    <!-- Action Button -->
+    <button id="btn-save" onclick="submitCroppedImage()" class="w-full py-3.5 px-4 bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-bold rounded-2xl shadow-lg transition active:scale-95 flex items-center justify-center gap-2 text-sm">
+      <span>💾</span> ยืนยันรูปนี้และบันทึกเข้า Google Drive
+    </button>
+
+    <!-- Footer Note -->
+    <div class="text-[11px] text-slate-500 text-center font-mono">
+      🔒 ระบบจัดเก็บรูปถ่ายความละเอียดสูง (512×512 px) สำรองเข้า Google Drive ของโรงเรียนอัตโนมัติ
+    </div>
+
+  </div>
+
+  <script>
+    let cropper = null;
+    const urlParams = new URLSearchParams(window.location.search);
+    const token = urlParams.get('token');
+
+    async function init() {
+      if (!token) {
+        showError('ไม่พบ Token หรือลิงก์ไม่ถูกต้อง');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/crop/session/${token}`);
+        const data = await res.json();
+
+        if (!res.ok || !data.valid) {
+          showError(data.error || 'ลิงก์หมดอายุหรือถูกใช้งานไปแล้ว');
+          return;
+        }
+
+        if (data.memberName) {
+          document.getElementById('member-name-display').innerHTML = `สารวัตร: <b class="text-amber-300">${data.memberName}</b> • ปรับใบหน้าให้อยู่ตรงกลาง`;
+        }
+
+        const img = document.getElementById('image-to-crop');
+        img.src = data.imageUrl;
+        img.onload = () => {
+          document.getElementById('loading-spinner').style.display = 'none';
+          img.style.display = 'block';
+
+          cropper = new Cropper(img, {
+            aspectRatio: 1, // บังคับสี่เหลี่ยมจัตุรัส 1:1
+            viewMode: 1,
+            autoCropArea: 0.85,
+            responsive: true,
+            restore: false,
+            guides: true,
+            center: true,
+            highlight: false,
+            cropBoxMovable: true,
+            cropBoxResizable: true,
+            toggleDragModeOnDblclick: false,
+            background: false
+          });
+        };
+        img.onerror = () => {
+          showError('ไม่สามารถโหลดรูปภาพต้นฉบับได้');
+        };
+      } catch (err) {
+        showError('เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์');
+      }
+    }
+
+    function showError(msg) {
+      document.getElementById('loading-spinner').style.display = 'none';
+      document.getElementById('controls-toolbar').style.display = 'none';
+      document.getElementById('btn-save').style.display = 'none';
+      document.getElementById('error-message').textContent = msg;
+      document.getElementById('error-display').classList.remove('hidden');
+    }
+
+    async function submitCroppedImage() {
+      if (!cropper) return;
+      const btn = document.getElementById('btn-save');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> กำลังบันทึกและส่งเข้า Google Drive...';
+      btn.disabled = true;
+
+      try {
+        const canvas = cropper.getCroppedCanvas({
+          width: 512,
+          height: 512,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high'
+        });
+
+        const imageBase64 = canvas.toDataURL('image/jpeg', 0.92);
+
+        const res = await fetch('/api/crop/submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            token: token,
+            imageBase64: imageBase64
+          })
+        });
+
+        const result = await res.json();
+        if (res.ok && result.success) {
+          btn.innerHTML = '<span>✅</span> บันทึกสำเร็จ!';
+          btn.classList.remove('from-amber-500', 'to-amber-500');
+          btn.classList.add('from-emerald-500', 'to-emerald-600', 'text-white');
+
+          alert('🎉 บันทึกรูปถ่ายและส่งเข้า Google Drive เรียบร้อยแล้ว!\n👉 คุณสามารถปิดหน้านี้และกลับไปที่ Discord ได้เลยครับ');
+          setTimeout(() => {
+            window.close();
+          }, 1000);
+        } else {
+          alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'กรุณาลองใหม่อีกครั้ง'));
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+        }
+      } catch (err) {
+        alert('❌ ไม่สามารถบันทึกรูปภาพได้: ' + err.message);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>
