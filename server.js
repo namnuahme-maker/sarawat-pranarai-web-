@@ -912,15 +912,15 @@ app.post('/api/crop/submit', async (req, res) => {
         } else {
           // ผู้สมัครลงทะเบียนใหม่: อัปเดตการ์ดยืนยันข้อมูลในห้องลงทะเบียนสารวัตรใหม่ทันที (Real-time)
           const confirmPayload = {
-            content: `🔒 <@${cropSession.discord_id}> ยืนยันข้อมูลหรือไม่? โปรดตรวจสอบข้อมูลและรูปถ่ายขนาด 1 นิ้วด้านล่าง`,
+            content: `🔒 <@${cropSession.discord_id}> ตัดแต่งรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว! โปรดตรวจสอบข้อมูลและกดยืนยันในช่องนี้ได้เลยครับ:`,
             embeds: [{
               title: '🛡️ ยืนยันข้อมูลการลงทะเบียนสารวัตร [ขั้นตอนสุดท้าย]',
               description:
                 `สวัสดีครับคุณ **${member.first_name} ${member.last_name} (${member.nickname || '-'})**\n` +
                 `ระบบได้รับการตัดแต่งและสำรองรูปถ่ายขนาด 1 นิ้ว (3:4) ของคุณเรียบร้อยแล้ว!\n\n` +
                 `👉 **ต้องการยืนยันข้อมูลหรือไม่?**\n` +
-                `• **หากข้อมูลและรูปถ่ายถูกต้องแล้ว:** กด **"✅ กดยืนยัน"** เพื่อส่งให้ผู้บริหารพิจารณาอนุมัติ\n` +
-                `• **หากต้องการแก้ไขข้อมูลหรือเปลี่ยนรูปใหม่:** กด **"✏️ ปุ่มแก้ไข"**`,
+                `• **หากข้อมูลและรูปถ่ายถูกต้องแล้ว:** กด **"✅ ยืนยันข้อมูล & ส่งขออนุมัติ"** เพื่อส่งให้ผู้บริหารพิจารณาอนุมัติ\n` +
+                `• **หากต้องการแก้ไขข้อมูลหรือเปลี่ยนรูปใหม่:** กด **"✏️ แก้ไขข้อมูล"**`,
               fields: [
                 {
                   name: '👤 ข้อมูลสารวัตร',
@@ -949,13 +949,13 @@ app.post('/api/crop/submit', async (req, res) => {
                 {
                   type: 2,
                   style: 3, // Success (Green)
-                  label: '✅ กดยืนยัน',
+                  label: '✅ ยืนยันข้อมูล & ส่งขออนุมัติ',
                   custom_id: `btn_confirm_send_approval_${member.id}`
                 },
                 {
                   type: 2,
                   style: 2, // Secondary (Grey)
-                  label: '✏️ ปุ่มแก้ไข',
+                  label: '✏️ แก้ไขข้อมูล',
                   custom_id: `btn_edit_registration_info_${member.id}`
                 }
               ]
@@ -985,7 +985,7 @@ app.post('/api/crop/submit', async (req, res) => {
         }
       }
 
-      // 7.2 ส่งแจ้งเตือนและส่งการ์ดตรวจสอบข้อมูลเข้าแชทส่วนตัว (DM) ของผู้สมัครด้วย
+      // 7.2 ส่งแจ้งเตือนเข้าแชทส่วนตัว (DM) ของผู้สมัคร เพื่อเตือนให้กลับมากดยืนยันในช่อง Discord
       if (discordToken && cropSession.discord_id) {
         const dmRes = await fetch('https://discord.com/api/v10/users/@me/channels', {
           method: 'POST',
@@ -1027,7 +1027,7 @@ app.post('/api/crop/submit', async (req, res) => {
               })
             }).catch(() => {});
           } else {
-            // ผู้สมัครลงทะเบียนใหม่: ส่งสำเนาการ์ดยืนยันเข้า DM
+            // ผู้สมัครลงทะเบียนใหม่: ส่งข้อความแจ้งเตือนสั้นๆ เข้า DM ให้กลับมากดยืนยันในช่อง Discord
             await fetch(`https://discord.com/api/v10/channels/${dmChan.id}/messages`, {
               method: 'POST',
               headers: {
@@ -1035,54 +1035,7 @@ app.post('/api/crop/submit', async (req, res) => {
                 'Content-Type': 'application/json'
               },
               body: JSON.stringify({
-                content: `🔒 <@${cropSession.discord_id}> ยืนยันข้อมูลหรือไม่? โปรดตรวจสอบข้อมูลและรูปถ่ายขนาด 1 นิ้วด้านล่าง`,
-                embeds: [{
-                  title: '🛡️ ยืนยันข้อมูลการลงทะเบียนสารวัตร [ขั้นตอนสุดท้าย]',
-                  description:
-                    `สวัสดีครับคุณ **${member.first_name} ${member.last_name} (${member.nickname || '-'})**\n` +
-                    `ระบบได้รับการบันทึกรูปภาพขนาด 1 นิ้วของคุณเข้าสู่ระบบเรียบร้อยแล้ว!\n\n` +
-                    `👉 **โปรดตรวจสอบความถูกต้องด้านล่าง:**\n` +
-                    `• **หากข้อมูลและรูปถูกต้องแล้ว:** กด **"✅ กดยืนยัน"**\n` +
-                    `• **หากต้องการแก้ไขข้อมูลหรือเปลี่ยนรูปใหม่:** กด **"✏️ ปุ่มแก้ไข"**`,
-                  fields: [
-                    {
-                      name: '👤 ข้อมูลสารวัตร',
-                      value: `• ชื่อ-สกุล: **${member.first_name} ${member.last_name}**\n• ชื่อเล่น: **${member.nickname || '-'}**\n• ชั้น/ห้อง: **ม.${member.grade_class || '-'}** เลขที่ **#${member.student_no || '-'}**`,
-                      inline: true
-                    },
-                    {
-                      name: '🛡️ ข้อมูลการปฏิบัติหน้าที่',
-                      value: `• วันประจำการ: **วัน${weekdayName} (${weekday})**\n• ผลัดเวร: \`${member.duty_day || '-'}\` ${isSpecial ? '⭐' : ''}\n• เบอร์โทรศัพท์: \`${member.phone_number || '-'}\``,
-                      inline: true
-                    },
-                    {
-                      name: '⏳ สถานะปัจจุบัน',
-                      value: '📋 **พร้อมส่งขออนุมัติ (รอการกดยืนยันจากคุณ)**',
-                      inline: false
-                    }
-                  ],
-                  image: { url: finalImageUrl },
-                  color: 0x3498DB,
-                  footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์ (สำเนาส่วนตัว)' },
-                  timestamp: new Date().toISOString()
-                }],
-                components: [{
-                  type: 1,
-                  components: [
-                    {
-                      type: 2,
-                      style: 3, // Success (Green)
-                      label: '✅ กดยืนยัน',
-                      custom_id: `btn_confirm_send_approval_${member.id}`
-                    },
-                    {
-                      type: 2,
-                      style: 2, // Secondary (Grey)
-                      label: '✏️ ปุ่มแก้ไข',
-                      custom_id: `btn_edit_registration_info_${member.id}`
-                    }
-                  ]
-                }]
+                content: `✨ <@${cropSession.discord_id}> คุณได้ตัดแต่งรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!\n👉 **กรุณากลับไปกดยืนยันข้อมูลในช่อง <#${targetChannelId}>** เพื่อส่งคำขออนุมัติไปยังคณะผู้บริหารครับ`
               })
             }).catch(e => console.warn('[DM REVIEW SEND NOTICE]:', e.message));
           }
