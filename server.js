@@ -408,9 +408,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth และ /api/verify สำหรับสแกน QR บัตร)
+// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify สำหรับสแกน QR บัตร และ /api/crop สำหรับโทเค็นครอปรูป 1:1)
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/auth') || req.path.startsWith('/verify')) {
+  if (req.path.startsWith('/auth') || req.path.startsWith('/verify') || req.path.startsWith('/crop')) {
     return next();
   }
   return requireAuth(req, res, next);
