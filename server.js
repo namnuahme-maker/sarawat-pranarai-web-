@@ -2840,15 +2840,23 @@ app.get('/api/analytics/overview', async (req, res) => {
   try {
     const { startDate, endDate, preset = 'all' } = req.query;
 
-    // 1. Fetch Members
+    // 1. Fetch Members (เฉพาะสมาชิกสถานะ ACTIVE ที่ได้รับการอนุมัติแล้วเท่านั้น)
     let members = [];
     try {
       const { data: mData, error: mErr } = await supabase
         .from('members')
         .select('*')
+        .eq('status', 'ACTIVE')
         .order('duty_id', { ascending: true });
       if (!mErr && Array.isArray(mData) && mData.length > 0) {
-        members = mData;
+        // กรองตัดชื่อ-นามสกุลซ้ำซ้อน (Deduplication)
+        const seenNames = new Set();
+        members = mData.filter(m => {
+          const key = `${(m.first_name || '').trim()} ${(m.last_name || '').trim()}`;
+          if (seenNames.has(key)) return false;
+          seenNames.add(key);
+          return true;
+        });
       }
     } catch (e) {}
 
@@ -3041,11 +3049,20 @@ app.get('/api/analytics/overview', async (req, res) => {
       F: { name: 'เวรวันศุกร์', color: 'cyan', dutyDesc: 'ตรวจสัมภาระ & ดูแลความเรียบร้อยช่วงเลิกเรียน' }
     };
 
+    const getBaseWeekday = (dutyDay) => {
+      if (!dutyDay) return '';
+      if (dutyDay === 'TSS' || dutyDay === 'Ts') return 'Ts';
+      return dutyDay.replace(/S+$/, '');
+    };
+
     const organization = ['M', 'T', 'W', 'Ts', 'F'].map(shiftKey => {
-      const shiftMembers = members.filter(m => m.duty_day === shiftKey);
+      const shiftMembers = members.filter(m => getBaseWeekday(m.duty_day) === shiftKey);
       const head = shiftMembers.find(m => m.is_head) || shiftMembers[0] || null;
-      const deputy = shiftMembers.find(m => m.is_deputy && m !== head) || shiftMembers[1] || null;
-      const officers = shiftMembers.filter(m => m !== head && m !== deputy);
+      const deputy = shiftMembers.find(m => m.is_deputy && m.id !== (head?.id)) || 
+                     shiftMembers.find(m => m.id !== (head?.id)) || null;
+      const officers = shiftMembers.filter(m => 
+        (!head || m.id !== head.id) && (!deputy || m.id !== deputy.id)
+      );
 
       return {
         shift_code: shiftKey,
@@ -3054,7 +3071,7 @@ app.get('/api/analytics/overview', async (req, res) => {
         color: SHIFT_TITLES[shiftKey]?.color || 'amber',
         total_members: shiftMembers.length,
         head: head ? {
-          duty_id: head.duty_id,
+          duty_id: head.duty_id || '-',
           name: `${head.first_name || ''} ${head.last_name || ''}`.trim(),
           nickname: head.nickname || '',
           class_room: head.grade_class || head.room || '',
@@ -3062,7 +3079,7 @@ app.get('/api/analytics/overview', async (req, res) => {
           photo_url: head.photo_url || ''
         } : null,
         deputy: deputy ? {
-          duty_id: deputy.duty_id,
+          duty_id: deputy.duty_id || '-',
           name: `${deputy.first_name || ''} ${deputy.last_name || ''}`.trim(),
           nickname: deputy.nickname || '',
           class_room: deputy.grade_class || deputy.room || '',
@@ -3070,7 +3087,7 @@ app.get('/api/analytics/overview', async (req, res) => {
           photo_url: deputy.photo_url || ''
         } : null,
         officers: officers.map(o => ({
-          duty_id: o.duty_id,
+          duty_id: o.duty_id || '-',
           name: `${o.first_name || ''} ${o.last_name || ''}`.trim(),
           nickname: o.nickname || '',
           class_room: o.grade_class || o.room || '',

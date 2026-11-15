@@ -985,7 +985,7 @@
                 <span class="font-bold text-amber-400 flex items-center gap-1">
                   <span>👑</span> หัวหน้าผลัดเวร
                 </span>
-                <span class="font-mono text-amber-300 font-bold">${head ? head.duty_id : '-'}</span>
+                <span class="font-mono text-amber-300 font-bold">${head && head.duty_id && head.duty_id !== 'null' ? head.duty_id : '-'}</span>
               </div>
               <div class="text-xs font-bold text-white truncate">
                 ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
@@ -999,7 +999,7 @@
                 <span class="font-bold text-sky-400 flex items-center gap-1">
                   <span>🥈</span> รองหัวหน้าผลัดเวร
                 </span>
-                <span class="font-mono text-sky-300 font-bold">${deputy ? deputy.duty_id : '-'}</span>
+                <span class="font-mono text-sky-300 font-bold">${deputy && deputy.duty_id && deputy.duty_id !== 'null' ? deputy.duty_id : '-'}</span>
               </div>
               <div class="text-xs font-bold text-white truncate">
                 ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
@@ -1014,7 +1014,7 @@
                 ${officers.length > 0 ? officers.map(o => `
                   <div class="text-[11px] flex items-center justify-between bg-tactical-900/60 p-1.5 rounded-lg border border-tactical-border/50">
                     <div class="truncate">
-                      <span class="font-mono text-amber-300 text-[10px]">[${o.duty_id}]</span>
+                      <span class="font-mono text-amber-300 text-[10px]">[${o.duty_id && o.duty_id !== 'null' ? o.duty_id : '-'}]</span>
                       <span class="text-slate-200">${o.nickname || o.name}</span>
                     </div>
                     <span class="text-[10px] font-mono text-slate-400">${o.class_room}</span>
