@@ -873,6 +873,45 @@ app.post('/api/crop/submit', async (req, res) => {
       .update({ used_at: new Date().toISOString() })
       .eq('token', token);
 
+    // 7. ส่งการ์ดแจ้งเตือนผ่าน Discord DM ว่ารูปถ่ายได้รับการครอปและอัปเดตเรียบร้อยแล้ว
+    try {
+      const discordToken = process.env.DISCORD_TOKEN;
+      if (discordToken && cropSession.discord_id) {
+        const dmRes = await fetch('https://discord.com/api/v10/users/@me/channels', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bot ${discordToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ recipient_id: cropSession.discord_id })
+        });
+        if (dmRes.ok) {
+          const dmChan = await dmRes.json();
+          const verifyChanId = process.env.VERIFY_CHANNEL_ID || '1567570864835264542';
+          await fetch(`https://discord.com/api/v10/channels/${dmChan.id}/messages`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bot ${discordToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              embeds: [{
+                title: '✨ ครอปและปรับแต่งรูปถ่ายเรียบร้อยแล้ว!',
+                description: `รูปถ่ายหน้าตรงของคุณได้รับการตัดแต่งขนาดสี่เหลี่ยมจัตุรัส (1:1) และบันทึกลงระบบแล้ว\n\n` +
+                             `👉 **ขั้นตอนสุดท้าย:** โปรดกลับไปที่ห้อง <#${verifyChanId}> แล้วกด **"🔄 รีเฟรชรูปภาพ"** เพื่อดูรูปใหม่ หรือกด **"✅ ยืนยันข้อมูล & ส่งขออนุมัติ"** เพื่อส่งให้ผู้บริหารได้ทันทีครับ`,
+                image: { url: finalImageUrl },
+                color: 0x2ECC71,
+                footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์' },
+                timestamp: new Date().toISOString()
+              }]
+            })
+          });
+        }
+      }
+    } catch (dmErr) {
+      console.warn('[CROP DM NOTICE]:', dmErr.message);
+    }
+
     return res.json({
       success: true,
       imageUrl: finalImageUrl,
