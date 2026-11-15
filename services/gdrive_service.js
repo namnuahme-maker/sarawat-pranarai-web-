@@ -105,12 +105,46 @@ async function getGoogleAccessToken(creds) {
  * @param {object} metadata - ข้อมูลเพิ่มเติมเกี่ยวกับสารวัตร
  */
 async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
+  const folderId = process.env.GDRIVE_FOLDER_ID || '1lcAN_otZ7RPOax6J1oodV-LjQ4hou_ez';
+
+  // 1. ช่องทางที่ 1: Google Apps Script Webhook (แนะนำสูงสุดสำหรับโฟลเดอร์ใน My Drive - ไม่ติด Quota 0 Byte)
+  if (process.env.GDRIVE_WEBHOOK_URL) {
+    try {
+      const mime = metadata.mimeType || (filename.endsWith('.png') ? 'image/png' : (filename.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg'));
+      const res = await fetch(process.env.GDRIVE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          folderId,
+          category: metadata.category || 'profile',
+          filename,
+          mimeType: mime,
+          base64Data: buffer.toString('base64'),
+          metadata
+        })
+      });
+      if (res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && data.success) {
+          console.log(`[GDRIVE] ✅ อัปโหลดสำเร็จผ่าน Apps Script Gateway: ${filename} (ID: ${data.fileId})`);
+          return {
+            success: true,
+            fileId: data.fileId,
+            webViewLink: data.webViewLink
+          };
+        }
+      }
+    } catch (whErr) {
+      console.warn('[GDRIVE WEBHOOK NOTICE]:', whErr.message);
+    }
+  }
+
+  // 2. ช่องทางที่ 2: Google Service Account Direct API (สำหรับ Shared Drive)
   const creds = getServiceAccountCredentials();
-  const folderId = process.env.GDRIVE_FOLDER_ID;
 
   if (!creds) {
-    console.log('[GDRIVE] ⚠️ ยังไม่ได้ตั้งค่า Google Service Account Key (ข้ามการอัปโหลดเข้า Drive)');
-    return { success: false, skipped: true, reason: 'No Google Service Account configured' };
+    console.log('[GDRIVE] ⚠️ ยังไม่ได้ตั้งค่า GDRIVE_WEBHOOK_URL หรือ Service Account Key (ข้ามการอัปโหลดเข้า Drive)');
+    return { success: false, skipped: true, reason: 'No Google credentials configured' };
   }
 
   try {
