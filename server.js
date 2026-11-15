@@ -755,7 +755,7 @@ app.get('/api/crop/session/:token', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('crop_tokens')
-      .select('token, member_id, source_image_url, expires_at, used_at, members(id, first_name, last_name, nickname, duty_id)')
+      .select('token, member_id, source_image_url, expires_at, used_at, members(id, first_name, last_name, nickname, duty_id, status)')
       .eq('token', token)
       .maybeSingle();
 
@@ -777,7 +777,10 @@ app.get('/api/crop/session/:token', async (req, res) => {
     return res.json({
       valid: true,
       imageUrl: data.source_image_url,
-      memberName: memberName
+      memberName: memberName,
+      dutyId: member.duty_id || null,
+      status: member.status || null,
+      isActive: member.status === 'ACTIVE'
     });
   } catch (err) {
     console.error('[CROP] Session check error:', err);
@@ -944,6 +947,11 @@ app.post('/api/crop/submit', async (req, res) => {
         });
         if (dmRes.ok) {
           const dmChan = await dmRes.json();
+          const isActive = (member.status === 'ACTIVE');
+          const statusDesc = isActive
+            ? `✅ **สถานะ:** อัปเดตรูปถ่ายบนบัตรประจำตัวสารวัตรดิจิทัล 3D สำเร็จเรียบร้อยแล้ว!`
+            : `✅ **สถานะ:** ส่งคำขออนุมัติไปยังคณะผู้บริหารในห้อง <#${approvalChanId}> เรียบร้อยแล้ว กรุณารอการตรวจสอบและอนุมัติจากผู้บริหารครับ`;
+
           await fetch(`https://discord.com/api/v10/channels/${dmChan.id}/messages`, {
             method: 'POST',
             headers: {
@@ -953,11 +961,10 @@ app.post('/api/crop/submit', async (req, res) => {
             body: JSON.stringify({
               embeds: [{
                 title: '✨ ครอปและปรับแต่งรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!',
-                description: `รูปถ่ายหน้าตรงของคุณได้รับการตัดแต่งขนาด 1 นิ้ว (3:4) และบันทึกลงระบบพร้อมสำรองเข้า Google Drive เรียบร้อยแล้ว\n\n` +
-                             `✅ **สถานะ:** ส่งคำขออนุมัติไปยังคณะผู้บริหารในห้อง <#${approvalChanId}> เรียบร้อยแล้ว กรุณารอการตรวจสอบและอนุมัติจากผู้บริหารครับ`,
+                description: `รูปถ่ายหน้าตรงของคุณได้รับการตัดแต่งขนาด 1 นิ้ว (3:4) และบันทึกลงระบบพร้อมสำรองเข้า Google Drive เรียบร้อยแล้ว\n\n${statusDesc}`,
                 image: { url: finalImageUrl },
                 color: 0x2ECC71,
-                footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์' },
+                footer: { text: 'ระบบบริการสารวัตร • โรงเรียนพระนารายณ์' },
                 timestamp: new Date().toISOString()
               }]
             })
@@ -971,7 +978,8 @@ app.post('/api/crop/submit', async (req, res) => {
     return res.json({
       success: true,
       imageUrl: finalImageUrl,
-      gdriveUrl: gdriveUrl
+      gdriveUrl: gdriveUrl,
+      isActive: (member.status === 'ACTIVE')
     });
   } catch (err) {
     console.error('[CROP] Submit error:', err);
