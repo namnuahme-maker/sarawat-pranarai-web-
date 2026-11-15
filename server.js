@@ -776,7 +776,7 @@ app.get('/api/crop/session/:token', async (req, res) => {
 
     return res.json({
       valid: true,
-      imageUrl: data.source_image_url,
+      imageUrl: (data.source_image_url || '').split('#')[0],
       memberName: memberName,
       dutyId: member.duty_id || null,
       status: member.status || null,
@@ -883,6 +883,102 @@ app.post('/api/crop/submit', async (req, res) => {
     try {
       const discordToken = process.env.DISCORD_TOKEN;
       const approvalChanId = process.env.APPROVAL_CHANNEL_ID || '1567570916932722778';
+
+      // 7.0 Realtime update Discord message (ห้องที่ส่งรูป) ทันที
+      let targetChannelId = null;
+      let targetMessageId = null;
+      if (cropSession.source_image_url) {
+        const metaMatch = cropSession.source_image_url.match(/#discord_meta:(\d+):(\d+)/);
+        if (metaMatch) {
+          targetChannelId = metaMatch[1];
+          targetMessageId = metaMatch[2];
+        }
+      }
+
+      if (discordToken && targetChannelId && targetMessageId) {
+        const isSpecial = member.duty_day && member.duty_day.endsWith('S');
+        const weekday = member.duty_day ? (member.duty_day === 'TSS' ? 'Ts' : member.duty_day.replace(/S+$/, '') || member.duty_day) : 'M';
+        const DAY_NAMES = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Ts: 'พฤหัสบดี', F: 'ศุกร์', S: 'พิเศษ (ทุกวัน)' };
+        const weekdayName = DAY_NAMES[weekday] || weekday;
+
+        if (member.status === 'ACTIVE') {
+          // สารวัตรปัจจุบัน (อัปเดตบัตร 3D ทันที)
+          await fetch(`https://discord.com/api/v10/channels/${targetChannelId}/messages/${targetMessageId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bot ${discordToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              content: `✅ <@${cropSession.discord_id}> อัปเดตรูปถ่ายทำบัตรประจำตัว 3D สำเร็จเรียบร้อยแล้ว!`,
+              embeds: [{
+                title: '✨ อัปเดตรูปถ่ายทำบัตรประจำตัว 3D สำเร็จเรียบร้อยแล้ว!',
+                description:
+                  `คุณ **${member.first_name} ${member.last_name} (${member.nickname || '-'})** ได้ตัดแต่งรูปถ่ายขนาด 1 นิ้ว (3:4) เรียบร้อยแล้ว!\n\n` +
+                  `✅ บัตรประจำตัวสารวัตรดิจิทัล 3D ของคุณได้รับการอัปเดตรูปใหม่ทันที พร้อมสำรองเข้า Google Drive เรียบร้อยแล้ว`,
+                image: { url: finalImageUrl },
+                color: 0x2ECC71,
+                footer: { text: 'ระบบบริการสารวัตร • โรงเรียนพระนารายณ์' },
+                timestamp: new Date().toISOString()
+              }],
+              components: [{
+                type: 1,
+                components: [{
+                  type: 2,
+                  style: 5,
+                  label: '🪪 เปิดดูบัตรประจำตัว 3D',
+                  url: `https://sarawat-pranarai-web.onrender.com/card?id=${member.id}`
+                }]
+              }]
+            })
+          }).catch(err => console.warn('[REALTIME PATCH ACTIVE ERROR]:', err.message));
+        } else {
+          // ผู้สมัครลงทะเบียนใหม่ (อัปเดตแสดงสถานะส่งขออนุมัติเรียบร้อย)
+          await fetch(`https://discord.com/api/v10/channels/${targetChannelId}/messages/${targetMessageId}`, {
+            method: 'PATCH',
+            headers: {
+              'Authorization': `Bot ${discordToken}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              content: `✅ <@${cropSession.discord_id}> ปรับแต่งรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!`,
+              embeds: [{
+                title: '✅ ปรับแต่งรูปภาพขนาด 1 นิ้วสำเร็จ & ส่งคำขออนุมัติเรียบร้อยแล้ว',
+                description:
+                  `ยินดีด้วยครับคุณ **${member.first_name} ${member.last_name} (${member.nickname || '-'})**\n` +
+                  `ระบบได้รับการตัดแต่งรูปภาพขนาด 1 นิ้ว (3:4) มาตรฐานทำบัตรประจำตัวเรียบร้อยแล้ว!\n\n` +
+                  `🚀 **สถานะปัจจุบัน:**\n` +
+                  `• บันทึกรูปภาพขนาด 1 นิ้วความละเอียดสูงเข้าสู่ระบบเรียบร้อย\n` +
+                  `• สำรองไฟล์ภาพเข้า **Google Drive** ของโรงเรียนเรียบร้อย\n` +
+                  `• ส่งคำขอลงทะเบียนพร้อมรูปภาพไปยังคณะผู้บริหารในห้อง <#${approvalChanId}> แล้ว\n\n` +
+                  `⏳ กรุณารอคณะผู้บริหารตรวจสอบและอนุมัติการลงทะเบียน เมื่อได้รับการอนุมัติ บอทจะแจ้งเตือนและจัดทำบัตรสารวัตร 3D ให้ทันทีครับ!`,
+                fields: [
+                  {
+                    name: '👤 ข้อมูลสารวัตร',
+                    value: `• ชื่อ-สกุล: **${member.first_name} ${member.last_name}**\n• ชื่อเล่น: **${member.nickname || '-'}**\n• ชั้น/ห้อง: **ม.${member.grade_class || '-'}** เลขที่ **#${member.student_no || '-'}**`,
+                    inline: true
+                  },
+                  {
+                    name: '🛡️ ข้อมูลการปฏิบัติหน้าที่',
+                    value: `• วันประจำการ: **วัน${weekdayName} (${weekday})**\n• ผลัดเวร: \`${member.duty_day || '-'}\` ${isSpecial ? '⭐' : ''}`,
+                    inline: true
+                  },
+                  {
+                    name: '⏳ สถานะ',
+                    value: '⏳ **รอการอนุมัติจากผู้บริหาร (PENDING APPROVAL)**',
+                    inline: false
+                  }
+                ],
+                image: { url: finalImageUrl },
+                color: 0x2ECC71,
+                footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์' },
+                timestamp: new Date().toISOString()
+              }],
+              components: []
+            })
+          }).catch(err => console.warn('[REALTIME PATCH REGISTRATION ERROR]:', err.message));
+        }
+      }
 
       // 7.1 หากเป็นผู้สมัครใหม่ (ยังไม่ ACTIVE) ให้ส่งการ์ดขออนุมัติเข้าห้องประชุมหัวหน้าทันที
       if (discordToken && member.status !== 'ACTIVE') {
