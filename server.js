@@ -880,20 +880,19 @@ app.post('/api/crop/submit', async (req, res) => {
       .eq('token', token);
 
     // 7. แจ้งเตือนไปยัง Discord และส่งขออนุมัติเข้าห้องประชุมหัวหน้า
+    let targetChannelId = null;
+    let targetMessageId = null;
+    if (cropSession.source_image_url) {
+      const metaMatch = cropSession.source_image_url.match(/#discord_meta:(\d+):(\d+)/);
+      if (metaMatch) {
+        targetChannelId = metaMatch[1];
+        targetMessageId = metaMatch[2];
+      }
+    }
+
     try {
       const discordToken = process.env.DISCORD_TOKEN;
       const approvalChanId = process.env.APPROVAL_CHANNEL_ID || '1567570916932722778';
-
-      // 7.0 Realtime update Discord message (ห้องที่ส่งรูป) ทันที
-      let targetChannelId = null;
-      let targetMessageId = null;
-      if (cropSession.source_image_url) {
-        const metaMatch = cropSession.source_image_url.match(/#discord_meta:(\d+):(\d+)/);
-        if (metaMatch) {
-          targetChannelId = metaMatch[1];
-          targetMessageId = metaMatch[2];
-        }
-      }
 
       if (discordToken && targetChannelId && targetMessageId) {
         // 🔒 ลบข้อความการ์ดในห้องสาธารณะทิ้งทันที เพื่อความเป็นส่วนตัวสูงสุด ไม่ให้สมาชิกคนอื่นมองเห็น
