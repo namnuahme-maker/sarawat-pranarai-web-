@@ -215,13 +215,48 @@
           btn.classList.remove('from-amber-500', 'to-amber-500');
           btn.classList.add('from-emerald-500', 'to-emerald-600', 'text-white');
 
-          const alertMsg = result.isActive
-            ? '🎉 บันทึกรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!\n👉 ระบบได้สำรองรูปเข้า Google Drive และอัปเดตบัตรประจำตัวสารวัตร 3D ให้ทันที คุณสามารถปิดหน้านี้ได้เลยครับ'
-            : '🎉 บันทึกรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!\n👉 ระบบได้สำรองรูปเข้า Google Drive และส่งคำขออนุมัติไปยังคณะผู้บริหารโรงเรียนเรียบร้อยแล้ว คุณสามารถปิดหน้านี้ได้เลยครับ';
-          alert(alertMsg);
+          // Deep link to Discord registration channel (#🛡️│ลงทะเบียนสารวัตรใหม่)
+          const targetChanId = result.channelId || '1567570864835264542';
+          const discordDeepLink = `discord://discord.com/channels/1567547042207895664/${targetChanId}`;
+          const discordWebLink = `https://discord.com/channels/1567547042207895664/${targetChanId}`;
+
+          // Show success modal overlay
+          const successDiv = document.createElement('div');
+          successDiv.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300';
+          successDiv.innerHTML = `
+            <div class="bg-tactical-900 border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl space-y-4">
+              <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
+                ✅
+              </div>
+              <h3 class="text-lg font-bold text-slate-100">บันทึกรูปถ่ายขนาด 1 นิ้วสำเร็จ!</h3>
+              <p class="text-xs text-slate-300 leading-relaxed">
+                ระบบได้สำรองรูปเข้า <b>Google Drive</b> เรียบร้อยแล้ว<br/>
+                <span class="text-amber-400 font-medium">กำลังนำท่านกลับสู่ Discord เพื่อตรวจสอบข้อมูลส่วนตัวและกดยืนยัน...</span>
+              </p>
+              <div class="pt-2">
+                <a href="${discordDeepLink}" id="btn-back-discord" class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 font-bold rounded-2xl shadow-lg transition active:scale-95 text-sm">
+                  <span>🚀</span> แตะเพื่อกลับสู่ Discord ทันที
+                </a>
+              </div>
+              <div class="text-[11px] text-slate-500">
+                หากระบบไม่เปิด Discord อัตโนมัติ กรุณากดปุ่มด้านบน
+              </div>
+            </div>
+          `;
+          document.body.appendChild(successDiv);
+
+          // Attempt auto-redirect to Discord app
           setTimeout(() => {
-            window.close();
-          }, 1500);
+            try {
+              window.location.href = discordDeepLink;
+            } catch (e) {}
+          }, 300);
+
+          // After 2.5s update link to web Discord if app didn't capture
+          setTimeout(() => {
+            const btnBack = document.getElementById('btn-back-discord');
+            if (btnBack) btnBack.href = discordWebLink;
+          }, 2500);
         } else {
           alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'กรุณาลองใหม่อีกครั้ง'));
           btn.innerHTML = originalText;
