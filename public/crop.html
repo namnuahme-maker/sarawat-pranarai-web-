@@ -51,8 +51,17 @@
       <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-300 text-xs font-mono">
         <span>🛡️</span> SARAWAT PROFILE PHOTO STUDIO
       </div>
-      <h1 class="text-lg sm:text-xl font-extrabold text-white">จัดตำแหน่งและครอปรูปโปรไฟล์</h1>
-      <p id="member-name-display" class="text-xs text-slate-400">ลาก เลื่อน และซูม ให้ใบหน้าอยู่กึ่งกลางกรอบสี่เหลี่ยมจัตุรัส</p>
+      <h1 class="text-lg sm:text-xl font-extrabold text-white">จัดตำแหน่งและครอปรูปถ่าย (ขนาด 1 นิ้ว)</h1>
+      <p id="member-name-display" class="text-xs text-slate-400">ลาก เลื่อน และซูม ให้ใบหน้าและเครื่องแบบพอดีกรอบรูปขนาด 1 นิ้ว (มาตรฐานรูปหน้าปกเอกสาร)</p>
+    </div>
+
+    <!-- Ratio Selector Bar -->
+    <div class="flex items-center justify-center gap-1.5 text-[11px] font-mono">
+      <span class="text-slate-500 text-xs">สัดส่วน:</span>
+      <button type="button" onclick="setRatio(3/4, this)" class="ratio-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold transition">1 นิ้ว (3:4)</button>
+      <button type="button" onclick="setRatio(2.5/3.0, this)" class="ratio-btn px-2.5 py-1 rounded-lg bg-tactical-850 border border-tactical-border text-slate-300 hover:text-white transition">1 นิ้ว (5:6)</button>
+      <button type="button" onclick="setRatio(1, this)" class="ratio-btn px-2.5 py-1 rounded-lg bg-tactical-850 border border-tactical-border text-slate-300 hover:text-white transition">จัตุรัส (1:1)</button>
+      <button type="button" onclick="setRatio(NaN, this)" class="ratio-btn px-2.5 py-1 rounded-lg bg-tactical-850 border border-tactical-border text-slate-300 hover:text-white transition">อิสระ</button>
     </div>
 
     <!-- Cropper Container -->
@@ -97,7 +106,7 @@
 
     <!-- Footer Note -->
     <div class="text-[11px] text-slate-500 text-center font-mono">
-      🔒 ระบบจัดเก็บรูปถ่ายความละเอียดสูง (512×512 px) สำรองเข้า Google Drive ของโรงเรียนอัตโนมัติ
+      🔒 ระบบจัดเก็บรูปถ่ายขนาด 1 นิ้วความละเอียดสูง (600×800 px) สำรองเข้า Google Drive ของโรงเรียนอัตโนมัติ
     </div>
 
   </div>
@@ -106,6 +115,17 @@
     let cropper = null;
     const urlParams = new URLSearchParams(window.location.search);
     const token = urlParams.get('token');
+
+    function setRatio(ratio, btn) {
+      if (!cropper) return;
+      cropper.setAspectRatio(ratio);
+      document.querySelectorAll('.ratio-btn').forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-slate-950', 'font-bold');
+        b.classList.add('bg-tactical-850', 'text-slate-300');
+      });
+      btn.classList.remove('bg-tactical-850', 'text-slate-300');
+      btn.classList.add('bg-amber-500', 'text-slate-950', 'font-bold');
+    }
 
     async function init() {
       if (!token) {
@@ -123,7 +143,7 @@
         }
 
         if (data.memberName) {
-          document.getElementById('member-name-display').innerHTML = `สารวัตร: <b class="text-amber-300">${data.memberName}</b> • ปรับใบหน้าให้อยู่ตรงกลาง`;
+          document.getElementById('member-name-display').innerHTML = `สารวัตร: <b class="text-amber-300">${data.memberName}</b> • ปรับขนาด 1 นิ้ว (3:4)`;
         }
 
         const img = document.getElementById('image-to-crop');
@@ -133,9 +153,9 @@
           img.style.display = 'block';
 
           cropper = new Cropper(img, {
-            aspectRatio: 1, // บังคับสี่เหลี่ยมจัตุรัส 1:1
+            aspectRatio: 3 / 4, // รูปขนาด 1 นิ้ว (3:4) มาตรฐานรูปติดบัตรและหน้าปกเอกสาร
             viewMode: 1,
-            autoCropArea: 0.85,
+            autoCropArea: 0.9,
             responsive: true,
             restore: false,
             guides: true,
@@ -167,13 +187,13 @@
       if (!cropper) return;
       const btn = document.getElementById('btn-save');
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<span>⏳</span> กำลังบันทึกและส่งเข้า Google Drive...';
+      btn.innerHTML = '<span>⏳</span> กำลังบันทึกรูป 1 นิ้วเข้า Google Drive...';
       btn.disabled = true;
 
       try {
         const canvas = cropper.getCroppedCanvas({
-          width: 512,
-          height: 512,
+          width: 600,
+          height: 800,
           imageSmoothingEnabled: true,
           imageSmoothingQuality: 'high'
         });
