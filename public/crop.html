@@ -211,7 +211,7 @@
 
         const result = await res.json();
         if (res.ok && result.success) {
-          btn.innerHTML = '<span>✅</span> บันทึกสำเร็จ!';
+          btn.innerHTML = '<span>✅</span> บันทึกสำเร็จ! กำลังกลับ Discord...';
           btn.classList.remove('from-amber-500', 'to-amber-500');
           btn.classList.add('from-emerald-500', 'to-emerald-600', 'text-white');
 
@@ -220,43 +220,41 @@
           const discordDeepLink = `discord://discord.com/channels/1567547042207895664/${targetChanId}`;
           const discordWebLink = `https://discord.com/channels/1567547042207895664/${targetChanId}`;
 
-          // Show success modal overlay
-          const successDiv = document.createElement('div');
-          successDiv.className = 'fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in duration-300';
-          successDiv.innerHTML = `
-            <div class="bg-tactical-900 border border-emerald-500/40 rounded-3xl p-6 max-w-sm w-full text-center shadow-2xl space-y-4">
-              <div class="w-16 h-16 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-3xl mx-auto shadow-inner">
-                ✅
-              </div>
-              <h3 class="text-lg font-bold text-slate-100">บันทึกรูปถ่ายขนาด 1 นิ้วสำเร็จ!</h3>
-              <p class="text-xs text-slate-300 leading-relaxed">
-                ระบบได้สำรองรูปเข้า <b>Google Drive</b> เรียบร้อยแล้ว<br/>
-                🔒 <b>เพื่อความเป็นส่วนตัวสูงสุด:</b> ระบบได้ลบการ์ดในห้องรวม และส่งข้อมูลตรวจสอบไปยัง <b>แชทส่วนตัว (DM)</b> ของคุณใน Discord เรียบร้อยแล้ว
-              </p>
-              <div class="pt-2">
-                <a href="${discordDeepLink}" id="btn-back-discord" class="w-full inline-flex items-center justify-center gap-2 py-3 px-4 bg-gradient-to-r from-emerald-500 to-teal-500 hover:brightness-110 text-slate-950 font-bold rounded-2xl shadow-lg transition active:scale-95 text-sm">
-                  <span>🚀</span> แตะเพื่อเปิด Discord ทันที
-                </a>
-              </div>
-              <div class="text-[11px] text-slate-500">
-                หากระบบไม่เปิด Discord อัตโนมัติ กรุณากดปุ่มด้านบน
+          // ปิดหน้าต่างทันที (สำหรับ In-App Browser หรือ Webview)
+          try {
+            window.close();
+          } catch (e) {}
+
+          // พากลับแอป Discord ทันทีแบบ Real-time
+          window.location.href = discordDeepLink;
+
+          // แสดงแถบแจ้งเตือนด้านบน (Toast) เผื่อกรณีเบราว์เซอร์บล็อก window.close()
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-4 left-4 right-4 bg-emerald-600/95 backdrop-blur-md text-white p-4 rounded-2xl shadow-2xl z-50 flex items-center justify-between border border-emerald-400/30';
+          toast.innerHTML = `
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">✅</span>
+              <div>
+                <p class="font-bold text-sm">บันทึกรูปและส่งยืนยันสำเร็จ!</p>
+                <p class="text-xs text-emerald-100">กำลังกลับไปยัง Discord...</p>
               </div>
             </div>
+            <a href="${discordDeepLink}" onclick="try{window.close();}catch(e){}" class="px-3 py-1.5 bg-white text-emerald-800 font-bold rounded-xl text-xs hover:bg-emerald-50 active:scale-95 transition">
+              กลับ Discord
+            </a>
           `;
-          document.body.appendChild(successDiv);
+          document.body.appendChild(toast);
 
-          // Attempt auto-redirect to Discord app
+          // พยายามปิดและ redirect ซ้ำหลังจาก 500ms
           setTimeout(() => {
-            try {
-              window.location.href = discordDeepLink;
-            } catch (e) {}
-          }, 300);
+            try { window.close(); } catch (e) {}
+            window.location.href = discordDeepLink;
+          }, 500);
 
-          // After 2.5s update link to web Discord if app didn't capture
           setTimeout(() => {
-            const btnBack = document.getElementById('btn-back-discord');
-            if (btnBack) btnBack.href = discordWebLink;
-          }, 2500);
+            try { window.close(); } catch (e) {}
+            window.location.href = discordWebLink;
+          }, 2000);
         } else {
           alert('❌ เกิดข้อผิดพลาด: ' + (result.error || 'กรุณาลองใหม่อีกครั้ง'));
           btn.innerHTML = originalText;
