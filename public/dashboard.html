@@ -1477,20 +1477,49 @@
   <!-- ========================================================= -->
   <script>
     const COMMON_NICKNAMES = {
+      // ผู้ใช้ระบุเจาะจง
+      'ปอร์เช่': 'PORSCHE',
+      'ปอเช่': 'PORSCHE',
+      'พอร์ช': 'PORSCHE',
+      'กันดั้ม': 'GUNDAM',
+      'กันดัม': 'GUNDAM',
+      'ออกัส': 'AUGUST',
+      'ออกัสท์': 'AUGUST',
+      'ออร์กัส': 'AUGUST',
+      'ออม': 'AOM',
+      'ออมสิน': 'AOMSIN',
+      'ออมมี่': 'AOMMY',
+
+      // ชื่อเล่นยอดนิยมทั่วไป
       'น้ำเหนือ': 'NAMNUAH',
       'นำเหนือ': 'NAMNUAH',
-      'น้ำำ': 'NAM',
       'น้ำ': 'NAM',
+      'น้ำำ': 'NAM',
+      'น้ำชา': 'NAMCHA',
+      'น้ำตาล': 'NAMTAN',
+      'น้ำหวาน': 'NAMWAN',
+      'น้ำผึ้ง': 'NAMPEUNG',
       'ปัน': 'PUN',
+      'ปันปัน': 'PUNPUN',
+      'ปิ่น': 'PIN',
+      'คิว': 'Q',
+      'แบงก์': 'BANK',
+      'แบงค์': 'BANK',
+      'กานต์': 'KANT',
+      'บีม': 'BEAM',
+      'ภีม': 'PEEM',
+      'ภีมะ': 'PEEMA',
+      'นาย': 'NINE',
+      'พิมมี่': 'PIMMY',
       'นน': 'NON',
+      'นนท์': 'NON',
+      'นนท': 'NON',
       'ดิสดิส': 'DISDIS',
       'โบ๊ท': 'BOAT',
       'โบ๊ต': 'BOAT',
       'บอส': 'BOSS',
       'เบสท์': 'BEST',
       'เบส': 'BEST',
-      'แบงค์': 'BANK',
-      'แบงก์': 'BANK',
       'อาร์ม': 'ARM',
       'ไอซ์': 'ICE',
       'กาย': 'GUY',
@@ -1501,8 +1530,6 @@
       'ฟลุ๊ค': 'FLUKE',
       'ฟลุ๊คส์': 'FLUKE',
       'ฟลุค': 'FLUKE',
-      'นนท์': 'NON',
-      'นนท': 'NON',
       'กันต์': 'GUN',
       'กัน': 'GUN',
       'มาร์ค': 'MARK',
@@ -1538,55 +1565,129 @@
       'มิ้น': 'MINT',
       'มินต์': 'MINT',
       'แพร': 'PRAE',
+      'แพรว': 'PRAEW',
+      'แพรวา': 'PRAEWA',
       'พิม': 'PIM',
+      'พิมพ์': 'PIM',
       'บอม': 'BOMB',
       'บอมบ์': 'BOMB',
       'เบียร์': 'BEER',
       'วิว': 'VIEW',
       'โอ๊ค': 'OAK',
       'เอิร์ธ': 'EARTH',
+      'เอิร์ท': 'EARTH',
       'ข้าว': 'KHAO',
+      'ข้าวหอม': 'KHAOHOM',
       'เนย': 'NOEY',
       'เตย': 'TOEY',
+      'เต้ย': 'TOEY',
       'เป็ด': 'PED',
       'ไก่': 'KAI',
       'หมู': 'MOO',
-      'ปลา': 'PLA'
+      'ปลา': 'PLA',
+      'กัปตัน': 'CAPTAIN',
+      'จูเนียร์': 'JUNIOR',
+      'วินเนอร์': 'WINNER',
+      'ไตเติ้ล': 'TITLE',
+      'ออโต้': 'AUTO',
+      'ฟิล์ม': 'FILM',
+      'ฟิวส์': 'FUSE',
+      'โอม': 'OHM',
+      'ต้า': 'TAR',
+      'ต้าร์': 'TAR',
+      'ตั้ม': 'TUM',
+      'ดรีม': 'DREAM',
+      'คอปเตอร์': 'COPTER',
+      'การ์ตูน': 'CARTOON',
+      'สกาย': 'SKY',
+      'พีช': 'PEACH',
+      'แจ็ค': 'JACK',
+      'แชมป์': 'CHAMP',
+      'เบนซ์': 'BENZ',
+      'บาส': 'BAS',
+      'บอล': 'BALL',
+      'แป้ง': 'PANG',
+      'ฝน': 'FON',
+      'ฝ้าย': 'FAI',
+      'หยก': 'YOK',
+      'เมย์': 'MAY',
+      'มด': 'MOD',
+      'ปู': 'POO',
+      'กุ้ง': 'KOONG',
+      'ส้ม': 'SOM',
+      'เจ': 'JAY',
+      'จอย': 'JOY',
+      'เจน': 'JANE',
+      'จูน': 'JUNE',
+      'ซัน': 'SUN',
+      'นิก': 'NICK',
+      'ปาล์ม': 'PALM',
+      'ปิง': 'PING',
+      'ต้อม': 'TOM',
+      'บอย': 'BOY',
+      'เอม': 'AIM',
+      'แอม': 'AM',
+      'อิง': 'ING',
+      'อาร์ต': 'ART',
+      'เชน': 'SHANE',
+      'มิน': 'MIN',
+      'นิวตัน': 'NEWTON',
+      'ตั๊ก': 'TUK',
+      'อั้ม': 'AUM',
+      'อุ้ม': 'AUM'
     };
 
     function romanizeThaiNickname(thai) {
       if (!thai) return 'SARAWAT';
       const clean = thai.trim();
       if (!clean || clean === '.' || clean === '-') return 'SARAWAT';
-      
+
+      // 1. If already English / Latin characters
       if (/^[A-Za-z0-9_\-\s]+$/.test(clean)) {
         return clean.toUpperCase();
       }
 
+      // 2. Direct dictionary lookup
       if (COMMON_NICKNAMES[clean]) {
         return COMMON_NICKNAMES[clean];
       }
 
+      // 3. Strip tone marks (วรรณยุกต์: ่ ้ ๊ ๋ ์ ็ ํ ๎)
       const withoutTones = clean.replace(/[\u0E48-\u0E4C\u0E47\u0E4D\u0E4E\u0E3A]/g, '');
       if (COMMON_NICKNAMES[withoutTones]) {
         return COMMON_NICKNAMES[withoutTones];
       }
 
-      for (const [k, v] of Object.entries(COMMON_NICKNAMES)) {
-        if (clean === k || withoutTones === k) return v;
+      // 4. Strip silenced letters with Than-tha-khat / Ga-run (e.g. ร์ ์ ธ์ ฆ์ ภ์)
+      const withoutGarun = clean.replace(/[ก-ฮ][\u0E30-\u0E39]?\u0E4C/g, '');
+      if (COMMON_NICKNAMES[withoutGarun]) {
+        return COMMON_NICKNAMES[withoutGarun];
+      }
+      const cleanWithoutGarunTones = withoutGarun.replace(/[\u0E48-\u0E4C\u0E47\u0E4D\u0E4E\u0E3A]/g, '');
+      if (COMMON_NICKNAMES[cleanWithoutGarunTones]) {
+        return COMMON_NICKNAMES[cleanWithoutGarunTones];
       }
 
-      let res = clean;
-      res = res.replace(/เ(.*)ือ(.*)/g, '$1UAH$2');
-      res = res.replace(/แ(.*)ว/g, '$1AEW');
-      res = res.replace(/เ(.*)ย/g, '$1OEY');
-      res = res.replace(/เ(.*)า/g, '$1AO');
-      res = res.replace(/โ(.*)ะ/g, '$1O');
-      res = res.replace(/โ(.*)/g, '$1O');
-      res = res.replace(/แ(.*)/g, '$1AE');
-      res = res.replace(/เ(.*)/g, '$1E');
+      // 5. Intelligent Phonetic Romanization Algorithm
+      let res = clean.replace(/[ก-ฮ][\u0E30-\u0E39]?\u0E4C/g, ''); // strip silent letters
+      res = res.replace(/[\u0E48-\u0E4B]/g, ''); // strip tone marks
+
+      // Multi-character vowel combinations
+      res = res.replace(/เ([ก-ฮ])ือ([ก-ฮ]?)/g, '$1UAH$2');
+      res = res.replace(/เ([ก-ฮ])ีย([ก-ฮ]?)/g, '$1IA$2');
+      res = res.replace(/แ([ก-ฮ])ว/g, '$1AEW');
+      res = res.replace(/เ([ก-ฮ])ย/g, '$1OEY');
+      res = res.replace(/เ([ก-ฮ])า/g, '$1AO');
+      res = res.replace(/โ([ก-ฮ])ะ/g, '$1O');
+      res = res.replace(/โ([ก-ฮ])([ก-ฮ]?)/g, '$1O$2');
+      res = res.replace(/แ([ก-ฮ])([ก-ฮ]?)/g, '$1AE$2');
+      res = res.replace(/เ([ก-ฮ])([ก-ฮ]?)/g, '$1E$2');
+      res = res.replace(/ไ([ก-ฮ])/g, '$1AI');
+      res = res.replace(/ใ([ก-ฮ])/g, '$1AI');
       res = res.replace(/ำ/g, 'AM');
-      res = res.replace(/ั/g, 'U');
+      res = res.replace(/([ก-ฮ])ั([ก-ฮ])/g, '$1U$2');
+      res = res.replace(/([ก-ฮ])็([ก-ฮ])/g, '$1O$2');
+      res = res.replace(/([ก-ฮ])อ([ก-ฮ])/g, '$1OR$2');
       res = res.replace(/า/g, 'A');
       res = res.replace(/ิ/g, 'I');
       res = res.replace(/ี/g, 'EE');
@@ -1594,7 +1695,7 @@
       res = res.replace(/ื/g, 'EU');
       res = res.replace(/ุ/g, 'U');
       res = res.replace(/ู/g, 'OO');
-      
+
       const consonants = {
         'ก': 'K', 'ข': 'KH', 'ฃ': 'KH', 'ค': 'KH', 'ฅ': 'KH', 'ฆ': 'KH',
         'ง': 'NG', 'จ': 'J', 'ฉ': 'CH', 'ช': 'CH', 'ซ': 'S', 'ฌ': 'CH',
@@ -1602,7 +1703,7 @@
         'น': 'N', 'บ': 'B', 'ป': 'P', 'ผ': 'PH', 'ฝ': 'F', 'พ': 'PH',
         'ฟ': 'F', 'ภ': 'PH', 'ม': 'M', 'ย': 'Y', 'ร': 'R', 'ล': 'L',
         'ว': 'W', 'ศ': 'S', 'ษ': 'S', 'ส': 'S', 'ห': 'H', 'ฬ': 'L',
-        'อ': 'O', 'ฮ': 'H', 'ๆ': ''
+        'อ': 'A', 'ฮ': 'H'
       };
 
       let out = '';
