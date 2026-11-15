@@ -796,7 +796,7 @@ app.post('/api/crop/submit', async (req, res) => {
     // 1. ดึงข้อมูล Token
     const { data: cropSession, error: sErr } = await supabase
       .from('crop_tokens')
-      .select('*, members(id, first_name, last_name, nickname, duty_id)')
+      .select('*, members(id, first_name, last_name, nickname, duty_id, duty_day, grade_class, student_no, phone_number, status)')
       .eq('token', token)
       .maybeSingle();
 
@@ -859,6 +859,9 @@ app.post('/api/crop/submit', async (req, res) => {
       profile_image_url: finalImageUrl,
       photo_cropped_at: new Date().toISOString()
     };
+    if (member.status !== 'ACTIVE') {
+      updatePayload.status = 'PENDING_APPROVAL';
+    }
     if (gdriveId) updatePayload.gdrive_file_id = gdriveId;
     if (gdriveUrl) updatePayload.gdrive_file_url = gdriveUrl;
 
@@ -873,9 +876,63 @@ app.post('/api/crop/submit', async (req, res) => {
       .update({ used_at: new Date().toISOString() })
       .eq('token', token);
 
-    // 7. ส่งการ์ดแจ้งเตือนผ่าน Discord DM ว่ารูปถ่ายได้รับการครอปและอัปเดตเรียบร้อยแล้ว
+    // 7. แจ้งเตือนไปยัง Discord และส่งขออนุมัติเข้าห้องประชุมหัวหน้า
     try {
       const discordToken = process.env.DISCORD_TOKEN;
+      const approvalChanId = process.env.APPROVAL_CHANNEL_ID || '1567570916932722778';
+
+      // 7.1 หากเป็นผู้สมัครใหม่ (ยังไม่ ACTIVE) ให้ส่งการ์ดขออนุมัติเข้าห้องประชุมหัวหน้าทันที
+      if (discordToken && member.status !== 'ACTIVE') {
+        const isSpecial = member.duty_day && member.duty_day.endsWith('S');
+        const weekday = member.duty_day ? (member.duty_day === 'TSS' ? 'Ts' : member.duty_day.replace(/S+$/, '') || member.duty_day) : 'M';
+        const DAY_NAMES = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Ts: 'พฤหัสบดี', F: 'ศุกร์', S: 'พิเศษ (ทุกวัน)' };
+        const weekdayName = DAY_NAMES[weekday] || weekday;
+
+        await fetch(`https://discord.com/api/v10/channels/${approvalChanId}/messages`, {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bot ${discordToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            embeds: [{
+              title: '📋 คำขอลงทะเบียนสารวัตรใหม่ [รอการตรวจสอบ]',
+              description:
+                `มีสารวัตรนักเรียนทำรายการลงทะเบียนและจัดสัดส่วนรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว โปรดตรวจสอบและดำเนินการ\n\n` +
+                `👤 **ชื่อ-สกุล:** ${member.first_name} ${member.last_name} (**${member.nickname || '-'}**)\n` +
+                `🏫 **ชั้นเรียน:** ม.${member.grade_class || '-'} (เลขที่ ${member.student_no || '-'})\n` +
+                `📞 **เบอร์โทรศัพท์:** \`${member.phone_number || '-'}\`\n` +
+                `📅 **เวรประจำวัน:** วัน${weekdayName} (\`${weekday}\`)\n` +
+                `⭐ **ลักษณะเวร:** ${isSpecial ? `⭐ **เวรพิเศษ (ทุกวัน)** [ผลัด \`${member.duty_day}\`]` : `👤 เวรเฉพาะวัน [ผลัด \`${member.duty_day}\`]`}\n` +
+                `🏷️ **ผลัดเวร:** \`${member.duty_day || '-'}\`\n` +
+                `💬 **บัญชี Discord:** <@${cropSession.discord_id}>`,
+              image: { url: finalImageUrl },
+              color: isSpecial ? 0x9B59B6 : 0xF39C12,
+              footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์' },
+              timestamp: new Date().toISOString()
+            }],
+            components: [{
+              type: 1,
+              components: [
+                {
+                  type: 2,
+                  style: 3,
+                  label: '✅ อนุมัติการลงทะเบียน',
+                  custom_id: `btn_approve_member_${member.id}`
+                },
+                {
+                  type: 2,
+                  style: 4,
+                  label: '❌ ปฏิเสธคำขอ',
+                  custom_id: `btn_reject_member_${member.id}`
+                }
+              ]
+            }]
+          })
+        }).catch(err => console.warn('[CROP APPROVAL NOTIFY NOTICE]:', err.message));
+      }
+
+      // 7.2 ส่งแจ้งเตือนส่วนตัว (DM) ให้ผู้สมัครรับทราบ
       if (discordToken && cropSession.discord_id) {
         const dmRes = await fetch('https://discord.com/api/v10/users/@me/channels', {
           method: 'POST',
@@ -887,7 +944,6 @@ app.post('/api/crop/submit', async (req, res) => {
         });
         if (dmRes.ok) {
           const dmChan = await dmRes.json();
-          const verifyChanId = process.env.VERIFY_CHANNEL_ID || '1567570864835264542';
           await fetch(`https://discord.com/api/v10/channels/${dmChan.id}/messages`, {
             method: 'POST',
             headers: {
@@ -896,20 +952,20 @@ app.post('/api/crop/submit', async (req, res) => {
             },
             body: JSON.stringify({
               embeds: [{
-                title: '✨ ครอปและปรับแต่งรูปถ่ายเรียบร้อยแล้ว!',
-                description: `รูปถ่ายหน้าตรงของคุณได้รับการตัดแต่งขนาด 1 นิ้ว (มาตรฐานรูปหน้าปกเอกสาร) และบันทึกลงระบบแล้ว\n\n` +
-                             `👉 **ขั้นตอนสุดท้าย:** โปรดกลับไปที่ห้อง <#${verifyChanId}> แล้วกด **"🔄 รีเฟรชรูปภาพ"** เพื่อดูรูปใหม่ หรือกด **"✅ ยืนยันข้อมูล & ส่งขออนุมัติ"** เพื่อส่งให้ผู้บริหารได้ทันทีครับ`,
+                title: '✨ ครอปและปรับแต่งรูปถ่ายขนาด 1 นิ้วเรียบร้อยแล้ว!',
+                description: `รูปถ่ายหน้าตรงของคุณได้รับการตัดแต่งขนาด 1 นิ้ว (3:4) และบันทึกลงระบบพร้อมสำรองเข้า Google Drive เรียบร้อยแล้ว\n\n` +
+                             `✅ **สถานะ:** ส่งคำขออนุมัติไปยังคณะผู้บริหารในห้อง <#${approvalChanId}> เรียบร้อยแล้ว กรุณารอการตรวจสอบและอนุมัติจากผู้บริหารครับ`,
                 image: { url: finalImageUrl },
                 color: 0x2ECC71,
                 footer: { text: 'ระบบลงทะเบียนสารวัตร • โรงเรียนพระนารายณ์' },
                 timestamp: new Date().toISOString()
               }]
             })
-          });
+          }).catch(() => {});
         }
       }
     } catch (dmErr) {
-      console.warn('[CROP DM NOTICE]:', dmErr.message);
+      console.warn('[CROP NOTIFICATION NOTICE]:', dmErr.message);
     }
 
     return res.json({
