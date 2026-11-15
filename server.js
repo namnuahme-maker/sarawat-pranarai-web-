@@ -2942,23 +2942,9 @@ app.get('/api/analytics/overview', async (req, res) => {
     });
 
     attendance.forEach(rec => {
+      // 🛡️ บันทึกเฉพาะสารวัตรที่มีตัวตนจริงในฐานข้อมูล members เท่านั้น ป้องกัน duty_id ผีแปลกปลอมโผล่บน Leaderboard
       if (!memberMap[rec.duty_id]) {
-        memberMap[rec.duty_id] = {
-          duty_id: rec.duty_id,
-          name: rec.name || rec.duty_id,
-          nickname: rec.nickname || '',
-          class_room: rec.class_room || '',
-          duty_day: rec.shift_code || 'M',
-          is_head: false,
-          is_deputy: false,
-          photo_url: '',
-          present_count: 0,
-          late_count: 0,
-          leave_count: 0,
-          absent_count: 0,
-          total_attendance: 0,
-          leave_types: {}
-        };
+        return;
       }
       const st = rec.status;
       memberMap[rec.duty_id].total_attendance++;

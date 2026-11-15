@@ -105,15 +105,6 @@
       "created_at": "2026-11-14T09:58:52.671Z"
     },
     {
-      "session_id": "att-sess-1794650332669",
-      "duty_id": "TS5",
-      "member_name": "นายปัณณวัฒน์ ปานฮวด",
-      "shift_code": "TS",
-      "duty_date": "2026-11-14",
-      "status": "LATE",
-      "created_at": "2026-11-14T09:58:52.671Z"
-    },
-    {
       "session_id": "att-sess-1794650483823",
       "duty_id": "TS1",
       "member_name": "นายณิชกานต์ คำไชย",
@@ -144,15 +135,6 @@
       "session_id": "att-sess-1794650483823",
       "duty_id": "TS4",
       "member_name": "นายนนท์ธวัตร แย้มอำพล",
-      "shift_code": "T",
-      "duty_date": "2026-11-14",
-      "status": "PRESENT",
-      "created_at": "2026-11-14T10:01:23.824Z"
-    },
-    {
-      "session_id": "att-sess-1794650483823",
-      "duty_id": "TS5",
-      "member_name": "นายปัณณวัฒน์ ปานฮวด",
       "shift_code": "T",
       "duty_date": "2026-11-14",
       "status": "PRESENT",
@@ -189,15 +171,6 @@
       "session_id": "att-sess-1794651363243",
       "duty_id": "TS4",
       "member_name": "นายนนท์ธวัตร แย้มอำพล",
-      "shift_code": "T",
-      "duty_date": "11/14",
-      "status": "PRESENT",
-      "created_at": "2026-11-14T10:16:03.246Z"
-    },
-    {
-      "session_id": "att-sess-1794651363243",
-      "duty_id": "TS5",
-      "member_name": "นายปัณณวัฒน์ ปานฮวด",
       "shift_code": "T",
       "duty_date": "11/14",
       "status": "PRESENT",
