@@ -59,7 +59,7 @@ async function getGoogleAccessToken(creds) {
 
   const claim = {
     iss: creds.client_email,
-    scope: 'https://www.googleapis.com/auth/drive.file',
+    scope: 'https://www.googleapis.com/auth/drive',
     aud: 'https://oauth2.googleapis.com/token',
     exp: now + 3600,
     iat: now
@@ -139,7 +139,7 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
       Buffer.from(closeDelimiter)
     ]);
 
-    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,webViewLink', {
+    const res = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&supportsAllDrives=true&fields=id,name,webViewLink', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${token}`,
