@@ -558,6 +558,7 @@
                   <option value="MEMBER">MEMBER (สารวัตรทั่วไป)</option>
                   <option value="VICE_PRESIDENT">VICE_PRESIDENT (รองประธาน)</option>
                   <option value="PRESIDENT">PRESIDENT (ประธานสารวัตร)</option>
+                  <option value="ADMIN">ADMIN (⚡ ผู้ดูแลระบบ - สิทธิ์สูงสุด)</option>
                 </select>
               </div>
               <div>
@@ -905,14 +906,14 @@
       }
     }
 
-    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร (ประธาน / รองประธาน)
+    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร / แอดมิน (สิทธิ์ไม่เบลอรูปภาพ)
     function isExecutiveRole(m) {
       if (!m) return false;
       const r = (m.role || '').toUpperCase();
       const sr = (m.shift_role || '').toUpperCase();
       const rank = (m.rank || '');
-      return r === 'PRESIDENT' || r === 'VICE_PRESIDENT' || 
-             rank.includes('ประธาน') || rank.includes('รองประธาน') ||
+      return r === 'ADMIN' || r === 'PRESIDENT' || r === 'VICE_PRESIDENT' || 
+             rank.includes('ดูแล') || rank.includes('ประธาน') || rank.includes('รองประธาน') ||
              r === 'COMMANDER';
     }
 
@@ -1683,7 +1684,8 @@
       const dRole = document.getElementById('dossier-role-title');
       if (dRole) {
         let roleText = 'สารวัตรนักเรียน';
-        if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
+        if (m.role === 'ADMIN') roleText = '⚡ ผู้ดูแลระบบ (System Admin)';
+        else if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
         else if (m.role === 'VICE_PRESIDENT') roleText = '⭐ รองประธานสารวัตร';
         else if (m.shift_role === 'SHIFT_HEAD') roleText = '🛡️ หัวหน้าเวรประจำวัน';
         dRole.textContent = roleText;
@@ -1764,7 +1766,7 @@
     function canEditMembers() {
       const u = window.currentUser;
       if (!u) return true;
-      return Boolean(u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
+      return Boolean(u.isAdmin || u.role === 'ADMIN' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
     }
 
     function toggleMemberEditMode(show) {

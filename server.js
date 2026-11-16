@@ -91,15 +91,18 @@ function getUserFromReq(req) {
     return {
       id: 'dev_local_admin',
       username: 'Local Developer',
-      nickname: 'ผู้ดูแลระบบ (Local)',
+      nickname: 'ผู้ดูแลระบบ (Local Admin)',
       discriminator: '0000',
       avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=256&q=80',
       officialPhoto: null,
-      role: 'COMMANDER',
+      role: 'ADMIN',
+      isAdmin: true,
       isCommander: true,
+      isLeader: true,
       isGuildMember: true,
       roles: ['1567547042207895664'],
-      serverNick: 'ผู้ดูแลระบบ (Localhost)'
+      serverNick: '⚡ ผู้ดูแลระบบ (Localhost)',
+      rank: 'ผู้ดูแลระบบ'
     };
   }
 
@@ -192,11 +195,18 @@ async function processDiscordUserLogin(accessToken, res) {
       if (data) memberData = data;
     } catch (e) {}
 
+    const roleAdmin = process.env.ROLE_ADMIN;
     const rolePresident = process.env.ROLE_PRESIDENT;
     const roleVicePresident = process.env.ROLE_VICE_PRESIDENT;
-    const isPresident = roles.includes(rolePresident);
-    const isVicePresident = roles.includes(roleVicePresident);
-    const isLeader = isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+
+    // ตรวจสอบสิทธิ์ผู้ดูแลระบบ (Admin role หรือ Discord Administrator permission)
+    const isAdmin = (roleAdmin && roles.includes(roleAdmin)) || 
+                    memberData?.role === 'ADMIN' ||
+                    (guildMember && (BigInt(guildMember.permissions || '0') & BigInt(0x8)) === BigInt(0x8));
+    const isPresident = roles.includes(rolePresident) || memberData?.role === 'PRESIDENT';
+    const isVicePresident = roles.includes(roleVicePresident) || memberData?.role === 'VICE_PRESIDENT';
+    const isLeader = isAdmin || isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+    const isCommander = isAdmin || isPresident;
     const isVerified = roles.includes(process.env.ROLE_VERIFIED) || !!memberData;
 
     // 🌟 เน้นย้ำ: ดึงรูปโปรไฟล์ที่ผู้ใช้งานส่งในช่องส่งรูป (profile_image_url) มาใช้เป็นหลักอันดับ 1
@@ -214,10 +224,13 @@ async function processDiscordUserLogin(accessToken, res) {
       officialPhoto: submittedPhoto || null,
       roles: roles,
       isGuildMember,
+      isAdmin,
+      isCommander,
       isLeader,
       isVerified,
+      role: isAdmin ? 'ADMIN' : (isPresident ? 'PRESIDENT' : (isVicePresident ? 'VICE_PRESIDENT' : (memberData?.role || 'MEMBER'))),
       dutyId: memberData?.duty_id || null,
-      rank: memberData?.rank || (isPresident ? 'ประธาน' : isVicePresident ? 'รองประธาน' : (memberData?.shift_role || 'สารวัตร')),
+      rank: memberData?.rank || (isAdmin ? 'ผู้ดูแลระบบ' : (isPresident ? 'ประธาน' : (isVicePresident ? 'รองประธาน' : (memberData?.shift_role || 'สารวัตร')))),
       exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // อายุเซสชัน 7 วัน
     };
 
@@ -1105,10 +1118,10 @@ app.get('/api/members', async (req, res) => {
 app.patch('/api/members/:id', async (req, res) => {
   try {
     const user = getUserFromReq(req);
-    // ตรวจสอบสิทธิ์ว่าเป็นประธาน/ผู้บริหาร
-    const isAllowed = user && (user.isCommander || user.isLeader || user.role === 'COMMANDER' || user.role === 'PRESIDENT');
+    // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือประธาน/ผู้บริหาร
+    const isAllowed = user && (user.isAdmin || user.isCommander || user.isLeader || user.role === 'ADMIN' || user.role === 'COMMANDER' || user.role === 'PRESIDENT');
     if (!isAllowed) {
-      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์แก้ไขข้อมูลสงวนเฉพาะประธานหรือผู้บริหารเท่านั้น' });
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์แก้ไขข้อมูลสงวนเฉพาะผู้ดูแลระบบหรือประธานสารวัตรเท่านั้น' });
     }
 
     const { id } = req.params;
