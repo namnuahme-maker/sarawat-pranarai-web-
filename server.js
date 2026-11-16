@@ -3162,9 +3162,8 @@ app.get('/api/analytics/overview', async (req, res) => {
 
     const organization = ['M', 'T', 'W', 'Ts', 'F'].map(shiftKey => {
       const shiftMembers = members.filter(m => getBaseWeekday(m.duty_day) === shiftKey);
-      const head = shiftMembers.find(m => m.is_head) || shiftMembers[0] || null;
-      const deputy = shiftMembers.find(m => m.is_deputy && m.id !== (head?.id)) || 
-                     shiftMembers.find(m => m.id !== (head?.id)) || null;
+      const head = shiftMembers.find(m => m.is_head || (m.shift_role || '').toUpperCase() === 'SHIFT_HEAD') || null;
+      const deputy = shiftMembers.find(m => (m.is_deputy || (m.shift_role || '').toUpperCase() === 'SHIFT_DEPUTY') && m.id !== (head?.id)) || null;
       const officers = shiftMembers.filter(m => 
         (!head || m.id !== head.id) && (!deputy || m.id !== deputy.id)
       );
@@ -3285,6 +3284,33 @@ app.get(['/dashboard', '/dashboard.html', '/app', '/console'], requireAuth, (req
 // -------------------------------------------------------------
 // 7.2.2 หน้าพิมพ์ใบเช็คชื่อ A4 และระบบสแกนเช็คชื่อ Multi-Shot
 // -------------------------------------------------------------
+app.get('/sheet/:id', async (req, res) => {
+  const sheetId = req.params.id;
+  try {
+    const { data, error } = await supabase.storage.from('sarawat-photos').download(`temp-sheets/${sheetId}.html`);
+    if (error || !data) {
+      res.status(404).send(`
+        <!DOCTYPE html>
+        <html lang="th">
+        <head><meta charset="UTF-8"><title>เอกสารหมดอายุ</title></head>
+        <body style="font-family:sans-serif;background:#0f172a;color:#fff;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;">
+          <div style="background:#1e293b;padding:2.5rem;border-radius:12px;text-align:center;max-width:440px;">
+            <h2 style="color:#f87171;">⏰ ลิ้งก์เอกสารนี้หมดอายุแล้ว</h2>
+            <p style="color:#94a3b8;">เอกสารชั่วคราวถูกลบออกจากหน่วยความจำแล้ว กรุณากดขอใบตารางเช็คชื่อใหม่จากช่อง Discord</p>
+          </div>
+        </body></html>
+      `);
+      return;
+    }
+    const html = await data.text();
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
+    res.send(html);
+  } catch (err) {
+    res.status(500).send('Internal Server Error: ' + err.message);
+  }
+});
+
 app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
 });

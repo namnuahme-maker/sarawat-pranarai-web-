@@ -741,8 +741,8 @@
       document.getElementById('meta-count-text').textContent = `${roster.length} นาย`;
       document.getElementById('sign-shift-title').innerHTML = `( ...................................................... )<br>หัวหน้า${shiftData.name}`;
 
-      const head = roster.find(m => m.is_head) || roster[0];
-      const deputy = roster.find(m => m.is_deputy) || roster[1] || roster[0];
+      const head = roster.find(m => m.is_head || (m.shift_role || '').toUpperCase() === 'SHIFT_HEAD') || null;
+      const deputy = roster.find(m => (m.is_deputy || (m.shift_role || '').toUpperCase() === 'SHIFT_DEPUTY') && m.id !== (head?.id)) || null;
       document.getElementById('lead-head-name').textContent = head ? `[${head.duty_id}] ${head.nickname} (${head.name})` : 'ยังไม่ได้แต่งตั้ง';
       document.getElementById('lead-deputy-name').textContent = deputy ? `[${deputy.duty_id}] ${deputy.nickname} (${deputy.name})` : 'ยังไม่ได้แต่งตั้ง';
 
