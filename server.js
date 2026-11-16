@@ -196,6 +196,7 @@ async function processDiscordUserLogin(accessToken, res) {
     } catch (e) {}
 
     const roleAdmin = process.env.ROLE_ADMIN;
+    const roleTeacher = process.env.ROLE_TEACHER;
     const rolePresident = process.env.ROLE_PRESIDENT;
     const roleVicePresident = process.env.ROLE_VICE_PRESIDENT;
 
@@ -203,9 +204,10 @@ async function processDiscordUserLogin(accessToken, res) {
     const isAdmin = (roleAdmin && roles.includes(roleAdmin)) || 
                     memberData?.role === 'ADMIN' ||
                     (guildMember && (BigInt(guildMember.permissions || '0') & BigInt(0x8)) === BigInt(0x8));
+    const isTeacher = (roleTeacher && roles.includes(roleTeacher)) || memberData?.role === 'TEACHER' || memberData?.shift_role === 'TEACHER';
     const isPresident = roles.includes(rolePresident) || memberData?.role === 'PRESIDENT';
     const isVicePresident = roles.includes(roleVicePresident) || memberData?.role === 'VICE_PRESIDENT';
-    const isLeader = isAdmin || isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+    const isLeader = isAdmin || isTeacher || isPresident || isVicePresident || roles.some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
     const isCommander = isAdmin || isPresident;
     const isVerified = roles.includes(process.env.ROLE_VERIFIED) || !!memberData;
 
@@ -225,12 +227,13 @@ async function processDiscordUserLogin(accessToken, res) {
       roles: roles,
       isGuildMember,
       isAdmin,
+      isTeacher,
       isCommander,
       isLeader,
       isVerified,
-      role: isAdmin ? 'ADMIN' : (isPresident ? 'PRESIDENT' : (isVicePresident ? 'VICE_PRESIDENT' : (memberData?.role || 'MEMBER'))),
+      role: isAdmin ? 'ADMIN' : (isTeacher ? 'TEACHER' : (isPresident ? 'PRESIDENT' : (isVicePresident ? 'VICE_PRESIDENT' : (memberData?.role || 'MEMBER')))),
       dutyId: memberData?.duty_id || null,
-      rank: memberData?.rank || (isAdmin ? 'ผู้ดูแลระบบ' : (isPresident ? 'ประธาน' : (isVicePresident ? 'รองประธาน' : (memberData?.shift_role || 'สารวัตร')))),
+      rank: memberData?.rank || (isAdmin ? '⚡ ผู้ดูแลระบบ' : (isTeacher ? '👨‍🏫 ครูที่ปรึกษา' : (isPresident ? 'ประธาน' : (isVicePresident ? 'รองประธาน' : (memberData?.shift_role || 'สารวัตร'))))),
       exp: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60) // อายุเซสชัน 7 วัน
     };
 
@@ -373,30 +376,75 @@ app.get('/api/auth/me', async (req, res) => {
     });
   }
 
-  // ซิงค์รูปโปรไฟล์ล่าสุดที่ผู้ใช้งานส่งในช่องส่งรูป เพื่อให้เป็นปัจจุบันเสมอ
+  // ซิงค์รูปโปรไฟล์และสิทธิ์ตำแหน่งล่าสุดจาก Supabase เพื่อให้เป็นปัจจุบันเสมอ Real-time
   try {
-    const { data: m } = await supabase
+    const { data: m, error: mErr } = await supabase
       .from('members')
-      .select('profile_image_url, photo_url, profile_photo_url, nickname, first_name, last_name, duty_id, shift_role, rank')
+      .select('id, profile_image_url, nickname, first_name, last_name, duty_id, shift_role, role')
       .eq('discord_id', user.id)
       .order('updated_at', { ascending: false })
       .limit(1)
       .maybeSingle();
 
+    if (mErr) console.warn('Supabase member sync error:', mErr.message);
+
     if (m) {
-      const latestPhoto = m.profile_image_url || m.photo_url || m.profile_photo_url;
-      if (latestPhoto) {
-        user.avatar = latestPhoto;
-        user.officialPhoto = latestPhoto;
+      if (m.profile_image_url) {
+        user.avatar = m.profile_image_url;
+        user.officialPhoto = m.profile_image_url;
       }
       if (m.nickname) user.nickname = m.nickname;
       if (m.duty_id) user.dutyId = m.duty_id;
-      if (m.shift_role || m.rank) user.rank = m.rank || m.shift_role || user.rank;
+
+      // ⚡ ซิงค์สิทธิ์และยศล่าสุดจาก Supabase ทันที ไม่ต้องรอให้คุกกี้เดิมหมดอายุ
+      if (m.role) {
+        user.role = m.role;
+      }
+      const isSysAdmin = m.role === 'ADMIN' || user.isAdmin;
+      const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER' || user.isTeacher;
+      const isPres = m.role === 'PRESIDENT' || user.role === 'PRESIDENT';
+      const isVP = m.role === 'VICE_PRESIDENT' || user.role === 'VICE_PRESIDENT';
+
+      user.isAdmin = isSysAdmin;
+      user.isTeacher = isTeacher;
+      user.isCommander = isSysAdmin || isPres;
+      user.isLeader = isSysAdmin || isTeacher || isPres || isVP || (user.roles || []).some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+
+      if (isSysAdmin) {
+        user.rank = '⚡ ผู้ดูแลระบบ';
+        user.serverNick = `⚡ ผู้ดูแลระบบ (${m.nickname || user.username})`;
+      } else if (isTeacher) {
+        user.rank = '👨‍🏫 ครูที่ปรึกษา';
+        user.serverNick = `👨‍🏫 ครูที่ปรึกษา (${m.nickname || user.username})`;
+      } else if (isPres) {
+        user.rank = '👑 ประธานสารวัตร';
+      } else if (isVP) {
+        user.rank = '⭐ รองประธานสารวัตร';
+      } else if (m.shift_role === 'SHIFT_HEAD') {
+        user.rank = '🛡️ หัวหน้าเวร';
+      } else if (m.shift_role === 'SHIFT_DEPUTY') {
+        user.rank = '🎖️ รองหัวหน้าเวร';
+      } else {
+        user.rank = '🛡️ สารวัตรนักเรียน';
+      }
+
       if (m.first_name) {
         user.displayName = `${m.first_name} ${m.last_name || ''} (${m.nickname || ''})`.trim();
       }
+
+      // รีเฟรชคุกกี้เซสชันด้วยยศและสิทธิ์ล่าสุดทันที
+      const refreshedToken = signAuthToken(user);
+      res.cookie('sarawat_auth', refreshedToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/'
+      });
     }
-  } catch (e) {}
+  } catch (e) {
+    console.warn('Sync user data error:', e);
+  }
 
   res.json({
     loggedIn: true,
@@ -1117,9 +1165,25 @@ app.get('/api/members', async (req, res) => {
 // -------------------------------------------------------------
 app.patch('/api/members/:id', async (req, res) => {
   try {
-    const user = getUserFromReq(req);
-    // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือประธาน/ผู้บริหาร
-    const isAllowed = user && (user.isAdmin || user.isCommander || user.isLeader || user.role === 'ADMIN' || user.role === 'COMMANDER' || user.role === 'PRESIDENT');
+    let user = getUserFromReq(req);
+    // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือครูที่ปรึกษาหรือประธาน/ผู้บริหาร
+    let isAllowed = user && (user.isAdmin || user.isCommander || user.isLeader || user.isTeacher || user.role === 'ADMIN' || user.role === 'COMMANDER' || user.role === 'PRESIDENT' || user.role === 'TEACHER');
+
+    // หากคุกกี้ยังเป็นค่าเดิม ให้ซิงค์สิทธิ์สดตรงจาก Supabase ทันที
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && (dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT' || dbUser.role === 'TEACHER')) {
+          user.role = dbUser.role;
+          user.isAdmin = dbUser.role === 'ADMIN';
+          user.isTeacher = dbUser.role === 'TEACHER';
+          user.isCommander = dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT';
+          user.isLeader = true;
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
+
     if (!isAllowed) {
       return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์แก้ไขข้อมูลสงวนเฉพาะผู้ดูแลระบบหรือประธานสารวัตรเท่านั้น' });
     }

@@ -527,7 +527,7 @@
             <div class="flex items-center justify-between pb-2 border-b border-tactical-border">
               <span class="text-xs font-bold text-amber-400 flex items-center gap-1.5">
                 <span>⚙️</span>
-                <span>ปรับปรุงข้อมูลสารวัตรแบบ Real-time (สิทธิ์ประธาน)</span>
+                <span>ปรับปรุงข้อมูลสารวัตรแบบ Real-time (ผู้ดูแลระบบ/ประธาน/ครูที่ปรึกษา)</span>
               </span>
               <span class="text-[10px] text-slate-400 font-mono">ซิงค์ฐานข้อมูล & Discord ทันที</span>
             </div>
@@ -556,6 +556,7 @@
                 <label class="block text-[11px] text-slate-400 font-mono mb-1">ตำแหน่ง / สิทธิ์ (Role)</label>
                 <select id="edit-member-role" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white text-xs outline-none focus:border-amber-400 font-mono">
                   <option value="MEMBER">MEMBER (สารวัตรทั่วไป)</option>
+                  <option value="TEACHER">TEACHER (👨‍🏫 ครูที่ปรึกษา)</option>
                   <option value="VICE_PRESIDENT">VICE_PRESIDENT (รองประธาน)</option>
                   <option value="PRESIDENT">PRESIDENT (ประธานสารวัตร)</option>
                   <option value="ADMIN">ADMIN (⚡ ผู้ดูแลระบบ - สิทธิ์สูงสุด)</option>
@@ -906,14 +907,15 @@
       }
     }
 
-    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร / แอดมิน (สิทธิ์ไม่เบลอรูปภาพ)
+    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร / แอดมิน / ครูที่ปรึกษา (สิทธิ์ไม่เบลอรูปภาพ)
     function isExecutiveRole(m) {
       if (!m) return false;
       const r = (m.role || '').toUpperCase();
       const sr = (m.shift_role || '').toUpperCase();
       const rank = (m.rank || '');
-      return r === 'ADMIN' || r === 'PRESIDENT' || r === 'VICE_PRESIDENT' || 
-             rank.includes('ดูแล') || rank.includes('ประธาน') || rank.includes('รองประธาน') ||
+      return r === 'ADMIN' || r === 'PRESIDENT' || r === 'VICE_PRESIDENT' || r === 'TEACHER' ||
+             sr === 'TEACHER' ||
+             rank.includes('ครู') || rank.includes('ดูแล') || rank.includes('ประธาน') || rank.includes('รองประธาน') ||
              r === 'COMMANDER';
     }
 
@@ -1044,6 +1046,7 @@
       }
 
       container.innerHTML = mems.map(m => {
+        const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
         const isExec = isExecutiveRole(m);
         const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65; pointer-events: none;';
 
@@ -1055,11 +1058,11 @@
               ${!isExec ? '<span class="absolute inset-0 flex items-center justify-center text-[8px] bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์">🔒</span>' : ''}
             </div>
             <div class="truncate text-xs">
-              <span class="font-bold text-slate-200">${m.nickname || m.first_name}</span>
-              <span class="text-[10px] text-slate-400 ml-1">ม.${m.grade_class || '-'}</span>
+              <span class="font-bold text-slate-200">${isTeacher ? `ครู${m.nickname || m.first_name}` : (m.nickname || m.first_name)}</span>
+              <span class="text-[10px] text-slate-400 ml-1">${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'}`}</span>
             </div>
           </div>
-          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-tactical-900 text-amber-300 border border-tactical-border">${m.duty_id || 'เวร'}</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-tactical-900 text-amber-300 border-tactical-border'}">${isTeacher ? 'ครู' : (m.duty_id || 'เวร')}</span>
         </div>
       `;
       }).join('');
@@ -1118,8 +1121,11 @@
 
       if (rosterViewMode === 'list') {
         grid.innerHTML = filtered.map((m, idx) => {
+          const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
           const dutyDay = m.duty_day || '-';
-          const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' };
+          const shiftInfo = isTeacher
+            ? { name: '👨‍🏫 ครูที่ปรึกษา', color: 'border-amber-500/40 text-amber-300', badge: 'bg-amber-500/10 text-amber-300' }
+            : (SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' });
           const isExec = isExecutiveRole(m);
           const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;';
 
@@ -1138,8 +1144,8 @@
 
               <!-- 3. Duty ID Badge -->
               <div class="text-center">
-                <span class="inline-block px-2.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-mono font-bold text-xs shadow-sm">
-                  [${m.duty_id || 'รอ'}]
+                <span class="inline-block px-2.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'} font-mono font-bold text-xs shadow-sm">
+                  [${isTeacher ? 'ครู' : (m.duty_id || 'รอ')}]
                 </span>
               </div>
 
@@ -1151,13 +1157,13 @@
               <!-- 5. Nickname -->
               <div class="text-xs font-mono truncate">
                 <span class="text-slate-500 text-[10px]">ชื่อเล่น: </span>
-                <strong class="text-amber-300 font-bold">${m.nickname || '-'}</strong>
+                <strong class="text-amber-300 font-bold">${isTeacher ? `ครู${m.nickname || '-'}` : (m.nickname || '-')}</strong>
               </div>
 
               <!-- 6. Grade & Student No -->
               <div class="text-xs font-mono text-slate-300 whitespace-nowrap">
-                <span>ม.${m.grade_class || '-'}</span>
-                <span class="text-slate-500 ml-1.5">#${m.student_no || '-'}</span>
+                <span>${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'}`}</span>
+                ${!isTeacher ? `<span class="text-slate-500 ml-1.5">#${m.student_no || '-'}</span>` : ''}
               </div>
 
               <!-- 7. Duty Shift Badge -->
@@ -1179,8 +1185,11 @@
         }).join('');
       } else {
         grid.innerHTML = filtered.map(m => {
+          const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
           const dutyDay = m.duty_day || '-';
-          const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' };
+          const shiftInfo = isTeacher
+            ? { name: '👨‍🏫 ครูที่ปรึกษา', color: 'border-amber-500/40 text-amber-300', badge: 'bg-amber-500/10 text-amber-300' }
+            : (SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' });
           const isExec = isExecutiveRole(m);
           const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;';
 
@@ -1194,13 +1203,13 @@
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center justify-between gap-1">
                     <span class="font-bold text-xs text-slate-100 truncate">${m.first_name || ''} ${m.last_name || ''}</span>
-                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-400 border border-amber-500/30 font-bold whitespace-nowrap">[${m.duty_id || 'รอ'}]</span>
+                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'} font-bold whitespace-nowrap">[${isTeacher ? 'ครู' : (m.duty_id || 'รอ')}]</span>
                   </div>
                   <div class="text-[11px] text-slate-300 font-mono mt-1">
-                    ชื่อเล่น: <strong class="text-amber-300">${m.nickname || '-'}</strong>
+                    ชื่อเล่น: <strong class="text-amber-300">${isTeacher ? `ครู${m.nickname || '-'}` : (m.nickname || '-')}</strong>
                   </div>
-                  <div class="text-[10px] text-slate-400 font-mono mt-0.5">
-                    ม.${m.grade_class || '-'} #${m.student_no || '-'}
+                  <div class="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                    ${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'} #${m.student_no || '-'}`}
                   </div>
                 </div>
               </div>
@@ -1678,13 +1687,15 @@
       }
 
       // Populate Officer Dossier Fields
+      const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
       const dBadge = document.getElementById('dossier-duty-badge');
-      if (dBadge) dBadge.textContent = `[${dutyId}]`;
+      if (dBadge) dBadge.textContent = isTeacher ? '[ครูที่ปรึกษา]' : `[${dutyId}]`;
 
       const dRole = document.getElementById('dossier-role-title');
       if (dRole) {
         let roleText = 'สารวัตรนักเรียน';
         if (m.role === 'ADMIN') roleText = '⚡ ผู้ดูแลระบบ (System Admin)';
+        else if (isTeacher) roleText = '👨‍🏫 ครูที่ปรึกษา (Advisor Teacher)';
         else if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
         else if (m.role === 'VICE_PRESIDENT') roleText = '⭐ รองประธานสารวัตร';
         else if (m.shift_role === 'SHIFT_HEAD') roleText = '🛡️ หัวหน้าเวรประจำวัน';
@@ -1716,19 +1727,19 @@
       }
 
       const dClass = document.getElementById('dossier-class');
-      if (dClass) dClass.textContent = m.grade_class ? (m.grade_class.startsWith('ม.') ? m.grade_class : `ม.${m.grade_class}`) : '-';
+      if (dClass) dClass.textContent = isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : (m.grade_class ? (m.grade_class.startsWith('ม.') ? m.grade_class : `ม.${m.grade_class}`) : '-');
 
       const dStudentNo = document.getElementById('dossier-student-no');
-      if (dStudentNo) dStudentNo.textContent = m.student_no ? `เลขที่ ${m.student_no}` : '-';
+      if (dStudentNo) dStudentNo.textContent = isTeacher ? 'ครูที่ปรึกษาฝ่ายสารวัตร' : (m.student_no ? `เลขที่ ${m.student_no}` : '-');
 
       const dStudentID = document.getElementById('dossier-student-id');
-      if (dStudentID) dStudentID.textContent = m.student_id || m.student_code || m.student_no || '-';
+      if (dStudentID) dStudentID.textContent = isTeacher ? 'บุคลากรทางการศึกษา' : (m.student_id || m.student_code || m.student_no || '-');
 
       const dShift = document.getElementById('dossier-shift');
       if (dShift) {
         const dutyDay = m.duty_day || '-';
-        const shiftInfo = SHIFT_MAP[dutyDay] || { name: dutyDay };
-        dShift.textContent = `${shiftInfo.name} [${dutyDay}]`;
+        const shiftInfo = isTeacher ? { name: 'ทุกวัน / ตลอดภาคเรียน' } : (SHIFT_MAP[dutyDay] || { name: dutyDay });
+        dShift.textContent = isTeacher ? `👨‍🏫 ${shiftInfo.name} [ครูที่ปรึกษา]` : `${shiftInfo.name} [${dutyDay}]`;
       }
 
       // Check executive permissions for inline realtime edit
@@ -1766,7 +1777,7 @@
     function canEditMembers() {
       const u = window.currentUser;
       if (!u) return true;
-      return Boolean(u.isAdmin || u.role === 'ADMIN' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
+      return Boolean(u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
     }
 
     function toggleMemberEditMode(show) {

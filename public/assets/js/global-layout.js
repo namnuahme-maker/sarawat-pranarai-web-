@@ -246,10 +246,13 @@
       const avatarUrl = user.avatar || '/assets/logo.png';
       const displayName = user.displayName || user.username || 'สารวัตร';
       const isSysAdmin = Boolean(user.isAdmin || user.role === 'ADMIN' || (user.rank && user.rank.includes('ดูแล')));
+      const isTeacher = Boolean(user.isTeacher || user.role === 'TEACHER' || (user.rank && user.rank.includes('ครู')));
       let rankTitle = user.rank;
-      if (!rankTitle || isSysAdmin) {
+      if (!rankTitle || isSysAdmin || isTeacher) {
         if (isSysAdmin) {
           rankTitle = '⚡ ผู้ดูแลระบบ';
+        } else if (isTeacher) {
+          rankTitle = '👨‍🏫 ครูที่ปรึกษา';
         } else if (user.isLeader) {
           rankTitle = '👑 ผู้บริหาร/หัวหน้า';
         } else {
@@ -257,8 +260,19 @@
         }
       }
 
-      const badgeRoleColor = isSysAdmin ? 'text-rose-400 font-bold' : 'text-amber-400/90';
-      const badgeBorderColor = isSysAdmin ? 'border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]' : 'border-indigo-500/70';
+      let badgeRoleColor = 'text-amber-400/90';
+      let badgeBorderColor = 'border-indigo-500/70';
+      let dotColor = 'bg-emerald-500';
+
+      if (isSysAdmin) {
+        badgeRoleColor = 'text-rose-400 font-bold';
+        badgeBorderColor = 'border-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]';
+        dotColor = 'bg-rose-500 shadow-[0_0_6px_#f43f5e]';
+      } else if (isTeacher) {
+        badgeRoleColor = 'text-amber-300 font-bold';
+        badgeBorderColor = 'border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.4)]';
+        dotColor = 'bg-amber-400 shadow-[0_0_6px_#f59e0b]';
+      }
 
       const profileBadge = document.createElement('div');
       profileBadge.id = 'nav-user-profile-badge';
@@ -267,7 +281,7 @@
         <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${displayName} (${user.username || ''})" onclick="toggleMobileNav()">
           <div class="relative flex-shrink-0">
             <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border ${badgeBorderColor} shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 transition" onerror="this.src='/assets/logo.png'">
-            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${isSysAdmin ? 'bg-rose-500 shadow-[0_0_6px_#f43f5e]' : 'bg-emerald-500'} border border-black"></span>
+            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${dotColor} border border-black"></span>
           </div>
           <div class="hidden md:flex flex-col text-left leading-tight">
             <span class="text-xs font-semibold text-slate-100 truncate max-w-[110px]">${displayName}</span>
