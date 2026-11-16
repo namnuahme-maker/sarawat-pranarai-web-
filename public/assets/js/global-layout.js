@@ -233,16 +233,71 @@
 
       const profileBadge = document.createElement('div');
       profileBadge.id = 'nav-user-profile-badge';
-      profileBadge.className = 'flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 border-l border-slate-800/80 flex-shrink-0';
+      profileBadge.className = 'relative flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 border-l border-slate-800/80 flex-shrink-0';
       profileBadge.innerHTML = `
-        <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${displayName} (${user.username || ''})" onclick="toggleMobileNav()">
+        <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="คลิกเพื่อดูโปรไฟล์และจัดการข้อมูลส่วนตัว" onclick="window.toggleUserProfileDropdown(event)">
           <div class="relative flex-shrink-0">
-            <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border ${badgeBorderColor} shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 transition" onerror="this.src='/assets/logo.png'">
+            <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border ${badgeBorderColor} shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
             <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${dotColor} border border-black"></span>
           </div>
           <div class="hidden md:flex flex-col text-left leading-tight">
-            <span class="text-xs font-semibold text-slate-100 truncate max-w-[110px]">${displayName}</span>
+            <div class="flex items-center gap-1">
+              <span class="text-xs font-semibold text-slate-100 truncate max-w-[110px] group-hover:text-amber-300 transition">${displayName}</span>
+              <span class="text-[9px] text-slate-400 group-hover:text-amber-400 transition">▾</span>
+            </div>
             <span class="text-[10px] ${badgeRoleColor} font-mono truncate max-w-[110px]">${rankTitle}</span>
+          </div>
+        </div>
+
+        <!-- User Profile Dropdown Popover -->
+        <div id="user-profile-dropdown" class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 bg-slate-900/95 border border-tactical-border/90 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl p-4 z-50 text-slate-200 font-sans transition-all duration-200">
+          
+          <!-- Header Profile Info -->
+          <div class="flex items-center gap-3 pb-3 border-b border-tactical-border/70">
+            <div class="relative flex-shrink-0">
+              <img src="${avatarUrl}" alt="${displayName}" class="w-12 h-12 rounded-full border-2 ${badgeBorderColor} object-cover shadow-lg" onerror="this.src='/assets/logo.png'">
+              <span class="absolute bottom-0 right-0 w-3 h-3 rounded-full ${dotColor} border-2 border-slate-900"></span>
+            </div>
+            <div class="min-w-0 flex-1 text-left">
+              <div class="font-bold text-sm text-slate-100 truncate">${displayName}</div>
+              <div class="text-xs text-amber-300/90 font-medium truncate">${user.nickname ? `ชื่อเล่น: ${user.nickname}` : ''} ${user.dutyId ? `<span class="font-mono text-amber-400">[${user.dutyId}]</span>` : ''}</div>
+              <div class="mt-1 flex items-center gap-1.5 flex-wrap">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold ${isSysAdmin ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40' : (isTeacher ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' : 'bg-blue-500/20 text-blue-300 border border-blue-500/40')}">
+                  ${rankTitle}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Info Grid -->
+          <div class="grid grid-cols-2 gap-2 py-3 text-xs border-b border-tactical-border/70 text-slate-300">
+            <div class="p-2 rounded-lg bg-tactical-950/70 border border-tactical-border/60">
+              <div class="text-[10px] text-slate-400 font-mono">ชั้น / ห้อง</div>
+              <div class="font-bold text-slate-200 truncate">${user.gradeClass ? `ม.${user.gradeClass}` : (isTeacher ? 'ครูที่ปรึกษา' : '-')} ${user.studentNo ? `(#${user.studentNo})` : ''}</div>
+            </div>
+            <div class="p-2 rounded-lg bg-tactical-950/70 border border-tactical-border/60">
+              <div class="text-[10px] text-slate-400 font-mono">ผลัดเวร</div>
+              <div class="font-bold text-slate-200 truncate">${user.dutyDay || (isTeacher ? 'ทุกวัน' : '-')}</div>
+            </div>
+            <div class="col-span-2 p-2 rounded-lg bg-tactical-950/70 border border-tactical-border/60 flex items-center justify-between">
+              <span class="text-[10px] text-slate-400 font-mono">เบอร์โทรศัพท์:</span>
+              <span class="font-mono font-bold text-slate-200">${user.phoneNumber || '-'}</span>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="pt-3 flex flex-col gap-2">
+            <button onclick="window.handleOpenMyProfileEdit(event)" class="w-full py-2 px-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-bold text-xs flex items-center justify-center gap-1.5 shadow-md active:scale-98 transition">
+              <span>✏️</span> แก้ไขข้อมูลของฉัน
+            </button>
+
+            <button onclick="window.handleOpenMyCard(event)" class="w-full py-2 px-3 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-200 text-xs flex items-center justify-center gap-1.5 active:scale-98 transition">
+              <span>🪪</span> เปิดดูบัตรประจำตัวสารวัตร
+            </button>
+
+            <a href="/logout" class="w-full py-1.5 px-3 rounded-lg text-center text-xs text-rose-400 hover:text-rose-300 hover:bg-rose-500/10 transition mt-1">
+              🚪 ออกจากระบบ
+            </a>
           </div>
         </div>
       `;
@@ -258,6 +313,84 @@
       console.warn('[GLOBAL-LAYOUT] Profile load error:', e);
     }
   }
+
+  // Toggle User Profile Dropdown
+  window.toggleUserProfileDropdown = function (e) {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('user-profile-dropdown');
+    if (dropdown) {
+      dropdown.classList.toggle('hidden');
+    }
+  };
+
+  // Close User Profile Dropdown when clicking outside or pressing Escape
+  document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('user-profile-dropdown');
+    const badge = document.getElementById('nav-user-profile-badge');
+    if (dropdown && !dropdown.classList.contains('hidden')) {
+      if (!dropdown.contains(e.target) && !badge.contains(e.target)) {
+        dropdown.classList.add('hidden');
+      }
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      const dropdown = document.getElementById('user-profile-dropdown');
+      if (dropdown && !dropdown.classList.contains('hidden')) {
+        dropdown.classList.add('hidden');
+      }
+    }
+  });
+
+  // Action: Open Self Edit Modal
+  window.handleOpenMyProfileEdit = function (e) {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('user-profile-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+
+    const u = window.currentUser;
+    if (!u) return;
+
+    // ถ้าอยู่ในหน้าหลักที่มี openCardModal อยู่แล้ว
+    if (typeof window.openCardModal === 'function') {
+      const targetId = u.memberId || (window.allMembers && window.allMembers.find(m => m.discord_id === u.id || m.duty_id === u.dutyId)?.id);
+      if (targetId) {
+        window.openCardModal(targetId);
+        setTimeout(() => {
+          if (typeof window.toggleMemberEditMode === 'function') {
+            window.toggleMemberEditMode(true);
+          }
+        }, 150);
+        return;
+      }
+    }
+
+    // ถ้าอยู่หน้าอื่น ให้ย้ายไปหน้าหลักพร้อมคำสั่งเปิดโหมดแก้ไขทันที
+    const memberParam = u.memberId ? `&memberId=${u.memberId}` : '';
+    window.location.href = `/?edit=self${memberParam}`;
+  };
+
+  // Action: Open Official ID Card
+  window.handleOpenMyCard = function (e) {
+    if (e) e.stopPropagation();
+    const dropdown = document.getElementById('user-profile-dropdown');
+    if (dropdown) dropdown.classList.add('hidden');
+
+    const u = window.currentUser;
+    if (!u) return;
+
+    if (typeof window.openCardModal === 'function') {
+      const targetId = u.memberId || (window.allMembers && window.allMembers.find(m => m.discord_id === u.id || m.duty_id === u.dutyId)?.id);
+      if (targetId) {
+        window.openCardModal(targetId);
+        return;
+      }
+    }
+
+    const cardId = u.memberId || u.id;
+    window.open(`/card?id=${cardId}`, '_blank');
+  };
 
   // Universal UI Helpers Object
   window.SarawatUI = {

@@ -380,7 +380,7 @@ app.get('/api/auth/me', async (req, res) => {
   try {
     const { data: m, error: mErr } = await supabase
       .from('members')
-      .select('id, profile_image_url, nickname, first_name, last_name, duty_id, shift_role, role')
+      .select('id, profile_image_url, nickname, first_name, last_name, duty_id, shift_role, role, grade_class, student_no, phone_number, duty_day')
       .eq('discord_id', user.id)
       .order('updated_at', { ascending: false })
       .limit(1)
@@ -389,6 +389,14 @@ app.get('/api/auth/me', async (req, res) => {
     if (mErr) console.warn('Supabase member sync error:', mErr.message);
 
     if (m) {
+      user.memberId = m.id;
+      user.firstName = m.first_name;
+      user.lastName = m.last_name;
+      user.gradeClass = m.grade_class;
+      user.studentNo = m.student_no;
+      user.phoneNumber = m.phone_number;
+      user.dutyDay = m.duty_day;
+      user.shiftRole = m.shift_role;
       if (m.profile_image_url) {
         user.avatar = m.profile_image_url;
         user.officialPhoto = m.profile_image_url;
@@ -1180,6 +1188,12 @@ app.patch('/api/members/:id', async (req, res) => {
           user.isCommander = dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT';
           user.isLeader = true;
           isAllowed = true;
+        } else {
+          // สารวัตรทั่วไปสามารถแก้ไขข้อมูลส่วนตัวของตนเองได้
+          const { data: targetMember } = await supabase.from('members').select('id, discord_id').eq('id', req.params.id).maybeSingle();
+          if (targetMember && targetMember.discord_id === user.id) {
+            isAllowed = true;
+          }
         }
       } catch (err) {}
     }

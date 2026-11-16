@@ -1031,9 +1031,20 @@
         // Process Members
         if (membersRes.success) {
           allMembers = membersRes.data || [];
+          window.allMembers = allMembers;
           renderShiftsGrid();
           renderTodayOfficers();
           renderRoster(allMembers);
+
+          // Check if navigated with ?edit=self or ?memberId=
+          const urlParams = new URLSearchParams(window.location.search);
+          if (urlParams.get('edit') === 'self' || urlParams.get('memberId')) {
+            const memberId = urlParams.get('memberId') || (window.currentUser && (window.currentUser.memberId || allMembers.find(m => m.discord_id === window.currentUser.id)?.id));
+            if (memberId) {
+              openCardModal(memberId);
+              setTimeout(() => toggleMemberEditMode(true), 250);
+            }
+          }
         }
 
         // Process Cases
@@ -1929,11 +1940,18 @@
       }
     });
 
-    function canEditMembers() {
+    function canEditMembers(targetMember) {
       const u = window.currentUser;
       if (!u) return false;
-      return Boolean(u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
+      const tm = targetMember || activeCardMember;
+      const isSelf = tm && (tm.id === u.memberId || tm.discord_id === u.id);
+      return Boolean(isSelf || u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
     }
+
+    window.openCardModal = openCardModal;
+    window.closeCardModal = closeCardModal;
+    window.toggleMemberEditMode = toggleMemberEditMode;
+    window.canEditMembers = canEditMembers;
 
     function toggleMemberEditMode(show) {
       const container = document.getElementById('dossier-edit-container');
