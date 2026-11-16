@@ -26,6 +26,15 @@
   <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+  <!-- Cropper.js for 1-Inch Profile Photo Studio -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.2/cropper.min.js"></script>
+  <style>
+    .cropper-view-box, .cropper-face { border-radius: 6px; }
+    .cropper-line, .cropper-point { background-color: #f59e0b !important; }
+    .cropper-view-box { outline: 2px solid #f59e0b !important; outline-color: rgba(245, 158, 11, 0.9) !important; }
+  </style>
+
   <!-- Universal Global Layout & Shared Component Controller -->
   <script src="/assets/js/global-layout.js" defer></script>
 </head>
@@ -602,9 +611,41 @@
                 <label class="block text-[11px] text-slate-400 font-mono mb-1">เลขที่ในห้อง</label>
                 <input type="text" id="edit-member-student-no" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white text-xs outline-none focus:border-amber-400 font-mono" placeholder="12">
               </div>
-              <div class="sm:col-span-2">
-                <label class="block text-[11px] text-slate-400 font-mono mb-1">URL รูปภาพโปรไฟล์ (หรือปล่อยว่างไว้)</label>
-                <input type="text" id="edit-member-photo-url" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white text-xs outline-none focus:border-amber-400 font-mono" placeholder="https://...">
+
+              <!-- Photo Upload & Cropper Section -->
+              <div class="sm:col-span-2 p-3 rounded-xl bg-tactical-950/80 border border-tactical-border space-y-2.5">
+                <div class="flex items-center justify-between">
+                  <label class="block text-[11px] text-slate-200 font-mono font-semibold flex items-center gap-1.5">
+                    <span>📸</span>
+                    <span>รูปถ่ายประจำตัวสารวัตร (ขนาด 1 นิ้ว 3:4)</span>
+                  </label>
+                  <span class="text-[10px] text-amber-400 font-mono">ครอป 3:4 • Google Drive Auto-Backup</span>
+                </div>
+                
+                <div class="flex flex-col sm:flex-row items-center gap-3">
+                  <!-- Thumbnail preview -->
+                  <div class="relative w-16 h-20 rounded-lg overflow-hidden border border-tactical-border bg-black flex-shrink-0 shadow-inner group cursor-pointer" onclick="document.getElementById('edit-profile-photo-input').click()" title="คลิกเพื่อเลือกรูปใหม่">
+                    <img id="edit-profile-photo-preview" src="/assets/logo.png" alt="Profile" class="w-full h-full object-cover">
+                    <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center text-[10px] text-amber-300 font-bold transition text-center px-1">
+                      เปลี่ยนรูป
+                    </div>
+                  </div>
+
+                  <div class="flex-1 w-full space-y-1.5">
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <input type="file" id="edit-profile-photo-input" accept="image/jpeg,image/png,image/webp" class="hidden" onchange="handleProfilePhotoSelected(event)">
+                      <button type="button" onclick="document.getElementById('edit-profile-photo-input').click()" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center gap-1.5 active:scale-95 transition shadow-sm">
+                        <span>📷</span> อัปโหลดรูปใหม่ (ตัดภาพ 1 นิ้ว)
+                      </button>
+                      <button type="button" id="btn-re-crop-photo" onclick="openCropperWithCurrentPhoto()" class="hidden px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 text-slate-300 border border-tactical-border text-xs flex items-center gap-1 active:scale-95 transition">
+                        <span>✂️</span> ปรับตำแหน่ง/ครอปใหม่
+                      </button>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <input type="text" id="edit-member-photo-url" class="flex-1 px-2.5 py-1 rounded-lg bg-black/70 border border-tactical-border/70 text-slate-300 text-[10px] outline-none focus:border-amber-400 font-mono" placeholder="หรือกรอก URL รูปภาพโดยตรง">
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -623,6 +664,72 @@
 
       </div>
 
+    </div>
+  </div>
+
+  <!-- ✂️ DEDICATED IN-MODAL CROPPER (1-INCH 3:4 STANDARD) -->
+  <div id="profile-crop-modal" class="fixed inset-0 z-[200] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5" onclick="if(event.target === this) closeProfileCropModal()">
+    <div onclick="event.stopPropagation()" class="max-w-xl w-full bg-tactical-900 border border-tactical-border rounded-3xl p-4 sm:p-6 shadow-2xl space-y-4 max-h-[95vh] flex flex-col">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-tactical-border pb-3 flex-shrink-0">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-base font-bold shadow-inner">✂️</div>
+          <div>
+            <h3 class="text-sm sm:text-base font-bold text-white leading-tight">จัดตำแหน่งและครอปรูปถ่ายสารวัตร</h3>
+            <p class="text-[11px] text-slate-400 font-mono">ขนาดมาตรฐาน 1 นิ้ว (สัดส่วน 3:4 สำหรับติดบัตรและเอกสาร)</p>
+          </div>
+        </div>
+        <button onclick="closeProfileCropModal()" class="w-8 h-8 rounded-lg bg-tactical-800 hover:bg-rose-500/20 hover:text-rose-400 text-slate-400 flex items-center justify-center text-xs transition">✕</button>
+      </div>
+
+      <!-- Ratio Selector Bar -->
+      <div class="flex items-center justify-center gap-1.5 text-[11px] font-mono flex-shrink-0">
+        <span class="text-slate-500 text-xs">สัดส่วน:</span>
+        <button type="button" onclick="setModalCropRatio(3/4, this)" class="modal-ratio-btn px-2.5 py-1 rounded-lg bg-amber-500 text-slate-950 font-bold transition">1 นิ้ว (3:4)</button>
+        <button type="button" onclick="setModalCropRatio(1, this)" class="modal-ratio-btn px-2.5 py-1 rounded-lg bg-tactical-850 border border-tactical-border text-slate-300 hover:text-white transition">จัตุรัส (1:1)</button>
+        <button type="button" onclick="setModalCropRatio(NaN, this)" class="modal-ratio-btn px-2.5 py-1 rounded-lg bg-tactical-850 border border-tactical-border text-slate-300 hover:text-white transition">อิสระ</button>
+      </div>
+
+      <!-- Cropper Image Area -->
+      <div class="relative w-full h-72 sm:h-96 bg-black rounded-2xl overflow-hidden border border-tactical-border flex items-center justify-center flex-shrink-0">
+        <img id="cropper-target-img" class="max-h-full max-w-full" style="display: none;" alt="Source Image">
+        <div id="cropper-loading-spinner" class="flex flex-col items-center gap-2 text-slate-400 text-xs font-mono">
+          <svg class="animate-spin h-6 w-6 text-amber-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+          </svg>
+          <span>กำลังโหลดรูปภาพ...</span>
+        </div>
+      </div>
+
+      <!-- Controls: Rotate, Zoom, Reset -->
+      <div class="grid grid-cols-4 gap-2 text-xs font-semibold flex-shrink-0">
+        <button type="button" onclick="modalCropper && modalCropper.rotate(-90)" class="py-2 px-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1 active:scale-95">
+          <span>↺</span> หมุนซ้าย
+        </button>
+        <button type="button" onclick="modalCropper && modalCropper.rotate(90)" class="py-2 px-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1 active:scale-95">
+          <span>↻</span> หมุนขวา
+        </button>
+        <button type="button" onclick="modalCropper && modalCropper.zoom(0.1)" class="py-2 px-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1 active:scale-95">
+          <span>➕</span> ซูมเข้า
+        </button>
+        <button type="button" onclick="modalCropper && modalCropper.reset()" class="py-2 px-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 border border-tactical-border text-slate-300 hover:text-white transition flex items-center justify-center gap-1 active:scale-95">
+          <span>🔄</span> รีเซ็ต
+        </button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-between pt-2 border-t border-tactical-border flex-shrink-0">
+        <span class="text-[10px] text-slate-500 font-mono hidden sm:inline">Google Drive Auto-Backup • 600x800 px</span>
+        <div class="flex items-center gap-2 ml-auto">
+          <button type="button" onclick="closeProfileCropModal()" class="px-4 py-2 rounded-xl bg-tactical-800 hover:bg-tactical-700 text-slate-300 text-xs font-medium transition active:scale-95">
+            ยกเลิก
+          </button>
+          <button type="button" id="btn-confirm-crop" onclick="confirmProfileCropAndUpload()" class="px-5 py-2 rounded-xl bg-gradient-to-r from-amber-500 via-amber-400 to-amber-500 hover:brightness-110 text-slate-950 font-bold text-xs flex items-center gap-1.5 shadow-md active:scale-95 transition">
+            <span>💾</span> ยืนยันและอัปโหลดรูป 1 นิ้ว
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1995,6 +2102,14 @@
         document.getElementById('edit-member-grade').value = (m.grade_class || '').replace('ม.', '').trim();
         document.getElementById('edit-member-student-no').value = m.student_no || '';
         document.getElementById('edit-member-photo-url').value = m.profile_image_url || '';
+        
+        const previewImg = document.getElementById('edit-profile-photo-preview');
+        if (previewImg) previewImg.src = m.profile_image_url || '/assets/logo.png';
+        const reCropBtn = document.getElementById('btn-re-crop-photo');
+        if (reCropBtn) {
+          if (m.profile_image_url) reCropBtn.classList.remove('hidden');
+          else reCropBtn.classList.add('hidden');
+        }
 
         container.classList.remove('hidden');
         if (viewGrid) viewGrid.classList.add('hidden');
@@ -2148,6 +2263,195 @@
         saveBtn.innerHTML = '<span>💾</span><span>บันทึกและซิงค์ทันที</span>';
       }
     }
+
+    // ✂️ PROFILE PHOTO UPLOAD & CROPPER CONTROLLER
+    let modalCropper = null;
+
+    function setModalCropRatio(ratio, btn) {
+      if (!modalCropper) return;
+      modalCropper.setAspectRatio(ratio);
+      document.querySelectorAll('.modal-ratio-btn').forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-slate-950', 'font-bold');
+        b.classList.add('bg-tactical-850', 'text-slate-300');
+      });
+      btn.classList.remove('bg-tactical-850', 'text-slate-300');
+      btn.classList.add('bg-amber-500', 'text-slate-950', 'font-bold');
+    }
+
+    function handleProfilePhotoSelected(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+
+      if (!file.type.startsWith('image/')) {
+        if (window.SarawatUI && SarawatUI.toast) {
+          SarawatUI.toast('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, WebP)', 'error');
+        } else {
+          alert('กรุณาเลือกไฟล์รูปภาพเท่านั้น (JPG, PNG, WebP)');
+        }
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        openProfileCropModal(e.target.result);
+      };
+      reader.readAsDataURL(file);
+      event.target.value = '';
+    }
+
+    function openCropperWithCurrentPhoto() {
+      const url = document.getElementById('edit-member-photo-url').value.trim() || (activeCardMember && activeCardMember.profile_image_url);
+      if (!url) {
+        document.getElementById('edit-profile-photo-input').click();
+        return;
+      }
+      openProfileCropModal(url);
+    }
+
+    function openProfileCropModal(imageSrc) {
+      const modal = document.getElementById('profile-crop-modal');
+      const img = document.getElementById('cropper-target-img');
+      const spinner = document.getElementById('cropper-loading-spinner');
+      if (!modal || !img) return;
+
+      if (modalCropper) {
+        modalCropper.destroy();
+        modalCropper = null;
+      }
+
+      img.style.display = 'none';
+      if (spinner) spinner.style.display = 'flex';
+      modal.classList.remove('hidden');
+
+      img.crossOrigin = 'anonymous';
+      img.src = imageSrc;
+
+      img.onload = function () {
+        if (spinner) spinner.style.display = 'none';
+        img.style.display = 'block';
+
+        modalCropper = new Cropper(img, {
+          aspectRatio: 3 / 4, // 1 นิ้วมาตรฐานติดบัตร
+          viewMode: 1,
+          autoCropArea: 0.9,
+          responsive: true,
+          restore: false,
+          guides: true,
+          center: true,
+          highlight: false,
+          cropBoxMovable: true,
+          cropBoxResizable: true,
+          toggleDragModeOnDblclick: false,
+          background: false
+        });
+      };
+
+      img.onerror = function () {
+        if (spinner) spinner.style.display = 'none';
+        if (window.SarawatUI && SarawatUI.toast) {
+          SarawatUI.toast('ไม่สามารถโหลดภาพต้นฉบับได้ กรุณาเลือกไฟล์ภาพใหม่จากเครื่อง', 'error');
+        } else {
+          alert('ไม่สามารถโหลดภาพต้นฉบับได้ กรุณาเลือกไฟล์ภาพใหม่จากเครื่อง');
+        }
+        closeProfileCropModal();
+      };
+    }
+
+    function closeProfileCropModal() {
+      const modal = document.getElementById('profile-crop-modal');
+      if (modal) modal.classList.add('hidden');
+      if (modalCropper) {
+        modalCropper.destroy();
+        modalCropper = null;
+      }
+    }
+
+    async function confirmProfileCropAndUpload() {
+      if (!modalCropper || !activeCardMember) return;
+      const btn = document.getElementById('btn-confirm-crop');
+      const origText = btn.innerHTML;
+      btn.innerHTML = '<span>⏳</span> กำลังบันทึกและสำรอง Google Drive...';
+      btn.disabled = true;
+
+      try {
+        const canvas = modalCropper.getCroppedCanvas({
+          width: 600,
+          height: 800,
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high'
+        });
+
+        const imageBase64 = canvas.toDataURL('image/jpeg', 0.92);
+
+        const res = await fetch(`/api/members/${activeCardMember.id}/photo`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64 })
+        });
+
+        const result = await res.json();
+        if (!res.ok || !result.success) {
+          throw new Error(result.error || 'บันทึกรูปไม่สำเร็จ');
+        }
+
+        const newImageUrl = result.imageUrl;
+
+        // อัปเดตในฟอร์มแก้ไข
+        const urlInput = document.getElementById('edit-member-photo-url');
+        if (urlInput) urlInput.value = newImageUrl;
+        const previewImg = document.getElementById('edit-profile-photo-preview');
+        if (previewImg) previewImg.src = newImageUrl;
+        const reCropBtn = document.getElementById('btn-re-crop-photo');
+        if (reCropBtn) reCropBtn.classList.remove('hidden');
+
+        // อัปเดตบนการ์ดบัตร CR80 ทันที
+        activeCardMember.profile_image_url = newImageUrl;
+        const cardImg = document.getElementById('card-photo-img');
+        if (cardImg) cardImg.src = newImageUrl;
+        const privacyNotice = document.getElementById('card-privacy-notice');
+        if (privacyNotice) privacyNotice.classList.add('hidden');
+
+        // อัปเดตในตาราง roster ของ allMembers
+        const idx = allMembers.findIndex(m => m.id === activeCardMember.id);
+        if (idx !== -1) {
+          allMembers[idx].profile_image_url = newImageUrl;
+          renderRoster(allMembers);
+          renderTodayOfficers(allMembers);
+        }
+
+        // หากเป็นโปรไฟล์ของตนเอง ให้อัปเดตรูปมุมขวาบนใน Header ด้วย
+        if (window.currentUser && (window.currentUser.memberId === activeCardMember.id || window.currentUser.id === activeCardMember.discord_id)) {
+          window.currentUser.avatar = newImageUrl;
+          const badgeImg = document.querySelector('#nav-user-profile-badge img');
+          if (badgeImg) badgeImg.src = newImageUrl;
+        }
+
+        if (window.SarawatUI && SarawatUI.toast) {
+          SarawatUI.toast('✅ อัปโหลดและครอปรูปโปรไฟล์ขนาด 1 นิ้วสำเร็จ (สำรอง Google Drive เรียบร้อย)', 'success');
+        } else {
+          alert('✅ อัปโหลดและครอปรูปโปรไฟล์ขนาด 1 นิ้วสำเร็จ');
+        }
+
+        closeProfileCropModal();
+      } catch (err) {
+        console.error('Photo crop upload error:', err);
+        if (window.SarawatUI && SarawatUI.toast) {
+          SarawatUI.toast('เกิดข้อผิดพลาด: ' + err.message, 'error');
+        } else {
+          alert('เกิดข้อผิดพลาด: ' + err.message);
+        }
+      } finally {
+        btn.innerHTML = origText;
+        btn.disabled = false;
+      }
+    }
+
+    window.handleProfilePhotoSelected = handleProfilePhotoSelected;
+    window.openCropperWithCurrentPhoto = openCropperWithCurrentPhoto;
+    window.openProfileCropModal = openProfileCropModal;
+    window.closeProfileCropModal = closeProfileCropModal;
+    window.setModalCropRatio = setModalCropRatio;
+    window.confirmProfileCropAndUpload = confirmProfileCropAndUpload;
 
     function copyDossierPhone() {
       if (!activeCardMember || !activeCardMember.phone_number) {

@@ -1279,6 +1279,118 @@ app.patch('/api/members/:id', async (req, res) => {
   }
 });
 
+// อัปโหลดและบันทึกรูปโปรไฟล์ 1 นิ้ว (3:4) เข้า Supabase Storage และสำรอง Google Drive
+app.post('/api/members/:id/photo', async (req, res) => {
+  try {
+    const user = getUserFromReq(req);
+    if (!user) return res.status(401).json({ error: 'กรุณาเข้าสู่ระบบก่อนดำเนินการ' });
+
+    const { id } = req.params;
+    const { imageBase64 } = req.body;
+    if (!imageBase64) {
+      return res.status(400).json({ error: 'ไม่พบข้อมูลรูปภาพ (imageBase64 missing)' });
+    }
+
+    // ดึงข้อมูลสมาชิกเป้าหมาย
+    const { data: targetMember, error: fetchErr } = await supabase
+      .from('members')
+      .select('*')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (fetchErr || !targetMember) {
+      return res.status(404).json({ error: 'ไม่พบข้อมูลสารวัตรท่านนี้' });
+    }
+
+    // ตรวจสอบสิทธิ์ (แอดมิน/ครู/ประธาน หรือเจ้าของข้อมูลตัวเอง)
+    const isSelf = Boolean(
+      (user.memberId && user.memberId === targetMember.id) ||
+      (user.id && targetMember.discord_id && user.id === targetMember.discord_id)
+    );
+    const isPrivileged = Boolean(
+      user.isAdmin || user.role === 'ADMIN' ||
+      user.isTeacher || user.role === 'TEACHER' ||
+      user.isCommander || user.isLeader ||
+      user.role === 'COMMANDER' || user.role === 'PRESIDENT'
+    );
+
+    if (!isSelf && !isPrivileged) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: คุณสามารถอัปโหลดได้เฉพาะรูปโปรไฟล์ของตนเองเท่านั้น' });
+    }
+
+    // 1. บันทึกลง Local Uploads
+    const uploadDir = path.join(__dirname, 'public', 'uploads');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+    const safeDutyId = (targetMember.duty_id || targetMember.nickname || 'SW').replace(/[^a-zA-Z0-9_-]/g, '_');
+    const filename = `profile_cropped_${safeDutyId}_${Date.now()}.jpg`;
+    const buf = Buffer.from(imageBase64.split(',').pop(), 'base64');
+    fs.writeFileSync(path.join(uploadDir, filename), buf);
+    let finalImageUrl = `/uploads/${filename}`;
+
+    // 2. อัปโหลดเข้าสู่ Supabase Storage (Bucket: sarawat-photos/profile-photos/)
+    try {
+      const storagePath = `profile-photos/${filename}`;
+      const { error: uploadErr } = await supabase.storage
+        .from('sarawat-photos')
+        .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
+
+      if (!uploadErr) {
+        const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+        finalImageUrl = publicUrl;
+      }
+    } catch (storageEx) {
+      console.warn('[PHOTO-UPLOAD] Supabase storage upload warning:', storageEx.message);
+    }
+
+    // 3. สำรองไฟล์ภาพเข้าสู่ Google Drive อัตโนมัติ
+    let gdriveId = null;
+    let gdriveUrl = null;
+    try {
+      const gdriveRes = await uploadToGoogleDrive(buf, filename, {
+        memberName: `${targetMember.first_name || ''} ${targetMember.last_name || ''}`.trim() || targetMember.nickname || 'สารวัตรนักเรียน',
+        dutyId: targetMember.duty_id || '-'
+      });
+      if (gdriveRes && gdriveRes.success) {
+        gdriveId = gdriveRes.fileId;
+        gdriveUrl = gdriveRes.webViewLink;
+      }
+    } catch (gdriveEx) {
+      console.warn('[PHOTO-UPLOAD] Google Drive backup warning:', gdriveEx.message);
+    }
+
+    // 4. บันทึก URL รูปลงตาราง members
+    const updatePayload = {
+      profile_image_url: finalImageUrl,
+      photo_cropped_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
+    if (gdriveId) updatePayload.gdrive_file_id = gdriveId;
+    if (gdriveUrl) updatePayload.gdrive_file_url = gdriveUrl;
+
+    const { data: updatedMember, error: updateErr } = await supabase
+      .from('members')
+      .update(updatePayload)
+      .eq('id', targetMember.id)
+      .select()
+      .maybeSingle();
+
+    if (updateErr) throw updateErr;
+
+    console.log(`[SARAWAT-WEB] 📸 อัปโหลดและครอปรูปโปรไฟล์ของ ${targetMember.nickname || targetMember.duty_id} สำเร็จ`);
+    res.json({
+      success: true,
+      message: 'อัปโหลดและตัดรูปโปรไฟล์สำเร็จ',
+      imageUrl: finalImageUrl,
+      gdriveUrl,
+      member: updatedMember
+    });
+  } catch (err) {
+    console.error('[SARAWAT-WEB] Photo upload error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // -------------------------------------------------------------
 // 4. API: รายการคดีและหลักฐาน (Cases Vault)
 // -------------------------------------------------------------
