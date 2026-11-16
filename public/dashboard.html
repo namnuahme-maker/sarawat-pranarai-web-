@@ -10,9 +10,13 @@
   <link rel="shortcut icon" href="/assets/logo.png">
   <link rel="apple-touch-icon" href="/assets/logo.png">
   
-  <!-- Tailwind CSS & Google Fonts -->
+  <!-- Tailwind CSS & Universal Global Theme & Shared Config -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/assets/js/global-tailwind.js"></script>
   <link rel="stylesheet" href="/animations.css">
+  <link rel="stylesheet" href="/assets/css/global-theme.css">
+  
+  <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@400;700&family=Chakra+Petch:wght@500;600;700;800&family=Michroma&family=Kanit:ital,wght@0,400;0,600;0,700;0,800;0,900&family=Prompt:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
@@ -23,72 +27,9 @@
   <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Chakra Petch', 'Prompt', 'sans-serif'],
-            mono: ['Chakra Petch', 'monospace'],
-          },
-          colors: {
-            tactical: {
-              950: '#020611',
-              900: '#070f1e',
-              850: '#0d192e',
-              800: '#132442',
-              700: '#1d355f',
-              border: '#1e3860',
-              accent: '#0ea5e9'
-            },
-            navy: {
-              950: '#070b14',
-              900: '#0c1322',
-              850: '#111a2e',
-              800: '#17233d',
-              700: '#223254',
-            },
-            royal: {
-              500: '#1d4ed8',
-              600: '#1e40af',
-              700: '#1d3557'
-            },
-            gold: {
-              400: '#fbbf24',
-              500: '#f59e0b',
-              600: '#d97706'
-            }
-          },
-          animation: {
-            'pulse-subtle': 'pulseSubtle 2.5s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-            'float': 'float 3s ease-in-out infinite',
-            'fade-in': 'fadeIn 0.35s ease-out forwards',
-            'slide-up': 'slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards'
-          },
-          keyframes: {
-            pulseSubtle: {
-              '0%, 100%': { opacity: '1' },
-              '50%': { opacity: '0.6' }
-            },
-            float: {
-              '0%, 100%': { transform: 'translateY(0)' },
-              '50%': { transform: 'translateY(-4px)' }
-            },
-            fadeIn: {
-              '0%': { opacity: '0', transform: 'scale(0.98)' },
-              '100%': { opacity: '1', transform: 'scale(1)' }
-            },
-            slideUp: {
-              '0%': { opacity: '0', transform: 'translateY(12px)' },
-              '100%': { opacity: '1', transform: 'translateY(0)' }
-            }
-          }
-        }
-      }
-    }
-  </script>
+
+  <!-- Universal Global Layout & Shared Component Controller -->
+  <script src="/assets/js/global-layout.js" defer></script>
 
   <style>
     /* Custom Scrollbar */

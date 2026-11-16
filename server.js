@@ -1100,6 +1100,53 @@ app.get('/api/members', async (req, res) => {
 });
 
 // -------------------------------------------------------------
+// 3.1 API: อัปเดตข้อมูลสารวัตร (สิทธิ์เฉพาะประธาน/ผู้บริหาร/Commander)
+// -------------------------------------------------------------
+app.patch('/api/members/:id', async (req, res) => {
+  try {
+    const user = getUserFromReq(req);
+    // ตรวจสอบสิทธิ์ว่าเป็นประธาน/ผู้บริหาร
+    const isAllowed = user && (user.isCommander || user.isLeader || user.role === 'COMMANDER' || user.role === 'PRESIDENT');
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์แก้ไขข้อมูลสงวนเฉพาะประธานหรือผู้บริหารเท่านั้น' });
+    }
+
+    const { id } = req.params;
+    const { first_name, last_name, nickname, grade_class, student_no, phone_number, duty_day, duty_id, role, shift_role, rank, profile_image_url } = req.body;
+
+    const updateData = {};
+    if (first_name !== undefined) updateData.first_name = first_name;
+    if (last_name !== undefined) updateData.last_name = last_name;
+    if (nickname !== undefined) updateData.nickname = nickname;
+    if (grade_class !== undefined) updateData.grade_class = grade_class;
+    if (student_no !== undefined) updateData.student_no = student_no;
+    if (phone_number !== undefined) updateData.phone_number = phone_number;
+    if (duty_day !== undefined) updateData.duty_day = duty_day;
+    if (duty_id !== undefined) updateData.duty_id = duty_id;
+    if (role !== undefined) updateData.role = role;
+    if (shift_role !== undefined) updateData.shift_role = shift_role;
+    if (rank !== undefined) updateData.rank = rank;
+    if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
+    updateData.updated_at = new Date().toISOString();
+
+    const { data, error } = await supabase
+      .from('members')
+      .update(updateData)
+      .eq('id', id)
+      .select()
+      .maybeSingle();
+
+    if (error) throw error;
+    if (!data) return res.status(404).json({ error: 'ไม่พบข้อมูลสารวัตรท่านนี้' });
+
+    console.log(`[SARAWAT-WEB] ✏️ ข้อมูลสารวัตร ${data.nickname || data.duty_id} ถูกอัปเดตโดย ${user.username || user.nickname}`);
+    res.json({ success: true, message: 'อัปเดตข้อมูลสารวัตรสำเร็จ', data });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
 // 4. API: รายการคดีและหลักฐาน (Cases Vault)
 // -------------------------------------------------------------
 app.get('/api/cases', async (req, res) => {

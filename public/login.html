@@ -10,37 +10,14 @@
   <link rel="shortcut icon" href="/assets/logo.png">
   <link rel="apple-touch-icon" href="/assets/logo.png">
 
-  <!-- Tailwind CSS -->
+  <!-- Tailwind CSS & Universal Global Theme & Shared Config -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/assets/js/global-tailwind.js"></script>
   <link rel="stylesheet" href="/animations.css">
+  <link rel="stylesheet" href="/assets/css/global-theme.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700;800&family=Kanit:wght@400;500;600;700;800&family=Prompt:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Prompt', 'sans-serif'],
-            display: ['Chakra Petch', 'sans-serif'],
-            heading: ['Kanit', 'sans-serif'],
-          },
-          colors: {
-            tactical: {
-              950: '#030712',
-              900: '#070b14',
-              850: '#0b1120',
-              800: '#111827',
-              700: '#1e293b',
-              border: '#1e293b',
-            },
-            discord: '#5865F2',
-          }
-        }
-      }
-    }
-  </script>
 
   <style>
     body {

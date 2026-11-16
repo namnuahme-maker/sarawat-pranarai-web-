@@ -6,76 +6,22 @@
   <title>คลังของหายและส่งมอบคืน // สารวัตรนักเรียน โรงเรียนพระนารายณ์</title>
   <link rel="icon" href="/favicon.ico">
 
-  <!-- Tailwind CSS & Clean Modern Typography -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="/animations.css">
+  <!-- Google Fonts: Prompt, JetBrains Mono, Chakra Petch -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&family=Chakra+Petch:wght@500;600;700&display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS & Universal Global Theme & Shared Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/assets/js/global-tailwind.js"></script>
+  <link rel="stylesheet" href="/animations.css">
+  <link rel="stylesheet" href="/assets/css/global-theme.css">
   <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
 
-  <script>
-    tailwind.config = {
-      darkMode: 'class',
-      theme: {
-        extend: {
-          fontFamily: {
-            sans: ['Prompt', 'sans-serif'],
-            mono: ['JetBrains Mono', 'monospace'],
-          },
-          colors: {
-            midnight: {
-              950: '#030712', // Deepest Midnight Canvas
-              900: '#070c18', // Navigation & Headers
-              850: '#0b111f', // Primary Cards & Panels
-              800: '#111a2e', // Elevated Surfaces & Hovers
-              750: '#17233d', // Pill Containers & High Elevation
-              700: '#1f2e50', // Borders & Dividers
-              600: '#2b3f6c', // Subtle Borders
-            }
-          }
-        }
-      }
-    }
-  </script>
+  <!-- Universal Global Layout & Shared Component Controller -->
+  <script src="/assets/js/global-layout.js" defer></script>
 
   <style>
-    body {
-      font-family: 'Prompt', sans-serif;
-      background-color: #030712;
-      color: #f1f5f9;
-    }
-
-    /* Dialog Backdrop & Scroll Containment (Modern Web Guidance) */
-    dialog:not([open]) {
-      display: none !important;
-    }
-    dialog:modal {
-      overscroll-behavior: contain;
-    }
-    dialog::backdrop {
-      background: rgba(3, 7, 18, 0.75);
-      backdrop-filter: blur(10px);
-      overflow: hidden;
-      overscroll-behavior: contain;
-    }
-    
-    /* Clean custom scrollbar */
-    .custom-scroll::-webkit-scrollbar {
-      height: 6px;
-      width: 6px;
-    }
-    .custom-scroll::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb {
-      background: rgba(148, 163, 184, 0.25);
-      border-radius: 9999px;
-    }
-    .custom-scroll::-webkit-scrollbar-thumb:hover {
-      background: rgba(148, 163, 184, 0.45);
-    }
-
     @media print {
       body * { visibility: hidden; }
       #printable-tag-area, #printable-tag-area * { visibility: visible; }
@@ -83,102 +29,10 @@
     }
   </style>
 </head>
-<body class="min-h-screen bg-midnight-950 text-slate-100 flex flex-col antialiased selection:bg-blue-600 selection:text-white">
+<body class="min-h-screen bg-tactical-navy-gradient text-slate-100 flex flex-col antialiased selection:bg-cyan-500 selection:text-black">
 
-  <!-- ========================================================== -->
-  <!-- TOP NAVIGATION BAR (MIDNIGHT COMMAND HEADER) -->
-  <!-- ========================================================== -->
-  <!-- ========================================================== -->
-  <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (UNIVERSAL NAVIGATION) -->
-  <!-- ========================================================== -->
-  <header class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-midnight-700/80 px-3 sm:px-4 py-2 sm:py-2.5 transition w-full max-w-full overflow-hidden">
-    <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full">
-      
-      <!-- Brand & School Logo -->
-      <a href="/" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group flex-shrink">
-        <div class="relative flex-shrink-0">
-          <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain drop-shadow-[0_0_10px_rgba(59,130,246,0.6)] group-hover:scale-105 transition" onerror="this.onerror=null; this.src='assets/logo.png';">
-          <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full border-2 border-black animate-pulse"></span>
-        </div>
-        <div class="leading-tight min-w-0">
-          <div class="flex items-center gap-1 sm:gap-1.5 flex-wrap">
-            <span class="font-bold text-xs sm:text-sm tracking-wide text-slate-100 uppercase truncate">SARAWAT PRANARAI</span>
-            <span class="hidden sm:inline-block text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-semibold flex-shrink-0">LOST & FOUND</span>
-          </div>
-          <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block truncate">คลังของหายและส่งมอบคืน • โรงเรียนพระนารายณ์</p>
-        </div>
-      </a>
-
-      <!-- Desktop Core Navigation Links -->
-      <nav class="hidden lg:flex items-center gap-1.5 bg-midnight-900/90 border border-midnight-700/80 rounded-xl p-1 font-sans text-xs">
-        <a href="/" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
-          <span>🛡️</span> หน้าหลัก
-        </a>
-        <a href="/attendance-scan" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-emerald-300 hover:text-white hover:bg-emerald-600/20 border border-emerald-500/40">
-          <span>⚡</span> สแกนเช็คชื่อ
-        </a>
-        <a href="/analytics" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-cyan-300 hover:text-white hover:bg-cyan-600/20 border border-cyan-500/40">
-          <span>📊</span> สถิติ & คลังข้อมูล
-        </a>
-        <a href="/card-studio" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
-          <span>🎨</span> ทำบัตร
-        </a>
-        <a href="/lost-found" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 bg-amber-500/15 text-amber-300 border border-amber-500/40 shadow">
-          <span>📦</span> ของหาย
-        </a>
-        <a href="/bodycam-upload" class="nav-link px-3 py-1.5 rounded-lg font-medium transition flex items-center gap-1.5 text-slate-300 hover:text-white hover:bg-midnight-800">
-          <span>📷</span> บอดี้แคม
-        </a>
-      </nav>
-
-      <!-- Header Controls -->
-      <div class="flex items-center gap-1.5 sm:gap-2.5 flex-shrink-0">
-        <!-- Live Clock -->
-        <div class="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-midnight-850 border border-midnight-700/80 text-slate-300 text-xs font-mono">
-          <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
-          <span id="live-clock" class="font-medium text-slate-200">12:00:00</span>
-        </div>
-
-        <!-- Primary Action: Intake Item -->
-        <button onclick="openIntakeModal()" class="group relative inline-flex items-center justify-center gap-1.5 sm:gap-2 px-3 sm:px-3.5 h-9 rounded-xl bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-600 hover:from-blue-500 hover:via-blue-400 hover:to-indigo-500 active:scale-95 text-white font-semibold text-xs sm:text-sm shadow-[0_2px_12px_rgba(37,99,235,0.35)] hover:shadow-[0_4px_20px_rgba(59,130,246,0.55)] border border-blue-400/30 transition-all duration-200 flex-shrink-0 whitespace-nowrap focus:outline-none focus:ring-2 focus:ring-blue-400/50">
-          <span class="w-4 h-4 rounded-full bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition-colors">
-            <svg class="w-2.5 h-2.5 text-white transition-transform duration-300 group-hover:rotate-90" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
-              <line x1="12" y1="5" x2="12" y2="19"></line>
-              <line x1="5" y1="12" x2="19" y2="12"></line>
-            </svg>
-          </span>
-          <span class="tracking-wide drop-shadow-sm font-medium">
-            <span class="hidden sm:inline">บันทึก</span>ของพบเจอ
-          </span>
-        </button>
-
-        <!-- Mobile Hamburger Menu Button -->
-        <button onclick="document.getElementById('mobile-lf-nav')?.classList.toggle('hidden')" class="lg:hidden w-9 h-9 rounded-xl bg-midnight-850/90 hover:bg-midnight-800 text-slate-300 hover:text-white border border-midnight-700/80 active:scale-95 transition-all flex items-center justify-center flex-shrink-0 shadow-sm focus:outline-none focus:ring-2 focus:ring-midnight-600" aria-label="Toggle navigation">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
-        </button>
-      </div>
-
-    </div>
-
-    <!-- Mobile Dropdown Navigation Drawer -->
-    <div id="mobile-lf-nav" class="hidden lg:hidden pt-3 pb-2 border-t border-midnight-700/80 mt-2.5 grid grid-cols-2 gap-2 text-xs">
-      <a href="/" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
-        <span>🛡️</span> หน้าหลัก
-      </a>
-      <a href="/analytics" class="p-2 rounded-lg bg-cyan-500/20 border border-cyan-500/40 flex items-center gap-2 text-cyan-300 font-bold">
-        <span>📊</span> สถิติ & คลังข้อมูล
-      </a>
-      <a href="/card-studio" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
-        <span>🎨</span> ทำบัตรสารวัตร
-      </a>
-      <a href="/lost-found" class="p-2 rounded-lg bg-amber-500/15 border border-amber-500/40 flex items-center gap-2 text-amber-300 font-bold">
-        <span>📦</span> คลังของหาย
-      </a>
-      <a href="/bodycam-upload" class="p-2 rounded-lg bg-midnight-850 border border-midnight-700 flex items-center gap-2 text-slate-200 hover:text-amber-300">
-        <span>📷</span> ส่งภาพบอดี้แคม
-      </a>
-    </div>
-  </header>
+  <!-- 🛡️ TACTICAL GLOBAL HUD HEADER (MOUNTED AUTOMATICALLY VIA GLOBAL-LAYOUT.JS) -->
+  <header id="sarawat-global-header"></header>
 
   <!-- ========================================================== -->
   <!-- MAIN WORKSPACE -->
@@ -190,7 +44,7 @@
       
       <!-- Segmented Tab Group -->
       <div class="inline-flex p-1 rounded-xl bg-midnight-900 border border-midnight-700/80 text-xs font-medium">
-        <button onclick="switchTab('showcase')" id="tab-btn-showcase" class="px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-sm">
+        <button onclick="switchTab('showcase')" id="tab-btn-showcase" class="px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium transition-colors flex items-center gap-2 shadow-md shadow-cyan-500/25 border border-cyan-400/30">
           <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
           <span>คลังของพบเจอ</span>
           <span id="badge-total-items" class="px-1.5 py-0.2 rounded bg-blue-900/60 text-blue-200 text-[10px] font-mono tabular-nums">0</span>
@@ -221,8 +75,8 @@
         
         <!-- Search Input Bar -->
         <div class="relative">
-          <input type="text" id="search-input" oninput="loadItems()" placeholder="ค้นหาชื่อ รหัส หรือสถานที่พบเจอ..." class="w-full bg-midnight-950 border border-midnight-700 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 transition-colors">
-          <span class="absolute right-3.5 top-2.5 text-[10px] font-mono text-slate-500 border border-midnight-700 px-1.5 py-0.5 rounded">/</span>
+          <input type="text" id="search-input" oninput="loadItems()" placeholder="ค้นหาชื่อ รหัส หรือสถานที่พบเจอ..." class="w-full bg-midnight-950/80 backdrop-blur-md border border-cyan-500/25 rounded-lg px-3.5 py-2 text-xs sm:text-sm text-white placeholder-slate-400 focus:outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/40 transition-colors">
+          <span class="absolute right-3.5 top-2.5 text-[10px] font-mono text-cyan-400/70 border border-cyan-500/30 px-1.5 py-0.5 rounded">/</span>
         </div>
 
         <!-- 1-Click Horizontal Category Selector -->
@@ -245,7 +99,7 @@
         <div class="flex items-center justify-between flex-wrap gap-2 pt-2 border-t border-midnight-700/60 text-xs">
           <div class="flex items-center gap-1.5">
             <span class="text-slate-400 font-medium mr-1">สถานะ:</span>
-            <button onclick="selectStatus('ALL')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-midnight-800 text-white border border-midnight-600 transition-colors" data-status="ALL">ทั้งหมด</button>
+            <button onclick="selectStatus('ALL')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm transition-colors flex items-center gap-1.5" data-status="ALL">ทั้งหมด</button>
             <button onclick="selectStatus('WAITING_OWNER')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5" data-status="WAITING_OWNER"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>รอเจ้าของรับ</button>
             <button onclick="selectStatus('DELIVERED')" class="status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5" data-status="DELIVERED"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>ส่งมอบแล้ว</button>
           </div>
@@ -1042,7 +896,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const btn = document.getElementById(`tab-btn-${t}`);
         if (pane) pane.classList.add('hidden');
         if (btn) {
-          btn.className = "px-3.5 py-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-midnight-800 transition-colors flex items-center gap-2";
+          btn.className = "px-3.5 py-1.5 rounded-lg text-slate-300 hover:text-white hover:bg-midnight-800/80 transition-colors flex items-center gap-2";
         }
       });
 
@@ -1050,7 +904,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const activeBtn = document.getElementById(`tab-btn-${tabId}`);
       if (activePane) activePane.classList.remove('hidden');
       if (activeBtn) {
-        activeBtn.className = "px-3.5 py-1.5 rounded-lg bg-blue-600 text-white font-medium transition-colors flex items-center gap-2 shadow-sm";
+        activeBtn.className = "px-3.5 py-1.5 rounded-lg bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-medium transition-colors flex items-center gap-2 shadow-md shadow-cyan-500/25 border border-cyan-400/30";
       }
     }
 
@@ -1087,7 +941,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
 
       const isAll = currentCategory === 'ALL';
       let html = `
-        <button onclick="selectCategory('ALL')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${isAll ? 'bg-blue-600 text-white shadow-sm' : 'bg-midnight-850 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white'}" data-cat="ALL">
+        <button onclick="selectCategory('ALL')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors ${isAll ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-cyan-500/25 border border-cyan-400/40' : 'bg-midnight-850/80 backdrop-blur-sm border border-cyan-500/20 text-slate-300 hover:bg-midnight-800 hover:text-white hover:border-cyan-400/40'}" data-cat="ALL">
           ทั้งหมด
         </button>
       `;
@@ -1096,7 +950,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const isActive = currentCategory === c.name;
         const isConfiscated = c.name.includes('ของกลาง');
         html += `
-          <button onclick="selectCategory('${c.name.replace(/'/g, "\\'")}')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${isActive ? (isConfiscated ? 'bg-rose-600 text-white shadow-sm' : 'bg-blue-600 text-white shadow-sm') : (isConfiscated ? 'bg-rose-950/40 border border-rose-800/60 text-rose-300 hover:bg-rose-900/50' : 'bg-midnight-850 border border-midnight-700/80 text-slate-300 hover:bg-midnight-800 hover:text-white')}" data-cat="${c.name}">
+          <button onclick="selectCategory('${c.name.replace(/'/g, "\\'")}')" class="cat-pill px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${isActive ? (isConfiscated ? 'bg-rose-600 text-white shadow-sm' : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-md shadow-cyan-500/25 border border-cyan-400/40') : (isConfiscated ? 'bg-rose-950/40 border border-rose-800/60 text-rose-300 hover:bg-rose-900/50' : 'bg-midnight-850/80 backdrop-blur-sm border border-cyan-500/20 text-slate-300 hover:bg-midnight-800 hover:text-white hover:border-cyan-400/40')}" data-cat="${c.name}">
             ${isConfiscated ? icon('scale', 'w-3.5 h-3.5 text-rose-400') : ''}
             <span>${c.name}</span>
           </button>
@@ -1116,9 +970,9 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       currentStatus = status;
       document.querySelectorAll('.status-pill').forEach(btn => {
         if (btn.dataset.status === status) {
-          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-midnight-800 text-white border border-midnight-600 transition-colors";
+          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-sm transition-colors flex items-center gap-1.5";
         } else {
-          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white transition-colors flex items-center gap-1.5";
+          btn.className = "status-pill px-2.5 py-1 rounded-lg text-xs font-medium text-slate-400 hover:text-white hover:bg-midnight-800/80 transition-colors flex items-center gap-1.5";
         }
       });
       loadItems();
@@ -1190,7 +1044,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         const isDelivered = it.status === 'DELIVERED';
         const statusBadge = isDelivered
           ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-emerald-950/90 text-emerald-300 border border-emerald-800/80"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>ส่งมอบแล้ว</span>`
-          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-midnight-900/90 text-blue-300 border border-blue-800/80"><span class="w-1.5 h-1.5 rounded-full bg-blue-400"></span>รอเจ้าของรับ</span>`;
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-mono font-medium bg-cyan-950/80 text-cyan-300 border border-cyan-700/60 shadow-sm"><span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>รอเจ้าของรับ</span>`;
 
         const hasSecret = Boolean(it.secret_traits);
         const elapsed = formatElapsedTime(it.created_at || it.found_date, it.found_time);
@@ -1199,14 +1053,14 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         // สไตล์เวลา: เกิน 30 วันปรับข้อความและขอบเป็นสีแดงเด่นชัด (ตามเงื่อนไขของกลาง)
         const timeBadgeClass = elapsed.isOver30
           ? "text-[10px] font-mono font-medium text-red-400 bg-red-950/90 border border-red-800/90"
-          : "text-[10px] font-mono text-slate-400 bg-midnight-950 border border-midnight-700/80";
+          : "text-[10px] font-mono text-slate-300 bg-midnight-950/80 border border-cyan-500/20";
 
         const confiscatedBadge = isConfiscated
           ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-rose-950/90 text-rose-300 border border-rose-800" title="ของค้างเกิน 30 วัน จัดเข้าหมวดของกลาง">${icon('scale', 'w-3 h-3 text-rose-400')} ของกลาง</span>`
           : '';
 
         return `
-          <div class="bg-midnight-900 border ${isConfiscated ? 'border-rose-900/60' : 'border-midnight-700/80'} rounded-xl overflow-hidden shadow-sm flex flex-col group">
+          <div class="bg-midnight-900 border ${isConfiscated ? 'border-rose-900/60' : 'border-cyan-500/20'} rounded-xl overflow-hidden shadow-sm flex flex-col group">
             
             <!-- Item Photo Box -->
             <div class="aspect-[4/3] bg-midnight-950 relative overflow-hidden cursor-pointer" onclick="openQuickViewModal('${it.id}')">
@@ -1218,7 +1072,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
                 ${hasSecret ? `<span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-amber-950/90 text-amber-300 border border-amber-800" title="มีจุดสังเกตลับสำหรับตรวจ">${icon('lock', 'w-3 h-3 text-amber-400')} จุดลับ</span>` : ''}
               </div>
 
-              <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-midnight-950/90 text-slate-300 backdrop-blur-sm border border-midnight-700/80">
+              <div class="absolute bottom-2 right-2 px-1.5 py-0.5 rounded text-[10px] font-mono font-medium bg-midnight-950/90 text-cyan-300 backdrop-blur-sm border border-cyan-500/30">
                 ${it.item_code}
               </div>
             </div>
@@ -1227,13 +1081,13 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
             <div class="p-3.5 flex-1 flex flex-col justify-between space-y-3">
               <div class="space-y-1">
                 <div class="flex items-center justify-between gap-1">
-                  <span class="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">${it.category}</span>
+                  <span class="text-[10px] font-mono text-cyan-400 uppercase tracking-wider block">${it.category}</span>
                   <span class="${timeBadgeClass} px-1.5 py-0.5 rounded inline-flex items-center gap-1" title="${elapsed.isOver30 ? 'เกิน 30 วันแล้ว (สถานะของกลาง)' : 'เวลาที่ผ่านไปนับแต่พบของ'}">
                     ${icon('clock', elapsed.isOver30 ? 'w-3 h-3 text-red-400' : 'w-3 h-3 text-slate-500')}
                     <span>${elapsed.text}${elapsed.isOver30 ? ' (เกิน 30 วัน)' : ''}</span>
                   </span>
                 </div>
-                <h3 class="text-xs sm:text-sm font-semibold text-white line-clamp-1 hover:text-blue-400 transition-colors cursor-pointer" onclick="openQuickViewModal('${it.id}')" title="${it.title}">
+                <h3 class="text-xs sm:text-sm font-semibold text-white line-clamp-1 hover:text-cyan-300 transition-colors cursor-pointer" onclick="openQuickViewModal('${it.id}')" title="${it.title}">
                   ${it.title}
                 </h3>
                 <p class="text-xs text-slate-400 line-clamp-2 leading-relaxed">

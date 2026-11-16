@@ -10,16 +10,14 @@
 @keyframes pageFadeIn {
   from {
     opacity: 0;
-    transform: translateY(4px);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
   }
 }
 
 body {
-  animation: pageFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation: pageFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==========================================================
@@ -74,40 +72,129 @@ button:active:not(:disabled),
 }
 
 /* ==========================================================
- * 5. Smooth Modal & Dialog Entrances
+ * 5. Smooth Modal & Dialog Entrances (Spring In 60FPS)
  * ========================================================== */
-@keyframes modalEnter {
-  from {
+@keyframes modalSpringIn {
+  0% {
     opacity: 0;
-    transform: scale(0.96) translateY(6px);
+    transform: scale(0.93) translateY(12px);
   }
-  to {
+  60% {
+    opacity: 1;
+    transform: scale(1.01) translateY(-2px);
+  }
+  100% {
     opacity: 1;
     transform: scale(1) translateY(0);
   }
 }
 
-.modal-enter,
-.modal-box,
-dialog[open] > div,
+#card-modal:not(.hidden) > div,
+#evidence-modal:not(.hidden) > div,
 #qv-modal:not(.hidden) > div,
 #modal-student-dossier:not(.hidden) > div,
 #featureGuideModal:not(.hidden) > div,
-#filter-drawer:not(.hidden) > div {
-  animation: modalEnter 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+#filter-drawer:not(.hidden) > div,
+.modal-enter,
+.modal-box,
+dialog[open] > div {
+  animation: modalSpringIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
 }
 
 /* ==========================================================
- * 6. Smooth Backdrop Blur Transition
+ * 6. Quick Menu & Dropdown Silky Entrance
+ * ========================================================== */
+@keyframes popoverSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+#left-quick-menu-popover:not(.hidden),
+.popover-menu:not(.hidden),
+.dropdown-menu:not(.hidden) {
+  animation: popoverSlideDown 0.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* ==========================================================
+ * 7. Active Duty Shift Radar Pulse Glow
+ * ========================================================== */
+@keyframes tacticalPulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 7px rgba(16, 185, 129, 0);
+  }
+}
+
+.tactical-pulse,
+.status-pulse-active,
+#today-active-shift-badge {
+  animation: tacticalPulseGlow 2.2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+}
+
+/* ==========================================================
+ * 8. Card & Roster Hover Lift & Tactical Glow
+ * ========================================================== */
+.card-tactical,
+.roster-card-item,
+#roster-grid > div {
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              border-color 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.22s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  will-change: transform, box-shadow;
+}
+
+#roster-grid > div:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -5px rgba(245, 158, 11, 0.2), 0 0 15px -3px rgba(245, 158, 11, 0.12);
+  border-color: rgba(245, 158, 11, 0.6) !important;
+}
+
+/* ==========================================================
+ * 9. Digital CR80 Card Holographic Light Sweep
+ * ========================================================== */
+@keyframes cardHoloShimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.id-card-cr80:hover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 35%, rgba(255, 255, 255, 0.16) 50%, transparent 65%);
+  background-size: 200% 100%;
+  animation: cardHoloShimmer 1.4s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 40;
+}
+
+/* ==========================================================
+ * 10. Smooth Backdrop Blur Transition
  * ========================================================== */
 .modal-backdrop,
+.fixed.inset-0.bg-black\/85,
 .fixed.inset-0.bg-black\/80,
 .fixed.inset-0.bg-black\/70 {
-  transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* ==========================================================
- * 7. Accessibility: Disable animations if preferred
+ * 11. Accessibility: Disable animations if preferred
  * ========================================================== */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
