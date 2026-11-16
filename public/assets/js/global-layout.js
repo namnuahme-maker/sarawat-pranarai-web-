@@ -99,50 +99,6 @@
                 <p class="text-[10px] sm:text-[11px] text-slate-400 hidden md:block truncate">ศูนย์บัญชาการสารวัตรนักเรียน • โรงเรียนพระนารายณ์</p>
               </div>
             </a>
-
-            <!-- Left Quick Feature Menu Dropdown (Annotation 6) -->
-            <div class="relative">
-              <button onclick="toggleLeftQuickMenu(event)" class="px-2 sm:px-2.5 py-1.5 rounded-lg bg-tactical-900 hover:bg-tactical-800 text-amber-300 border border-amber-500/30 text-xs font-semibold flex items-center gap-1.5 transition active:scale-95 shadow-sm" title="เมนูฟังก์ชันด่วน (ทำบัตร, สแกนชื่อ, ของหาย)">
-                <span class="animate-pulse">⚡</span>
-                <span class="hidden md:inline">ฟังก์ชันระบบ</span>
-                <svg class="w-3 h-3 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
-              </button>
-
-              <!-- Left Quick Menu Popover -->
-              <div id="left-quick-menu-popover" class="hidden absolute left-0 top-full mt-2 w-56 rounded-2xl bg-tactical-900/95 backdrop-blur-xl border border-tactical-border shadow-2xl shadow-black/80 p-2 z-50 text-xs space-y-1">
-                <div class="px-2.5 py-1 text-[10px] font-mono font-bold text-slate-500 uppercase tracking-wider border-b border-tactical-border/60 mb-1">
-                  เครื่องมือปฏิบัติการ
-                </div>
-                <a href="/attendance-scan" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-emerald-300 hover:bg-emerald-500/20 hover:text-white transition font-semibold">
-                  <span class="text-sm">⚡</span>
-                  <div>
-                    <div>สแกนเช็คชื่อ</div>
-                    <div class="text-[10px] text-slate-400 font-normal">ระบบกล้อง Multi-Shot AI</div>
-                  </div>
-                </a>
-                <a href="/card-studio" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-amber-300 hover:bg-amber-500/20 hover:text-white transition font-semibold">
-                  <span class="text-sm">🎨</span>
-                  <div>
-                    <div>สตูดิโอทำบัตร</div>
-                    <div class="text-[10px] text-slate-400 font-normal">บัตรประจำตัว CR80</div>
-                  </div>
-                </a>
-                <a href="/lost-found" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-cyan-300 hover:bg-cyan-500/20 hover:text-white transition font-semibold">
-                  <span class="text-sm">📦</span>
-                  <div>
-                    <div>คลังของหาย</div>
-                    <div class="text-[10px] text-slate-400 font-normal">บันทึกของพบเจอ/ส่งมอบคืน</div>
-                  </div>
-                </a>
-                <a href="/attendance-sheet" class="flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-purple-300 hover:bg-purple-500/20 hover:text-white transition font-semibold">
-                  <span class="text-sm">📄</span>
-                  <div>
-                    <div>ใบเช็คชื่อ A4</div>
-                    <div class="text-[10px] text-slate-400 font-normal">ตารางเวร 12 สัปดาห์</div>
-                  </div>
-                </a>
-              </div>
-            </div>
           </div>
 
           <!-- Desktop Core Navigation Links -->
@@ -235,6 +191,7 @@
 
       const user = data.user;
       window.currentUser = user;
+      document.dispatchEvent(new CustomEvent('sarawat:user_loaded', { detail: user }));
 
       // Do not inject badge on attendance-scan to preserve camera viewport
       if (window.location.pathname.includes('attendance-scan')) return;

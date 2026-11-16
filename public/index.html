@@ -243,19 +243,20 @@
       <!-- Officers Table & List Container -->
       <div class="w-full max-w-full overflow-x-auto custom-scrollbar pb-2">
         <!-- Table Column Headers (Visible in List Mode) -->
-        <div id="roster-list-header" class="min-w-[760px] grid grid-cols-[36px_44px_76px_1fr_120px_130px_160px_90px] items-center gap-3 px-4 py-2 mb-1.5 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider bg-tactical-950 border border-tactical-border/70 rounded-xl">
+        <div id="roster-list-header" class="min-w-[940px] grid grid-cols-[36px_44px_76px_1fr_110px_140px_110px_140px_110px] items-center gap-3 px-4 py-2 mb-1.5 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider bg-tactical-950 border border-tactical-border/70 rounded-xl">
           <div class="text-center">#</div>
           <div class="text-center">รูป</div>
           <div class="text-center">รหัสเวร</div>
           <div>ชื่อ - สกุล</div>
           <div>ชื่อเล่น</div>
+          <div>ยศ / ตำแหน่ง</div>
           <div>ชั้น / เลขที่</div>
           <div>ผลัดปฏิบัติหน้าที่</div>
-          <div class="text-right">บัตรประจำตัว</div>
+          <div class="text-right">จัดการ / ดูบัตร</div>
         </div>
 
         <!-- High-Density Roster Viewport -->
-        <div id="roster-grid" class="flex flex-col gap-2 min-w-[760px]">
+        <div id="roster-grid" class="flex flex-col gap-2 min-w-[940px]">
           <div class="p-8 text-center text-xs text-slate-500">กำลังโหลดทำเนียบสารวัตร...</div>
         </div>
       </div>
@@ -838,6 +839,13 @@
       fetchData();
       initRealtime();
 
+      document.addEventListener('sarawat:user_loaded', () => {
+        if (allMembers && allMembers.length) {
+          renderRoster(allMembers);
+          renderTodayOfficers(allMembers);
+        }
+      });
+
       if (window.location.search.includes('tour=start')) {
         setTimeout(startSpotlightTour, 900);
       }
@@ -907,7 +915,7 @@
       }
     }
 
-    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร / แอดมิน / ครูที่ปรึกษา (สิทธิ์ไม่เบลอรูปภาพ)
+    // Annotation 4: ตรวจสอบตำแหน่งผู้บริหาร / แอดมิน / ครูที่ปรึกษา
     function isExecutiveRole(m) {
       if (!m) return false;
       const r = (m.role || '').toUpperCase();
@@ -917,6 +925,60 @@
              sr === 'TEACHER' ||
              rank.includes('ครู') || rank.includes('ดูแล') || rank.includes('ประธาน') || rank.includes('รองประธาน') ||
              r === 'COMMANDER';
+    }
+
+    // 🔒 สิทธิ์การมองเห็นรูปภาพ: หากคนดูเป็นผู้ดูแลระบบ, ครูที่ปรึกษา หรือประธาน -> ปลดล็อกเห็นรูปจริงของทุกคนทันที
+    function shouldBlurPhoto(m) {
+      if (!m) return false;
+      const u = window.currentUser;
+      if (u && (u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader)) {
+        return false;
+      }
+      if (isExecutiveRole(m)) {
+        return false;
+      }
+      return true;
+    }
+
+    // 🎖️ ฟังก์ชันดึง Badge ยศและตำแหน่งสารวัตรแบบละเอียด
+    function getMemberRoleBadge(m) {
+      if (!m) return { label: '🛡️ สารวัตร', badgeClass: 'bg-slate-800 text-slate-300 border-slate-700' };
+      const r = (m.role || '').toUpperCase();
+      const sr = (m.shift_role || '').toUpperCase();
+      const rank = (m.rank || '');
+
+      if (r === 'ADMIN' || rank.includes('ดูแล')) {
+        return { label: '⚡ ผู้ดูแลระบบ', badgeClass: 'bg-rose-500/15 text-rose-300 border-rose-500/50 shadow-[0_0_8px_rgba(244,63,94,0.3)]' };
+      }
+      if (r === 'TEACHER' || sr === 'TEACHER' || rank.includes('ครู')) {
+        return { label: '👨‍🏫 ครูที่ปรึกษา', badgeClass: 'bg-amber-500/15 text-amber-300 border-amber-400/50 shadow-[0_0_8px_rgba(245,158,11,0.3)]' };
+      }
+      if (r === 'PRESIDENT' || (rank.includes('ประธาน') && !rank.includes('รอง'))) {
+        return { label: '👑 ประธานสารวัตร', badgeClass: 'bg-yellow-500/15 text-yellow-300 border-yellow-500/40' };
+      }
+      if (r === 'VICE_PRESIDENT' || rank.includes('รองประธาน')) {
+        return { label: '⭐ รองประธาน', badgeClass: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40' };
+      }
+      if (sr === 'SHIFT_HEAD' || rank.includes('หัวหน้าเวร')) {
+        return { label: '🛡️ หัวหน้าเวร', badgeClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' };
+      }
+      if (sr === 'SHIFT_DEPUTY' || rank.includes('รองหัวหน้า')) {
+        return { label: '🎖️ รองหัวหน้าเวร', badgeClass: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40' };
+      }
+      return { label: '🛡️ สารวัตรนักเรียน', badgeClass: 'bg-slate-800 text-slate-300 border-slate-700' };
+    }
+
+    // ⚙️ เมนูด่วนแก้ไขยศและตำแหน่งทันที
+    function quickEditMemberRole(memberId) {
+      openCardModal(memberId);
+      setTimeout(() => {
+        toggleMemberEditMode(true);
+        const roleEl = document.getElementById('edit-member-role');
+        if (roleEl) {
+          roleEl.focus();
+          roleEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 60);
     }
 
     // 4. Fetch All Backend Data
@@ -1047,15 +1109,15 @@
 
       container.innerHTML = mems.map(m => {
         const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
-        const isExec = isExecutiveRole(m);
-        const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65; pointer-events: none;';
+        const shouldBlur = shouldBlurPhoto(m);
+        const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.25); opacity: 0.65; pointer-events: none;' : '';
 
         return `
         <div onclick="openCardModal('${m.id}')" class="p-2 rounded-lg bg-tactical-850 hover:bg-tactical-800 border border-tactical-border hover:border-amber-500/40 cursor-pointer transition flex items-center justify-between">
           <div class="flex items-center gap-2 min-w-0">
             <div class="w-6 h-6 rounded-md overflow-hidden bg-black flex-shrink-0 relative border border-slate-700">
               <img src="${m.profile_image_url || '/assets/logo.png'}" style="${blurStyle}" class="w-full h-full object-cover" onerror="this.src='/assets/logo.png'">
-              ${!isExec ? '<span class="absolute inset-0 flex items-center justify-center text-[8px] bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์">🔒</span>' : ''}
+              ${shouldBlur ? '<span class="absolute inset-0 flex items-center justify-center text-[8px] bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์">🔒</span>' : ''}
             </div>
             <div class="truncate text-xs">
               <span class="font-bold text-slate-200">${isTeacher ? `ครู${m.nickname || m.first_name}` : (m.nickname || m.first_name)}</span>
@@ -1119,6 +1181,8 @@
         return;
       }
 
+      const canEdit = canEditMembers();
+
       if (rosterViewMode === 'list') {
         grid.innerHTML = filtered.map((m, idx) => {
           const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER';
@@ -1126,11 +1190,12 @@
           const shiftInfo = isTeacher
             ? { name: '👨‍🏫 ครูที่ปรึกษา', color: 'border-amber-500/40 text-amber-300', badge: 'bg-amber-500/10 text-amber-300' }
             : (SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' });
-          const isExec = isExecutiveRole(m);
-          const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;';
+          const shouldBlur = shouldBlurPhoto(m);
+          const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;' : '';
+          const roleBadge = getMemberRoleBadge(m);
 
           return `
-            <div onclick="openCardModal('${m.id}')" class="grid grid-cols-[36px_44px_76px_1fr_120px_130px_160px_90px] items-center gap-3 px-4 py-2.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:bg-tactical-850 cursor-pointer transition shadow-md group">
+            <div onclick="openCardModal('${m.id}')" class="grid grid-cols-[36px_44px_76px_1fr_110px_140px_110px_140px_110px] items-center gap-3 px-4 py-2.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:bg-tactical-850 cursor-pointer transition shadow-md group">
               <!-- 1. Index -->
               <div class="text-center font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400 transition">
                 ${String(idx + 1).padStart(2, '0')}
@@ -1139,7 +1204,7 @@
               <!-- 2. Avatar Photo -->
               <div class="w-10 h-11 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black flex items-center justify-center relative">
                 <img src="${m.profile_image_url || '/assets/logo.png'}" style="${blurStyle}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
-                ${!isExec ? '<span class="absolute inset-0 flex items-center justify-center text-[10px] bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์ความปลอดภัย">🔒</span>' : ''}
+                ${shouldBlur ? '<span class="absolute inset-0 flex items-center justify-center text-[10px] bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์ความปลอดภัย">🔒</span>' : ''}
               </div>
 
               <!-- 3. Duty ID Badge -->
@@ -1160,22 +1225,39 @@
                 <strong class="text-amber-300 font-bold">${isTeacher ? `ครู${m.nickname || '-'}` : (m.nickname || '-')}</strong>
               </div>
 
-              <!-- 6. Grade & Student No -->
+              <!-- 6. Role & Rank Badge (Annotation Pointa) -->
+              <div class="flex items-center gap-1.5 min-w-0">
+                <span class="inline-flex items-center px-2 py-0.5 rounded ${roleBadge.badgeClass} font-mono text-[10px] font-bold border truncate">
+                  ${roleBadge.label}
+                </span>
+                ${canEdit ? `
+                  <button onclick="event.stopPropagation(); quickEditMemberRole('${m.id}')" class="p-1 rounded bg-slate-800/90 hover:bg-amber-500/20 text-slate-400 hover:text-amber-300 border border-slate-700/80 transition flex-shrink-0" title="แก้ไขยศ/ตำแหน่ง">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  </button>
+                ` : ''}
+              </div>
+
+              <!-- 7. Grade & Student No -->
               <div class="text-xs font-mono text-slate-300 whitespace-nowrap">
                 <span>${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'}`}</span>
                 ${!isTeacher ? `<span class="text-slate-500 ml-1.5">#${m.student_no || '-'}</span>` : ''}
               </div>
 
-              <!-- 7. Duty Shift Badge -->
+              <!-- 8. Duty Shift Badge -->
               <div class="whitespace-nowrap">
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[11px] border ${shiftInfo.color}">
                   ${shiftInfo.name}
                 </span>
               </div>
 
-              <!-- 8. Action Link -->
-              <div class="text-right whitespace-nowrap">
-                <span class="text-xs font-mono text-cyan-400 group-hover:text-cyan-300 group-hover:underline flex items-center justify-end gap-1 font-semibold">
+              <!-- 9. Action Link & Quick Edit -->
+              <div class="text-right whitespace-nowrap flex items-center justify-end gap-1.5">
+                ${canEdit ? `
+                  <button onclick="event.stopPropagation(); quickEditMemberRole('${m.id}')" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[10px] font-mono font-semibold transition active:scale-95 flex items-center gap-1 shadow-sm">
+                    <span>⚙️</span><span>ยศ</span>
+                  </button>
+                ` : ''}
+                <span class="text-xs font-mono text-cyan-400 group-hover:text-cyan-300 group-hover:underline flex items-center gap-0.5 font-semibold">
                   <span>ดูบัตร</span>
                   <span>→</span>
                 </span>
@@ -1190,29 +1272,45 @@
           const shiftInfo = isTeacher
             ? { name: '👨‍🏫 ครูที่ปรึกษา', color: 'border-amber-500/40 text-amber-300', badge: 'bg-amber-500/10 text-amber-300' }
             : (SHIFT_MAP[dutyDay] || { name: dutyDay, color: 'border-slate-700 text-slate-400', badge: 'bg-slate-800 text-slate-300' });
-          const isExec = isExecutiveRole(m);
-          const blurStyle = isExec ? '' : 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;';
+          const shouldBlur = shouldBlurPhoto(m);
+          const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;' : '';
+          const roleBadge = getMemberRoleBadge(m);
 
           return `
             <div onclick="openCardModal('${m.id}')" class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5 cursor-pointer transition shadow-md group flex flex-col justify-between h-full">
-              <div class="flex items-start gap-3">
-                <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black flex items-center justify-center">
-                  <img src="${m.profile_image_url || '/assets/logo.png'}" style="${blurStyle}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
-                  ${!isExec ? '<span class="absolute inset-0 flex items-center justify-center text-xs bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์ความปลอดภัย">🔒</span>' : ''}
+              <div>
+                <div class="flex items-start gap-3">
+                  <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black flex items-center justify-center">
+                    <img src="${m.profile_image_url || '/assets/logo.png'}" style="${blurStyle}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
+                    ${shouldBlur ? '<span class="absolute inset-0 flex items-center justify-center text-xs bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์ความปลอดภัย">🔒</span>' : ''}
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="flex items-center justify-between gap-1">
+                      <span class="font-bold text-xs text-slate-100 truncate">${m.first_name || ''} ${m.last_name || ''}</span>
+                      <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'} font-bold whitespace-nowrap">[${isTeacher ? 'ครู' : (m.duty_id || 'รอ')}]</span>
+                    </div>
+                    <div class="text-[11px] text-slate-300 font-mono mt-1">
+                      ชื่อเล่น: <strong class="text-amber-300">${isTeacher ? `ครู${m.nickname || '-'}` : (m.nickname || '-')}</strong>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
+                      ${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'} #${m.student_no || '-'}`}
+                    </div>
+                  </div>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <div class="flex items-center justify-between gap-1">
-                    <span class="font-bold text-xs text-slate-100 truncate">${m.first_name || ''} ${m.last_name || ''}</span>
-                    <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'} font-bold whitespace-nowrap">[${isTeacher ? 'ครู' : (m.duty_id || 'รอ')}]</span>
-                  </div>
-                  <div class="text-[11px] text-slate-300 font-mono mt-1">
-                    ชื่อเล่น: <strong class="text-amber-300">${isTeacher ? `ครู${m.nickname || '-'}` : (m.nickname || '-')}</strong>
-                  </div>
-                  <div class="text-[10px] text-slate-400 font-mono mt-0.5 truncate">
-                    ${isTeacher ? (m.grade_class || 'ครูที่ปรึกษา') : `ม.${m.grade_class || '-'} #${m.student_no || '-'}`}
-                  </div>
+
+                <!-- Role Badge & Quick Edit Button in Card -->
+                <div class="flex items-center justify-between gap-1 mt-2.5 pt-2 border-t border-slate-800/80">
+                  <span class="inline-flex items-center px-1.5 py-0.5 rounded ${roleBadge.badgeClass} font-mono text-[9px] font-bold border truncate">
+                    ${roleBadge.label}
+                  </span>
+                  ${canEdit ? `
+                    <button onclick="event.stopPropagation(); quickEditMemberRole('${m.id}')" class="px-2 py-0.5 rounded bg-amber-500/10 hover:bg-amber-500/25 text-amber-300 border border-amber-500/30 text-[10px] font-mono flex items-center gap-1 transition active:scale-95 shadow-sm">
+                      <span>⚙️</span><span>แก้ไขยศ</span>
+                    </button>
+                  ` : ''}
                 </div>
               </div>
+
               <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
                 <span class="px-1.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[10px] border ${shiftInfo.color}">${shiftInfo.name}</span>
                 <span class="text-cyan-400 group-hover:underline font-mono">ดูบัตร →</span>
@@ -1643,7 +1741,7 @@
       const nameEl = document.getElementById('card-fullname');
       if (nameEl) nameEl.textContent = fullName;
 
-      const isExec = isExecutiveRole(m);
+      const shouldBlur = shouldBlurPhoto(m);
       const photoEl = document.getElementById('card-photo-img');
       const privacyNotice = document.getElementById('card-privacy-notice');
       if (photoEl) {
@@ -1654,7 +1752,7 @@
         } else {
           photoEl.className = 'w-full h-full object-cover object-top';
         }
-        if (!isExec) {
+        if (shouldBlur) {
           photoEl.style.filter = 'blur(16px)';
           photoEl.style.transform = 'scale(1.25)';
           photoEl.style.opacity = '0.7';
@@ -1776,7 +1874,7 @@
 
     function canEditMembers() {
       const u = window.currentUser;
-      if (!u) return true;
+      if (!u) return false;
       return Boolean(u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader || u.role === 'COMMANDER' || u.role === 'PRESIDENT');
     }
 
