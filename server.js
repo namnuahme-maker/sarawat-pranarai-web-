@@ -1216,6 +1216,48 @@ app.patch('/api/members/:id', async (req, res) => {
     if (error) throw error;
     if (!data) return res.status(404).json({ error: 'ไม่พบข้อมูลสารวัตรท่านนี้' });
 
+    // 🤖 ซิงค์การเปลี่ยนรหัสเวรและบทบาทเวรพิเศษเข้าสู่ Discord ทันที
+    if (data && data.discord_id && DISCORD_BOT_TOKEN && DISCORD_GUILD_ID) {
+      try {
+        const isSpecialDuty = Boolean(
+          (data.duty_day && (data.duty_day.endsWith('S') || data.duty_day.includes('S'))) ||
+          (data.duty_id && data.duty_id.includes('S'))
+        );
+        const roleSpecial = process.env.ROLE_SPECIAL || '1567570841548627971';
+
+        // 1. อัปเดต Discord Nickname ตามรหัสเวรใหม่
+        const newNick = data.role === 'TEACHER'
+          ? `[ครูที่ปรึกษา] ${data.nickname || ''} (${data.first_name || ''})`.substring(0, 32)
+          : `[${data.duty_id || 'สารวัตร'}] ${data.nickname || ''} (${data.first_name || ''})`.substring(0, 32);
+
+        await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}`, {
+          method: 'PATCH',
+          headers: {
+            Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ nick: newNick })
+        }).catch(() => {});
+
+        // 2. ซิงค์ยศเวรพิเศษ (ROLE_SPECIAL)
+        if (roleSpecial) {
+          if (isSpecialDuty) {
+            await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${roleSpecial}`, {
+              method: 'PUT',
+              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+            }).catch(() => {});
+          } else {
+            await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${roleSpecial}`, {
+              method: 'DELETE',
+              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+            }).catch(() => {});
+          }
+        }
+      } catch (dErr) {
+        console.warn('[SARAWAT-WEB] Discord sync warning:', dErr.message);
+      }
+    }
+
     console.log(`[SARAWAT-WEB] ✏️ ข้อมูลสารวัตร ${data.nickname || data.duty_id} ถูกอัปเดตโดย ${user.username || user.nickname}`);
     res.json({ success: true, message: 'อัปเดตข้อมูลสารวัตรสำเร็จ', data });
   } catch (err) {

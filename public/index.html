@@ -544,14 +544,32 @@
               </div>
               <div>
                 <label class="block text-[11px] text-slate-400 font-mono mb-1">ผลัดเวรประจำสัปดาห์</label>
-                <select id="edit-member-duty-day" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white text-xs outline-none focus:border-amber-400 font-mono">
+                <select id="edit-member-duty-day" onchange="handleDutyDayChange(this.value)" class="w-full px-2.5 py-1.5 rounded-lg bg-black border border-tactical-border text-white text-xs outline-none focus:border-amber-400 font-mono">
                   <option value="M">วันจันทร์ (M)</option>
                   <option value="T">วันอังคาร (T)</option>
                   <option value="W">วันพุธ (W)</option>
                   <option value="Ts">วันพฤหัสบดี (Ts)</option>
                   <option value="F">วันศุกร์ (F)</option>
-                  <option value="S">วันเสาร์ (S)</option>
+                  <option value="S">วันเสาร์ / ส่วนกลาง (S)</option>
                 </select>
+              </div>
+
+              <!-- Special Duty Toggle Control -->
+              <div class="sm:col-span-2 p-2.5 rounded-xl bg-purple-950/30 border border-purple-500/30 flex items-center justify-between transition hover:border-purple-400/50">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center text-sm font-bold shadow-inner">⭐</div>
+                  <div>
+                    <div class="text-xs font-bold text-slate-100 flex items-center gap-1.5">
+                      <span>ปฏิบัติหน้าที่เวรพิเศษ (Special Duty)</span>
+                      <span id="badge-special-shift-status" class="text-[10px] px-1.5 py-0.5 rounded bg-purple-500/20 text-purple-300 font-mono border border-purple-500/40">เวรมาทุกวัน</span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-mono">สลับรหัสเวร เช่น M1 ↔ MS1 และบาร์โค้ดบัตรอัตโนมัติ</div>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input type="checkbox" id="edit-member-is-special" class="sr-only peer" onchange="handleSpecialShiftToggle(this.checked)">
+                  <div class="w-11 h-6 bg-slate-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600 shadow-inner"></div>
+                </label>
               </div>
               <div>
                 <label class="block text-[11px] text-slate-400 font-mono mb-1">ตำแหน่ง / สิทธิ์ (Role)</label>
@@ -1138,7 +1156,16 @@
 
       let filtered = members;
       if (currentShiftFilter !== 'ALL') {
-        filtered = filtered.filter(m => m.duty_day && m.duty_day.startsWith(currentShiftFilter));
+        if (currentShiftFilter === 'S') {
+          // สารวัตรเวรพิเศษ: ผลัดเวรลงท้ายด้วย S, มีคำว่า S, หรือรหัสเวรมี S เช่น FS1, MS1, TSS2
+          filtered = filtered.filter(m => {
+            const dd = (m.duty_day || '').toUpperCase();
+            const did = (m.duty_id || '').toUpperCase();
+            return dd.endsWith('S') || dd.includes('S') || did.includes('S');
+          });
+        } else {
+          filtered = filtered.filter(m => m.duty_day && m.duty_day.startsWith(currentShiftFilter));
+        }
       }
 
       if (currentLevelFilter === 'M4') {
@@ -1890,7 +1917,21 @@
         const m = activeCardMember;
         document.getElementById('edit-member-nickname').value = m.nickname || '';
         document.getElementById('edit-member-duty-id').value = m.duty_id || '';
-        document.getElementById('edit-member-duty-day').value = m.duty_day || 'M';
+
+        // ตรวจสอบสถานะเวรพิเศษเริ่มต้น
+        const isSpecial = Boolean(
+          (m.duty_day && (m.duty_day.endsWith('S') || m.duty_day.includes('S'))) ||
+          (m.duty_id && (m.duty_id.includes('S') || m.duty_id.includes('s')))
+        );
+        const specialCheckbox = document.getElementById('edit-member-is-special');
+        if (specialCheckbox) specialCheckbox.checked = isSpecial;
+
+        // กำหนดวันพื้นฐานใน dropdown
+        let baseDay = m.duty_day || 'M';
+        if (baseDay === 'TSS') baseDay = 'Ts';
+        else if (baseDay.endsWith('S') && baseDay !== 'S') baseDay = baseDay.replace(/S+$/, '') || 'M';
+        document.getElementById('edit-member-duty-day').value = baseDay;
+
         document.getElementById('edit-member-role').value = m.role || 'MEMBER';
         document.getElementById('edit-member-shift-role').value = m.shift_role || 'OFFICER';
         document.getElementById('edit-member-phone').value = m.phone_number || '';
@@ -1909,9 +1950,86 @@
         if (viewGrid) viewGrid.classList.remove('hidden');
         if (toggleBtn) {
           toggleBtn.classList.remove('bg-amber-500/30');
-          toggleBtn.innerHTML = '<span>✏️</span><span>แก้ไขข้อมูล (ประธาน)</span>';
+          toggleBtn.innerHTML = '<span>✏️</span><span>แก้ไขข้อมูล (Admin/Executive)</span>';
         }
       }
+    }
+
+    // 🎛️ ฟังก์ชันสลับสถานะเวรพิเศษและปรับรหัสเวรสดทันที
+    function handleSpecialShiftToggle(isSpecial) {
+      const dutyIdInput = document.getElementById('edit-member-duty-id');
+      const dutyDaySelect = document.getElementById('edit-member-duty-day');
+      let curId = (dutyIdInput.value || '').trim();
+      let curDay = dutyDaySelect.value;
+
+      let newId = curId;
+      if (isSpecial) {
+        // M1 -> MS1, F2 -> FS2, Ts1 -> TSS1
+        if (curId.startsWith('Ts') || curId.startsWith('TS')) {
+          newId = curId.replace(/^Ts/i, 'TSS');
+        } else if (!curId.includes('S') && !curId.includes('s')) {
+          const match = curId.match(/^([A-Za-z]+)(\d*)$/);
+          if (match) {
+            newId = `${match[1]}S${match[2]}`;
+          } else {
+            newId = `${curDay}S1`;
+          }
+        }
+      } else {
+        // MS1 -> M1, FS2 -> F2, TSS1 -> Ts1
+        if (curId.startsWith('TSS') || curId.startsWith('Tss') || curId.startsWith('tss')) {
+          newId = curId.replace(/^TSS/i, 'Ts');
+        } else {
+          newId = curId.replace(/S/gi, '');
+        }
+      }
+
+      dutyIdInput.value = newId;
+      updateCardPreviewRealtime(newId);
+    }
+
+    // 📅 ฟังก์ชันเปลี่ยนวันประจำสัปดาห์ พร้อมรักษาเลขลำดับและสถานะเวรพิเศษ
+    function handleDutyDayChange(newDay) {
+      const isSpecial = document.getElementById('edit-member-is-special')?.checked;
+      const dutyIdInput = document.getElementById('edit-member-duty-id');
+      const curId = (dutyIdInput.value || '').trim();
+      const numMatch = curId.match(/\d+$/);
+      const num = numMatch ? numMatch[0] : '1';
+
+      let newPrefix = newDay;
+      if (isSpecial) {
+        newPrefix = newDay === 'Ts' ? 'TSS' : (newDay === 'S' ? 'S' : `${newDay}S`);
+      }
+      const newId = `${newPrefix}${num}`;
+      dutyIdInput.value = newId;
+      updateCardPreviewRealtime(newId);
+    }
+
+    // 💳 อัปเดตพรีวิวบัตร รหัสด้านล่าง และบาร์โค้ดแบบ Real-time
+    function updateCardPreviewRealtime(dutyId) {
+      if (!activeCardMember) return;
+      const dBadge = document.getElementById('dossier-duty-badge');
+      if (dBadge) dBadge.textContent = `[${dutyId}]`;
+
+      const codeEl = document.getElementById('card-codeline');
+      if (codeEl) {
+        const rawClass = (activeCardMember.grade_class || '').replace('ม.', '').trim();
+        const classDisplay = rawClass ? `M${rawClass.replace('/', '-')}` : 'M5-7';
+        const phoneOrNo = activeCardMember.phone_number || activeCardMember.student_no || '0634125121';
+        codeEl.textContent = `${classDisplay}-${dutyId}-${phoneOrNo}`;
+      }
+
+      try {
+        const barcodeText = `${dutyId}-${activeCardMember.student_no || '69055'}`;
+        JsBarcode("#card-barcode-svg", barcodeText, {
+          format: "CODE128",
+          lineColor: "#050505",
+          width: 1.4,
+          height: 34,
+          displayValue: false,
+          margin: 0
+        });
+      } catch (e) {}
     }
 
     async function saveMemberRealtime() {
@@ -1920,10 +2038,17 @@
       saveBtn.disabled = true;
       saveBtn.innerHTML = '<span>⏳</span><span>กำลังซิงค์...</span>';
 
+      const isSpecialChecked = document.getElementById('edit-member-is-special')?.checked;
+      let selectedDay = document.getElementById('edit-member-duty-day').value;
+      let effectiveDutyDay = selectedDay;
+      if (isSpecialChecked) {
+        effectiveDutyDay = selectedDay === 'Ts' ? 'TSS' : (selectedDay === 'S' ? 'S' : `${selectedDay}S`);
+      }
+
       const payload = {
         nickname: document.getElementById('edit-member-nickname').value.trim(),
         duty_id: document.getElementById('edit-member-duty-id').value.trim(),
-        duty_day: document.getElementById('edit-member-duty-day').value,
+        duty_day: effectiveDutyDay,
         role: document.getElementById('edit-member-role').value,
         shift_role: document.getElementById('edit-member-shift-role').value,
         phone_number: document.getElementById('edit-member-phone').value.trim(),
