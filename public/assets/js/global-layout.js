@@ -81,7 +81,7 @@
     }).join('');
 
     return `
-      <header id="sarawat-global-header" class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-tactical-border px-3 sm:px-4 py-2 sm:py-2.5 transition w-full max-w-full overflow-hidden">
+      <header id="sarawat-global-header" class="sticky top-0 z-50 bg-black/90 backdrop-blur-md border-b border-tactical-border px-3 sm:px-4 py-2 sm:py-2.5 transition w-full max-w-full overflow-visible">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-3 w-full flex-nowrap">
           
           <!-- Brand, School Logo & Left Quick Feature Menu -->
@@ -235,7 +235,7 @@
       profileBadge.id = 'nav-user-profile-badge';
       profileBadge.className = 'relative flex items-center gap-1.5 sm:gap-2 pl-1.5 sm:pl-2.5 border-l border-slate-800/80 flex-shrink-0';
       profileBadge.innerHTML = `
-        <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="คลิกเพื่อดูโปรไฟล์และจัดการข้อมูลส่วนตัว" onclick="window.toggleUserProfileDropdown(event)">
+        <div role="button" tabindex="0" class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group select-none" title="คลิกเพื่อดูโปรไฟล์และจัดการข้อมูลส่วนตัว" onclick="window.toggleUserProfileDropdown(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.toggleUserProfileDropdown(event);}">
           <div class="relative flex-shrink-0">
             <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border ${badgeBorderColor} shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
             <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${dotColor} border border-black"></span>
@@ -250,7 +250,7 @@
         </div>
 
         <!-- User Profile Dropdown Popover -->
-        <div id="user-profile-dropdown" class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 bg-slate-900/95 border border-tactical-border/90 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl p-4 z-50 text-slate-200 font-sans transition-all duration-200">
+        <div id="user-profile-dropdown" class="hidden absolute right-0 top-full mt-2 w-72 sm:w-80 max-w-[calc(100vw-20px)] bg-slate-900/95 border border-tactical-border/90 rounded-2xl shadow-[0_16px_40px_rgba(0,0,0,0.85)] backdrop-blur-xl p-4 z-[100] text-slate-200 font-sans transition-all duration-200">
           
           <!-- Header Profile Info -->
           <div class="flex items-center gap-3 pb-3 border-b border-tactical-border/70">

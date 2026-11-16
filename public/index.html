@@ -859,10 +859,19 @@
       fetchData();
       initRealtime();
 
-      document.addEventListener('sarawat:user_loaded', () => {
+      document.addEventListener('sarawat:user_loaded', (e) => {
         if (allMembers && allMembers.length) {
           renderRoster(allMembers);
           renderTodayOfficers(allMembers);
+        }
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('edit') === 'self' && allMembers && allMembers.length) {
+          const u = e.detail || window.currentUser;
+          const targetId = u?.memberId || allMembers.find(m => m.discord_id === u?.id)?.id;
+          if (targetId && document.getElementById('card-modal')?.classList.contains('hidden')) {
+            openCardModal(targetId);
+            setTimeout(() => toggleMemberEditMode(true), 250);
+          }
         }
       });
 
