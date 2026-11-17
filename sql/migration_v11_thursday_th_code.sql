@@ -22,6 +22,22 @@ BEGIN
     RAISE EXCEPTION 'Thursday duty ID migration collision in members.duty_id; resolve duplicate Th/ThS IDs before retrying';
   END IF;
 
+  IF EXISTS (
+    SELECT 1 FROM (
+      SELECT CASE
+        WHEN duty_id ~ '^TSS[0-9]*$' OR duty_id ~ '^TsS[0-9]*$'
+          THEN 'ThS' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+        ELSE 'Th' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+      END AS target_duty_id
+      FROM public.members
+     WHERE duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
+    ) mapped
+    GROUP BY target_duty_id
+    HAVING COUNT(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'Multiple old Thursday duty IDs map to the same Th/ThS ID; resolve before retrying';
+  END IF;
+
   IF to_regclass('public.shift_leadership') IS NOT NULL AND EXISTS (
     SELECT 1 FROM public.shift_leadership
      WHERE shift_code IN ('Ts', 'Th')
@@ -77,6 +93,24 @@ BEGIN
     IF has_conflict THEN
       RAISE EXCEPTION 'Thursday attendance record IDs collide; resolve duplicate Th/ThS records before retrying';
     END IF;
+
+    EXECUTE $q$
+      SELECT EXISTS (
+        SELECT target_duty_id, duty_date FROM (
+          SELECT CASE
+            WHEN duty_id ~ '^TSS[0-9]*$' OR duty_id ~ '^TsS[0-9]*$'
+              THEN 'ThS' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+            ELSE 'Th' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+          END AS target_duty_id, duty_date
+          FROM public.attendance_records
+          WHERE duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
+        ) mapped
+        GROUP BY target_duty_id, duty_date HAVING COUNT(*) > 1
+      )
+    $q$ INTO has_conflict;
+    IF has_conflict THEN
+      RAISE EXCEPTION 'Multiple old Thursday attendance IDs map to the same Th/ThS ID on one date';
+    END IF;
   END IF;
 END $$;
 
@@ -117,38 +151,53 @@ UPDATE public.duty_logs
    SET duty_day = CASE WHEN duty_day = 'Ts' THEN 'Th' ELSE 'ThS' END
  WHERE duty_day IN ('Ts', 'TSS', 'TsS');
 
-UPDATE public.attendance_scan_sessions
-   SET shift_code = CASE WHEN shift_code = 'Ts' THEN 'Th' ELSE 'ThS' END
- WHERE shift_code IN ('Ts', 'TSS', 'TsS');
+DO $$
+BEGIN
+  IF to_regclass('public.attendance_scan_sessions') IS NOT NULL THEN
+    EXECUTE $q$
+      UPDATE public.attendance_scan_sessions
+         SET shift_code = CASE WHEN shift_code = 'Ts' THEN 'Th' ELSE 'ThS' END
+       WHERE shift_code IN ('Ts', 'TSS', 'TsS')
+    $q$;
+  END IF;
 
-UPDATE public.attendance_records
-   SET shift_code = CASE WHEN shift_code = 'Ts' THEN 'Th' ELSE 'ThS' END,
-       duty_id = CASE
-     WHEN duty_id ~ '^TSS[0-9]*$' OR duty_id ~ '^TsS[0-9]*$'
-       THEN 'ThS' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
-     WHEN duty_id ~ '^Ts[0-9]*$'
-       THEN 'Th' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
-     ELSE duty_id
-   END
- WHERE shift_code IN ('Ts', 'TSS', 'TsS')
-    OR duty_id ~ '^(Ts|TSS|TsS)[0-9]*$';
+  IF to_regclass('public.attendance_records') IS NOT NULL THEN
+    EXECUTE $q$
+      UPDATE public.attendance_records
+         SET shift_code = CASE WHEN shift_code = 'Ts' THEN 'Th' ELSE 'ThS' END,
+             duty_id = CASE
+           WHEN duty_id ~ '^TSS[0-9]*$' OR duty_id ~ '^TsS[0-9]*$'
+             THEN 'ThS' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+           WHEN duty_id ~ '^Ts[0-9]*$'
+             THEN 'Th' || COALESCE(substring(duty_id FROM '[0-9]+$'), '')
+           ELSE duty_id
+         END
+       WHERE shift_code IN ('Ts', 'TSS', 'TsS')
+          OR duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
+    $q$;
+  END IF;
 
-UPDATE public.lost_items
-   SET finder_duty_id = CASE
-         WHEN finder_duty_id ~ '^TSS[0-9]*$' OR finder_duty_id ~ '^TsS[0-9]*$'
-           THEN 'ThS' || COALESCE(substring(finder_duty_id FROM '[0-9]+$'), '')
-         WHEN finder_duty_id ~ '^Ts[0-9]*$'
-           THEN 'Th' || COALESCE(substring(finder_duty_id FROM '[0-9]+$'), '')
-         ELSE finder_duty_id
-       END,
-       delivered_by_duty_id = CASE
-         WHEN delivered_by_duty_id ~ '^TSS[0-9]*$' OR delivered_by_duty_id ~ '^TsS[0-9]*$'
-           THEN 'ThS' || COALESCE(substring(delivered_by_duty_id FROM '[0-9]+$'), '')
-         WHEN delivered_by_duty_id ~ '^Ts[0-9]*$'
-           THEN 'Th' || COALESCE(substring(delivered_by_duty_id FROM '[0-9]+$'), '')
-         ELSE delivered_by_duty_id
-       END
- WHERE finder_duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
-    OR delivered_by_duty_id ~ '^(Ts|TSS|TsS)[0-9]*$';
+  IF to_regclass('public.lost_items') IS NOT NULL THEN
+    EXECUTE $q$
+      UPDATE public.lost_items
+         SET finder_duty_id = CASE
+               WHEN finder_duty_id ~ '^TSS[0-9]*$' OR finder_duty_id ~ '^TsS[0-9]*$'
+                 THEN 'ThS' || COALESCE(substring(finder_duty_id FROM '[0-9]+$'), '')
+               WHEN finder_duty_id ~ '^Ts[0-9]*$'
+                 THEN 'Th' || COALESCE(substring(finder_duty_id FROM '[0-9]+$'), '')
+               ELSE finder_duty_id
+             END,
+             delivered_by_duty_id = CASE
+               WHEN delivered_by_duty_id ~ '^TSS[0-9]*$' OR delivered_by_duty_id ~ '^TsS[0-9]*$'
+                 THEN 'ThS' || COALESCE(substring(delivered_by_duty_id FROM '[0-9]+$'), '')
+               WHEN delivered_by_duty_id ~ '^Ts[0-9]*$'
+                 THEN 'Th' || COALESCE(substring(delivered_by_duty_id FROM '[0-9]+$'), '')
+               ELSE delivered_by_duty_id
+             END
+       WHERE finder_duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
+          OR delivered_by_duty_id ~ '^(Ts|TSS|TsS)[0-9]*$'
+    $q$;
+  END IF;
+END $$;
 
 COMMIT;
