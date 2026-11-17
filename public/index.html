@@ -1250,11 +1250,11 @@
           fetch('/api/stats').then(r => r.json()).catch(() => ({})),
           fetch('/api/members').then(r => r.json()).catch(() => ({ success: false })),
           fetch('/api/cases').then(r => r.json()).catch(() => ({ success: false })),
-          loadCardStudioConfig()
+          loadCardStudioConfig().catch(() => ({}))
         ]);
 
         // Process Stats (Annotation 2: แสดงกำลังพลที่พร้อมปฏิบัติหน้าที่จริงจาก members.active)
-        if (statsRes.success) {
+        if (statsRes && statsRes.success) {
           statsData = statsRes;
           const activeCount = statsRes.members?.active || 0;
           const totalCount = statsRes.members?.total || activeCount;
@@ -1269,12 +1269,12 @@
         }
 
         // Process Members
-        if (membersRes.success) {
-          allMembers = membersRes.data || [];
+        if (membersRes && membersRes.success && Array.isArray(membersRes.data)) {
+          allMembers = membersRes.data;
           window.allMembers = allMembers;
-          renderShiftsGrid();
-          renderTodayOfficers();
-          renderRoster(allMembers);
+          try { renderShiftsGrid(); } catch (e) { console.error('renderShiftsGrid error:', e); }
+          try { renderTodayOfficers(); } catch (e) { console.error('renderTodayOfficers error:', e); }
+          try { renderRoster(allMembers); } catch (e) { console.error('renderRoster error:', e); }
 
           // Check if navigated with ?edit=self or ?memberId=
           const urlParams = new URLSearchParams(window.location.search);
@@ -1285,12 +1285,26 @@
               setTimeout(() => toggleMemberEditMode(true), 250);
             }
           }
+        } else {
+          console.error('Failed to load members:', membersRes);
+          const shiftGrid = document.getElementById('shifts-grid-container');
+          if (shiftGrid && shiftGrid.innerHTML.includes('กำลังโหลด')) {
+            shiftGrid.innerHTML = '<div class="col-span-full py-6 text-center text-xs text-rose-400 font-mono">⚠️ ไม่สามารถโหลดตารางเวรได้ กรุณารีเฟรชหรือตรวจสอบสิทธิ์</div>';
+          }
+          const todayList = document.getElementById('today-officers-list');
+          if (todayList && todayList.innerHTML.includes('กำลังโหลด')) {
+            todayList.innerHTML = '<div class="p-3 text-center text-xs text-rose-400 font-mono">⚠️ ไม่สามารถโหลดรายชื่อเวรวันนี้ได้</div>';
+          }
+          const rosterGrid = document.getElementById('roster-grid');
+          if (rosterGrid && rosterGrid.innerHTML.includes('กำลังโหลด')) {
+            rosterGrid.innerHTML = '<div class="col-span-full py-8 text-center text-xs text-rose-400 font-mono">⚠️ ไม่สามารถโหลดทำเนียบสารวัตรได้</div>';
+          }
         }
 
         // Process Cases
-        if (casesRes.success) {
+        if (casesRes && casesRes.success) {
           allCases = casesRes.data || [];
-          renderCases(allCases);
+          try { renderCases(allCases); } catch (e) { console.error('renderCases error:', e); }
         }
 
       } catch (err) {
@@ -1352,16 +1366,18 @@
         { code: 'S', title: 'เวรพิเศษ (S)', dayNum: 6, color: 'yellow' }
       ];
 
-      const isHeadRole = (m) => {
+      const isHeadRole = (m, shiftCode) => {
         if (!m) return false;
+        if (m.leadership_by_shift?.[shiftCode]?.HEAD) return true;
         const sr = (m.shift_role || '').toUpperCase();
         const r = (m.role || '').toUpperCase();
         const rt = m.role_title || '';
         return sr === 'SHIFT_HEAD' || r === 'SHIFT_HEAD' || r === 'HEAD' || rt.includes('หัวหน้าเวร') || !!m.is_head;
       };
 
-      const isDeputyRole = (m) => {
+      const isDeputyRole = (m, shiftCode) => {
         if (!m) return false;
+        if (m.leadership_by_shift?.[shiftCode]?.DEPUTY) return true;
         const sr = (m.shift_role || '').toUpperCase();
         const r = (m.role || '').toUpperCase();
         const rt = m.role_title || '';
@@ -1371,7 +1387,7 @@
       // Update KPI Shift Info
       const activeShiftObj = shifts.find(s => s.code === currentTodayCode) || shifts[0];
       const shiftMembers = allMembers.filter(m => isMemberInShift(m, currentTodayCode));
-      const head = shiftMembers.find(isHeadRole) || null;
+      const head = shiftMembers.find(m => isHeadRole(m, currentTodayCode)) || null;
 
       document.getElementById('kpi-today-shift-code').textContent = currentTodayCode;
       document.getElementById('kpi-today-shift-name').textContent = activeShiftObj.title;
@@ -1384,8 +1400,8 @@
       container.innerHTML = shifts.map(s => {
         const isToday = (s.code === currentTodayCode);
         const mems = allMembers.filter(m => isMemberInShift(m, s.code));
-        const headOfficer = mems.find(isHeadRole) || null;
-        const depOfficer = mems.find(isDeputyRole) || null;
+        const headOfficer = mems.find(m => isHeadRole(m, s.code)) || null;
+        const depOfficer = mems.find(m => isDeputyRole(m, s.code)) || null;
 
         return `
           <div class="p-3 rounded-xl bg-tactical-850 border ${isToday ? 'border-amber-500 shadow-[0_0_12px_rgba(245,158,11,0.2)]' : 'border-tactical-border'} flex flex-col justify-between">
@@ -2251,7 +2267,12 @@
         else if (isTeacher) roleText = '👨‍🏫 ครูที่ปรึกษา (Advisor Teacher)';
         else if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
         else if (m.role === 'VICE_PRESIDENT') roleText = '⭐ รองประธานสารวัตร';
-        else if (m.shift_role === 'SHIFT_HEAD') roleText = '🛡️ หัวหน้าเวรประจำวัน';
+        else {
+          const shiftCode = m.duty_day === 'S' ? 'S' : (m.duty_day === 'TSS' || m.duty_day === 'TsS' ? 'Ts' : (m.duty_day || '').replace(/S+$/, ''));
+          const leadership = m.leadership_by_shift?.[shiftCode] || {};
+          if (leadership.HEAD) roleText = `🛡️ หัวหน้าเวร (${shiftCode})`;
+          else if (leadership.DEPUTY) roleText = `🎖️ รองหัวหน้าเวร (${shiftCode})`;
+        }
         dRole.textContent = roleText;
       }
 

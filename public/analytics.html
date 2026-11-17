@@ -389,7 +389,7 @@
         <div>
           <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
             <span>👑</span>
-            <span>ทำเนียบโครงสร้างกำลังพล & บทบาทหน้าที่ 5 ผลัดเวร</span>
+            <span>ทำเนียบโครงสร้างกำลังพล & บทบาทหน้าที่ 6 ผลัดเวร</span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
               Organization Matrix
             </span>
@@ -401,8 +401,8 @@
         </a>
       </div>
 
-      <!-- Shift Structure Grid (5 Cards: จันทร์ ถึง ศุกร์) -->
-      <div id="organization-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+      <!-- Shift Structure Grid -->
+      <div id="organization-grid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
         <!-- Rendered dynamically via JS -->
         <div class="col-span-full py-8 text-center text-slate-500 text-xs font-mono">
           กำลังจัดทำเนียบโครงสร้างกำลังพล...
@@ -552,7 +552,7 @@
       renderLostItems(data.lostFound);
 
       // 5. Render Organization Structure
-      renderOrganization(data.organization);
+      renderOrganization(data.organization, data.canManageLeadership);
     }
 
     // ----------------------------------------------------------
@@ -831,7 +831,7 @@
     // ----------------------------------------------------------
     // 6. ORGANIZATION & DUTIES RENDERING
     // ----------------------------------------------------------
-    function renderOrganization(orgList = []) {
+    function renderOrganization(orgList = [], canManage = false) {
       const grid = document.getElementById('organization-grid');
       if (!grid) return;
 
@@ -844,6 +844,16 @@
         const head = shift.head;
         const deputy = shift.deputy;
         const officers = shift.officers || [];
+        const assignmentControl = (position, current) => canManage ? `
+          <div class="flex gap-1 mt-2">
+            <select id="lead-${shift.shift_code}-${position}" class="min-w-0 flex-1 bg-tactical-900 border border-tactical-border rounded-lg px-2 py-1.5 text-[10px] text-slate-200">
+              <option value="">เลือกสารวัตร${position === 'HEAD' ? 'หัวหน้า' : 'รองหัวหน้า'}</option>
+              ${(shift.eligible_members || []).map(m => `<option value="${m.id}" ${current?.id === m.id ? 'selected' : ''}>[${m.duty_id}] ${m.nickname || m.name}</option>`).join('')}
+            </select>
+            <button type="button" onclick="saveShiftLeadership('${shift.shift_code}','${position}')" class="px-2 py-1 rounded-lg bg-amber-500/15 border border-amber-500/30 text-amber-300 text-[10px] font-bold">บันทึก</button>
+            ${current ? `<button type="button" onclick="clearShiftLeadership('${shift.shift_code}','${position}')" class="px-2 py-1 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-[10px]">ถอด</button>` : ''}
+          </div>
+        ` : '';
 
         return `
           <div class="p-3.5 rounded-2xl bg-tactical-950 border border-tactical-border flex flex-col justify-between space-y-3 shadow-md hover:border-amber-500/40 transition">
@@ -871,6 +881,7 @@
                 ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
               </div>
               <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${head ? head.class_room : '-'}</div>
+              ${assignmentControl('HEAD', head)}
             </div>
 
             <!-- Leadership Role 2: รองหัวหน้าเวร (Deputy 🥈) -->
@@ -885,6 +896,7 @@
                 ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
               </div>
               <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${deputy ? deputy.class_room : '-'}</div>
+              ${assignmentControl('DEPUTY', deputy)}
             </div>
 
             <!-- Officer Members List -->
@@ -906,6 +918,32 @@
           </div>
         `;
       }).join('');
+    }
+
+    async function saveShiftLeadership(shiftCode, position) {
+      const select = document.getElementById(`lead-${shiftCode}-${position}`);
+      if (!select?.value) return;
+      const response = await fetch('/api/shift-leadership', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ shift_code: shiftCode, position, member_id: select.value })
+      });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        alert(result.message || 'บันทึกตำแหน่งไม่สำเร็จ');
+        return;
+      }
+      await loadAnalyticsData();
+    }
+
+    async function clearShiftLeadership(shiftCode, position) {
+      const response = await fetch(`/api/shift-leadership/${shiftCode}/${position}`, { method: 'DELETE' });
+      const result = await response.json();
+      if (!response.ok || !result.success) {
+        alert(result.message || 'ถอดตำแหน่งไม่สำเร็จ');
+        return;
+      }
+      await loadAnalyticsData();
     }
 
     function toggleMobileNav() {

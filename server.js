@@ -419,6 +419,10 @@ app.get('/api/auth/me', async (req, res) => {
       const isTeacher = m.role === 'TEACHER' || m.shift_role === 'TEACHER' || user.isTeacher;
       const isPres = m.role === 'PRESIDENT' || user.role === 'PRESIDENT';
       const isVP = m.role === 'VICE_PRESIDENT' || user.role === 'VICE_PRESIDENT';
+      const { data: leadershipAssignments = [] } = await supabase
+        .from('shift_leadership').select('shift_code, position').eq('member_id', m.id);
+      const memberShift = m.duty_day === 'S' ? 'S' : (['Ts', 'TSS', 'TsS'].includes(m.duty_day) ? 'Ts' : (m.duty_day || '').replace(/S+$/, ''));
+      const memberShiftLeadership = leadershipAssignments.find(a => a.shift_code === memberShift);
 
       user.isAdmin = isSysAdmin;
       user.isTeacher = isTeacher;
@@ -426,7 +430,7 @@ app.get('/api/auth/me', async (req, res) => {
       user.isVicePresident = isVP;
       user.canManageMembers = isSysAdmin || isTeacher || isPres || isVP;
       user.isCommander = isSysAdmin || isPres;
-      user.isLeader = isSysAdmin || isTeacher || isPres || isVP || (user.roles || []).some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
+      user.isLeader = isSysAdmin || isTeacher || isPres || isVP || leadershipAssignments.length > 0 || (user.roles || []).some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
 
       if (isSysAdmin) {
         user.rank = '⚡ ผู้ดูแลระบบ';
@@ -438,10 +442,10 @@ app.get('/api/auth/me', async (req, res) => {
         user.rank = '👑 ประธานสารวัตร';
       } else if (isVP) {
         user.rank = '⭐ รองประธานสารวัตร';
-      } else if (m.shift_role === 'SHIFT_HEAD') {
-        user.rank = '🛡️ หัวหน้าเวร';
-      } else if (m.shift_role === 'SHIFT_DEPUTY') {
-        user.rank = '🎖️ รองหัวหน้าเวร';
+      } else if (memberShiftLeadership?.position === 'HEAD') {
+        user.rank = `🛡️ หัวหน้าเวร (${memberShift})`;
+      } else if (memberShiftLeadership?.position === 'DEPUTY') {
+        user.rank = `🎖️ รองหัวหน้าเวร (${memberShift})`;
       } else {
         user.rank = '🛡️ สารวัตรนักเรียน';
       }
@@ -1164,15 +1168,21 @@ app.get('/api/members', async (req, res) => {
     const memberIds = (members || []).map(m => m.id).filter(Boolean);
     let leadershipByMember = {};
     if (memberIds.length) {
-      const { data: assignments, error: leadershipError } = await supabase
-        .from('shift_leadership')
-        .select('member_id, shift_code, position')
-        .in('member_id', memberIds);
-      if (leadershipError) throw leadershipError;
-      for (const assignment of assignments || []) {
-        leadershipByMember[assignment.member_id] ||= {};
-        leadershipByMember[assignment.member_id][assignment.shift_code] ||= {};
-        leadershipByMember[assignment.member_id][assignment.shift_code][assignment.position] = true;
+      try {
+        const { data: assignments, error: leadershipError } = await supabase
+          .from('shift_leadership')
+          .select('member_id, shift_code, position')
+          .in('member_id', memberIds);
+        if (!leadershipError && assignments) {
+          for (const assignment of assignments) {
+            leadershipByMember[assignment.member_id] ||= {};
+            leadershipByMember[assignment.member_id][assignment.shift_code] ||= {};
+            leadershipByMember[assignment.member_id][assignment.shift_code][assignment.position] = true;
+          }
+        }
+      } catch (leadershipErr) {
+        // Table might not exist yet; gracefully fallback
+        console.warn('[MEMBERS] shift_leadership fetch skipped:', leadershipErr.message);
       }
     }
 
@@ -1202,6 +1212,28 @@ app.get('/api/members', async (req, res) => {
 // -------------------------------------------------------------
 const LEADERSHIP_SHIFT_CODES = ['M', 'T', 'W', 'Ts', 'F', 'S'];
 const LEADERSHIP_POSITIONS = ['HEAD', 'DEPUTY'];
+const WEB_LEADERSHIP_ROLE_IDS = {
+  M: { HEAD: process.env.ROLE_HEAD_M || '1567570806412804126', DEPUTY: process.env.ROLE_DEPUTY_M || '1567570808270758020' },
+  T: { HEAD: process.env.ROLE_HEAD_T || '1567570810439335946', DEPUTY: process.env.ROLE_DEPUTY_T || '1567570812024786996' },
+  W: { HEAD: process.env.ROLE_HEAD_W || '1567570813878804511', DEPUTY: process.env.ROLE_DEPUTY_W || '1567570815728353490' },
+  Ts: { HEAD: process.env.ROLE_HEAD_THU || '1567570829288542218', DEPUTY: process.env.ROLE_DEPUTY_THU || '1567570831851126804' },
+  F: { HEAD: process.env.ROLE_HEAD_F || '1567570837215649962', DEPUTY: process.env.ROLE_DEPUTY_F || '1567570839925293178' },
+  S: { HEAD: process.env.ROLE_HEAD_S || '1567570801866047589', DEPUTY: process.env.ROLE_DEPUTY_S || '1567570803703423006' }
+};
+
+async function syncLeadershipDiscordRole(memberId, shiftCode, position, method) {
+  if (!DISCORD_BOT_TOKEN || !DISCORD_GUILD_ID) return;
+  const { data: member } = await supabase.from('members').select('discord_id').eq('id', memberId).maybeSingle();
+  const roleId = WEB_LEADERSHIP_ROLE_IDS[shiftCode]?.[position];
+  if (!member?.discord_id || !roleId) return;
+  const response = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${member.discord_id}/roles/${roleId}`, {
+    method,
+    headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+  });
+  if (!response.ok && response.status !== 404) {
+    throw new Error(`Discord role sync failed (${response.status})`);
+  }
+}
 
 function canManageShiftLeadership(user) {
   return Boolean(user && (
@@ -1223,10 +1255,12 @@ app.get('/api/shift-leadership', async (req, res) => {
     const { data, error } = await supabase
       .from('shift_leadership')
       .select('shift_code, position, member_id, members(id, duty_id, first_name, last_name, nickname, grade_class, duty_day)');
-    if (error) throw error;
+    if (error) {
+      return res.json({ success: true, data: [], canManage: canManageShiftLeadership(req.user) });
+    }
     res.json({ success: true, data: data || [], canManage: canManageShiftLeadership(req.user) });
   } catch (err) {
-    res.status(500).json({ success: false, message: 'โหลดตำแหน่งหัวหน้าเวรไม่สำเร็จ', error: err.message });
+    res.json({ success: true, data: [], canManage: canManageShiftLeadership(req.user) });
   }
 });
 
@@ -1257,6 +1291,10 @@ app.post('/api/shift-leadership', async (req, res) => {
       return res.status(409).json({ success: false, message: 'สารวัตรคนเดียวกันเป็นทั้งหัวหน้าและรองในผลัดเดียวกันไม่ได้' });
     }
 
+    const { data: previousAssignment, error: previousError } = await supabase
+      .from('shift_leadership').select('member_id').eq('shift_code', shiftCode).eq('position', position).maybeSingle();
+    if (previousError) throw previousError;
+
     const { data, error } = await supabase.from('shift_leadership').upsert({
       shift_code: shiftCode,
       position,
@@ -1265,6 +1303,14 @@ app.post('/api/shift-leadership', async (req, res) => {
       updated_at: new Date().toISOString()
     }, { onConflict: 'shift_code,position' }).select('shift_code, position, member_id').single();
     if (error) throw error;
+    try {
+      if (previousAssignment?.member_id && previousAssignment.member_id !== memberId) {
+        await syncLeadershipDiscordRole(previousAssignment.member_id, shiftCode, position, 'DELETE');
+      }
+      await syncLeadershipDiscordRole(memberId, shiftCode, position, 'PUT');
+    } catch (roleError) {
+      console.error('[LEADERSHIP] Discord role sync failed:', roleError.message);
+    }
     res.json({ success: true, message: 'บันทึกตำแหน่งประจำผลัดแล้ว', data });
   } catch (err) {
     res.status(500).json({ success: false, message: 'บันทึกตำแหน่งไม่สำเร็จ กรุณาตรวจว่าติดตั้ง migration_v10 แล้ว', error: err.message });
@@ -1280,8 +1326,14 @@ app.delete('/api/shift-leadership/:shiftCode/:position', async (req, res) => {
     if (!LEADERSHIP_SHIFT_CODES.includes(shiftCode) || !LEADERSHIP_POSITIONS.includes(position)) {
       return res.status(400).json({ success: false, message: 'ผลัดหรือตำแหน่งไม่ถูกต้อง' });
     }
+    const { data: previousAssignment } = await supabase
+      .from('shift_leadership').select('member_id').eq('shift_code', shiftCode).eq('position', position).maybeSingle();
     const { error } = await supabase.from('shift_leadership').delete().eq('shift_code', shiftCode).eq('position', position);
     if (error) throw error;
+    if (previousAssignment?.member_id) {
+      try { await syncLeadershipDiscordRole(previousAssignment.member_id, shiftCode, position, 'DELETE'); }
+      catch (roleError) { console.error('[LEADERSHIP] Discord role removal failed:', roleError.message); }
+    }
     res.json({ success: true, message: 'ถอดตำแหน่งประจำผลัดแล้ว' });
   } catch (err) {
     res.status(500).json({ success: false, message: 'ถอดตำแหน่งไม่สำเร็จ', error: err.message });
@@ -3522,8 +3574,12 @@ app.get('/api/analytics/overview', async (req, res) => {
         : getBaseWeekday(m.duty_day) === shiftKey);
       const headId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'HEAD')?.member_id;
       const deputyId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'DEPUTY')?.member_id;
-      const head = shiftMembers.find(m => m.id === headId) || null;
-      const deputy = shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) || null;
+      const head = (headId ? shiftMembers.find(m => m.id === headId) : null)
+        || shiftMembers.find(m => (m.shift_role || '').toUpperCase() === 'SHIFT_HEAD' || (m.role || '').toUpperCase() === 'SHIFT_HEAD' || !!m.is_head)
+        || null;
+      const deputy = (deputyId ? shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) : null)
+        || shiftMembers.find(m => m.id !== head?.id && ((m.shift_role || '').toUpperCase() === 'SHIFT_DEPUTY' || (m.role || '').toUpperCase() === 'SHIFT_DEPUTY' || !!m.is_deputy))
+        || null;
       const officers = shiftMembers.filter(m => 
         (!head || m.id !== head.id) && (!deputy || m.id !== deputy.id)
       );
