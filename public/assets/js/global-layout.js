@@ -10,6 +10,7 @@
   // Shared navigation items used in the all-screen menu drawer.
   const NAV_ITEMS = [
     { id: 'home', label: 'หน้าหลัก', icon: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>', href: '/' },
+    { id: 'roster', label: 'ทำเนียบสารวัตรทั้งหมด', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>', href: '/?tab=roster' },
     { id: 'attendance-scan', label: 'สแกนเช็คชื่อ', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', href: '/attendance-scan', highlight: 'emerald' },
     { id: 'analytics', label: 'สถิติ & คลังข้อมูล', icon: '<path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8V9m4 6v-6"/>', href: '/analytics', highlight: 'cyan' },
     { id: 'card-studio', label: 'ทำบัตร', icon: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M6 16c.6-1.3 1.3-2 2-2s1.4.7 2 2m3-4h5m-5 3h5"/>', href: '/card-studio' },
@@ -19,6 +20,9 @@
   // Detect Current Active Route
   function getActiveNavId() {
     const path = window.location.pathname.toLowerCase();
+    if ((path === '/' || path === '/index.html') && new URLSearchParams(window.location.search).get('tab') === 'roster') {
+      return 'roster';
+    }
     if (path === '/' || path === '/index.html' || path === '/dashboard' || path === '/dashboard.html' || path === '/app' || path === '/console') {
       return 'home';
     }
@@ -112,7 +116,7 @@
     const drawer = document.getElementById('mobile-nav-drawer');
     if (!drawer || !drawer.open || drawer.classList.contains('is-closing')) return;
     drawer.classList.add('is-closing');
-    window.setTimeout(() => finishClosingNav(drawer), 240);
+    window.setTimeout(() => finishClosingNav(drawer), 220);
   };
 
   window.openFeatureGuideFromNav = function () {
@@ -136,6 +140,11 @@
 
     drawer.classList.remove('is-closing');
     drawer.showModal();
+    window.requestAnimationFrame(() => {
+      if (drawer.open && !drawer.classList.contains('is-closing')) {
+        drawer.classList.add('is-visible');
+      }
+    });
     const toggle = document.getElementById('global-nav-toggle');
     if (toggle) {
       toggle.setAttribute('aria-expanded', 'true');
@@ -173,6 +182,7 @@
       toggle.setAttribute('aria-expanded', 'false');
       toggle.setAttribute('aria-label', 'เปิดเมนูหลัก');
     }
+    event.target.classList.remove('is-visible');
   }, true);
 
   // Left Quick Menu Toggle (Annotation 6)

@@ -1095,6 +1095,9 @@
         }
       } catch (e) {}
       applyRosterViewModeUI();
+      if (new URLSearchParams(window.location.search).get('tab') === 'roster') {
+        switchTab('roster', { scroll: false });
+      }
       initLiveClock();
       fetchData();
       initRealtime();
@@ -1165,7 +1168,7 @@
     }
 
     // 3. Tab Navigation (Annotation 7: Auto-scroll smoothly on tab switch)
-    function switchTab(tabId) {
+    function switchTab(tabId, options = {}) {
       document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
       document.querySelectorAll('.tab-btn').forEach(btn => {
         btn.classList.remove('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
@@ -1176,7 +1179,9 @@
       const btn = document.getElementById(`tab-btn-${tabId}`);
       if (pane) {
         pane.classList.remove('hidden');
-        window.scrollTo({ top: Math.max(0, pane.offsetTop - 70), behavior: 'smooth' });
+        if (options.scroll !== false) {
+          window.scrollTo({ top: Math.max(0, pane.offsetTop - 70), behavior: 'smooth' });
+        }
       }
       if (btn) {
         btn.classList.add('bg-amber-500/20', 'text-amber-300', 'border', 'border-amber-500/30');
@@ -1685,14 +1690,6 @@
               </div>
 
               <div class="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[10px]">
-                <span class="px-1.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[10px] border ${shiftInfo.color}">${shiftInfo.name}</span>
-                <span class="text-cyan-400 group-hover:underline font-mono">ดูบัตร →</span>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
-    }
                 <span class="px-1.5 py-0.5 rounded ${shiftInfo.badge} font-mono text-[10px] border ${shiftInfo.color}">${shiftInfo.name}</span>
                 <span class="text-cyan-400 group-hover:underline font-mono">ดูบัตร →</span>
               </div>
