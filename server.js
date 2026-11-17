@@ -3534,7 +3534,15 @@ app.get('/api/analytics/overview', async (req, res) => {
         duty_desc: SHIFT_TITLES[shiftKey]?.dutyDesc || 'ปฏิบัติหน้าที่สารวัตรนักเรียน',
         color: SHIFT_TITLES[shiftKey]?.color || 'amber',
         total_members: shiftMembers.length,
+        eligible_members: shiftMembers.map(m => ({
+          id: m.id,
+          duty_id: m.duty_id || '-',
+          nickname: m.nickname || '',
+          name: `${m.first_name || ''} ${m.last_name || ''}`.trim(),
+          class_room: m.grade_class || m.room || ''
+        })),
         head: head ? {
+          id: head.id,
           duty_id: head.duty_id || '-',
           name: `${head.first_name || ''} ${head.last_name || ''}`.trim(),
           nickname: head.nickname || '',
@@ -3543,6 +3551,7 @@ app.get('/api/analytics/overview', async (req, res) => {
           photo_url: head.photo_url || ''
         } : null,
         deputy: deputy ? {
+          id: deputy.id,
           duty_id: deputy.duty_id || '-',
           name: `${deputy.first_name || ''} ${deputy.last_name || ''}`.trim(),
           nickname: deputy.nickname || '',
@@ -3590,7 +3599,8 @@ app.get('/api/analytics/overview', async (req, res) => {
           claimed: lostItems.filter(i => i.status === 'CLAIMED').length,
           recent: lostItems.slice(0, 5)
         },
-        organization
+        organization,
+        canManageLeadership: canManageShiftLeadership(req.user)
       }
     });
   } catch (err) {
