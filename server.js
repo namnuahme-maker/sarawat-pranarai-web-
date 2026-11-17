@@ -1183,13 +1183,19 @@ app.post('/api/crop/submit', async (req, res) => {
 // -------------------------------------------------------------
 app.get('/api/members', async (req, res) => {
   try {
-    const { duty_day, search } = req.query;
+    const { duty_day, search, status } = req.query;
     let query = supabase
       .from('members')
-      .select('id, first_name, last_name, nickname, grade_class, student_no, phone_number, profile_image_url, role, shift_role, duty_day, duty_id, status')
-      .eq('status', 'ACTIVE')
+      .select('id, first_name, last_name, nickname, grade_class, student_no, phone_number, profile_image_url, role, shift_role, duty_day, duty_id, status, discord_id')
       .order('duty_day', { ascending: true })
       .order('duty_id', { ascending: true });
+
+    if (status) {
+      query = query.eq('status', status);
+    } else {
+      // ดึงทั้ง ACTIVE และ PENDING_APPROVAL (เช่น สมาชิกพรีโหลดที่รอผูก Discord)
+      query = query.in('status', ['ACTIVE', 'PENDING_APPROVAL']);
+    }
 
     if (duty_day && duty_day !== 'ALL') {
       // ดึงทั้งเวรปกติ และเวรพิเศษที่สังกัดวันนี้
@@ -1444,9 +1450,15 @@ app.post('/api/members', async (req, res) => {
     const cleanFirstName = String(first_name).trim();
     const cleanLastName = String(last_name).trim();
     const cleanNickname = String(nickname).trim();
-    const cleanClass = grade_class ? String(grade_class).replace(/^ม\./, '').trim() : '-';
-    const cleanNo = parseInt(student_no, 10) || 0;
-    const cleanPhone = phone_number ? String(phone_number).trim() : '-';
+    const cleanClass = (grade_class && String(grade_class).trim()) 
+      ? String(grade_class).replace(/^ม\./, '').trim() 
+      : '-';
+    const cleanNo = (student_no !== undefined && student_no !== null && String(student_no).trim() !== '') 
+      ? (parseInt(student_no, 10) || 0) 
+      : 0;
+    const cleanPhone = (phone_number && String(phone_number).trim() !== '') 
+      ? String(phone_number).trim() 
+      : '-';
 
     // ตรวจสอบชื่อ-นามสกุลซ้ำ
     const { data: existing } = await supabase
@@ -1530,17 +1542,22 @@ app.patch('/api/members/:id', async (req, res) => {
     : String(req.body.duty_id || '').trim();
   try {
     let user = getUserFromReq(req);
-    // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือครูที่ปรึกษาหรือประธาน/ผู้บริหาร
-    let isAllowed = user && (user.isAdmin || user.isCommander || user.isLeader || user.isTeacher || user.role === 'ADMIN' || user.role === 'COMMANDER' || user.role === 'PRESIDENT' || user.role === 'TEACHER');
+    // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือครูที่ปรึกษาหรือประธาน/รองประธาน/ผู้บริหาร
+    let isAllowed = user && (
+      user.isAdmin || user.isCommander || user.isLeader || user.isTeacher || user.isPresident || user.isVicePresident || user.canManageMembers ||
+      user.role === 'ADMIN' || user.role === 'COMMANDER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT' || user.role === 'TEACHER'
+    );
 
     // หากคุกกี้ยังเป็นค่าเดิม ให้ซิงค์สิทธิ์สดตรงจาก Supabase ทันที
     if (!isAllowed && user && user.id) {
       try {
         const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
-        if (dbUser && (dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT' || dbUser.role === 'TEACHER')) {
+        if (dbUser && (dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT' || dbUser.role === 'VICE_PRESIDENT' || dbUser.role === 'TEACHER')) {
           user.role = dbUser.role;
           user.isAdmin = dbUser.role === 'ADMIN';
           user.isTeacher = dbUser.role === 'TEACHER';
+          user.isPresident = dbUser.role === 'PRESIDENT';
+          user.isVicePresident = dbUser.role === 'VICE_PRESIDENT';
           user.isCommander = dbUser.role === 'ADMIN' || dbUser.role === 'PRESIDENT';
           user.isLeader = true;
           isAllowed = true;
@@ -1677,6 +1694,69 @@ app.patch('/api/members/:id', async (req, res) => {
       });
     }
     res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// 3.3 API: ลบสารวัตรออกจากระบบ (สิทธิ์: ผู้ดูแลระบบ, ครูที่ปรึกษา, ประธาน, รองประธาน)
+// -------------------------------------------------------------
+app.delete('/api/members/:id', async (req, res) => {
+  try {
+    let user = getUserFromReq(req);
+    let isAllowed = user && (
+      user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident || user.canManageMembers ||
+      user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT'
+    );
+
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(dbUser.role)) {
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การลบสมาชิกสงวนเฉพาะผู้ดูแลระบบ ครูที่ปรึกษา ประธาน หรือรองประธานเท่านั้น' });
+    }
+
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ error: 'ไม่ระบุรหัสสมาชิก' });
+
+    const { data: targetMember, error: findErr } = await supabase
+      .from('members')
+      .select('id, first_name, last_name, nickname, discord_id')
+      .eq('id', id)
+      .maybeSingle();
+
+    if (findErr || !targetMember) {
+      return res.status(404).json({ error: 'ไม่พบข้อมูลสมาชิกที่ต้องการลบ' });
+    }
+
+    // ลบข้อมูลที่เกี่ยวข้องใน shift_leadership หากมี
+    try {
+      await supabase.from('shift_leadership').delete().eq('member_id', id);
+    } catch (e) {
+      console.warn('[API] Warning deleting shift_leadership:', e.message);
+    }
+
+    // ลบเรคคอร์ดจาก members
+    const { error: delErr } = await supabase
+      .from('members')
+      .delete()
+      .eq('id', id);
+
+    if (delErr) {
+      console.error('[API] Error deleting member:', delErr);
+      return res.status(500).json({ error: 'ไม่สามารถลบข้อมูลสมาชิกได้: ' + delErr.message });
+    }
+
+    console.log(`[API] 🗑️ ลบข้อมูลสมาชิกสำเร็จ: ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname}) [ID: ${id}]`);
+    return res.json({ success: true, message: `ลบข้อมูล ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname || '-'}) เรียบร้อยแล้ว` });
+  } catch (err) {
+    console.error('[API] /api/members/:id DELETE crash:', err);
+    return res.status(500).json({ error: err.message });
   }
 });
 

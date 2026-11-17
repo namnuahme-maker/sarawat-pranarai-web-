@@ -65,11 +65,13 @@
     if (document.getElementById('nav-user-profile-badge')) return;
 
     // หาปุ่ม Mobile Hamburger ก่อน
-    const mobileBtn = document.querySelector('header button[onclick*="toggleMobileNav"]') ||
+    const mobileBtn = document.getElementById('global-nav-toggle') ||
+                      document.querySelector('header button[onclick*="toggleMobileNav"]') ||
                       document.querySelector('header button[aria-label="Toggle navigation"]');
 
     // หา Action Container ที่ถูกต้อง (ถ้าเจอปุ่ม Hamburger ให้เอา Parent ของปุ่มเป็น Container เสมอ เพื่อความปลอดภัยของ DOM)
-    const headerActions = (mobileBtn && mobileBtn.parentElement) ||
+    const headerActions = document.getElementById('header-action-container') ||
+                          (mobileBtn && mobileBtn.parentElement) ||
                           document.querySelector('header .flex.items-center.gap-1\\.5.sm\\:gap-2') ||
                           document.querySelector('header .flex.items-center.gap-2') ||
                           document.querySelector('header .flex.items-center.gap-3');
@@ -91,7 +93,7 @@
     const displayName = user.displayName || user.username || 'สารวัตร';
 
     profileWrapper.innerHTML = `
-      <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${displayName} (${user.username || ''})" onclick="typeof toggleMobileNav === 'function' ? toggleMobileNav() : null">
+      <div class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group" title="สารวัตร: ${displayName} (${user.username || ''})" onclick="typeof window.toggleSarawatNav === 'function' ? window.toggleSarawatNav() : null">
         <div class="relative flex-shrink-0">
           <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border border-indigo-500/70 shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 transition" onerror="this.src='/assets/logo.png'">
           <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full bg-emerald-500 border border-black"></span>
@@ -123,7 +125,8 @@
   }
 
   function injectMobileDrawerUserCard(user, rankTitle, rankBadgeClass) {
-    const mobileDrawer = document.getElementById('mobile-nav-drawer') || 
+    const mobileDrawer = document.getElementById('mobile-nav-drawer-content') ||
+                         document.getElementById('mobile-nav-drawer') ||
                          document.getElementById('mobile-bodycam-nav') ||
                          document.getElementById('mobile-menu') ||
                          document.querySelector('.mobile-nav-menu');
