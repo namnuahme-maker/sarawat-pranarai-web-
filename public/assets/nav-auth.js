@@ -62,7 +62,7 @@
   function injectUserProfileHeader(user) {
     if (!user) return;
     if (window.location.pathname.includes('attendance-scan')) return;
-    if (document.getElementById('nav-user-profile-badge')) return;
+    const existingHeaderProfile = document.getElementById('nav-user-profile-badge');
 
     // หาปุ่ม Mobile Hamburger ก่อน
     const mobileBtn = document.getElementById('global-nav-toggle') ||
@@ -109,11 +109,13 @@
       </a>
     `;
 
-    // ตรวจสอบความถูกต้องของ Parent ก่อนเรียก insertBefore เสมอ
-    if (mobileBtn && mobileBtn.parentNode === headerActions) {
-      headerActions.insertBefore(profileWrapper, mobileBtn);
-    } else {
-      headerActions.appendChild(profileWrapper);
+    // Do not duplicate the header profile added by the shared layout.
+    if (!existingHeaderProfile) {
+      if (mobileBtn && mobileBtn.parentNode === headerActions) {
+        headerActions.insertBefore(profileWrapper, mobileBtn);
+      } else {
+        headerActions.appendChild(profileWrapper);
+      }
     }
 
     // 2. แทรกการ์ดโปรไฟล์ฉบับเต็มและปุ่มออกจากระบบไว้ที่หัวแถวของ Mobile Drawer
