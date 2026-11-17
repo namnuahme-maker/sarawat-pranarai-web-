@@ -2624,10 +2624,13 @@
         renderRoster(allMembers);
         renderTimeline(allMembers);
 
+        const saveConfirmation = result.duty_id_changed
+          ? `รหัส ${result.previous_duty_id || payload.duty_id} ซ้ำ ระบบเปลี่ยนเป็น ${updatedData.duty_id} ให้แล้ว`
+          : `อัปเดตข้อมูล ${payload.nickname || activeCardMember.first_name} เรียบร้อยแล้ว`;
         if (window.SarawatUI && SarawatUI.toast) {
-          SarawatUI.toast('success', 'ซิงค์ข้อมูลสำเร็จ', `อัปเดตข้อมูล ${payload.nickname || activeCardMember.first_name} เรียบร้อยแล้ว`);
+          SarawatUI.toast('success', result.duty_id_changed ? 'บันทึกแล้วและปรับรหัสเวรให้' : 'ซิงค์ข้อมูลสำเร็จ', saveConfirmation);
         } else {
-          alert('บันทึกข้อมูลเรียบร้อยแล้ว');
+          alert(saveConfirmation);
         }
       } catch (err) {
         alert('เกิดข้อผิดพลาดในการบันทึก: ' + err.message);

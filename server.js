@@ -1444,7 +1444,36 @@ app.post('/api/members', async (req, res) => {
 // -------------------------------------------------------------
 // 3.2 API: อัปเดตข้อมูลสารวัตร (สิทธิ์เฉพาะประธาน/ผู้บริหาร/Commander)
 // -------------------------------------------------------------
+function getDutyIdPrefixForDay(dutyDay) {
+  const code = String(dutyDay || '').trim();
+  if (code === 'S') return 'S';
+  if (code === 'TSS' || code === 'TsS') return 'TSS';
+  if (code === 'Ts') return 'Ts';
+  if (['MS', 'TS', 'WS', 'FS'].includes(code)) return code;
+  return code;
+}
+
+async function getNextAvailableDutyId(dutyDay, excludedMemberId) {
+  const prefix = getDutyIdPrefixForDay(dutyDay);
+  if (!prefix) throw new Error('กรุณาเลือกผลัดเวรก่อนกำหนดรหัสเวร');
+
+  let query = supabase.from('members').select('duty_id').not('duty_id', 'is', null);
+  if (excludedMemberId) query = query.neq('id', excludedMemberId);
+  const { data: rows, error } = await query;
+  if (error) throw error;
+
+  const usedIds = new Set((rows || []).map(row => String(row.duty_id || '')));
+  for (let sequence = 1; sequence <= usedIds.size + 1; sequence++) {
+    const candidate = `${prefix}${sequence}`;
+    if (!usedIds.has(candidate)) return candidate;
+  }
+  throw new Error(`ไม่พบรหัสเวรว่างสำหรับผลัด ${dutyDay}`);
+}
+
 app.patch('/api/members/:id', async (req, res) => {
+  const requestedDutyId = req.body?.duty_id === undefined
+    ? undefined
+    : String(req.body.duty_id || '').trim();
   try {
     let user = getUserFromReq(req);
     // ตรวจสอบสิทธิ์ว่าเป็นผู้ดูแลระบบ (Admin) หรือครูที่ปรึกษาหรือประธาน/ผู้บริหาร
@@ -1479,6 +1508,8 @@ app.patch('/api/members/:id', async (req, res) => {
     const { first_name, last_name, nickname, grade_class, student_no, phone_number, duty_day, duty_id, role, shift_role, rank, profile_image_url } = req.body;
 
     const updateData = {};
+    let dutyIdChanged = false;
+    let originalDutyId = requestedDutyId;
     if (first_name !== undefined) updateData.first_name = first_name;
     if (last_name !== undefined) updateData.last_name = last_name;
     if (nickname !== undefined) updateData.nickname = nickname;
@@ -1486,19 +1517,47 @@ app.patch('/api/members/:id', async (req, res) => {
     if (student_no !== undefined) updateData.student_no = student_no;
     if (phone_number !== undefined) updateData.phone_number = phone_number;
     if (duty_day !== undefined) updateData.duty_day = duty_day;
-    if (duty_id !== undefined) updateData.duty_id = duty_id;
+    if (duty_id !== undefined) {
+      const cleanDutyId = String(duty_id || '').trim();
+      updateData.duty_id = cleanDutyId || null;
+      if (cleanDutyId) {
+        const { data: duplicateDutyId, error: duplicateLookupError } = await supabase
+          .from('members')
+          .select('id, duty_id, nickname, first_name, last_name')
+          .eq('duty_id', cleanDutyId)
+          .neq('id', id)
+          .maybeSingle();
+        if (duplicateLookupError) throw duplicateLookupError;
+        if (duplicateDutyId) {
+          const targetDutyDay = duty_day !== undefined
+            ? duty_day
+            : (await supabase.from('members').select('duty_day').eq('id', id).maybeSingle()).data?.duty_day;
+          updateData.duty_id = await getNextAvailableDutyId(targetDutyDay, id);
+          dutyIdChanged = true;
+        }
+      }
+    }
     if (role !== undefined) updateData.role = role;
     if (shift_role !== undefined) updateData.shift_role = shift_role;
     if (rank !== undefined) updateData.rank = rank;
     if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
     updateData.updated_at = new Date().toISOString();
 
-    const { data, error } = await supabase
-      .from('members')
-      .update(updateData)
-      .eq('id', id)
-      .select()
-      .maybeSingle();
+    let { data, error } = await supabase
+      .from('members').update(updateData).eq('id', id).select().maybeSingle();
+    for (let retry = 0; error?.code === '23505' && String(error.message || '').includes('members_duty_id_key') && retry < 3; retry++) {
+      if (duty_day === undefined && !updateData.duty_day) {
+        const { data: currentMember, error: currentMemberError } = await supabase
+          .from('members').select('duty_day').eq('id', id).maybeSingle();
+        if (currentMemberError) throw currentMemberError;
+        updateData.duty_day = currentMember?.duty_day;
+      }
+      if (!originalDutyId) originalDutyId = updateData.duty_id;
+      updateData.duty_id = await getNextAvailableDutyId(updateData.duty_day, id);
+      dutyIdChanged = true;
+      ({ data, error } = await supabase
+        .from('members').update(updateData).eq('id', id).select().maybeSingle());
+    }
 
     if (error) throw error;
     if (!data) return res.status(404).json({ error: 'ไม่พบข้อมูลสารวัตรท่านนี้' });
@@ -1546,8 +1605,23 @@ app.patch('/api/members/:id', async (req, res) => {
     }
 
     console.log(`[SARAWAT-WEB] ✏️ ข้อมูลสารวัตร ${data.nickname || data.duty_id} ถูกอัปเดตโดย ${user.username || user.nickname}`);
-    res.json({ success: true, message: 'อัปเดตข้อมูลสารวัตรสำเร็จ', data });
+    res.json({
+      success: true,
+      message: dutyIdChanged
+        ? `รหัสเวรซ้ำ ระบบเปลี่ยนเป็น ${data.duty_id} ให้แล้ว`
+        : 'อัปเดตข้อมูลสารวัตรสำเร็จ',
+      data,
+      duty_id_changed: dutyIdChanged,
+      previous_duty_id: dutyIdChanged ? originalDutyId : undefined
+    });
   } catch (err) {
+    if (err.code === '23505' && String(err.message || '').includes('members_duty_id_key')) {
+      return res.status(409).json({
+        success: false,
+        code: 'DUTY_ID_TAKEN',
+        error: `รหัสเวร ${requestedDutyId || ''} ถูกใช้แล้ว กรุณาเลือกรหัสที่ยังว่างแล้วบันทึกอีกครั้ง`
+      });
+    }
     res.status(500).json({ error: err.message });
   }
 });
