@@ -1161,6 +1161,21 @@ app.get('/api/members', async (req, res) => {
     const { data: members, error } = await query;
     if (error) throw error;
 
+    const memberIds = (members || []).map(m => m.id).filter(Boolean);
+    let leadershipByMember = {};
+    if (memberIds.length) {
+      const { data: assignments, error: leadershipError } = await supabase
+        .from('shift_leadership')
+        .select('member_id, shift_code, position')
+        .in('member_id', memberIds);
+      if (leadershipError) throw leadershipError;
+      for (const assignment of assignments || []) {
+        leadershipByMember[assignment.member_id] ||= {};
+        leadershipByMember[assignment.member_id][assignment.shift_code] ||= {};
+        leadershipByMember[assignment.member_id][assignment.shift_code][assignment.position] = true;
+      }
+    }
+
     let filtered = members || [];
     if (search) {
       const s = search.toLowerCase();
@@ -1172,9 +1187,104 @@ app.get('/api/members', async (req, res) => {
       );
     }
 
-    res.json({ success: true, count: filtered.length, data: filtered });
+    res.json({
+      success: true,
+      count: filtered.length,
+      data: filtered.map(m => ({ ...m, leadership_by_shift: leadershipByMember[m.id] || {} }))
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// ตำแหน่งหัวหน้า/รองหัวหน้าเวรที่ผูกกับผลัดโดยตรง
+// -------------------------------------------------------------
+const LEADERSHIP_SHIFT_CODES = ['M', 'T', 'W', 'Ts', 'F', 'S'];
+const LEADERSHIP_POSITIONS = ['HEAD', 'DEPUTY'];
+
+function canManageShiftLeadership(user) {
+  return Boolean(user && (
+    user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident ||
+    ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(user.role)
+  ));
+}
+
+function memberBelongsToShift(dutyDay, shiftCode) {
+  const code = String(dutyDay || '').trim();
+  if (shiftCode === 'S') return code === 'S' || /S$/.test(code);
+  if (shiftCode === 'Ts') return ['Ts', 'TSS', 'TsS'].includes(code);
+  const specialVariants = { M: 'MS', T: 'TS', W: 'WS', F: 'FS' };
+  return code === shiftCode || code === specialVariants[shiftCode];
+}
+
+app.get('/api/shift-leadership', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('shift_leadership')
+      .select('shift_code, position, member_id, members(id, duty_id, first_name, last_name, nickname, grade_class, duty_day)');
+    if (error) throw error;
+    res.json({ success: true, data: data || [], canManage: canManageShiftLeadership(req.user) });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'โหลดตำแหน่งหัวหน้าเวรไม่สำเร็จ', error: err.message });
+  }
+});
+
+app.post('/api/shift-leadership', async (req, res) => {
+  try {
+    if (!canManageShiftLeadership(req.user)) {
+      return res.status(403).json({ success: false, message: 'สงวนสิทธิ์สำหรับผู้ดูแลระบบ ครู ประธาน และรองประธาน' });
+    }
+    const { shift_code: shiftCode, position, member_id: memberId } = req.body || {};
+    if (!LEADERSHIP_SHIFT_CODES.includes(shiftCode) || !LEADERSHIP_POSITIONS.includes(position) || !memberId) {
+      return res.status(400).json({ success: false, message: 'กรุณาเลือกผลัด ตำแหน่ง และสารวัตรให้ครบ' });
+    }
+
+    const { data: member, error: memberError } = await supabase
+      .from('members').select('id, duty_day, status').eq('id', memberId).maybeSingle();
+    if (memberError) throw memberError;
+    if (!member || member.status !== 'ACTIVE') {
+      return res.status(404).json({ success: false, message: 'ไม่พบสารวัตรที่ได้รับการอนุมัติแล้ว' });
+    }
+    if (!memberBelongsToShift(member.duty_day, shiftCode)) {
+      return res.status(400).json({ success: false, message: 'เลือกได้เฉพาะสารวัตรที่อยู่ในผลัดนี้' });
+    }
+
+    const { data: otherAssignment, error: duplicateError } = await supabase
+      .from('shift_leadership').select('position').eq('member_id', memberId).eq('shift_code', shiftCode).maybeSingle();
+    if (duplicateError) throw duplicateError;
+    if (otherAssignment && otherAssignment.position !== position) {
+      return res.status(409).json({ success: false, message: 'สารวัตรคนเดียวกันเป็นทั้งหัวหน้าและรองในผลัดเดียวกันไม่ได้' });
+    }
+
+    const { data, error } = await supabase.from('shift_leadership').upsert({
+      shift_code: shiftCode,
+      position,
+      member_id: memberId,
+      assigned_by: req.user?.id || null,
+      updated_at: new Date().toISOString()
+    }, { onConflict: 'shift_code,position' }).select('shift_code, position, member_id').single();
+    if (error) throw error;
+    res.json({ success: true, message: 'บันทึกตำแหน่งประจำผลัดแล้ว', data });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'บันทึกตำแหน่งไม่สำเร็จ กรุณาตรวจว่าติดตั้ง migration_v10 แล้ว', error: err.message });
+  }
+});
+
+app.delete('/api/shift-leadership/:shiftCode/:position', async (req, res) => {
+  try {
+    if (!canManageShiftLeadership(req.user)) {
+      return res.status(403).json({ success: false, message: 'สงวนสิทธิ์สำหรับผู้ดูแลระบบ ครู ประธาน และรองประธาน' });
+    }
+    const { shiftCode, position } = req.params;
+    if (!LEADERSHIP_SHIFT_CODES.includes(shiftCode) || !LEADERSHIP_POSITIONS.includes(position)) {
+      return res.status(400).json({ success: false, message: 'ผลัดหรือตำแหน่งไม่ถูกต้อง' });
+    }
+    const { error } = await supabase.from('shift_leadership').delete().eq('shift_code', shiftCode).eq('position', position);
+    if (error) throw error;
+    res.json({ success: true, message: 'ถอดตำแหน่งประจำผลัดแล้ว' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: 'ถอดตำแหน่งไม่สำเร็จ', error: err.message });
   }
 });
 
@@ -3383,12 +3493,21 @@ app.get('/api/analytics/overview', async (req, res) => {
         return b.late_count - a.late_count;
       });
 
+    let leadershipAssignments = [];
+    try {
+      const { data: leadership } = await supabase
+        .from('shift_leadership')
+        .select('shift_code, position, member_id');
+      if (Array.isArray(leadership)) leadershipAssignments = leadership;
+    } catch (e) {}
+
     const SHIFT_TITLES = {
       M: { name: 'เวรวันจันทร์', color: 'amber', dutyDesc: 'ควบคุมแถวเข้าแถวเคารพธงชาติ & จุดประตู 1' },
       T: { name: 'เวรวันอังคาร', color: 'pink', dutyDesc: 'ตรวจเครื่องแต่งกายและทรงผม & โรงอาหาร' },
       W: { name: 'เวรวันพุธ', color: 'emerald', dutyDesc: 'ตรวจบัตรนักเรียน & ดูแลความเรียบร้อยรอบอาคาร' },
       Ts: { name: 'เวรวันพฤหัสบดี', color: 'orange', dutyDesc: 'สายตรวจอาคารเรียน & เฝ้าระวังจุดอับ' },
-      F: { name: 'เวรวันศุกร์', color: 'cyan', dutyDesc: 'ตรวจสัมภาระ & ดูแลความเรียบร้อยช่วงเลิกเรียน' }
+      F: { name: 'เวรวันศุกร์', color: 'cyan', dutyDesc: 'ตรวจสัมภาระ & ดูแลความเรียบร้อยช่วงเลิกเรียน' },
+      S: { name: 'เวรพิเศษ', color: 'violet', dutyDesc: 'กำลังพลเวรพิเศษที่ปฏิบัติงานร่วมกับผลัดประจำวัน' }
     };
 
     const getBaseWeekday = (dutyDay) => {
@@ -3397,10 +3516,14 @@ app.get('/api/analytics/overview', async (req, res) => {
       return dutyDay.replace(/S+$/, '');
     };
 
-    const organization = ['M', 'T', 'W', 'Ts', 'F'].map(shiftKey => {
-      const shiftMembers = members.filter(m => getBaseWeekday(m.duty_day) === shiftKey);
-      const head = shiftMembers.find(m => m.is_head || (m.shift_role || '').toUpperCase() === 'SHIFT_HEAD') || null;
-      const deputy = shiftMembers.find(m => (m.is_deputy || (m.shift_role || '').toUpperCase() === 'SHIFT_DEPUTY') && m.id !== (head?.id)) || null;
+    const organization = ['M', 'T', 'W', 'Ts', 'F', 'S'].map(shiftKey => {
+      const shiftMembers = members.filter(m => shiftKey === 'S'
+        ? m.duty_day === 'S' || /S$/.test(m.duty_day || '')
+        : getBaseWeekday(m.duty_day) === shiftKey);
+      const headId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'HEAD')?.member_id;
+      const deputyId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'DEPUTY')?.member_id;
+      const head = shiftMembers.find(m => m.id === headId) || null;
+      const deputy = shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) || null;
       const officers = shiftMembers.filter(m => 
         (!head || m.id !== head.id) && (!deputy || m.id !== deputy.id)
       );
