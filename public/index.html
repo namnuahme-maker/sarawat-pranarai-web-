@@ -222,7 +222,7 @@
           <button onclick="filterRoster('M')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="M">จันทร์ (M)</button>
           <button onclick="filterRoster('T')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="T">อังคาร (T)</button>
           <button onclick="filterRoster('W')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="W">พุธ (W)</button>
-          <button onclick="filterRoster('Ts')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="Ts">พฤหัส (Ts)</button>
+          <button onclick="filterRoster('Th')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="Th">พฤหัส (Th)</button>
           <button onclick="filterRoster('F')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="F">ศุกร์ (F)</button>
           <button onclick="filterRoster('S')" class="roster-filter-btn px-2.5 py-1 rounded-lg text-xs font-mono font-medium text-slate-400 hover:text-white bg-tactical-850 border border-tactical-border" data-shift="S">พิเศษ (S)</button>
 
@@ -565,7 +565,7 @@
                   <option value="M">วันจันทร์ (M)</option>
                   <option value="T">วันอังคาร (T)</option>
                   <option value="W">วันพุธ (W)</option>
-                  <option value="Ts">วันพฤหัสบดี (Ts)</option>
+                  <option value="Th">วันพฤหัสบดี (Th)</option>
                   <option value="F">วันศุกร์ (F)</option>
                   <option value="S">วันเสาร์ / ส่วนกลาง (S)</option>
                 </select>
@@ -912,8 +912,8 @@
               <option value="TS">วันอังคาร พิเศษ (TS)</option>
               <option value="W">วันพุธ (W)</option>
               <option value="WS">วันพุธ พิเศษ (WS)</option>
-              <option value="Ts">วันพฤหัสบดี (Ts)</option>
-              <option value="TSS">วันพฤหัสบดี พิเศษ (TSS)</option>
+              <option value="Th">วันพฤหัสบดี (Th)</option>
+              <option value="ThS">วันพฤหัสบดี พิเศษ (ThS)</option>
               <option value="F">วันศุกร์ (F)</option>
               <option value="FS">วันศุกร์ พิเศษ (FS)</option>
               <option value="S">เวรพิเศษปฏิบัติหน้าที่ทุกวัน (S)</option>
@@ -1067,8 +1067,8 @@
       'TS': { name: 'วันอังคาร + พิเศษ', color: 'border-purple-500/40 text-purple-400', badge: 'bg-purple-500/20 text-purple-300' },
       'W': { name: 'วันพุธ', color: 'border-emerald-500/40 text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
       'WS': { name: 'วันพุธ + พิเศษ', color: 'border-emerald-500/40 text-emerald-400', badge: 'bg-emerald-500/20 text-emerald-300' },
-      'Ts': { name: 'วันพฤหัสบดี', color: 'border-amber-500/40 text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
-      'TSS': { name: 'วันพฤหัสบดี + พิเศษ', color: 'border-amber-500/40 text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
+      'Th': { name: 'วันพฤหัสบดี', color: 'border-amber-500/40 text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
+      'ThS': { name: 'วันพฤหัสบดี + พิเศษ', color: 'border-amber-500/40 text-amber-400', badge: 'bg-amber-500/20 text-amber-300' },
       'F': { name: 'วันศุกร์', color: 'border-rose-500/40 text-rose-400', badge: 'bg-rose-500/20 text-rose-300' },
       'FS': { name: 'วันศุกร์ + พิเศษ', color: 'border-rose-500/40 text-rose-400', badge: 'bg-rose-500/20 text-rose-300' },
       'S': { name: 'เวรพิเศษ (วันเสาร์/กิจกรรม)', color: 'border-yellow-400/40 text-yellow-300', badge: 'bg-yellow-400/20 text-yellow-300' }
@@ -1332,20 +1332,20 @@
       // members without a saved shift day, where TS1 means Tuesday special.
       if (shiftCode === 'S') {
         if (dd) return dd === 'S' || /S$/.test(dd);
-        return /^(?:MS|TS|WS|TSS|FS|S)\d*$/.test(did);
+        return /^(?:MS|TS|WS|ThS|FS|S)\d*$/.test(did);
       }
 
-      // Thursday (Ts): Ts, TSS, TsS
-      if (shiftCode === 'Ts') {
-        if (dd === 'Ts' || dd === 'TSS' || dd === 'TsS') return true;
-        if (!dd && did) return did.startsWith('Ts') || did.startsWith('ts') || did.startsWith('TSS');
+      // Thursday (Th): Th, ThS, ThS
+      if (shiftCode === 'Th') {
+        if (dd === 'Th' || dd === 'ThS' || dd === 'ThS') return true;
+        if (!dd && did) return did.startsWith('Th') || did.startsWith('ts') || did.startsWith('ThS');
         return false;
       }
 
-      // Tuesday (T): T, TS (strictly NOT Ts or TSS)
+      // Tuesday (T): T, TS (strictly NOT Th or ThS)
       if (shiftCode === 'T') {
         if (dd === 'T' || dd === 'TS') return true;
-        if (!dd && did) return (did.startsWith('T') || did.startsWith('t')) && !did.startsWith('Ts') && !did.startsWith('ts') && !did.startsWith('TSS');
+        if (!dd && did) return (did.startsWith('T') || did.startsWith('t')) && !did.startsWith('Th') && !did.startsWith('ts') && !did.startsWith('ThS');
         return false;
       }
 
@@ -1361,14 +1361,14 @@
       if (!container) return;
 
       const dayIndex = new Date().getDay(); // 0=Sun, 1=Mon, ..., 6=Sat
-      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'S', 0: 'S' };
       const currentTodayCode = dayCodeMap[dayIndex] || 'M';
 
       const shifts = [
         { code: 'M', title: 'วันจันทร์ (M)', dayNum: 1, color: 'blue' },
         { code: 'T', title: 'วันอังคาร (T)', dayNum: 2, color: 'purple' },
         { code: 'W', title: 'วันพุธ (W)', dayNum: 3, color: 'emerald' },
-        { code: 'Ts', title: 'วันพฤหัสบดี (Ts)', dayNum: 4, color: 'amber' },
+        { code: 'Th', title: 'วันพฤหัสบดี (Th)', dayNum: 4, color: 'amber' },
         { code: 'F', title: 'วันศุกร์ (F)', dayNum: 5, color: 'rose' },
         { code: 'S', title: 'เวรพิเศษ (S)', dayNum: 6, color: 'yellow' }
       ];
@@ -1432,7 +1432,7 @@
       if (!container) return;
 
       const dayIndex = new Date().getDay();
-      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'S', 0: 'S' };
       const currentTodayCode = dayCodeMap[dayIndex] || 'M';
 
       const mems = allMembers.filter(m => isMemberInShift(m, currentTodayCode));
@@ -1494,7 +1494,7 @@
         });
       } else if (currentLevelFilter === 'TODAY') {
         const dayIndex = new Date().getDay();
-        const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+        const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'S', 0: 'S' };
         const todayCode = dayCodeMap[dayIndex] || 'M';
         filtered = filtered.filter(m => isMemberInShift(m, todayCode));
       }
@@ -2060,8 +2060,26 @@
     }
 
     function renderCardHTMLFromTemplate(containerId, m, scale = (280 / 430)) {
-      const container = document.getElementById(containerId);
+      const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
       if (!container || !m) return;
+
+      const canvasWidth = (cardStudioConfig && cardStudioConfig.canvas && cardStudioConfig.canvas.width) || 430;
+      const canvasHeight = (cardStudioConfig && cardStudioConfig.canvas && cardStudioConfig.canvas.height) || 680;
+      const hasBg = Boolean(cardStudioConfig && cardStudioConfig.canvas && cardStudioConfig.canvas.backgroundImage);
+
+      container.style.width = `${Math.round(canvasWidth * scale)}px`;
+      container.style.height = `${Math.round(canvasHeight * scale)}px`;
+      container.style.position = 'relative';
+      container.style.overflow = 'hidden';
+      container.style.backgroundColor = (cardStudioConfig && cardStudioConfig.canvas && cardStudioConfig.canvas.backgroundColor) || '#ffffff';
+      if (hasBg) {
+        container.style.backgroundImage = `url("${cardStudioConfig.canvas.backgroundImage}")`;
+        container.style.backgroundSize = '100% 100%';
+        container.style.backgroundRepeat = 'no-repeat';
+        container.style.backgroundPosition = 'center';
+      } else {
+        container.style.backgroundImage = 'none';
+      }
 
       const rawNickname = m.nickname || 'SARAWAT';
       const englishNickname = m.english_nickname || romanizeThaiNickname(rawNickname);
@@ -2082,6 +2100,10 @@
       const elements = (cardStudioConfig && cardStudioConfig.elements) || {};
       let html = '';
 
+      if (hasBg) {
+        html += `<img src="${cardStudioConfig.canvas.backgroundImage}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: fill; z-index: 1; pointer-events: none;" alt="Background">`;
+      }
+
       for (const [key, el] of Object.entries(elements)) {
         const left = Math.round((el.left || 0) * scale);
         const top = Math.round((el.top || 0) * scale);
@@ -2093,11 +2115,11 @@
 
         if (el.type === 'rect') {
           html += `
-            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background: ${el.fill || '#000'}; opacity: ${opacity}; z-index: 25; pointer-events: none;"></div>
+            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background: ${el.fill || '#000'}; opacity: ${opacity}; z-index: 10; pointer-events: none;"></div>
           `;
         } else if (el.type === 'image' && el.src) {
           html += `
-            <img src="${el.src}" style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; object-fit: contain; opacity: ${opacity}; transform: ${transform}; z-index: ${key.includes('watermark') ? 2 : 20}; pointer-events: none;" alt="${el.name || ''}">
+            <img src="${el.src}" style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; object-fit: contain; opacity: ${opacity}; transform: ${transform}; z-index: 15; pointer-events: none;" alt="${el.name || ''}">
           `;
         } else if (el.type === 'photo') {
           const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.2); opacity: 0.7;' : '';
@@ -2131,7 +2153,7 @@
             </div>
           `;
         } else if (el.type === 'barcode') {
-          const barcodeId = `bc_${containerId}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          const barcodeId = `bc_${(typeof containerId === 'string' ? containerId : 'cnt')}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
           html += `
             <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 20; pointer-events: none;">
               <svg id="${barcodeId}" style="width: 100%; height: 100%;"></svg>
@@ -2147,28 +2169,13 @@
                   displayValue: false,
                   margin: 0,
                   background: "transparent",
-                  lineColor: "#050505"
+                  lineColor: el.fill || "#050505"
                 });
               } catch (e) {}
             }
           }, 20);
         }
       }
-
-      // Ambient Color Fades
-      const blueWidth = Math.round(140 * scale);
-      const redWidth = Math.round(140 * scale);
-      const photoEl = elements.photo;
-      const pTop = photoEl ? (photoEl.top || 80) : 80;
-      const pH = photoEl ? (photoEl.height || 410) : 410;
-      const whiteTop = Math.round(Math.max(0, pTop + pH - 160) * scale);
-      const whiteHeight = Math.round(160 * scale);
-
-      html += `
-        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${blueWidth}px; background: linear-gradient(to right, rgba(0, 43, 128, 0.18) 0%, rgba(0, 43, 128, 0.05) 45%, rgba(0, 43, 128, 0) 100%); z-index: 8; pointer-events: none;"></div>
-        <div style="position: absolute; right: 0; top: 0; bottom: 0; width: ${redWidth}px; background: linear-gradient(to left, rgba(185, 28, 28, 0.18) 0%, rgba(185, 28, 28, 0.05) 45%, rgba(185, 28, 28, 0) 100%); z-index: 8; pointer-events: none;"></div>
-        <div style="position: absolute; left: 0; right: 0; top: ${whiteTop}px; height: ${whiteHeight}px; background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0) 100%); z-index: 8; pointer-events: none;"></div>
-      `;
 
       container.innerHTML = html;
     }
@@ -2479,13 +2486,13 @@
         const savedDutyDay = (m.duty_day || '').trim();
         const isSpecial = savedDutyDay
           ? savedDutyDay === 'S' || /S$/.test(savedDutyDay)
-          : /^(?:MS|TS|WS|TSS|FS|S)\d*$/.test((m.duty_id || '').trim());
+          : /^(?:MS|TS|WS|ThS|FS|S)\d*$/.test((m.duty_id || '').trim());
         const specialCheckbox = document.getElementById('edit-member-is-special');
         if (specialCheckbox) specialCheckbox.checked = isSpecial;
 
         // กำหนดวันพื้นฐานใน dropdown
         let baseDay = m.duty_day || 'M';
-        if (baseDay === 'TSS') baseDay = 'Ts';
+        if (baseDay === 'ThS') baseDay = 'Th';
         else if (baseDay.endsWith('S') && baseDay !== 'S') baseDay = baseDay.replace(/S+$/, '') || 'M';
         document.getElementById('edit-member-duty-day').value = baseDay;
 
@@ -2529,7 +2536,7 @@
       const match = curId.match(/(\d*)$/);
       const number = match?.[1] || '1';
       const prefix = isSpecial
-        ? (curDay === 'Ts' ? 'TSS' : (curDay === 'S' ? 'S' : `${curDay}S`))
+        ? (curDay === 'Th' ? 'ThS' : (curDay === 'S' ? 'S' : `${curDay}S`))
         : curDay;
       const newId = `${prefix}${number}`;
 
@@ -2547,7 +2554,7 @@
 
       let newPrefix = newDay;
       if (isSpecial) {
-        newPrefix = newDay === 'Ts' ? 'TSS' : (newDay === 'S' ? 'S' : `${newDay}S`);
+        newPrefix = newDay === 'Th' ? 'ThS' : (newDay === 'S' ? 'S' : `${newDay}S`);
       }
       const newId = `${newPrefix}${num}`;
       dutyIdInput.value = newId;
@@ -2573,7 +2580,7 @@
       let selectedDay = document.getElementById('edit-member-duty-day').value;
       let effectiveDutyDay = selectedDay;
       if (isSpecialChecked) {
-        effectiveDutyDay = selectedDay === 'Ts' ? 'TSS' : (selectedDay === 'S' ? 'S' : `${selectedDay}S`);
+        effectiveDutyDay = selectedDay === 'Th' ? 'ThS' : (selectedDay === 'S' ? 'S' : `${selectedDay}S`);
       }
 
       const payload = {
@@ -2769,6 +2776,7 @@
 
         // อัปเดตบนการ์ดบัตร CR80 ทันที
         activeCardMember.profile_image_url = newImageUrl;
+        renderCardHTMLFromTemplate('modal-card-render-zone', activeCardMember, 280 / 430);
         const cardImg = document.getElementById('card-photo-img');
         if (cardImg) cardImg.src = newImageUrl;
         const privacyNotice = document.getElementById('card-privacy-notice');
@@ -2950,19 +2958,35 @@
       modal.classList.add('hidden');
     }
 
-    // Download Card as PNG
+    // Download Card as PNG (Full-Resolution HD 430x680 export)
     async function downloadCardPNG() {
-      const zone = document.getElementById('modal-card-render-zone');
-      if (!zone) return;
+      if (!activeCardMember) return;
 
       try {
-        const canvas = await html2canvas(zone, {
-          scale: 3, // High resolution retina output
+        const exportContainer = document.createElement('div');
+        exportContainer.style.width = '430px';
+        exportContainer.style.height = '680px';
+        exportContainer.style.position = 'fixed';
+        exportContainer.style.left = '-9999px';
+        exportContainer.style.top = '-9999px';
+        exportContainer.style.zIndex = '-999';
+        document.body.appendChild(exportContainer);
+
+        renderCardHTMLFromTemplate(exportContainer, activeCardMember, 1.0);
+
+        await new Promise(r => setTimeout(r, 150));
+
+        const canvas = await html2canvas(exportContainer, {
+          scale: 2, // 2x Retina Output (860x1360 px)
           backgroundColor: '#ffffff',
-          useCORS: true
+          useCORS: true,
+          allowTaint: true
         });
+
+        document.body.removeChild(exportContainer);
+
         const link = document.createElement('a');
-        link.download = `ID_CARD_${activeCardMember ? (activeCardMember.duty_id || activeCardMember.nickname) : 'SARAWAT'}.png`;
+        link.download = `SARAWAT_CARD_${activeCardMember ? (activeCardMember.duty_id || activeCardMember.nickname) : 'OFFICER'}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       } catch (err) {
@@ -3031,9 +3055,9 @@
     // ==========================================================
     function copyDailyLineBrief() {
       const dayIndex = new Date().getDay();
-      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'S', 0: 'S' };
+      const dayCodeMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'S', 0: 'S' };
       const currentTodayCode = dayCodeMap[dayIndex] || 'M';
-      const shiftsNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Ts: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'วันเสาร์/พิเศษ' };
+      const shiftsNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Th: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'วันเสาร์/พิเศษ' };
       
       const todayOfficers = allMembers.filter(m => isMemberInShift(m, currentTodayCode));
       const dateStr = new Date().toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });

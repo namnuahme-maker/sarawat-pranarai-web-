@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS members (
     profile_image_url TEXT,                 -- URL รูปถ่ายหน้าตรงสำหรับทำบัตรสารวัตร
     role VARCHAR(30) DEFAULT 'MEMBER',      -- 'PRESIDENT', 'VICE_PRESIDENT', 'MEMBER'
     shift_role VARCHAR(30) DEFAULT 'MEMBER',-- Legacy compatibility; shift leaders are stored in shift_leadership
-    duty_day VARCHAR(5),                    -- 'M', 'T', 'W', 'Ts', 'F', 'S' (S = เวรพิเศษทุกวัน)
-    duty_id VARCHAR(10) UNIQUE,             -- 'M1', 'M2', 'Ts1', 'S1', 'S5', 'S12' etc.
+    duty_day VARCHAR(5),                    -- 'M', 'T', 'W', 'Th', 'F', 'S' (S = เวรพิเศษทุกวัน)
+    duty_id VARCHAR(10) UNIQUE,             -- 'M1', 'M2', 'Th1', 'S1', 'S5', 'S12' etc.
     discord_id VARCHAR(32) UNIQUE,
     status VARCHAR(30) DEFAULT 'PENDING_APPROVAL', -- 'PENDING_APPROVAL', 'ACTIVE', 'REJECTED', 'INACTIVE'
     approved_by VARCHAR(32),                -- Discord ID ผู้กดอนุมัติ
@@ -33,7 +33,7 @@ CREATE INDEX IF NOT EXISTS idx_members_status ON members(status);
 -- ผู้นำเวรแยกตามผลัด (สมาชิกหนึ่งคนเป็นผู้นำได้หลายผลัด แต่หนึ่งตำแหน่งมีผู้ดำรงตำแหน่งได้หนึ่งคน)
 CREATE TABLE IF NOT EXISTS shift_leadership (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    shift_code VARCHAR(5) NOT NULL CHECK (shift_code IN ('M', 'T', 'W', 'Ts', 'F', 'S')),
+    shift_code VARCHAR(5) NOT NULL CHECK (shift_code IN ('M', 'T', 'W', 'Th', 'F', 'S')),
     position VARCHAR(12) NOT NULL CHECK (position IN ('HEAD', 'DEPUTY')),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
     assigned_by VARCHAR(32),
@@ -48,7 +48,7 @@ CREATE INDEX IF NOT EXISTS idx_shift_leadership_member ON shift_leadership(membe
 CREATE TABLE IF NOT EXISTS leave_requests (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
-    duty_day VARCHAR(5) NOT NULL,            -- 'M', 'T', 'W', 'Ts', 'F', 'S'
+    duty_day VARCHAR(5) NOT NULL,            -- 'M', 'T', 'W', 'Th', 'F', 'S'
     leave_date VARCHAR(50) NOT NULL,
     shift_period VARCHAR(30) NOT NULL,
     leave_type VARCHAR(50) NOT NULL,

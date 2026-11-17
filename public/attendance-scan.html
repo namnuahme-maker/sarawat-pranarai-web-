@@ -129,9 +129,9 @@
             <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">W</span>
           </button>
 
-          <button onclick="selectShift('Ts')" id="chip-Ts" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
+          <button onclick="selectShift('Th')" id="chip-Th" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
             <span class="text-xs font-bold text-slate-200">พฤหัสฯ</span>
-            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Ts</span>
+            <span class="text-[9px] text-amber-400 font-mono mt-0.5 font-bold">Th</span>
           </button>
 
           <button onclick="selectShift('F')" id="chip-F" class="day-chip p-2 rounded-xl border transition flex flex-col items-center justify-center text-center bg-slate-850 border-slate-700 hover:border-amber-500/50">
@@ -551,10 +551,10 @@
         { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "5/3 (15)", is_deputy: true },
         { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "3/4 (20)" }
       ],
-      Ts: [
-        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true },
-        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true },
-        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)" }
+      Th: [
+        { duty_id: "Th1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true },
+        { duty_id: "Th2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true },
+        { duty_id: "Th3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)" }
       ],
       F: [
         { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true },
@@ -572,7 +572,7 @@
       M: "เวรวันจันทร์",
       T: "เวรวันอังคาร",
       W: "เวรวันพุธ",
-      Ts: "เวรวันพฤหัสบดี",
+      Th: "เวรวันพฤหัสบดี",
       F: "เวรวันศุกร์",
       S: "เวรพิเศษเสาร์/อาทิตย์"
     };
@@ -639,7 +639,7 @@
         'มกราคม', 'กุมภาพันธ์', 'มีนาคม', 'เมษายน', 'พฤษภาคม', 'มิถุนายน',
         'กรกฎาคม', 'สิงหาคม', 'กันยายน', 'ตุลาคม', 'พฤศจิกายน', 'ธันวาคม'
       ];
-      const shiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Ts', 5: 'F', 6: 'M', 0: 'M' };
+      const shiftMap = { 1: 'M', 2: 'T', 3: 'W', 4: 'Th', 5: 'F', 6: 'M', 0: 'M' };
 
       const dayOfWeek = now.getDay();
       const dayNum = now.getDate();
@@ -674,7 +674,7 @@
         return Array.from({ length: 12 }).map((_, i) => ({ mmdd: `ส.${i + 1}`, iso: '', week: i + 1 }));
       }
       const ceYear = acadYear - 543;
-      const dayOffsetMap = { M: 0, T: 1, W: 2, Ts: 3, F: 4 };
+      const dayOffsetMap = { M: 0, T: 1, W: 2, Th: 3, F: 4 };
       const offsetDays = dayOffsetMap[shiftKey] ?? 0;
 
       let baseMonday;
@@ -1236,13 +1236,13 @@
         try {
           const url = new URL(qrCode.data, window.location.origin);
           const shiftParam = url.searchParams.get('shift');
-          if (shiftParam && ['M', 'T', 'W', 'Ts', 'F', 'S'].includes(shiftParam)) {
+          if (shiftParam && ['M', 'T', 'W', 'Th', 'F', 'S'].includes(shiftParam)) {
             detectedShift = shiftParam;
           }
         } catch (e) {
           try {
             const parsed = JSON.parse(qrCode.data);
-            if (parsed.shift && ['M', 'T', 'W', 'Ts', 'F', 'S'].includes(parsed.shift)) {
+            if (parsed.shift && ['M', 'T', 'W', 'Th', 'F', 'S'].includes(parsed.shift)) {
               detectedShift = parsed.shift;
             }
           } catch (e2) {}

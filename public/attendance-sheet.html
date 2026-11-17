@@ -310,7 +310,7 @@
             <option value="M" class="bg-slate-900 text-white">เวรวันจันทร์ (M)</option>
             <option value="T" class="bg-slate-900 text-white">เวรวันอังคาร (T)</option>
             <option value="W" class="bg-slate-900 text-white">เวรวันพุธ (W)</option>
-            <option value="Ts" class="bg-slate-900 text-white">เวรวันพฤหัสบดี (Ts)</option>
+            <option value="Th" class="bg-slate-900 text-white">เวรวันพฤหัสบดี (Th)</option>
             <option value="F" class="bg-slate-900 text-white">เวรวันศุกร์ (F)</option>
             <option value="ALL" class="bg-slate-900 text-white">รวมทุกรอบเวร (5 กะ วันจันทร์ - ศุกร์)</option>
           </select>
@@ -537,10 +537,10 @@
         { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "5/3 (15)", is_deputy: true, post: "เสาธง" },
         { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "3/4 (20)", post: "โรงอาหาร" }
       ],
-      Ts: [
-        { duty_id: "Ts1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true, post: "ประตู 1" },
-        { duty_id: "Ts2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true, post: "เสาธง" },
-        { duty_id: "Ts3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)", post: "โรงอาหาร" }
+      Th: [
+        { duty_id: "Th1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true, post: "ประตู 1" },
+        { duty_id: "Th2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true, post: "เสาธง" },
+        { duty_id: "Th3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)", post: "โรงอาหาร" }
       ],
       F: [
         { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true, post: "ประตู 1" },
@@ -565,7 +565,7 @@
       M: { name: "เวรวันจันทร์", en: "MONDAY", code: "[M]", dayIndex: 1 },
       T: { name: "เวรวันอังคาร", en: "TUESDAY", code: "[T]", dayIndex: 2 },
       W: { name: "เวรวันพุธ", en: "WEDNESDAY", code: "[W]", dayIndex: 3 },
-      Ts: { name: "เวรวันพฤหัสบดี", en: "THURSDAY", code: "[Ts]", dayIndex: 4 },
+      Th: { name: "เวรวันพฤหัสบดี", en: "THURSDAY", code: "[Th]", dayIndex: 4 },
       F: { name: "เวรวันศุกร์", en: "FRIDAY", code: "[F]", dayIndex: 5 },
       S: { name: "เวรพิเศษทุกวัน", en: "SPECIAL", code: "[S]", dayIndex: 6 }
     };
@@ -696,7 +696,7 @@
       }
 
       const ceYear = acadYear - 543;
-      const dayOffsetMap = { M: 0, T: 1, W: 2, Ts: 3, F: 4 };
+      const dayOffsetMap = { M: 0, T: 1, W: 2, Th: 3, F: 4 };
       const offsetDays = dayOffsetMap[shiftKey] ?? 0;
 
       let baseMonday;

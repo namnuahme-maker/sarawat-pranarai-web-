@@ -562,8 +562,8 @@
       const ctx = document.getElementById('chart-shift-comparison')?.getContext('2d');
       if (!ctx || !window.Chart) return;
 
-      const labels = ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Ts)', 'ศุกร์ (F)'];
-      const keys = ['M', 'T', 'W', 'Ts', 'F'];
+      const labels = ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Th)', 'ศุกร์ (F)'];
+      const keys = ['M', 'T', 'W', 'Th', 'F'];
 
       const presentData = keys.map(k => (shiftStats[k] ? shiftStats[k].present : 0));
       const lateData = keys.map(k => (shiftStats[k] ? shiftStats[k].late : 0));
@@ -691,7 +691,7 @@
         M: 'bg-amber-500/15 text-amber-300 border-amber-500/30',
         T: 'bg-pink-500/15 text-pink-300 border-pink-500/30',
         W: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30',
-        Ts: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
+        Th: 'bg-orange-500/15 text-orange-300 border-orange-500/30',
         F: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/30'
       };
 

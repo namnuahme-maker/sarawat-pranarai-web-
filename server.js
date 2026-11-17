@@ -27,6 +27,37 @@ if (!supabaseUrl || !supabaseKey) {
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Keep old Thursday values readable while the web and Discord bot roll out
+// independently; all new writes and user-facing values use Th / ThS.
+function canonicalDutyDay(value) {
+  const code = String(value || '').trim();
+  if (code === 'Ts') return 'Th';
+  if (code === 'TSS' || code === 'TsS') return 'ThS';
+  return code;
+}
+
+function expandDutyDayAliases(values) {
+  return [...new Set(values.flatMap(value => {
+    const code = canonicalDutyDay(value);
+    if (code === 'Th') return ['Th', 'Ts'];
+    if (code === 'ThS') return ['ThS', 'TSS', 'TsS'];
+    return [code];
+  }))];
+}
+
+function canonicalDutyId(value) {
+  const id = String(value || '').trim();
+  let match = id.match(/^TSS(\d*)$/i) || id.match(/^TsS(\d*)$/);
+  if (match) return `ThS${match[1]}`;
+  match = id.match(/^Ts(\d*)$/);
+  if (match) return `Th${match[1]}`;
+  match = id.match(/^THS(\d*)$/i);
+  if (match) return `ThS${match[1]}`;
+  match = id.match(/^TH(\d*)$/i);
+  if (match) return `Th${match[1]}`;
+  return id.toUpperCase();
+}
+
 // =============================================================
 // 🔐 DISCORD OAUTH2 AUTHENTICATION & SESSION CONFIGURATION
 // =============================================================
@@ -421,7 +452,7 @@ app.get('/api/auth/me', async (req, res) => {
       const isVP = m.role === 'VICE_PRESIDENT' || user.role === 'VICE_PRESIDENT';
       const { data: leadershipAssignments = [] } = await supabase
         .from('shift_leadership').select('shift_code, position').eq('member_id', m.id);
-      const memberShift = m.duty_day === 'S' ? 'S' : (['Ts', 'TSS', 'TsS'].includes(m.duty_day) ? 'Ts' : (m.duty_day || '').replace(/S+$/, ''));
+      const memberShift = m.duty_day === 'S' ? 'S' : (['Th', 'ThS', 'ThS'].includes(m.duty_day) ? 'Th' : (m.duty_day || '').replace(/S+$/, ''));
       const memberShiftLeadership = leadershipAssignments.find(a => a.shift_code === memberShift);
 
       user.isAdmin = isSysAdmin;
@@ -533,13 +564,13 @@ app.get('/api/stats', async (req, res) => {
       M: 0, MS: 0,
       T: 0, TS: 0,
       W: 0, WS: 0,
-      Ts: 0, TSS: 0,
+      Th: 0, ThS: 0,
       F: 0, FS: 0,
       S: 0
     };
 
     (shiftData || []).forEach(row => {
-      const code = row.duty_day;
+      const code = canonicalDutyDay(row.duty_day);
       if (shiftCounts[code] !== undefined) {
         shiftCounts[code]++;
       } else {
@@ -979,8 +1010,8 @@ app.post('/api/crop/submit', async (req, res) => {
 
       const isActive = (member.status === 'ACTIVE');
       const isSpecial = member.duty_day && member.duty_day.endsWith('S');
-      const weekday = member.duty_day ? (member.duty_day === 'TSS' ? 'Ts' : member.duty_day.replace(/S+$/, '') || member.duty_day) : 'M';
-      const DAY_NAMES = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Ts: 'พฤหัสบดี', F: 'ศุกร์', S: 'พิเศษ (ทุกวัน)' };
+      const weekday = member.duty_day ? (member.duty_day === 'ThS' ? 'Th' : member.duty_day.replace(/S+$/, '') || member.duty_day) : 'M';
+      const DAY_NAMES = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Th: 'พฤหัสบดี', F: 'ศุกร์', S: 'พิเศษ (ทุกวัน)' };
       const weekdayName = DAY_NAMES[weekday] || weekday;
 
       if (discordToken && targetChannelId && targetMessageId) {
@@ -1156,9 +1187,10 @@ app.get('/api/members', async (req, res) => {
 
     if (duty_day && duty_day !== 'ALL') {
       // ดึงทั้งเวรปกติ และเวรพิเศษที่สังกัดวันนี้
-      const targetDays = duty_day === 'S'
-        ? ['S', 'MS', 'TS', 'WS', 'TSS', 'TsS', 'FS']
-        : [duty_day, duty_day === 'Ts' ? 'TSS' : `${duty_day}S`, ...(duty_day === 'Ts' ? ['TsS'] : [])];
+      const canonicalDay = canonicalDutyDay(duty_day);
+      const targetDays = expandDutyDayAliases(canonicalDay === 'S'
+        ? ['S', 'MS', 'TS', 'WS', 'ThS', 'FS']
+        : [canonicalDay, canonicalDay === 'Th' ? 'ThS' : `${canonicalDay}S`]);
       query = query.in('duty_day', targetDays);
     }
 
@@ -1210,13 +1242,13 @@ app.get('/api/members', async (req, res) => {
 // -------------------------------------------------------------
 // ตำแหน่งหัวหน้า/รองหัวหน้าเวรที่ผูกกับผลัดโดยตรง
 // -------------------------------------------------------------
-const LEADERSHIP_SHIFT_CODES = ['M', 'T', 'W', 'Ts', 'F', 'S'];
+const LEADERSHIP_SHIFT_CODES = ['M', 'T', 'W', 'Th', 'F', 'S'];
 const LEADERSHIP_POSITIONS = ['HEAD', 'DEPUTY'];
 const WEB_LEADERSHIP_ROLE_IDS = {
   M: { HEAD: process.env.ROLE_HEAD_M || '1567570806412804126', DEPUTY: process.env.ROLE_DEPUTY_M || '1567570808270758020' },
   T: { HEAD: process.env.ROLE_HEAD_T || '1567570810439335946', DEPUTY: process.env.ROLE_DEPUTY_T || '1567570812024786996' },
   W: { HEAD: process.env.ROLE_HEAD_W || '1567570813878804511', DEPUTY: process.env.ROLE_DEPUTY_W || '1567570815728353490' },
-  Ts: { HEAD: process.env.ROLE_HEAD_THU || '1567570829288542218', DEPUTY: process.env.ROLE_DEPUTY_THU || '1567570831851126804' },
+  Th: { HEAD: process.env.ROLE_HEAD_THU || '1567570829288542218', DEPUTY: process.env.ROLE_DEPUTY_THU || '1567570831851126804' },
   F: { HEAD: process.env.ROLE_HEAD_F || '1567570837215649962', DEPUTY: process.env.ROLE_DEPUTY_F || '1567570839925293178' },
   S: { HEAD: process.env.ROLE_HEAD_S || '1567570801866047589', DEPUTY: process.env.ROLE_DEPUTY_S || '1567570803703423006' }
 };
@@ -1243,9 +1275,9 @@ function canManageShiftLeadership(user) {
 }
 
 function memberBelongsToShift(dutyDay, shiftCode) {
-  const code = String(dutyDay || '').trim();
+  const code = canonicalDutyDay(dutyDay);
   if (shiftCode === 'S') return code === 'S' || /S$/.test(code);
-  if (shiftCode === 'Ts') return ['Ts', 'TSS', 'TsS'].includes(code);
+  if (shiftCode === 'Th') return ['Th', 'ThS'].includes(code);
   const specialVariants = { M: 'MS', T: 'TS', W: 'WS', F: 'FS' };
   return code === shiftCode || code === specialVariants[shiftCode];
 }
@@ -1413,8 +1445,8 @@ app.post('/api/members', async (req, res) => {
       grade_class: cleanClass,
       student_no: cleanNo,
       phone_number: cleanPhone,
-      duty_day: duty_day || null,
-      duty_id: duty_id ? String(duty_id).trim().toUpperCase() : null,
+      duty_day: duty_day ? canonicalDutyDay(duty_day) : null,
+      duty_id: duty_id ? canonicalDutyId(duty_id) : null,
       role: role || 'MEMBER',
       shift_role: shift_role || 'MEMBER',
       status: 'PENDING_APPROVAL',
@@ -1445,10 +1477,10 @@ app.post('/api/members', async (req, res) => {
 // 3.2 API: อัปเดตข้อมูลสารวัตร (สิทธิ์เฉพาะประธาน/ผู้บริหาร/Commander)
 // -------------------------------------------------------------
 function getDutyIdPrefixForDay(dutyDay) {
-  const code = String(dutyDay || '').trim();
+  const code = canonicalDutyDay(dutyDay);
   if (code === 'S') return 'S';
-  if (code === 'TSS' || code === 'TsS') return 'TSS';
-  if (code === 'Ts') return 'Ts';
+  if (code === 'ThS') return 'ThS';
+  if (code === 'Th') return 'Th';
   if (['MS', 'TS', 'WS', 'FS'].includes(code)) return code;
   return code;
 }
@@ -1566,7 +1598,7 @@ app.patch('/api/members/:id', async (req, res) => {
     if (data && data.discord_id && DISCORD_BOT_TOKEN && DISCORD_GUILD_ID) {
       try {
         // The persisted shift day is authoritative: TS1 can be a stale ID on
-        // a regular Thursday (Ts), so duty_id must not keep the special role.
+        // a regular Thursday (Th), so duty_id must not keep the special role.
         const dutyDay = String(data.duty_day || '').trim();
         const isSpecialDuty = dutyDay === 'S' || /S$/.test(dutyDay);
         const roleSpecial = process.env.ROLE_SPECIAL || '1567570841548627971';
@@ -2633,7 +2665,7 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
     const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'สารวัตรนักเรียน';
     let shiftLeadership = null;
     const { data: assignments } = await supabase.from('shift_leadership').select('shift_code, position').eq('member_id', member.id);
-    const memberShift = member.duty_day === 'S' ? 'S' : (['Ts', 'TSS', 'TsS'].includes(member.duty_day) ? 'Ts' : (member.duty_day || '').replace(/S+$/, ''));
+    const memberShift = member.duty_day === 'S' ? 'S' : (['Th', 'ThS', 'ThS'].includes(member.duty_day) ? 'Th' : (member.duty_day || '').replace(/S+$/, ''));
     shiftLeadership = (assignments || []).find(a => a.shift_code === memberShift) || null;
     const roleTitle = shiftLeadership?.position === 'HEAD' ? `หัวหน้าเวร (${memberShift})`
       : shiftLeadership?.position === 'DEPUTY' ? `รองหัวหน้าเวร (${memberShift})`
@@ -2934,7 +2966,7 @@ async function notifyAttendanceToDiscord(sessionData, summary, records) {
     const chId = process.env.ATTENDANCE_CHANNEL_ID || process.env.INCIDENT_CHANNEL_ID;
     if (!token || !guildId || !chId) return false;
 
-    const shiftNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Ts: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
+    const shiftNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Th: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
     const shiftThai = shiftNames[sessionData.shift_code] || sessionData.shift_code;
     const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
 
@@ -3062,10 +3094,10 @@ const ATTENDANCE_FALLBACK_ROSTERS = {
     { duty_id: "W2", first_name: "ก้องภพ", last_name: "ทองใบ", nickname: "อาร์ม", grade_class: "5/3", student_no: 15 },
     { duty_id: "W3", first_name: "ธราเทพ", last_name: "พงษ์สวัสดิ์", nickname: "ปัน", grade_class: "3/4", student_no: 20 }
   ],
-  Ts: [
-    { duty_id: "Ts1", first_name: "ณิชกานต์", last_name: "คำไชย", nickname: "นำเหนือ", grade_class: "5/7", student_no: 36 },
-    { duty_id: "Ts2", first_name: "ปรเมศวร์", last_name: "ดวงดี", nickname: "โบ๊ท", grade_class: "5/6", student_no: 8 },
-    { duty_id: "Ts3", first_name: "อภิวัฒน์", last_name: "มีทรัพย์", nickname: "ไอซ์", grade_class: "3/6", student_no: 14 }
+  Th: [
+    { duty_id: "Th1", first_name: "ณิชกานต์", last_name: "คำไชย", nickname: "นำเหนือ", grade_class: "5/7", student_no: 36 },
+    { duty_id: "Th2", first_name: "ปรเมศวร์", last_name: "ดวงดี", nickname: "โบ๊ท", grade_class: "5/6", student_no: 8 },
+    { duty_id: "Th3", first_name: "อภิวัฒน์", last_name: "มีทรัพย์", nickname: "ไอซ์", grade_class: "3/6", student_no: 14 }
   ],
   F: [
     { duty_id: "FS1", first_name: "ภัทรพล", last_name: "บุญวิเศษ", nickname: "ภีมะ", grade_class: "5/7", student_no: 4 },
@@ -3589,7 +3621,7 @@ app.get('/api/analytics/overview', async (req, res) => {
       M: { present: 0, late: 0, leave: 0, absent: 0 },
       T: { present: 0, late: 0, leave: 0, absent: 0 },
       W: { present: 0, late: 0, leave: 0, absent: 0 },
-      Ts: { present: 0, late: 0, leave: 0, absent: 0 },
+      Th: { present: 0, late: 0, leave: 0, absent: 0 },
       F: { present: 0, late: 0, leave: 0, absent: 0 }
     };
     attendance.forEach(r => {
@@ -3638,18 +3670,18 @@ app.get('/api/analytics/overview', async (req, res) => {
       M: { name: 'เวรวันจันทร์', color: 'amber', dutyDesc: 'ควบคุมแถวเข้าแถวเคารพธงชาติ & จุดประตู 1' },
       T: { name: 'เวรวันอังคาร', color: 'pink', dutyDesc: 'ตรวจเครื่องแต่งกายและทรงผม & โรงอาหาร' },
       W: { name: 'เวรวันพุธ', color: 'emerald', dutyDesc: 'ตรวจบัตรนักเรียน & ดูแลความเรียบร้อยรอบอาคาร' },
-      Ts: { name: 'เวรวันพฤหัสบดี', color: 'orange', dutyDesc: 'สายตรวจอาคารเรียน & เฝ้าระวังจุดอับ' },
+      Th: { name: 'เวรวันพฤหัสบดี', color: 'orange', dutyDesc: 'สายตรวจอาคารเรียน & เฝ้าระวังจุดอับ' },
       F: { name: 'เวรวันศุกร์', color: 'cyan', dutyDesc: 'ตรวจสัมภาระ & ดูแลความเรียบร้อยช่วงเลิกเรียน' },
       S: { name: 'เวรพิเศษ', color: 'violet', dutyDesc: 'กำลังพลเวรพิเศษที่ปฏิบัติงานร่วมกับผลัดประจำวัน' }
     };
 
     const getBaseWeekday = (dutyDay) => {
       if (!dutyDay) return '';
-      if (dutyDay === 'TSS' || dutyDay === 'Ts') return 'Ts';
+      if (dutyDay === 'ThS' || dutyDay === 'Th') return 'Th';
       return dutyDay.replace(/S+$/, '');
     };
 
-    const organization = ['M', 'T', 'W', 'Ts', 'F', 'S'].map(shiftKey => {
+    const organization = ['M', 'T', 'W', 'Th', 'F', 'S'].map(shiftKey => {
       const shiftMembers = members.filter(m => shiftKey === 'S'
         ? m.duty_day === 'S' || /S$/.test(m.duty_day || '')
         : getBaseWeekday(m.duty_day) === shiftKey);

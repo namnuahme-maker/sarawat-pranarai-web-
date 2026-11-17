@@ -349,7 +349,7 @@
             <h2 class="text-sm sm:text-base font-bold text-white flex items-center gap-2 font-mono">
               <span class="text-amber-400">⚡</span> อัตรากำลังพลจำแนกตามผลัดเวร (SHIFT ROSTER MATRIX)
             </h2>
-            <p class="text-xs text-slate-400 mt-0.5">รวมรหัสผสมเวรพิเศษประจำสัปดาห์ (MS, TS, WS, TSS, FS)</p>
+            <p class="text-xs text-slate-400 mt-0.5">รวมรหัสผสมเวรพิเศษประจำสัปดาห์ (MS, TS, WS, ThS, FS)</p>
           </div>
           <span class="text-[10px] font-mono font-bold text-cyan-400 px-2.5 py-1 rounded bg-navy-950 border border-cyan-500/30">MONITOR // LIVE</span>
         </div>
@@ -528,7 +528,7 @@
           <button onclick="filterRoster('M')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">จันทร์ (M/MS)</button>
           <button onclick="filterRoster('T')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">อังคาร (T/TS)</button>
           <button onclick="filterRoster('W')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">พุธ (W/WS)</button>
-          <button onclick="filterRoster('Ts')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">พฤหัส (Ts/TSS)</button>
+          <button onclick="filterRoster('Th')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">พฤหัส (Th/ThS)</button>
           <button onclick="filterRoster('F')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">ศุกร์ (F/FS)</button>
           <button onclick="filterRoster('S')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">เวรพิเศษ (S)</button>
         </div>
@@ -597,7 +597,7 @@
             <span>📅</span> ตารางปฏิบัติหน้าที่สารวัตรนักเรียนประจำสัปดาห์
           </h2>
           <p class="text-xs text-slate-400 mt-1 leading-relaxed">
-            สารวัตรเวรพิเศษ (รหัสผสม <span class="text-amber-400 font-bold font-mono">MS, TS, WS, TSS, FS</span>) มีหน้าที่ร่วมตรวจตรากับเวรประจำวันและสแตนด์บายทุกวัน
+            สารวัตรเวรพิเศษ (รหัสผสม <span class="text-amber-400 font-bold font-mono">MS, TS, WS, ThS, FS</span>) มีหน้าที่ร่วมตรวจตรากับเวรประจำวันและสแตนด์บายทุกวัน
           </p>
         </div>
 
@@ -642,9 +642,9 @@
             <div>
               <div class="flex items-center justify-between border-b border-amber-500/20 pb-2.5 mb-3">
                 <span class="font-bold text-amber-400 text-sm">🟠 วันพฤหัสบดี</span>
-                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300">Ts & TSS</span>
+                <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300">Th & ThS</span>
               </div>
-              <div id="shift-column-Ts" class="space-y-2 text-xs">กำลังโหลด...</div>
+              <div id="shift-column-Th" class="space-y-2 text-xs">กำลังโหลด...</div>
             </div>
           </div>
 
@@ -744,7 +744,7 @@
           <button onclick="stampDutyBadge('M')" class="w-7 h-7 rounded-lg bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500 text-blue-400 font-bold text-xs" title="เพิ่มตราเวรจันทร์">🔵</button>
           <button onclick="stampDutyBadge('T')" class="w-7 h-7 rounded-lg bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500 text-purple-400 font-bold text-xs" title="เพิ่มตราเวรอังคาร">🟣</button>
           <button onclick="stampDutyBadge('W')" class="w-7 h-7 rounded-lg bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500 text-emerald-400 font-bold text-xs" title="เพิ่มตราเวรพุธ">🟢</button>
-          <button onclick="stampDutyBadge('Ts')" class="w-7 h-7 rounded-lg bg-orange-600/20 hover:bg-orange-600/40 border border-orange-500 text-orange-400 font-bold text-xs" title="เพิ่มตราเวรพฤหัสบดี">🟠</button>
+          <button onclick="stampDutyBadge('Th')" class="w-7 h-7 rounded-lg bg-orange-600/20 hover:bg-orange-600/40 border border-orange-500 text-orange-400 font-bold text-xs" title="เพิ่มตราเวรพฤหัสบดี">🟠</button>
           <button onclick="stampDutyBadge('F')" class="w-7 h-7 rounded-lg bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500 text-rose-400 font-bold text-xs" title="เพิ่มตราเวรศุกร์">🔴</button>
           <button onclick="stampDutyBadge('S')" class="w-7 h-7 rounded-lg bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500 text-amber-400 font-bold text-xs" title="เพิ่มตราเวรพิเศษ">⭐</button>
 
@@ -1225,7 +1225,7 @@
             <option value="M">เวรวันจันทร์ (M & MS)</option>
             <option value="T">เวรวันอังคาร (T & TS)</option>
             <option value="W">เวรวันพุธ (W & WS)</option>
-            <option value="Ts">เวรวันพฤหัสบดี (Ts & TSS)</option>
+            <option value="Th">เวรวันพฤหัสบดี (Th & ThS)</option>
             <option value="F">เวรวันศุกร์ (F & FS)</option>
             <option value="S">เวรพิเศษเท่านั้น (S)</option>
           </select>
@@ -1456,8 +1456,8 @@
               <option value="TS">วันอังคาร พิเศษ (TS)</option>
               <option value="W">วันพุธ (W)</option>
               <option value="WS">วันพุธ พิเศษ (WS)</option>
-              <option value="Ts">วันพฤหัสบดี (Ts)</option>
-              <option value="TSS">วันพฤหัสบดี พิเศษ (TSS)</option>
+              <option value="Th">วันพฤหัสบดี (Th)</option>
+              <option value="ThS">วันพฤหัสบดี พิเศษ (ThS)</option>
               <option value="F">วันศุกร์ (F)</option>
               <option value="FS">วันศุกร์ พิเศษ (FS)</option>
               <option value="S">เวรพิเศษปฏิบัติหน้าที่ทุกวัน (S)</option>
@@ -2042,7 +2042,7 @@
             1: 'ผลัดเวรวันจันทร์ (Shift M & MS)',
             2: 'ผลัดเวรวันอังคาร (Shift T & TS)',
             3: 'ผลัดเวรวันพุธ (Shift W & WS)',
-            4: 'ผลัดเวรวันพฤหัสบดี (Shift Ts & TSS)',
+            4: 'ผลัดเวรวันพฤหัสบดี (Shift Th & ThS)',
             5: 'ผลัดเวรวันศุกร์ (Shift F & FS)',
             6: 'เวรพิเศษวันเสาร์ (Special Shift S)',
             0: 'วันอาทิตย์ (พักผลัดเวร)'
@@ -2064,9 +2064,9 @@
         { label: 'จันทร์ (M/MS)', count: (shifts.M || 0) + (shifts.MS || 0), border: 'border-blue-500/40', text: 'text-blue-400', bg: 'bg-blue-500/10' },
         { label: 'อังคาร (T/TS)', count: (shifts.T || 0) + (shifts.TS || 0), border: 'border-purple-500/40', text: 'text-purple-400', bg: 'bg-purple-500/10' },
         { label: 'พุธ (W/WS)', count: (shifts.W || 0) + (shifts.WS || 0), border: 'border-emerald-500/40', text: 'text-emerald-400', bg: 'bg-emerald-500/10' },
-        { label: 'พฤหัส (Ts/TSS)', count: (shifts.Ts || 0) + (shifts.TSS || 0), border: 'border-amber-500/40', text: 'text-amber-400', bg: 'bg-amber-500/10' },
+        { label: 'พฤหัส (Th/ThS)', count: (shifts.Th || 0) + (shifts.ThS || 0), border: 'border-amber-500/40', text: 'text-amber-400', bg: 'bg-amber-500/10' },
         { label: 'ศุกร์ (F/FS)', count: (shifts.F || 0) + (shifts.FS || 0), border: 'border-rose-500/40', text: 'text-rose-400', bg: 'bg-rose-500/10' },
-        { label: 'เวรพิเศษรวม (S)', count: (shifts.S || 0) + (shifts.MS || 0) + (shifts.TS || 0) + (shifts.WS || 0) + (shifts.TSS || 0) + (shifts.FS || 0), border: 'border-yellow-400/50', text: 'text-yellow-300', bg: 'bg-yellow-400/10' }
+        { label: 'เวรพิเศษรวม (S)', count: (shifts.S || 0) + (shifts.MS || 0) + (shifts.TS || 0) + (shifts.WS || 0) + (shifts.ThS || 0) + (shifts.FS || 0), border: 'border-yellow-400/50', text: 'text-yellow-300', bg: 'bg-yellow-400/10' }
       ];
 
       container.innerHTML = shiftConfigs.map(item => `
@@ -2245,7 +2245,7 @@
 
     // Render Weekly Shifts Columns
     function renderShiftsColumns(members) {
-      const days = ['M', 'T', 'W', 'Ts', 'F'];
+      const days = ['M', 'T', 'W', 'Th', 'F'];
       days.forEach(dayCode => {
         const col = document.getElementById(`shift-column-${dayCode}`);
         if (!col) return;
@@ -2253,7 +2253,7 @@
         const dayMembers = members.filter(m => {
           if (!m.duty_day) return false;
           if (m.duty_day === dayCode) return true;
-          if (dayCode === 'Ts' && m.duty_day === 'TSS') return true;
+          if (dayCode === 'Th' && m.duty_day === 'ThS') return true;
           if (m.duty_day === `${dayCode}S`) return true;
           return false;
         });
@@ -2322,11 +2322,29 @@
 
     // Dynamic Card HTML Generator from Studio Config
     function renderCardHTMLFromTemplate(containerId, m, scale = 1.0) {
-      const container = document.getElementById(containerId);
-      if (!container) return;
+      const container = typeof containerId === 'string' ? document.getElementById(containerId) : containerId;
+      if (!container || !m) return;
+
+      const canvasWidth = (studioConfig && studioConfig.canvas && studioConfig.canvas.width) || 430;
+      const canvasHeight = (studioConfig && studioConfig.canvas && studioConfig.canvas.height) || 680;
+      const hasBg = Boolean(studioConfig && studioConfig.canvas && studioConfig.canvas.backgroundImage);
+
+      container.style.width = `${Math.round(canvasWidth * scale)}px`;
+      container.style.height = `${Math.round(canvasHeight * scale)}px`;
+      container.style.position = 'relative';
+      container.style.overflow = 'hidden';
+      container.style.backgroundColor = (studioConfig && studioConfig.canvas && studioConfig.canvas.backgroundColor) || '#ffffff';
+      if (hasBg) {
+        container.style.backgroundImage = `url("${studioConfig.canvas.backgroundImage}")`;
+        container.style.backgroundSize = '100% 100%';
+        container.style.backgroundRepeat = 'no-repeat';
+        container.style.backgroundPosition = 'center';
+      } else {
+        container.style.backgroundImage = 'none';
+      }
 
       const rawNickname = m.nickname || 'SARAWAT';
-      const englishNickname = romanizeThaiNickname(rawNickname);
+      const englishNickname = m.english_nickname || romanizeThaiNickname(rawNickname);
       let fullName = `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.name || 'นายณิชกานต์ คำไชย';
       if (!fullName.startsWith('นาย') && !fullName.startsWith('นางสาว') && !fullName.startsWith('ด.ช.') && !fullName.startsWith('ด.ญ.')) {
         fullName = `นาย${fullName}`;
@@ -2343,6 +2361,10 @@
       const elements = (studioConfig && studioConfig.elements) || DEFAULT_STUDIO_CONFIG.elements;
       let html = '';
 
+      if (hasBg) {
+        html += `<img src="${studioConfig.canvas.backgroundImage}" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: fill; z-index: 1; pointer-events: none;" alt="Background">`;
+      }
+
       for (const [key, el] of Object.entries(elements)) {
         const left = Math.round((el.left || 0) * scale);
         const top = Math.round((el.top || 0) * scale);
@@ -2354,16 +2376,16 @@
 
         if (el.type === 'rect') {
           html += `
-            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background: ${el.fill || '#000'}; opacity: ${opacity}; z-index: 25; pointer-events: none;"></div>
+            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; background: ${el.fill || '#000'}; opacity: ${opacity}; z-index: 10; pointer-events: none;"></div>
           `;
         } else if (el.type === 'image' && el.src) {
           html += `
-            <img src="${el.src}" style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; object-fit: contain; opacity: ${opacity}; transform: ${transform}; z-index: ${key.includes('watermark') ? 2 : 20}; pointer-events: none;" alt="${el.name || ''}">
+            <img src="${el.src}" style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; object-fit: contain; opacity: ${opacity}; transform: ${transform}; z-index: 15; pointer-events: none;" alt="${el.name || ''}">
           `;
         } else if (el.type === 'photo') {
           html += `
-            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 5; pointer-events: none;">
-              <img src="${photoUrl}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; -webkit-mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%); mask-image: linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,1) 75%, rgba(0,0,0,0) 100%);" alt="Photo">
+            <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 5; pointer-events: none; overflow: hidden;">
+              <img src="${photoUrl}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" alt="Photo">
             </div>
           `;
         } else if (el.type === 'text') {
@@ -2385,7 +2407,7 @@
             </div>
           `;
         } else if (el.type === 'barcode') {
-          const barcodeId = `bc_${containerId}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+          const barcodeId = `bc_${(typeof containerId === 'string' ? containerId : 'cnt')}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
           html += `
             <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 20; pointer-events: none;">
               <svg id="${barcodeId}" style="width: 100%; height: 100%;"></svg>
@@ -2401,28 +2423,13 @@
                   displayValue: false,
                   margin: 0,
                   background: "transparent",
-                  lineColor: "#050505"
+                  lineColor: el.fill || "#050505"
                 });
               } catch (e) {}
             }
           }, 20);
         }
       }
-
-      // Ambient Color Fades (Over photo & background, strictly below all text)
-      const blueWidth = Math.round(140 * scale);
-      const redWidth = Math.round(140 * scale);
-      const photoEl = elements.photo || (DEFAULT_STUDIO_CONFIG && DEFAULT_STUDIO_CONFIG.elements.photo);
-      const pTop = photoEl ? (photoEl.top || 125) : 125;
-      const pH = photoEl ? (photoEl.height || 360) : 360;
-      const whiteTop = Math.round(Math.max(0, pTop + pH - 175) * scale);
-      const whiteHeight = Math.round(175 * scale);
-
-      html += `
-        <div style="position: absolute; left: 0; top: 0; bottom: 0; width: ${blueWidth}px; background: linear-gradient(to right, rgba(0, 43, 128, 0.22) 0%, rgba(0, 43, 128, 0.08) 45%, rgba(0, 43, 128, 0) 100%); z-index: 8; pointer-events: none;"></div>
-        <div style="position: absolute; right: 0; top: 0; bottom: 0; width: ${redWidth}px; background: linear-gradient(to left, rgba(185, 28, 28, 0.22) 0%, rgba(185, 28, 28, 0.08) 45%, rgba(185, 28, 28, 0) 100%); z-index: 8; pointer-events: none;"></div>
-        <div style="position: absolute; left: 0; right: 0; top: ${whiteTop}px; height: ${whiteHeight}px; background: linear-gradient(to top, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.5) 45%, rgba(255, 255, 255, 0) 100%); z-index: 8; pointer-events: none;"></div>
-      `;
 
       container.innerHTML = html;
     }
@@ -2521,7 +2528,7 @@
         const filtered = allMembers.filter(m => m.duty_day && m.duty_day.endsWith('S'));
         renderRoster(filtered);
       } else {
-        const targetDays = [shiftCode, shiftCode === 'Ts' ? 'TSS' : `${shiftCode}S`];
+        const targetDays = [shiftCode, shiftCode === 'Th' ? 'ThS' : `${shiftCode}S`];
         const filtered = allMembers.filter(m => targetDays.includes(m.duty_day));
         renderRoster(filtered);
       }
@@ -3354,7 +3361,7 @@
         chartDailyForce = new Chart(ctxForce, {
           type: 'bar',
           data: {
-            labels: ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Ts)', 'ศุกร์ (F)', 'พิเศษ (S)'],
+            labels: ['จันทร์ (M)', 'อังคาร (T)', 'พุธ (W)', 'พฤหัสฯ (Th)', 'ศุกร์ (F)', 'พิเศษ (S)'],
             datasets: [{
               label: 'กำลังพลตามเวร (นาย)',
               data: [0, 0, 0, 0, 0, 0],
@@ -3486,7 +3493,7 @@
       const shifts = (stats.members && stats.members.shifts) || {};
       let maxShift = '-';
       let maxShiftCount = 0;
-      const shiftNames = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Ts: 'พฤหัสบดี', F: 'ศุกร์', S: 'เวรพิเศษ' };
+      const shiftNames = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Th: 'พฤหัสบดี', F: 'ศุกร์', S: 'เวรพิเศษ' };
       for (const [sKey, count] of Object.entries(shifts)) {
         if (count > maxShiftCount) {
           maxShiftCount = count;
@@ -3502,7 +3509,7 @@
           shifts.M || 0,
           shifts.T || 0,
           shifts.W || 0,
-          shifts.Ts || 0,
+          shifts.Th || 0,
           shifts.F || 0,
           shifts.S || 0
         ];
@@ -3612,7 +3619,7 @@
         M: { bg: '#2563eb', text: '🔵 M' },
         T: { bg: '#9333ea', text: '🟣 T' },
         W: { bg: '#16a34a', text: '🟢 W' },
-        Ts: { bg: '#ea580c', text: '🟠 Ts' },
+        Th: { bg: '#ea580c', text: '🟠 Th' },
         F: { bg: '#dc2626', text: '🔴 F' },
         S: { bg: '#ca8a04', text: '⭐ S' }
       };
@@ -3673,7 +3680,7 @@
           <option value="M">🔵 เวรวันจันทร์ (M)</option>
           <option value="T">🟣 เวรวันอังคาร (T)</option>
           <option value="W">🟢 เวรวันพุธ (W)</option>
-          <option value="Ts">🟠 เวรวันพฤหัสบดี (Ts)</option>
+          <option value="Th">🟠 เวรวันพฤหัสบดี (Th)</option>
           <option value="F">🔴 เวรวันศุกร์ (F)</option>
           <option value="S">⭐ เวรพิเศษ (S)</option>
         `;
