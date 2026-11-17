@@ -1337,7 +1337,7 @@
 
       // Thursday (Ts): Ts, TSS, TsS
       if (shiftCode === 'Ts') {
-        if (dd === 'Ts' || dd === 'TSS' || dd === 'TsS' || dd.toLowerCase() === 'ts') return true;
+        if (dd === 'Ts' || dd === 'TSS' || dd === 'TsS') return true;
         if (!dd && did) return did.startsWith('Ts') || did.startsWith('ts') || did.startsWith('TSS');
         return false;
       }
@@ -2524,30 +2524,14 @@
     function handleSpecialShiftToggle(isSpecial) {
       const dutyIdInput = document.getElementById('edit-member-duty-id');
       const dutyDaySelect = document.getElementById('edit-member-duty-day');
-      let curId = (dutyIdInput.value || '').trim();
-      let curDay = dutyDaySelect.value;
-
-      let newId = curId;
-      if (isSpecial) {
-        // M1 -> MS1, F2 -> FS2, Ts1 -> TSS1
-        if (curId.startsWith('Ts') || curId.startsWith('TS')) {
-          newId = curId.replace(/^Ts/i, 'TSS');
-        } else if (!curId.includes('S') && !curId.includes('s')) {
-          const match = curId.match(/^([A-Za-z]+)(\d*)$/);
-          if (match) {
-            newId = `${match[1]}S${match[2]}`;
-          } else {
-            newId = `${curDay}S1`;
-          }
-        }
-      } else {
-        // Rebuild the prefix from the selected shift so TS1 cannot become T1
-        // when the actual shift is Thursday (Ts).
-        const match = curId.match(/(\d*)$/);
-        const number = match?.[1] || '1';
-        const normalPrefix = curDay === 'Ts' ? 'Ts' : curDay;
-        newId = `${normalPrefix}${number}`;
-      }
+      const curId = (dutyIdInput.value || '').trim();
+      const curDay = dutyDaySelect.value;
+      const match = curId.match(/(\d*)$/);
+      const number = match?.[1] || '1';
+      const prefix = isSpecial
+        ? (curDay === 'Ts' ? 'TSS' : (curDay === 'S' ? 'S' : `${curDay}S`))
+        : curDay;
+      const newId = `${prefix}${number}`;
 
       dutyIdInput.value = newId;
       updateCardPreviewRealtime(newId);
