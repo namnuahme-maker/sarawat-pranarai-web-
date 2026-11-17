@@ -110,27 +110,7 @@
       </div>
     </div>
 
-    <!-- Presets & Quick Style Bar -->
-    <div class="flex flex-wrap items-center justify-end gap-3 bg-tactical-900 border border-tactical-border rounded-2xl p-3 px-4 text-xs">
-      <div class="flex items-center gap-2 flex-wrap">
-        <span class="font-bold text-slate-300 flex items-center gap-1 font-mono">
-          <span>🏅</span> ตราเวร:
-        </span>
-        <button onclick="stampDutyBadge('M')" class="w-6 h-6 rounded bg-blue-600/20 hover:bg-blue-600/40 border border-blue-500 text-blue-400 font-bold text-[10px]" title="เวรจันทร์">M</button>
-        <button onclick="stampDutyBadge('T')" class="w-6 h-6 rounded bg-purple-600/20 hover:bg-purple-600/40 border border-purple-500 text-purple-400 font-bold text-[10px]" title="เวรอังคาร">T</button>
-        <button onclick="stampDutyBadge('W')" class="w-6 h-6 rounded bg-emerald-600/20 hover:bg-emerald-600/40 border border-emerald-500 text-emerald-400 font-bold text-[10px]" title="เวรพุธ">W</button>
-        <button onclick="stampDutyBadge('Ts')" class="w-6 h-6 rounded bg-orange-600/20 hover:bg-orange-600/40 border border-orange-500 text-orange-400 font-bold text-[10px]" title="เวรพฤหัสบดี">Ts</button>
-        <button onclick="stampDutyBadge('F')" class="w-6 h-6 rounded bg-rose-600/20 hover:bg-rose-600/40 border border-rose-500 text-rose-400 font-bold text-[10px]" title="เวรศุกร์">F</button>
-        <button onclick="stampDutyBadge('S')" class="w-6 h-6 rounded bg-amber-600/20 hover:bg-amber-600/40 border border-amber-500 text-amber-400 font-bold text-[10px]" title="เวรพิเศษ">S</button>
-        
-        <span class="text-slate-600 mx-1">|</span>
-        <span class="font-bold text-slate-300 flex items-center gap-1 font-mono">
-          <span>🖼️</span> กรอบรูป:
-        </span>
-        <button onclick="setPhotoFrameShape('fade')" class="px-2 py-0.5 rounded bg-black hover:bg-tactical-800 border border-tactical-border text-slate-300">Fade</button>
-        <button onclick="setPhotoFrameShape('rounded')" class="px-2 py-0.5 rounded bg-black hover:bg-tactical-800 border border-tactical-border text-slate-300">มน</button>
-      </div>
-    </div>
+
 
     <!-- Workspace Grid: Left Canvas (Col 7) / Right Inspector (Col 5) -->
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
@@ -214,10 +194,7 @@
                 <img src="/assets/logo.png" alt="โลโก้" class="w-5 h-5 object-contain group-hover:scale-110 transition shrink-0" onerror="this.style.display='none'">
                 <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">โลโก้หน่วย</span>
               </button>
-              <button type="button" onclick="addStandardIcon('star')" class="flex items-center gap-1.5 p-2 rounded-xl bg-tactical-950 border border-tactical-border hover:border-amber-500/50 hover:bg-tactical-850 transition text-left group">
-                <span class="text-sm">⭐</span>
-                <span class="text-[11px] text-slate-300 group-hover:text-amber-300 truncate">ดาวทอง</span>
-              </button>
+
             </div>
           </div>
         </div>
@@ -252,6 +229,31 @@
               <div class="space-y-1">
                 <label class="text-slate-400 font-mono text-[11px]">ตำแหน่ง Y (บน):</label>
                 <input type="number" id="prop-top" oninput="updateActiveObjectProperty('top', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+              </div>
+            </div>
+
+            <!-- Center & Alignment Controls (Annotation Pointa) -->
+            <div class="space-y-1">
+              <label class="text-slate-400 font-mono text-[11px]">การจัดตำแหน่ง (Alignment):</label>
+              <div class="grid grid-cols-2 gap-2">
+                <button type="button" onclick="centerActiveObject('horizontal')" class="px-2.5 py-1.5 rounded-lg bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border border-amber-500/40 text-xs font-semibold flex items-center justify-center gap-1.5 transition active:scale-95 shadow-sm" title="จัดตำแหน่งเลเยอร์ให้อยู่ตรงกลางบัตรแนวนอน">
+                  <span>🎯</span> จัดกึ่งกลางแนวนอน
+                </button>
+                <button type="button" onclick="centerActiveObject('vertical')" class="px-2.5 py-1.5 rounded-lg bg-tactical-850 hover:bg-tactical-800 text-slate-300 border border-tactical-border text-xs flex items-center justify-center gap-1.5 transition active:scale-95" title="จัดตำแหน่งเลเยอร์ให้อยู่ตรงกลางบัตรแนวตั้ง">
+                  <span>↕️</span> จัดกึ่งกลางแนวตั้ง
+                </button>
+              </div>
+            </div>
+
+            <!-- Size Controls (Width, Height) for Objects -->
+            <div id="field-size-controls" class="grid grid-cols-2 gap-3">
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">ความกว้าง (Width):</label>
+                <input type="number" id="prop-width" oninput="updateActiveObjectDimension('width', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
+              </div>
+              <div class="space-y-1">
+                <label class="text-slate-400 font-mono text-[11px]">ความสูง (Height):</label>
+                <input type="number" id="prop-height" oninput="updateActiveObjectDimension('height', parseInt(this.value))" class="w-full px-3 py-1.5 rounded-lg bg-black border border-tactical-border text-white outline-none focus:border-amber-400 font-mono">
               </div>
             </div>
 
@@ -575,7 +577,7 @@
         stripeRed: { id: "stripeRed", name: "แถบขวา (แดง)", type: "rect", left: 417, top: 0, width: 13, height: 680, fill: "#b91c1c", selectable: false },
         verticalSchoolText: { id: "verticalSchoolText", name: "ข้อความแนวตั้ง PRANARAI", type: "text", text: "PRANARAI SCHOOL", left: 403, top: 108, fontSize: 13, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", angle: 90, charSpacing: 400 },
         watermark: { id: "watermark", name: "ลายน้ำตราสารวัตร (เอียง)", type: "image", src: "/assets/logo.png", left: -20, top: 75, width: 250, height: 250, opacity: 0.45, angle: -14 },
-        photo: { id: "photo", name: "รูปถ่ายสารวัตรนักเรียน (สี่เหลี่ยมคมชัดแบบดั้งเดิม)", type: "photo", left: 35, top: 125, width: 350, height: 360 },
+        photo: { id: "photo", name: "รูปถ่ายสารวัตรนักเรียน (ภาพจำลองเต็มขนาด)", type: "photo", left: 0, top: 80, width: 430, height: 410, selectable: true },
         headerSarawat: { id: "headerSarawat", name: "หัวข้อ SARAWAT", type: "text", text: "SARAWAT", left: 215, top: 14, originX: "center", fontSize: 47, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", charSpacing: 200, scaleY: 1.05 },
         headerInspector: { id: "headerInspector", name: "หัวข้อ INSPECTOR (กลวง)", type: "text", text: "INSPECTOR", left: 215, top: 60, originX: "center", fontSize: 26, fontFamily: "Syncopate", fontWeight: "bold", fill: "transparent", stroke: "#94a3b8", strokeWidth: 1.2, charSpacing: 350 },
         nickname: { id: "nickname", name: "ชื่อเล่นอังกฤษ (ใหญ่)", type: "text", text: "{{nickname}}", left: 215, top: 490, originX: "center", fontSize: 47, fontFamily: "Syncopate", fontWeight: "bold", fill: "#050505", charSpacing: 250, scaleY: 1.05 },
@@ -596,7 +598,7 @@
       student_no: "69055",
       phone_number: "0634125121",
       duty_id: "TS1",
-      profile_image_url: "/assets/logo.png"
+      profile_image_url: "/assets/sample_student.jpg"
     };
 
     const PRESET_TEMPLATES = {
@@ -968,6 +970,22 @@
       studioCanvas.on('selection:updated', onObjectSelected);
       studioCanvas.on('selection:cleared', onSelectionCleared);
       studioCanvas.on('object:modified', onObjectModified);
+      studioCanvas.on('object:moving', (e) => {
+        if (e.target) {
+          if (document.getElementById('prop-left')) document.getElementById('prop-left').value = Math.round(e.target.left || 0);
+          if (document.getElementById('prop-top')) document.getElementById('prop-top').value = Math.round(e.target.top || 0);
+        }
+      });
+      studioCanvas.on('object:scaling', (e) => {
+        if (e.target) {
+          const curW = Math.round(e.target.getScaledWidth ? e.target.getScaledWidth() : ((e.target.width || 0) * (e.target.scaleX || 1)));
+          const curH = Math.round(e.target.getScaledHeight ? e.target.getScaledHeight() : ((e.target.height || 0) * (e.target.scaleY || 1)));
+          if (document.getElementById('prop-width')) document.getElementById('prop-width').value = curW || 0;
+          if (document.getElementById('prop-height')) document.getElementById('prop-height').value = curH || 0;
+          if (document.getElementById('prop-left')) document.getElementById('prop-left').value = Math.round(e.target.left || 0);
+          if (document.getElementById('prop-top')) document.getElementById('prop-top').value = Math.round(e.target.top || 0);
+        }
+      });
 
       window.addEventListener('keydown', handleCanvasKeyboardNudge);
       setupDragAndDrop();
@@ -1186,7 +1204,7 @@
     }
 
     function onObjectSelected(e) {
-      const obj = e.target;
+      const obj = e ? (e.target || (studioCanvas && studioCanvas.getActiveObject())) : (studioCanvas && studioCanvas.getActiveObject());
       if (!obj) return;
       
       document.getElementById('inspector-empty-state').classList.add('hidden');
@@ -1197,7 +1215,15 @@
       document.getElementById('prop-top').value = Math.round(obj.top || 0);
       document.getElementById('prop-opacity').value = obj.opacity !== undefined ? obj.opacity : 1;
 
-      const isText = obj.type === 'text';
+      // Update Width and Height fields
+      const curW = Math.round(obj.getScaledWidth ? obj.getScaledWidth() : ((obj.width || 0) * (obj.scaleX || 1)));
+      const curH = Math.round(obj.getScaledHeight ? obj.getScaledHeight() : ((obj.height || 0) * (obj.scaleY || 1)));
+      const widthInput = document.getElementById('prop-width');
+      const heightInput = document.getElementById('prop-height');
+      if (widthInput) widthInput.value = curW || 0;
+      if (heightInput) heightInput.value = curH || 0;
+
+      const isText = obj.type === 'text' || obj.type === 'i-text' || obj.type === 'textbox';
       document.getElementById('field-text-content').style.display = isText ? 'block' : 'none';
       document.getElementById('field-font-controls').style.display = isText ? 'block' : 'none';
 
@@ -1238,6 +1264,56 @@
       if (!obj) return;
       if (document.getElementById('prop-left')) document.getElementById('prop-left').value = Math.round(obj.left || 0);
       if (document.getElementById('prop-top')) document.getElementById('prop-top').value = Math.round(obj.top || 0);
+      const curW = Math.round(obj.getScaledWidth ? obj.getScaledWidth() : ((obj.width || 0) * (obj.scaleX || 1)));
+      const curH = Math.round(obj.getScaledHeight ? obj.getScaledHeight() : ((obj.height || 0) * (obj.scaleY || 1)));
+      if (document.getElementById('prop-width')) document.getElementById('prop-width').value = curW || 0;
+      if (document.getElementById('prop-height')) document.getElementById('prop-height').value = curH || 0;
+      syncConfigFromCanvas();
+    }
+
+    function centerActiveObject(axis = 'horizontal') {
+      if (!studioCanvas) return;
+      const obj = studioCanvas.getActiveObject();
+      if (!obj) {
+        showToast('กรุณาคลิกเลือกวัตถุที่ต้องการจัดกึ่งกลางก่อน', '⚠️');
+        return;
+      }
+
+      if (axis === 'horizontal' || axis === 'both') {
+        studioCanvas.centerObjectH(obj);
+      }
+      if (axis === 'vertical' || axis === 'both') {
+        studioCanvas.centerObjectV(obj);
+      }
+      obj.setCoords();
+      studioCanvas.renderAll();
+
+      if (document.getElementById('prop-left')) document.getElementById('prop-left').value = Math.round(obj.left || 0);
+      if (document.getElementById('prop-top')) document.getElementById('prop-top').value = Math.round(obj.top || 0);
+      syncConfigFromCanvas();
+      showToast('จัดกึ่งกลางวัตถุเรียบร้อย', '🎯');
+    }
+
+    function updateActiveObjectDimension(dim, val) {
+      if (!studioCanvas || !val || isNaN(val)) return;
+      const obj = studioCanvas.getActiveObject();
+      if (!obj) return;
+      
+      if (dim === 'width') {
+        if (obj.scaleToWidth) {
+          obj.scaleToWidth(val);
+        } else {
+          obj.set('width', val);
+        }
+      } else if (dim === 'height') {
+        if (obj.scaleToHeight) {
+          obj.scaleToHeight(val);
+        } else {
+          obj.set('height', val);
+        }
+      }
+      obj.setCoords();
+      studioCanvas.renderAll();
       syncConfigFromCanvas();
     }
 
@@ -1318,16 +1394,22 @@
         const entry = studioConfig.elements[o.customKey] || {};
         entry.left = Math.round(o.left);
         entry.top = Math.round(o.top);
-        if (o.type === 'text') {
+        entry.angle = o.angle || 0;
+        entry.opacity = o.opacity !== undefined ? o.opacity : 1;
+
+        if (o.type === 'text' || o.type === 'i-text' || o.type === 'textbox') {
           entry.fontSize = o.fontSize;
           entry.fontFamily = o.fontFamily;
           entry.fontWeight = o.fontWeight;
           entry.fill = o.fill;
           entry.charSpacing = o.charSpacing;
-        } else if (o.type === 'rect') {
-          entry.width = Math.round(o.getScaledWidth());
-          entry.height = Math.round(o.getScaledHeight());
-          entry.fill = o.fill;
+          if (o.scaleY) entry.scaleY = o.scaleY;
+        } else {
+          const scaledW = Math.round(o.getScaledWidth ? o.getScaledWidth() : ((o.width || 0) * (o.scaleX || 1)));
+          const scaledH = Math.round(o.getScaledHeight ? o.getScaledHeight() : ((o.height || 0) * (o.scaleY || 1)));
+          if (scaledW) entry.width = scaledW;
+          if (scaledH) entry.height = scaledH;
+          if (o.fill) entry.fill = o.fill;
         }
         studioConfig.elements[o.customKey] = entry;
       });

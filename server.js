@@ -97,6 +97,10 @@ function getUserFromReq(req) {
       officialPhoto: null,
       role: 'ADMIN',
       isAdmin: true,
+      isTeacher: false,
+      isPresident: true,
+      isVicePresident: true,
+      canManageMembers: true,
       isCommander: true,
       isLeader: true,
       isGuildMember: true,
@@ -228,6 +232,9 @@ async function processDiscordUserLogin(accessToken, res) {
       isGuildMember,
       isAdmin,
       isTeacher,
+      isPresident,
+      isVicePresident,
+      canManageMembers: isAdmin || isTeacher || isPresident || isVicePresident,
       isCommander,
       isLeader,
       isVerified,
@@ -415,6 +422,9 @@ app.get('/api/auth/me', async (req, res) => {
 
       user.isAdmin = isSysAdmin;
       user.isTeacher = isTeacher;
+      user.isPresident = isPres;
+      user.isVicePresident = isVP;
+      user.canManageMembers = isSysAdmin || isTeacher || isPres || isVP;
       user.isCommander = isSysAdmin || isPres;
       user.isLeader = isSysAdmin || isTeacher || isPres || isVP || (user.roles || []).some(r => typeof r === 'string' && r.startsWith('ROLE_HEAD'));
 
@@ -1169,7 +1179,108 @@ app.get('/api/members', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 3.1 API: อัปเดตข้อมูลสารวัตร (สิทธิ์เฉพาะประธาน/ผู้บริหาร/Commander)
+// 3.1 API: เพิ่มสารวัตรใหม่เข้าระบบ (สิทธิ์: ผู้ดูแลระบบ, ครูที่ปรึกษา, ประธาน, รองประธาน)
+// -------------------------------------------------------------
+app.post('/api/members', async (req, res) => {
+  try {
+    let user = getUserFromReq(req);
+    let isAllowed = user && (
+      user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident ||
+      user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT'
+    );
+
+    // หากคุกกี้ยังไม่สะท้อนสิทธิ์ล่าสุด ให้ซิงค์ตรงจาก Supabase
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(dbUser.role)) {
+          user.role = dbUser.role;
+          if (dbUser.role === 'ADMIN') user.isAdmin = true;
+          if (dbUser.role === 'TEACHER') user.isTeacher = true;
+          if (dbUser.role === 'PRESIDENT') user.isPresident = true;
+          if (dbUser.role === 'VICE_PRESIDENT') user.isVicePresident = true;
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การเพิ่มสมาชิกสงวนเฉพาะผู้ดูแลระบบ ครูที่ปรึกษา ประธาน หรือรองประธานเท่านั้น' });
+    }
+
+    const {
+      first_name,
+      last_name,
+      nickname,
+      grade_class,
+      student_no,
+      phone_number,
+      duty_day,
+      duty_id,
+      role,
+      shift_role
+    } = req.body;
+
+    if (!first_name || !last_name || !nickname) {
+      return res.status(400).json({ error: 'กรุณากรอกชื่อจริง นามสกุล และชื่อเล่นให้ครบถ้วน' });
+    }
+
+    const cleanFirstName = String(first_name).trim();
+    const cleanLastName = String(last_name).trim();
+    const cleanNickname = String(nickname).trim();
+    const cleanClass = grade_class ? String(grade_class).replace(/^ม\./, '').trim() : '-';
+    const cleanNo = parseInt(student_no, 10) || 0;
+    const cleanPhone = phone_number ? String(phone_number).trim() : '-';
+
+    // ตรวจสอบชื่อ-นามสกุลซ้ำ
+    const { data: existing } = await supabase
+      .from('members')
+      .select('id, first_name, last_name')
+      .eq('first_name', cleanFirstName)
+      .eq('last_name', cleanLastName)
+      .maybeSingle();
+
+    if (existing) {
+      return res.status(409).json({ error: `มีรายชื่อ ${cleanFirstName} ${cleanLastName} อยู่ในระบบแล้ว` });
+    }
+
+    const newMemberPayload = {
+      first_name: cleanFirstName,
+      last_name: cleanLastName,
+      nickname: cleanNickname,
+      grade_class: cleanClass,
+      student_no: cleanNo,
+      phone_number: cleanPhone,
+      duty_day: duty_day || null,
+      duty_id: duty_id ? String(duty_id).trim().toUpperCase() : null,
+      role: role || 'MEMBER',
+      shift_role: shift_role || 'MEMBER',
+      status: 'PENDING_APPROVAL',
+      discord_id: null,
+      created_at: new Date()
+    };
+
+    const { data: inserted, error: insertErr } = await supabase
+      .from('members')
+      .insert([newMemberPayload])
+      .select('*')
+      .single();
+
+    if (insertErr) {
+      console.error('[API] Error inserting new member:', insertErr);
+      return res.status(500).json({ error: 'ไม่สามารถบันทึกข้อมูลสมาชิกใหม่ได้: ' + insertErr.message });
+    }
+
+    console.log(`[API] ✅ เพิ่มสมาชิกใหม่สำเร็จ: ${inserted.first_name} ${inserted.last_name} (${inserted.nickname})`);
+    return res.status(201).json({ success: true, member: inserted });
+  } catch (err) {
+    console.error('[API] /api/members POST crash:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// -------------------------------------------------------------
+// 3.2 API: อัปเดตข้อมูลสารวัตร (สิทธิ์เฉพาะประธาน/ผู้บริหาร/Commander)
 // -------------------------------------------------------------
 app.patch('/api/members/:id', async (req, res) => {
   try {
