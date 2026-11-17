@@ -201,10 +201,18 @@
       <!-- Search & Filters Toolbar -->
       <div class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border flex flex-col md:flex-row items-center justify-between gap-3">
         
-        <!-- Live Search Box -->
-        <div class="relative w-full md:w-80">
-          <input type="text" id="roster-search-input" oninput="handleRosterSearch()" placeholder="ค้นหาชื่อ, ชื่อเล่น, ชั้นเรียน, รหัสเวร..." class="w-full bg-tactical-950 border border-tactical-border rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition font-mono">
-          <svg class="w-4 h-4 absolute left-2.5 top-2 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+        <!-- Search Box & Add Member Action -->
+        <div class="flex items-center gap-2.5 w-full md:w-auto">
+          <!-- Button Add Member (เพิ่มสารวัตรใหม่) -->
+          <button id="btn-add-member-roster" onclick="openAddMemberModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-lg flex-shrink-0" title="เพิ่มข้อมูลสารวัตรนักเรียนใหม่">
+            <span>➕</span> <span>เพิ่มสารวัตรใหม่</span>
+          </button>
+
+          <!-- Live Search Box -->
+          <div class="relative w-full md:w-72">
+            <input type="text" id="roster-search-input" oninput="handleRosterSearch()" placeholder="ค้นหาชื่อ, ชื่อเล่น, ชั้นเรียน, รหัสเวร..." class="w-full bg-tactical-950 border border-tactical-border rounded-xl pl-8 pr-3 py-2 text-xs text-slate-100 placeholder-slate-500 focus:outline-none focus:border-amber-500 transition font-mono">
+            <svg class="w-4 h-4 absolute left-2.5 top-2.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+          </div>
         </div>
 
         <!-- Granular Filter Chips -->
@@ -838,6 +846,121 @@
       </div>
     </div>
   </div>
+
+  <!-- ========================================================= -->
+  <!-- ➕ MODAL: ADD NEW MEMBER (เพิ่มข้อมูลสารวัตรใหม่) -->
+  <!-- ========================================================= -->
+  <div id="modal-add-member" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 transition-all">
+    <div class="relative w-full max-w-lg bg-tactical-900 border border-emerald-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto custom-scrollbar">
+      <!-- Close Button -->
+      <button type="button" onclick="closeAddMemberModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-tactical-800 hover:bg-tactical-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">
+        ✕
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl flex-shrink-0">
+          ➕
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">เพิ่มข้อมูลสารวัตรนักเรียนใหม่</h3>
+          <p class="text-xs text-slate-400">สำหรับผู้ดูแลระบบ ครูที่ปรึกษา ประธาน หรือรองประธาน</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="form-add-member" onsubmit="submitAddMember(event)" class="space-y-3.5">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อจริง <span class="text-rose-400">*</span></label>
+            <input type="text" id="add-m-first-name" required placeholder="เช่น นายสมชาย" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">นามสกุล <span class="text-rose-400">*</span></label>
+            <input type="text" id="add-m-last-name" required placeholder="เช่น ใจดี" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อเล่น <span class="text-rose-400">*</span></label>
+            <input type="text" id="add-m-nickname" required placeholder="เช่น นน, ปัน" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ระดับชั้น <span class="text-rose-400">*</span></label>
+            <input type="text" id="add-m-grade-class" required placeholder="เช่น 6/7, 5/2" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">เลขที่</label>
+            <input type="number" id="add-m-student-no" placeholder="เช่น 15" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-slate-300 mb-1">เบอร์โทรศัพท์</label>
+          <input type="tel" id="add-m-phone" placeholder="เช่น 0891234567" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">เวรประจำวัน</label>
+            <select id="add-m-duty-day" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+              <option value="">-- ยังไม่ระบุ --</option>
+              <option value="M">วันจันทร์ (M)</option>
+              <option value="MS">วันจันทร์ พิเศษ (MS)</option>
+              <option value="T">วันอังคาร (T)</option>
+              <option value="TS">วันอังคาร พิเศษ (TS)</option>
+              <option value="W">วันพุธ (W)</option>
+              <option value="WS">วันพุธ พิเศษ (WS)</option>
+              <option value="Ts">วันพฤหัสบดี (Ts)</option>
+              <option value="TSS">วันพฤหัสบดี พิเศษ (TSS)</option>
+              <option value="F">วันศุกร์ (F)</option>
+              <option value="FS">วันศุกร์ พิเศษ (FS)</option>
+              <option value="S">เวรพิเศษปฏิบัติหน้าที่ทุกวัน (S)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">รหัสเวร (Duty ID)</label>
+            <input type="text" id="add-m-duty-id" placeholder="เช่น M1, TS2 (เว้นว่างได้)" class="w-full uppercase font-mono bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ตำแหน่งองค์กร (Role)</label>
+            <select id="add-m-role" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+              <option value="MEMBER">สารวัตรนักเรียน (MEMBER)</option>
+              <option value="VICE_PRESIDENT">รองประธาน (VICE_PRESIDENT)</option>
+              <option value="PRESIDENT">ประธานสารวัตร (PRESIDENT)</option>
+              <option value="TEACHER">ครูที่ปรึกษา (TEACHER)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">บทบาทในเวร (Shift Role)</label>
+            <select id="add-m-shift-role" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-emerald-500">
+              <option value="MEMBER">สมาชิกประจำเวร</option>
+              <option value="SHIFT_DEPUTY">รองหัวหน้าเวร</option>
+              <option value="SHIFT_HEAD">หัวหน้าเวร</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-300">
+          💡 <strong>หมายเหตุ:</strong> ข้อมูลจะถูกบันทึกด้วยสถานะ <code>PENDING_APPROVAL</code> โดยยังไม่ผูกกับ Discord เมื่อสารวัตรเข้า Discord จะสามารถเลือกชื่อนี้เพื่อยืนยันตัวตนได้ทันที
+        </div>
+
+        <div id="add-m-error" class="hidden p-2.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300"></div>
+
+        <!-- Buttons -->
+        <div class="pt-3 border-t border-tactical-border flex justify-end gap-2">
+          <button type="button" onclick="closeAddMemberModal()" class="px-4 py-2 rounded-xl bg-tactical-850 hover:bg-tactical-800 text-slate-300 text-xs font-semibold transition">
+            ยกเลิก
+          </button>
+          <button type="submit" id="btn-submit-add-member" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-emerald-500/30 transition flex items-center gap-1.5">
+            <span>💾 บันทึกข้อมูล</span>
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 
@@ -2195,11 +2318,112 @@
       document.body.classList.remove('overflow-hidden');
     }
 
+    // Member Management Modal Functions (เพิ่มสารวัตรใหม่)
+    function openAddMemberModal() {
+      const modal = document.getElementById('modal-add-member');
+      const err = document.getElementById('add-m-error');
+      if (err) {
+        err.classList.add('hidden');
+        err.textContent = '';
+      }
+      const form = document.getElementById('form-add-member');
+      if (form) form.reset();
+      if (modal) modal.classList.remove('hidden');
+      document.body.classList.add('overflow-hidden');
+    }
+
+    function closeAddMemberModal() {
+      const modal = document.getElementById('modal-add-member');
+      if (modal) modal.classList.add('hidden');
+      document.body.classList.remove('overflow-hidden');
+    }
+
+    async function submitAddMember(e) {
+      e.preventDefault();
+      const errEl = document.getElementById('add-m-error');
+      const btn = document.getElementById('btn-submit-add-member');
+      if (errEl) {
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      }
+
+      const firstName = document.getElementById('add-m-first-name').value.trim();
+      const lastName = document.getElementById('add-m-last-name').value.trim();
+      const nickname = document.getElementById('add-m-nickname').value.trim();
+      const gradeClass = document.getElementById('add-m-grade-class').value.trim();
+      const studentNo = parseInt(document.getElementById('add-m-student-no').value, 10) || 0;
+      const phone = document.getElementById('add-m-phone').value.trim();
+      const dutyDay = document.getElementById('add-m-duty-day').value;
+      const dutyId = document.getElementById('add-m-duty-id').value.trim();
+      const role = document.getElementById('add-m-role').value;
+      const shiftRole = document.getElementById('add-m-shift-role').value;
+
+      if (!firstName || !lastName || !nickname || !gradeClass) {
+        if (errEl) {
+          errEl.textContent = 'กรุณากรอกชื่อจริง นามสกุล ชื่อเล่น และระดับชั้นให้ครบถ้วน';
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ กำลังบันทึก...</span>';
+      }
+
+      try {
+        const res = await fetch('/api/members', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            nickname: nickname,
+            grade_class: gradeClass,
+            student_no: studentNo,
+            phone_number: phone,
+            duty_day: dutyDay,
+            duty_id: dutyId,
+            role: role,
+            shift_role: shiftRole
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.success) {
+          throw new Error(data.error || 'เกิดข้อผิดพลาดในการบันทึกข้อมูล');
+        }
+
+        closeAddMemberModal();
+        alert(`✅ เพิ่มข้อมูล ${firstName} ${lastName} (${nickname}) สำเร็จ!\nสถานะ: PENDING_APPROVAL\nสารวัตรสามารถเข้าไปเลือกชื่อนี้เพื่อผูกบัญชีใน Discord ได้ทันที`);
+        await fetchData(true);
+      } catch (err) {
+        console.error('Add member error:', err);
+        if (errEl) {
+          errEl.textContent = '❌ ' + err.message;
+          errEl.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>💾 บันทึกข้อมูล</span>';
+        }
+      }
+    }
+
+    window.openAddMemberModal = openAddMemberModal;
+    window.closeAddMemberModal = closeAddMemberModal;
+    window.submitAddMember = submitAddMember;
+
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape') {
         const cardModal = document.getElementById('card-modal');
         if (cardModal && !cardModal.classList.contains('hidden')) {
           closeCardModal();
+        }
+        const addMemberModal = document.getElementById('modal-add-member');
+        if (addMemberModal && !addMemberModal.classList.contains('hidden')) {
+          closeAddMemberModal();
         }
       }
     });
