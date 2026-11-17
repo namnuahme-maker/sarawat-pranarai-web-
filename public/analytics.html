@@ -43,7 +43,7 @@
           <div class="flex items-center gap-2">
             <span class="text-xl">📅</span>
             <div>
-              <h1 class="text-sm sm:text-base font-bold text-white flex items-center gap-2">
+              <h1 class="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
                 <span>เลือกช่วงเวลาวิเคราะห์ข้อมูล</span>
                 <span id="active-range-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-cyan-500/15 text-cyan-300 border border-cyan-500/30 font-semibold">
                   ทั้งหมด (All-Time)
@@ -74,11 +74,11 @@
       <div class="pt-2 border-t border-tactical-border/70 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2 flex-wrap">
           <span class="text-slate-400 font-medium">หรือกำหนดช่วงวันเอง:</span>
-          <div class="flex items-center gap-1.5 bg-tactical-950 border border-tactical-border rounded-xl px-2.5 py-1">
+          <div class="flex items-center gap-1.5 border-b border-tactical-border/70 pb-1">
             <span class="text-slate-500">จาก</span>
-            <input type="date" id="input-start-date" class="bg-transparent text-slate-200 font-mono text-xs outline-none focus:text-cyan-300">
+            <input type="date" id="input-start-date" class="bg-transparent border-b border-tactical-border text-slate-200 font-mono text-xs outline-none focus:border-cyan-400 focus:text-cyan-300">
             <span class="text-slate-500">ถึง</span>
-            <input type="date" id="input-end-date" class="bg-transparent text-slate-200 font-mono text-xs outline-none focus:text-cyan-300">
+            <input type="date" id="input-end-date" class="bg-transparent border-b border-tactical-border text-slate-200 font-mono text-xs outline-none focus:border-cyan-400 focus:text-cyan-300">
           </div>
           <button onclick="applyCustomDateRange()" class="px-3 py-1.5 rounded-xl bg-cyan-600 hover:bg-cyan-500 text-black font-bold text-xs transition active:scale-95 shadow">
             🔍 กรองข้อมูล
@@ -86,8 +86,8 @@
         </div>
 
         <div class="text-[11px] font-mono text-slate-400 flex items-center gap-1.5">
-          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-          <span id="range-details-text">กำลังโหลดสถิติฐานข้อมูล...</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-400" aria-hidden="true"></span>
+          <span id="range-details-text" role="status" aria-live="polite">กำลังโหลดสถิติฐานข้อมูล...</span>
         </div>
       </div>
 
@@ -201,9 +201,9 @@
       <div class="lg:col-span-7 p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
         <div class="flex items-center justify-between border-b border-tactical-border pb-2">
           <div>
-            <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
+            <h2 class="font-bold text-base sm:text-lg text-slate-100 flex items-center gap-1.5">
               <span>📊</span> สถิติเข้าเวรแยกตามผลัด (จันทร์ - ศุกร์)
-            </h3>
+            </h2>
             <p class="text-[11px] text-slate-400">เปรียบเทียบสัดส่วน มาปกติ, มาสาย, ลา และขาดเวรในแต่ละวัน</p>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-tactical-850 text-cyan-300 border border-tactical-border">
@@ -219,9 +219,9 @@
       <div class="lg:col-span-5 p-4 rounded-2xl bg-tactical-900 border border-tactical-border space-y-3">
         <div class="flex items-center justify-between border-b border-tactical-border pb-2">
           <div>
-            <h3 class="font-bold text-xs sm:text-sm text-slate-100 flex items-center gap-1.5">
+            <h2 class="font-bold text-base sm:text-lg text-slate-100 flex items-center gap-1.5">
               <span>🍩</span> จำแนกประเภทการลาเวร
-            </h3>
+            </h2>
             <p class="text-[11px] text-slate-400">สัดส่วนเหตุผลการลา (ลาป่วย, ลากิจ, กิจกรรม, อื่นๆ)</p>
           </div>
           <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-tactical-850 text-amber-300 border border-tactical-border">
@@ -242,7 +242,7 @@
       
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 border-b border-tactical-border pb-2.5">
         <div>
-          <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+          <h2 class="font-bold text-base sm:text-lg text-white flex items-center gap-2">
             <span>🏆</span>
             <span>ทำเนียบสถิติการลา & ขาดเวรรายบุคคล (ใครลาบ่อยสุด)</span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
@@ -304,7 +304,7 @@
           <div class="flex items-center gap-2">
             <span class="text-lg">🚨</span>
             <div>
-              <h3 class="font-bold text-xs sm:text-sm text-slate-100">สารบบคดี & บันทึกเหตุการณ์</h3>
+              <h2 class="font-bold text-base text-slate-100">สารบบคดี & บันทึกเหตุการณ์</h2>
               <p class="text-[11px] text-slate-400">คดีที่เกิดขึ้นและดำเนินการในช่วงเวลาที่เลือก</p>
             </div>
           </div>
@@ -314,16 +314,16 @@
         </div>
 
         <!-- Case Counters -->
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="p-2.5 rounded-xl bg-tactical-950 border border-tactical-border">
+        <div class="grid grid-cols-3 divide-x divide-tactical-border/70 text-center">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-slate-400">คดีทั้งหมด</div>
             <div id="cases-total" class="text-lg font-bold font-mono text-white mt-0.5">0</div>
           </div>
-          <div class="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-amber-400">รอดำเนินการ</div>
             <div id="cases-pending" class="text-lg font-bold font-mono text-amber-300 mt-0.5">0</div>
           </div>
-          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-emerald-400">คลี่คลายแล้ว</div>
             <div id="cases-resolved" class="text-lg font-bold font-mono text-emerald-300 mt-0.5">0</div>
           </div>
@@ -344,7 +344,7 @@
           <div class="flex items-center gap-2">
             <span class="text-lg">📦</span>
             <div>
-              <h3 class="font-bold text-xs sm:text-sm text-slate-100">คลังของหาย & ส่งคืนเจ้าของ</h3>
+              <h2 class="font-bold text-base text-slate-100">คลังของหาย & ส่งคืนเจ้าของ</h2>
               <p class="text-[11px] text-slate-400">ทรัพย์สินที่พบและส่งมอบคืนในช่วงเวลาที่เลือก</p>
             </div>
           </div>
@@ -354,16 +354,16 @@
         </div>
 
         <!-- Lost Items Counters -->
-        <div class="grid grid-cols-3 gap-2 text-center">
-          <div class="p-2.5 rounded-xl bg-tactical-950 border border-tactical-border">
+        <div class="grid grid-cols-3 divide-x divide-tactical-border/70 text-center">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-slate-400">ของหายทั้งหมด</div>
             <div id="lost-total" class="text-lg font-bold font-mono text-white mt-0.5">0</div>
           </div>
-          <div class="p-2.5 rounded-xl bg-sky-500/10 border border-sky-500/30">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-sky-400">รอมารับคืน</div>
             <div id="lost-waiting" class="text-lg font-bold font-mono text-sky-300 mt-0.5">0</div>
           </div>
-          <div class="p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <div class="px-2 py-1">
             <div class="text-[10px] text-emerald-400">ส่งคืนสำเร็จ</div>
             <div id="lost-claimed" class="text-lg font-bold font-mono text-emerald-300 mt-0.5">0</div>
           </div>
@@ -387,7 +387,7 @@
       
       <div class="flex items-center justify-between border-b border-tactical-border pb-2.5">
         <div>
-          <h2 class="font-bold text-sm sm:text-base text-white flex items-center gap-2">
+          <h2 class="font-bold text-base sm:text-lg text-white flex items-center gap-2">
             <span>👑</span>
             <span>ทำเนียบโครงสร้างกำลังพล & บทบาทหน้าที่ 6 ผลัดเวร</span>
             <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 font-semibold">
@@ -790,7 +790,7 @@
       }
 
       list.innerHTML = cases.recent.map(c => `
-        <div class="p-2 rounded-xl bg-tactical-950 border border-tactical-border flex items-center justify-between gap-2">
+        <div class="py-2 border-b border-tactical-border/70 flex items-center justify-between gap-3 last:border-0">
           <div class="truncate">
             <div class="font-bold text-white text-xs truncate">${c.title || 'เหตุการณ์ทั่วไป'}</div>
             <div class="text-[10px] text-slate-400 font-mono">${c.incident_date || ''} • ${c.location || 'ในโรงเรียน'}</div>
@@ -816,7 +816,7 @@
       }
 
       list.innerHTML = lost.recent.map(item => `
-        <div class="p-2 rounded-xl bg-tactical-950 border border-tactical-border flex items-center justify-between gap-2">
+        <div class="py-2 border-b border-tactical-border/70 flex items-center justify-between gap-3 last:border-0">
           <div class="truncate">
             <div class="font-bold text-white text-xs truncate">${item.title || 'ของหายไม่ระบุชื่อ'}</div>
             <div class="text-[10px] text-slate-400 font-mono">รหัส: ${item.item_code || '-'} • พบที่: ${item.found_location || 'บริเวณโรงเรียน'}</div>
@@ -856,7 +856,7 @@
         ` : '';
 
         return `
-          <div class="p-3.5 rounded-2xl bg-tactical-950 border border-tactical-border flex flex-col justify-between space-y-3 shadow-md hover:border-amber-500/40 transition">
+          <div class="p-4 rounded-xl bg-tactical-950 border border-tactical-border flex flex-col justify-between space-y-3 hover:border-amber-500/40 transition">
             
             <!-- Shift Header -->
             <div class="border-b border-tactical-border/70 pb-2">
@@ -870,32 +870,32 @@
             </div>
 
             <!-- Leadership Role 1: หัวหน้าเวร (Head 👑) -->
-            <div class="p-2 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-1">
-              <div class="flex items-center justify-between text-[10px]">
-                <span class="font-bold text-amber-400 flex items-center gap-1">
+            <div class="space-y-1.5 border-b border-tactical-border/70 pb-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-amber-400 flex items-center gap-1.5">
                   <span>👑</span> หัวหน้าผลัดเวร
                 </span>
                 <span class="font-mono text-amber-300 font-bold">${head && head.duty_id && head.duty_id !== 'null' ? head.duty_id : '-'}</span>
               </div>
-              <div class="text-xs font-bold text-white truncate">
+              <div class="text-base font-bold text-white truncate">
                 ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
               </div>
-              <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${head ? head.class_room : '-'}</div>
+              <div class="text-xs text-slate-400">ห้อง: ${head ? head.class_room : '-'}</div>
               ${assignmentControl('HEAD', head)}
             </div>
 
             <!-- Leadership Role 2: รองหัวหน้าเวร (Deputy 🥈) -->
-            <div class="p-2 rounded-xl bg-sky-500/10 border border-sky-500/30 space-y-1">
-              <div class="flex items-center justify-between text-[10px]">
-                <span class="font-bold text-sky-400 flex items-center gap-1">
+            <div class="space-y-1.5 border-b border-tactical-border/70 pb-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-sky-400 flex items-center gap-1.5">
                   <span>🥈</span> รองหัวหน้าผลัดเวร
                 </span>
                 <span class="font-mono text-sky-300 font-bold">${deputy && deputy.duty_id && deputy.duty_id !== 'null' ? deputy.duty_id : '-'}</span>
               </div>
-              <div class="text-xs font-bold text-white truncate">
+              <div class="text-base font-bold text-white truncate">
                 ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
               </div>
-              <div class="text-[10px] text-slate-400 font-mono">ห้อง: ${deputy ? deputy.class_room : '-'}</div>
+              <div class="text-xs text-slate-400">ห้อง: ${deputy ? deputy.class_room : '-'}</div>
               ${assignmentControl('DEPUTY', deputy)}
             </div>
 
@@ -904,12 +904,12 @@
               <div class="text-[10px] font-semibold text-slate-400">สารวัตรประจำจุด:</div>
               <div class="space-y-1 max-h-36 overflow-y-auto pr-1">
                 ${officers.length > 0 ? officers.map(o => `
-                  <div class="text-[11px] flex items-center justify-between bg-tactical-900/60 p-1.5 rounded-lg border border-tactical-border/50">
+                  <div class="text-xs flex items-center justify-between gap-3 py-1.5 border-b border-tactical-border/50 last:border-0">
                     <div class="truncate">
-                      <span class="font-mono text-amber-300 text-[10px]">[${o.duty_id && o.duty_id !== 'null' ? o.duty_id : '-'}]</span>
+                      <span class="font-mono text-amber-300">[${o.duty_id && o.duty_id !== 'null' ? o.duty_id : '-'}]</span>
                       <span class="text-slate-200">${o.nickname || o.name}</span>
                     </div>
-                    <span class="text-[10px] font-mono text-slate-400">${o.class_room}</span>
+                    <span class="font-mono text-slate-400 shrink-0">${o.class_room}</span>
                   </div>
                 `).join('') : '<div class="text-[10px] text-slate-500 text-center py-1">ไม่มีกำลังพลเพิ่มเติม</div>'}
               </div>

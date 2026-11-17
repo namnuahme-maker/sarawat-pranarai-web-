@@ -1218,11 +1218,16 @@
       if (r === 'VICE_PRESIDENT' || rank.includes('รองประธาน')) {
         return { label: '⭐ รองประธาน', badgeClass: 'bg-cyan-500/15 text-cyan-300 border-cyan-500/40' };
       }
-      if (sr === 'SHIFT_HEAD' || rank.includes('หัวหน้าเวร')) {
-        return { label: '🛡️ หัวหน้าเวร', badgeClass: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' };
-      }
-      if (sr === 'SHIFT_DEPUTY' || rank.includes('รองหัวหน้า')) {
-        return { label: '🎖️ รองหัวหน้าเวร', badgeClass: 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40' };
+      const shiftLeadership = Object.entries(m.leadership_by_shift || {}).flatMap(([shiftCode, positions]) => [
+        ...(positions.HEAD ? [`หัวหน้าเวร ${shiftCode}`] : []),
+        ...(positions.DEPUTY ? [`รองหัวหน้าเวร ${shiftCode}`] : [])
+      ]);
+      if (shiftLeadership.length) {
+        const isHead = shiftLeadership.some(title => title.startsWith('หัวหน้า'));
+        return {
+          label: `${isHead ? '🛡️' : '🎖️'} ${shiftLeadership.join(' • ')}`,
+          badgeClass: isHead ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' : 'bg-indigo-500/15 text-indigo-300 border-indigo-500/40'
+        };
       }
       return { label: '🛡️ สารวัตรนักเรียน', badgeClass: 'bg-slate-800 text-slate-300 border-slate-700' };
     }
@@ -1368,20 +1373,12 @@
 
       const isHeadRole = (m, shiftCode) => {
         if (!m) return false;
-        if (m.leadership_by_shift?.[shiftCode]?.HEAD) return true;
-        const sr = (m.shift_role || '').toUpperCase();
-        const r = (m.role || '').toUpperCase();
-        const rt = m.role_title || '';
-        return sr === 'SHIFT_HEAD' || r === 'SHIFT_HEAD' || r === 'HEAD' || rt.includes('หัวหน้าเวร') || !!m.is_head;
+        return Boolean(m.leadership_by_shift?.[shiftCode]?.HEAD);
       };
 
       const isDeputyRole = (m, shiftCode) => {
         if (!m) return false;
-        if (m.leadership_by_shift?.[shiftCode]?.DEPUTY) return true;
-        const sr = (m.shift_role || '').toUpperCase();
-        const r = (m.role || '').toUpperCase();
-        const rt = m.role_title || '';
-        return sr === 'SHIFT_DEPUTY' || r === 'SHIFT_DEPUTY' || r === 'DEPUTY' || rt.includes('รองหัวหน้า') || !!m.is_deputy;
+        return Boolean(m.leadership_by_shift?.[shiftCode]?.DEPUTY);
       };
 
       // Update KPI Shift Info
@@ -2268,10 +2265,11 @@
         else if (m.role === 'PRESIDENT') roleText = '👑 ประธานสารวัตร';
         else if (m.role === 'VICE_PRESIDENT') roleText = '⭐ รองประธานสารวัตร';
         else {
-          const shiftCode = m.duty_day === 'S' ? 'S' : (m.duty_day === 'TSS' || m.duty_day === 'TsS' ? 'Ts' : (m.duty_day || '').replace(/S+$/, ''));
-          const leadership = m.leadership_by_shift?.[shiftCode] || {};
-          if (leadership.HEAD) roleText = `🛡️ หัวหน้าเวร (${shiftCode})`;
-          else if (leadership.DEPUTY) roleText = `🎖️ รองหัวหน้าเวร (${shiftCode})`;
+          const titles = Object.entries(m.leadership_by_shift || {}).flatMap(([shiftCode, positions]) => [
+            ...(positions.HEAD ? [`หัวหน้าเวร (${shiftCode})`] : []),
+            ...(positions.DEPUTY ? [`รองหัวหน้าเวร (${shiftCode})`] : [])
+          ]);
+          if (titles.length) roleText = titles.join(' • ');
         }
         dRole.textContent = roleText;
       }

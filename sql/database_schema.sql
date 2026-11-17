@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS members (
     phone_number VARCHAR(20) NOT NULL,
     profile_image_url TEXT,                 -- URL รูปถ่ายหน้าตรงสำหรับทำบัตรสารวัตร
     role VARCHAR(30) DEFAULT 'MEMBER',      -- 'PRESIDENT', 'VICE_PRESIDENT', 'MEMBER'
-    shift_role VARCHAR(30) DEFAULT 'MEMBER',-- 'SHIFT_HEAD', 'SHIFT_DEPUTY', 'MEMBER'
+    shift_role VARCHAR(30) DEFAULT 'MEMBER',-- Legacy compatibility; shift leaders are stored in shift_leadership
     duty_day VARCHAR(5),                    -- 'M', 'T', 'W', 'Ts', 'F', 'S' (S = เวรพิเศษทุกวัน)
     duty_id VARCHAR(10) UNIQUE,             -- 'M1', 'M2', 'Ts1', 'S1', 'S5', 'S12' etc.
     discord_id VARCHAR(32) UNIQUE,
@@ -29,6 +29,20 @@ CREATE TABLE IF NOT EXISTS members (
 CREATE INDEX IF NOT EXISTS idx_members_duty_day ON members(duty_day, status);
 CREATE INDEX IF NOT EXISTS idx_members_discord ON members(discord_id);
 CREATE INDEX IF NOT EXISTS idx_members_status ON members(status);
+
+-- ผู้นำเวรแยกตามผลัด (สมาชิกหนึ่งคนเป็นผู้นำได้หลายผลัด แต่หนึ่งตำแหน่งมีผู้ดำรงตำแหน่งได้หนึ่งคน)
+CREATE TABLE IF NOT EXISTS shift_leadership (
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    shift_code VARCHAR(5) NOT NULL CHECK (shift_code IN ('M', 'T', 'W', 'Ts', 'F', 'S')),
+    position VARCHAR(12) NOT NULL CHECK (position IN ('HEAD', 'DEPUTY')),
+    member_id UUID NOT NULL REFERENCES members(id) ON DELETE CASCADE,
+    assigned_by VARCHAR(32),
+    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    CONSTRAINT shift_leadership_one_position_per_shift UNIQUE (shift_code, position),
+    CONSTRAINT shift_leadership_member_once_per_shift UNIQUE (member_id, shift_code)
+);
+CREATE INDEX IF NOT EXISTS idx_shift_leadership_member ON shift_leadership(member_id);
 
 -- 2. ตารางการขอลาเวร (Leave Requests)
 CREATE TABLE IF NOT EXISTS leave_requests (

@@ -1157,8 +1157,8 @@ app.get('/api/members', async (req, res) => {
     if (duty_day && duty_day !== 'ALL') {
       // ดึงทั้งเวรปกติ และเวรพิเศษที่สังกัดวันนี้
       const targetDays = duty_day === 'S'
-        ? ['S', 'MS', 'TS', 'WS', 'TSS', 'FS']
-        : [duty_day, duty_day === 'Ts' ? 'TSS' : `${duty_day}S`];
+        ? ['S', 'MS', 'TS', 'WS', 'TSS', 'TsS', 'FS']
+        : [duty_day, duty_day === 'Ts' ? 'TSS' : `${duty_day}S`, ...(duty_day === 'Ts' ? ['TsS'] : [])];
       query = query.in('duty_day', targetDays);
     }
 
@@ -2557,7 +2557,13 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
     }
 
     const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'สารวัตรนักเรียน';
-    const roleTitle = member.shift_role === 'SHIFT_HEAD' ? 'หัวหน้าเวร' : (member.shift_role === 'SHIFT_DEPUTY' ? 'รองหัวหน้าเวร' : 'สารวัตรนักเรียน');
+    let shiftLeadership = null;
+    const { data: assignments } = await supabase.from('shift_leadership').select('shift_code, position').eq('member_id', member.id);
+    const memberShift = member.duty_day === 'S' ? 'S' : (['Ts', 'TSS', 'TsS'].includes(member.duty_day) ? 'Ts' : (member.duty_day || '').replace(/S+$/, ''));
+    shiftLeadership = (assignments || []).find(a => a.shift_code === memberShift) || null;
+    const roleTitle = shiftLeadership?.position === 'HEAD' ? `หัวหน้าเวร (${memberShift})`
+      : shiftLeadership?.position === 'DEPUTY' ? `รองหัวหน้าเวร (${memberShift})`
+      : 'สารวัตรนักเรียน';
 
     res.json({
       success: true,
@@ -2570,6 +2576,7 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
         displayName: member.nickname ? `${fullName} (${member.nickname})` : fullName,
         shift: member.duty_day || '',
         shift_role: roleTitle,
+        leadership_by_shift: Object.fromEntries((assignments || []).map(a => [a.shift_code, a.position])),
         photo_url: member.profile_image_url || '/assets/logo.png',
         grade_class: member.grade_class || '',
         student_no: member.student_no || ''
@@ -3574,12 +3581,8 @@ app.get('/api/analytics/overview', async (req, res) => {
         : getBaseWeekday(m.duty_day) === shiftKey);
       const headId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'HEAD')?.member_id;
       const deputyId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'DEPUTY')?.member_id;
-      const head = (headId ? shiftMembers.find(m => m.id === headId) : null)
-        || shiftMembers.find(m => (m.shift_role || '').toUpperCase() === 'SHIFT_HEAD' || (m.role || '').toUpperCase() === 'SHIFT_HEAD' || !!m.is_head)
-        || null;
-      const deputy = (deputyId ? shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) : null)
-        || shiftMembers.find(m => m.id !== head?.id && ((m.shift_role || '').toUpperCase() === 'SHIFT_DEPUTY' || (m.role || '').toUpperCase() === 'SHIFT_DEPUTY' || !!m.is_deputy))
-        || null;
+      const head = headId ? shiftMembers.find(m => m.id === headId) || null : null;
+      const deputy = deputyId ? shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) || null : null;
       const officers = shiftMembers.filter(m => 
         (!head || m.id !== head.id) && (!deputy || m.id !== deputy.id)
       );
