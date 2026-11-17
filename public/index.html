@@ -1328,9 +1328,11 @@
 
       if (!shiftCode || shiftCode === 'ALL') return true;
 
-      // Special Shift (S): ends with S, has S, or did has S
+      // Special duty follows the saved shift day. Only inspect the ID for legacy
+      // members without a saved shift day, where TS1 means Tuesday special.
       if (shiftCode === 'S') {
-        return (dd && (dd === 'S' || dd.endsWith('S') || dd.includes('S'))) || (did && did.toUpperCase().includes('S'));
+        if (dd) return dd === 'S' || /S$/.test(dd);
+        return /^(?:MS|TS|WS|TSS|FS|S)\d*$/.test(did);
       }
 
       // Thursday (Ts): Ts, TSS, TsS
@@ -2474,10 +2476,10 @@
         document.getElementById('edit-member-duty-id').value = m.duty_id || '';
 
         // ตรวจสอบสถานะเวรพิเศษเริ่มต้น
-        const isSpecial = Boolean(
-          (m.duty_day && (m.duty_day.endsWith('S') || m.duty_day.includes('S'))) ||
-          (m.duty_id && (m.duty_id.includes('S') || m.duty_id.includes('s')))
-        );
+        const savedDutyDay = (m.duty_day || '').trim();
+        const isSpecial = savedDutyDay
+          ? savedDutyDay === 'S' || /S$/.test(savedDutyDay)
+          : /^(?:MS|TS|WS|TSS|FS|S)\d*$/.test((m.duty_id || '').trim());
         const specialCheckbox = document.getElementById('edit-member-is-special');
         if (specialCheckbox) specialCheckbox.checked = isSpecial;
 
@@ -2539,12 +2541,12 @@
           }
         }
       } else {
-        // MS1 -> M1, FS2 -> F2, TSS1 -> Ts1
-        if (curId.startsWith('TSS') || curId.startsWith('Tss') || curId.startsWith('tss')) {
-          newId = curId.replace(/^TSS/i, 'Ts');
-        } else {
-          newId = curId.replace(/S/gi, '');
-        }
+        // Rebuild the prefix from the selected shift so TS1 cannot become T1
+        // when the actual shift is Thursday (Ts).
+        const match = curId.match(/(\d*)$/);
+        const number = match?.[1] || '1';
+        const normalPrefix = curDay === 'Ts' ? 'Ts' : curDay;
+        newId = `${normalPrefix}${number}`;
       }
 
       dutyIdInput.value = newId;

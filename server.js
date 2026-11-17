@@ -1565,10 +1565,10 @@ app.patch('/api/members/:id', async (req, res) => {
     // 🤖 ซิงค์การเปลี่ยนรหัสเวรและบทบาทเวรพิเศษเข้าสู่ Discord ทันที
     if (data && data.discord_id && DISCORD_BOT_TOKEN && DISCORD_GUILD_ID) {
       try {
-        const isSpecialDuty = Boolean(
-          (data.duty_day && (data.duty_day.endsWith('S') || data.duty_day.includes('S'))) ||
-          (data.duty_id && data.duty_id.includes('S'))
-        );
+        // The persisted shift day is authoritative: TS1 can be a stale ID on
+        // a regular Thursday (Ts), so duty_id must not keep the special role.
+        const dutyDay = String(data.duty_day || '').trim();
+        const isSpecialDuty = dutyDay === 'S' || /S$/.test(dutyDay);
         const roleSpecial = process.env.ROLE_SPECIAL || '1567570841548627971';
 
         // 1. อัปเดต Discord Nickname ตามรหัสเวรใหม่
