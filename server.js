@@ -36,6 +36,12 @@ function canonicalDutyDay(value) {
   return code;
 }
 
+function baseDutyDay(value) {
+  const code = canonicalDutyDay(value);
+  if (code === 'S') return 'S';
+  return code.endsWith('S') ? code.replace(/S+$/, '') : code;
+}
+
 function expandDutyDayAliases(values) {
   return [...new Set(values.flatMap(value => {
     const code = canonicalDutyDay(value);
@@ -452,8 +458,8 @@ app.get('/api/auth/me', async (req, res) => {
       const isVP = m.role === 'VICE_PRESIDENT' || user.role === 'VICE_PRESIDENT';
       const { data: leadershipAssignments = [] } = await supabase
         .from('shift_leadership').select('shift_code, position').eq('member_id', m.id);
-      const memberShift = m.duty_day === 'S' ? 'S' : (['Th', 'ThS', 'ThS'].includes(m.duty_day) ? 'Th' : (m.duty_day || '').replace(/S+$/, ''));
-      const memberShiftLeadership = leadershipAssignments.find(a => a.shift_code === memberShift);
+      const memberShift = baseDutyDay(m.duty_day);
+      const memberShiftLeadership = leadershipAssignments.find(a => canonicalDutyDay(a.shift_code) === memberShift);
 
       user.isAdmin = isSysAdmin;
       user.isTeacher = isTeacher;
@@ -1010,7 +1016,7 @@ app.post('/api/crop/submit', async (req, res) => {
 
       const isActive = (member.status === 'ACTIVE');
       const isSpecial = member.duty_day && member.duty_day.endsWith('S');
-      const weekday = member.duty_day ? (member.duty_day === 'ThS' ? 'Th' : member.duty_day.replace(/S+$/, '') || member.duty_day) : 'M';
+      const weekday = member.duty_day ? baseDutyDay(member.duty_day) : 'M';
       const DAY_NAMES = { M: 'จันทร์', T: 'อังคาร', W: 'พุธ', Th: 'พฤหัสบดี', F: 'ศุกร์', S: 'พิเศษ (ทุกวัน)' };
       const weekdayName = DAY_NAMES[weekday] || weekday;
 
@@ -1208,8 +1214,9 @@ app.get('/api/members', async (req, res) => {
         if (!leadershipError && assignments) {
           for (const assignment of assignments) {
             leadershipByMember[assignment.member_id] ||= {};
-            leadershipByMember[assignment.member_id][assignment.shift_code] ||= {};
-            leadershipByMember[assignment.member_id][assignment.shift_code][assignment.position] = true;
+            const shiftCode = canonicalDutyDay(assignment.shift_code);
+            leadershipByMember[assignment.member_id][shiftCode] ||= {};
+            leadershipByMember[assignment.member_id][shiftCode][assignment.position] = true;
           }
         }
       } catch (leadershipErr) {
@@ -1232,7 +1239,12 @@ app.get('/api/members', async (req, res) => {
     res.json({
       success: true,
       count: filtered.length,
-      data: filtered.map(m => ({ ...m, leadership_by_shift: leadershipByMember[m.id] || {} }))
+      data: filtered.map(m => ({
+        ...m,
+        duty_day: canonicalDutyDay(m.duty_day),
+        duty_id: canonicalDutyId(m.duty_id),
+        leadership_by_shift: leadershipByMember[m.id] || {}
+      }))
     });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -1290,7 +1302,15 @@ app.get('/api/shift-leadership', async (req, res) => {
     if (error) {
       return res.json({ success: true, data: [], canManage: canManageShiftLeadership(req.user) });
     }
-    res.json({ success: true, data: data || [], canManage: canManageShiftLeadership(req.user) });
+    res.json({ success: true, data: (data || []).map(row => ({
+      ...row,
+      shift_code: canonicalDutyDay(row.shift_code),
+      members: row.members ? {
+        ...row.members,
+        duty_day: canonicalDutyDay(row.members.duty_day),
+        duty_id: canonicalDutyId(row.members.duty_id)
+      } : row.members
+    })), canManage: canManageShiftLeadership(req.user) });
   } catch (err) {
     res.json({ success: true, data: [], canManage: canManageShiftLeadership(req.user) });
   }
@@ -1301,7 +1321,8 @@ app.post('/api/shift-leadership', async (req, res) => {
     if (!canManageShiftLeadership(req.user)) {
       return res.status(403).json({ success: false, message: 'สงวนสิทธิ์สำหรับผู้ดูแลระบบ ครู ประธาน และรองประธาน' });
     }
-    const { shift_code: shiftCode, position, member_id: memberId } = req.body || {};
+    const { shift_code: rawShiftCode, position, member_id: memberId } = req.body || {};
+    const shiftCode = canonicalDutyDay(rawShiftCode);
     if (!LEADERSHIP_SHIFT_CODES.includes(shiftCode) || !LEADERSHIP_POSITIONS.includes(position) || !memberId) {
       return res.status(400).json({ success: false, message: 'กรุณาเลือกผลัด ตำแหน่ง และสารวัตรให้ครบ' });
     }
@@ -1317,14 +1338,14 @@ app.post('/api/shift-leadership', async (req, res) => {
     }
 
     const { data: otherAssignment, error: duplicateError } = await supabase
-      .from('shift_leadership').select('position').eq('member_id', memberId).eq('shift_code', shiftCode).maybeSingle();
+      .from('shift_leadership').select('position').eq('member_id', memberId).in('shift_code', expandDutyDayAliases([shiftCode])).maybeSingle();
     if (duplicateError) throw duplicateError;
     if (otherAssignment && otherAssignment.position !== position) {
       return res.status(409).json({ success: false, message: 'สารวัตรคนเดียวกันเป็นทั้งหัวหน้าและรองในผลัดเดียวกันไม่ได้' });
     }
 
     const { data: previousAssignment, error: previousError } = await supabase
-      .from('shift_leadership').select('member_id').eq('shift_code', shiftCode).eq('position', position).maybeSingle();
+      .from('shift_leadership').select('member_id').in('shift_code', expandDutyDayAliases([shiftCode])).eq('position', position).maybeSingle();
     if (previousError) throw previousError;
 
     const { data, error } = await supabase.from('shift_leadership').upsert({
@@ -1354,13 +1375,14 @@ app.delete('/api/shift-leadership/:shiftCode/:position', async (req, res) => {
     if (!canManageShiftLeadership(req.user)) {
       return res.status(403).json({ success: false, message: 'สงวนสิทธิ์สำหรับผู้ดูแลระบบ ครู ประธาน และรองประธาน' });
     }
-    const { shiftCode, position } = req.params;
+    const { position } = req.params;
+    const shiftCode = canonicalDutyDay(req.params.shiftCode);
     if (!LEADERSHIP_SHIFT_CODES.includes(shiftCode) || !LEADERSHIP_POSITIONS.includes(position)) {
       return res.status(400).json({ success: false, message: 'ผลัดหรือตำแหน่งไม่ถูกต้อง' });
     }
     const { data: previousAssignment } = await supabase
-      .from('shift_leadership').select('member_id').eq('shift_code', shiftCode).eq('position', position).maybeSingle();
-    const { error } = await supabase.from('shift_leadership').delete().eq('shift_code', shiftCode).eq('position', position);
+      .from('shift_leadership').select('member_id').in('shift_code', expandDutyDayAliases([shiftCode])).eq('position', position).maybeSingle();
+    const { error } = await supabase.from('shift_leadership').delete().in('shift_code', expandDutyDayAliases([shiftCode])).eq('position', position);
     if (error) throw error;
     if (previousAssignment?.member_id) {
       try { await syncLeadershipDiscordRole(previousAssignment.member_id, shiftCode, position, 'DELETE'); }
@@ -1494,7 +1516,7 @@ async function getNextAvailableDutyId(dutyDay, excludedMemberId) {
   const { data: rows, error } = await query;
   if (error) throw error;
 
-  const usedIds = new Set((rows || []).map(row => String(row.duty_id || '')));
+  const usedIds = new Set((rows || []).map(row => canonicalDutyId(row.duty_id)));
   for (let sequence = 1; sequence <= usedIds.size + 1; sequence++) {
     const candidate = `${prefix}${sequence}`;
     if (!usedIds.has(candidate)) return candidate;
@@ -1548,9 +1570,9 @@ app.patch('/api/members/:id', async (req, res) => {
     if (grade_class !== undefined) updateData.grade_class = grade_class;
     if (student_no !== undefined) updateData.student_no = student_no;
     if (phone_number !== undefined) updateData.phone_number = phone_number;
-    if (duty_day !== undefined) updateData.duty_day = duty_day;
+    if (duty_day !== undefined) updateData.duty_day = duty_day ? canonicalDutyDay(duty_day) : null;
     if (duty_id !== undefined) {
-      const cleanDutyId = String(duty_id || '').trim();
+      const cleanDutyId = canonicalDutyId(duty_id);
       updateData.duty_id = cleanDutyId || null;
       if (cleanDutyId) {
         const { data: duplicateDutyId, error: duplicateLookupError } = await supabase
@@ -2381,7 +2403,7 @@ app.post('/api/lost-found/items', async (req, res) => {
       status: req.body.status || 'WAITING_OWNER',
       storage_location: storage_location || 'ห้องสารวัตรนักเรียน อาคาร 1',
       finder_name: finder_name || 'สารวัตรเวร',
-      finder_duty_id: req.body.finder_duty_id || null,
+      finder_duty_id: req.body.finder_duty_id ? canonicalDutyId(req.body.finder_duty_id) : null,
       finder_avatar_url: req.body.finder_avatar_url || null,
       finder_contact: finder_contact || '-',
       created_at: req.body.created_at || new Date().toISOString(),
@@ -2665,8 +2687,8 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
     const fullName = `${member.first_name || ''} ${member.last_name || ''}`.trim() || 'สารวัตรนักเรียน';
     let shiftLeadership = null;
     const { data: assignments } = await supabase.from('shift_leadership').select('shift_code, position').eq('member_id', member.id);
-    const memberShift = member.duty_day === 'S' ? 'S' : (['Th', 'ThS', 'ThS'].includes(member.duty_day) ? 'Th' : (member.duty_day || '').replace(/S+$/, ''));
-    shiftLeadership = (assignments || []).find(a => a.shift_code === memberShift) || null;
+    const memberShift = baseDutyDay(member.duty_day);
+    shiftLeadership = (assignments || []).find(a => canonicalDutyDay(a.shift_code) === memberShift) || null;
     const roleTitle = shiftLeadership?.position === 'HEAD' ? `หัวหน้าเวร (${memberShift})`
       : shiftLeadership?.position === 'DEPUTY' ? `รองหัวหน้าเวร (${memberShift})`
       : 'สารวัตรนักเรียน';
@@ -2676,13 +2698,13 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
       found: true,
       member: {
         id: member.id,
-        duty_id: member.duty_id || rawDutyId.toUpperCase(),
+        duty_id: canonicalDutyId(member.duty_id || rawDutyId),
         full_name: fullName,
         nickname: member.nickname || '',
         displayName: member.nickname ? `${fullName} (${member.nickname})` : fullName,
-        shift: member.duty_day || '',
+        shift: canonicalDutyDay(member.duty_day),
         shift_role: roleTitle,
-        leadership_by_shift: Object.fromEntries((assignments || []).map(a => [a.shift_code, a.position])),
+        leadership_by_shift: Object.fromEntries((assignments || []).map(a => [canonicalDutyDay(a.shift_code), a.position])),
         photo_url: member.profile_image_url || '/assets/logo.png',
         grade_class: member.grade_class || '',
         student_no: member.student_no || ''
@@ -2801,7 +2823,7 @@ app.post(['/api/lost-found/items/:id/handover', '/api/lost-items/:id/deliver'], 
           claimant_name,
           claimant_contact,
           delivered_by,
-          delivered_by_duty_id,
+          delivered_by_duty_id: delivered_by_duty_id ? canonicalDutyId(delivered_by_duty_id) : null,
           handover_photo_base64: rawPhotoBase64
         });
         if (discordCdnUrl) {
@@ -2817,7 +2839,7 @@ app.post(['/api/lost-found/items/:id/handover', '/api/lost-items/:id/deliver'], 
       claimant_name: claimant_name || 'ผู้รับมอบสิทธิ์',
       claimant_contact: claimant_contact || '-',
       delivered_by: delivered_by || 'สารวัตรนักเรียนเวร',
-      delivered_by_duty_id: delivered_by_duty_id || '-',
+      delivered_by_duty_id: canonicalDutyId(delivered_by_duty_id) || '-',
       delivered_by_photo_url: delivered_by_photo_url || null,
       handover_photo_url: finalHandoverPhoto,
       delivered_at: new Date().toISOString(),
@@ -3325,12 +3347,13 @@ app.post('/api/attendance/confirm', async (req, res) => {
     if (!shift_code || !Array.isArray(records)) {
       return res.status(400).json({ success: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาระบุกะเวรและรายชื่อสารวัตร' });
     }
+    const normalizedShiftCode = canonicalDutyDay(shift_code);
 
     let rawImageUrl = null;
     if (image_base64) {
       const uploadDir = path.join(__dirname, 'public', 'uploads');
       if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      const filename = `attendance_${shift_code}_${Date.now()}.jpg`;
+      const filename = `attendance_${normalizedShiftCode}_${Date.now()}.jpg`;
       const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
       fs.writeFileSync(path.join(uploadDir, filename), buf);
       rawImageUrl = `/uploads/${filename}`;
@@ -3361,7 +3384,7 @@ app.post('/api/attendance/confirm', async (req, res) => {
 
     const sessionData = {
       id: `att-sess-${Date.now()}`,
-      shift_code,
+      shift_code: normalizedShiftCode,
       quarter_number: quarter || 1,
       week_index: week_index || 1,
       duty_date: duty_date || new Date().toISOString().slice(0, 10),
@@ -3397,7 +3420,7 @@ app.post('/api/attendance/confirm', async (req, res) => {
       const upsertRows = records.map(r => ({
         duty_id: r.duty_id,
         member_name: r.name,
-        shift_code,
+        shift_code: normalizedShiftCode,
         duty_date: sessionData.duty_date,
         status: r.status,
         confidence: 0.98,
@@ -3416,7 +3439,7 @@ app.post('/api/attendance/confirm', async (req, res) => {
         session_id: sessionData.id,
         duty_id: r.duty_id,
         member_name: r.name,
-        shift_code,
+        shift_code: normalizedShiftCode,
         duty_date: sessionData.duty_date,
         status: r.status,
         created_at: new Date().toISOString()
@@ -3445,7 +3468,7 @@ app.get('/api/attendance/records', async (req, res) => {
     let records = [];
     try {
       let q = supabase.from('attendance_records').select('*').order('duty_date', { ascending: false }).limit(100);
-      if (shift) q = q.eq('shift_code', shift);
+      if (shift) q = q.in('shift_code', expandDutyDayAliases([shift]));
       if (date) q = q.eq('duty_date', date);
       const { data, error } = await q;
       if (!error && data) records = data;
@@ -3454,11 +3477,15 @@ app.get('/api/attendance/records', async (req, res) => {
     if (records.length === 0) {
       const db = getAttendanceData();
       records = db.records || [];
-      if (shift) records = records.filter(r => r.shift_code === shift);
+      if (shift) records = records.filter(r => canonicalDutyDay(r.shift_code) === canonicalDutyDay(shift));
       if (date) records = records.filter(r => r.duty_date === date);
     }
 
-    res.json({ success: true, count: records.length, data: records });
+    res.json({ success: true, count: records.length, data: records.map(r => ({
+      ...r,
+      shift_code: canonicalDutyDay(r.shift_code),
+      duty_id: canonicalDutyId(r.duty_id)
+    })) });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
@@ -3625,7 +3652,7 @@ app.get('/api/analytics/overview', async (req, res) => {
       F: { present: 0, late: 0, leave: 0, absent: 0 }
     };
     attendance.forEach(r => {
-      const sh = r.shift_code || (memberMap[r.duty_id] ? memberMap[r.duty_id].duty_day : 'M');
+      const sh = canonicalDutyDay(r.shift_code || (memberMap[r.duty_id] ? memberMap[r.duty_id].duty_day : 'M'));
       if (shiftStats[sh]) {
         if (r.status === 'PRESENT') shiftStats[sh].present++;
         else if (r.status === 'LATE') shiftStats[sh].late++;
@@ -3677,7 +3704,7 @@ app.get('/api/analytics/overview', async (req, res) => {
 
     const getBaseWeekday = (dutyDay) => {
       if (!dutyDay) return '';
-      if (dutyDay === 'ThS' || dutyDay === 'Th') return 'Th';
+      if (['ThS', 'Th'].includes(canonicalDutyDay(dutyDay))) return 'Th';
       return dutyDay.replace(/S+$/, '');
     };
 
@@ -3685,8 +3712,8 @@ app.get('/api/analytics/overview', async (req, res) => {
       const shiftMembers = members.filter(m => shiftKey === 'S'
         ? m.duty_day === 'S' || /S$/.test(m.duty_day || '')
         : getBaseWeekday(m.duty_day) === shiftKey);
-      const headId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'HEAD')?.member_id;
-      const deputyId = leadershipAssignments.find(a => a.shift_code === shiftKey && a.position === 'DEPUTY')?.member_id;
+      const headId = leadershipAssignments.find(a => canonicalDutyDay(a.shift_code) === shiftKey && a.position === 'HEAD')?.member_id;
+      const deputyId = leadershipAssignments.find(a => canonicalDutyDay(a.shift_code) === shiftKey && a.position === 'DEPUTY')?.member_id;
       const head = headId ? shiftMembers.find(m => m.id === headId) || null : null;
       const deputy = deputyId ? shiftMembers.find(m => m.id === deputyId && m.id !== head?.id) || null : null;
       const officers = shiftMembers.filter(m => 

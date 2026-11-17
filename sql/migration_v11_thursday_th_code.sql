@@ -31,12 +31,27 @@ BEGIN
     RAISE EXCEPTION 'Thursday leadership assignments collide; keep one head and one deputy for Th before retrying';
   END IF;
 
+  IF to_regclass('public.shift_leadership') IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.shift_leadership
+     WHERE shift_code IN ('Ts', 'Th')
+     GROUP BY member_id
+    HAVING COUNT(*) > 1
+  ) THEN
+    RAISE EXCEPTION 'A member has both old and new Thursday leadership rows; resolve duplicates before retrying';
+  END IF;
+
   IF to_regclass('public.attendance_scan_sessions') IS NOT NULL THEN
     EXECUTE $q$
       SELECT EXISTS (
-        SELECT 1 FROM public.attendance_scan_sessions
-         WHERE shift_code IN ('Ts', 'Th')
-         GROUP BY duty_date HAVING COUNT(*) > 1
+        SELECT 1 FROM (
+          SELECT CASE WHEN shift_code = 'Ts' THEN 'Th'
+                      WHEN shift_code IN ('TSS', 'TsS') THEN 'ThS'
+                      ELSE shift_code END AS canonical_shift,
+                 duty_date
+            FROM public.attendance_scan_sessions
+           WHERE shift_code IN ('Ts', 'Th', 'TSS', 'TsS', 'ThS')
+        ) sessions
+         GROUP BY canonical_shift, duty_date HAVING COUNT(*) > 1
       )
     $q$ INTO has_conflict;
     IF has_conflict THEN

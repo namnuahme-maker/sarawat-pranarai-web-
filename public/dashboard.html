@@ -2253,7 +2253,8 @@
         const dayMembers = members.filter(m => {
           if (!m.duty_day) return false;
           if (m.duty_day === dayCode) return true;
-          if (dayCode === 'Th' && m.duty_day === 'ThS') return true;
+          if (dayCode === 'Th' && ['ThS', 'TSS', 'TsS'].includes(m.duty_day)) return true;
+          if (dayCode === 'Th' && m.duty_day === 'Ts') return true;
           if (m.duty_day === `${dayCode}S`) return true;
           return false;
         });
@@ -2528,7 +2529,9 @@
         const filtered = allMembers.filter(m => m.duty_day && m.duty_day.endsWith('S'));
         renderRoster(filtered);
       } else {
-        const targetDays = [shiftCode, shiftCode === 'Th' ? 'ThS' : `${shiftCode}S`];
+        const targetDays = shiftCode === 'Th'
+          ? ['Th', 'ThS', 'Ts', 'TSS', 'TsS']
+          : [shiftCode, `${shiftCode}S`];
         const filtered = allMembers.filter(m => targetDays.includes(m.duty_day));
         renderRoster(filtered);
       }

@@ -1337,8 +1337,8 @@
 
       // Thursday (Th): Th, ThS, ThS
       if (shiftCode === 'Th') {
-        if (dd === 'Th' || dd === 'ThS' || dd === 'ThS') return true;
-        if (!dd && did) return did.startsWith('Th') || did.startsWith('ts') || did.startsWith('ThS');
+        if (['Th', 'ThS', 'Ts', 'TSS', 'TsS'].includes(dd)) return true;
+        if (!dd && did) return did.startsWith('Th') || did.startsWith('Ts') || did.startsWith('TSS') || did.startsWith('TsS');
         return false;
       }
 
@@ -2492,7 +2492,7 @@
 
         // กำหนดวันพื้นฐานใน dropdown
         let baseDay = m.duty_day || 'M';
-        if (baseDay === 'ThS') baseDay = 'Th';
+        if (baseDay === 'ThS' || baseDay === 'TSS' || baseDay === 'TsS') baseDay = 'Th';
         else if (baseDay.endsWith('S') && baseDay !== 'S') baseDay = baseDay.replace(/S+$/, '') || 'M';
         document.getElementById('edit-member-duty-day').value = baseDay;
 
