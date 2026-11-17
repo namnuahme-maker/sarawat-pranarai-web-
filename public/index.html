@@ -2622,7 +2622,8 @@
         openCardModal(activeCardMember.id);
         toggleMemberEditMode(false);
         renderRoster(allMembers);
-        renderTimeline(allMembers);
+        renderShiftsGrid();
+        renderTodayOfficers();
 
         const saveConfirmation = result.duty_id_changed
           ? `รหัส ${result.previous_duty_id || payload.duty_id} ซ้ำ ระบบเปลี่ยนเป็น ${updatedData.duty_id} ให้แล้ว`
