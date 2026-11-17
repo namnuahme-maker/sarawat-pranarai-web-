@@ -893,8 +893,8 @@
 
         <div class="grid grid-cols-3 gap-3">
           <div>
-            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อเล่น <span class="text-rose-400">*</span></label>
-            <input type="text" id="add-m-nickname" required placeholder="เช่น นน, ปัน" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อเล่น <span class="text-slate-500 font-normal">(เว้นว่างได้)</span></label>
+            <input type="text" id="add-m-nickname" placeholder="เช่น นน, ปัน (เว้นว่างได้)" class="w-full bg-tactical-950 border border-tactical-border rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500">
           </div>
           <div>
             <label class="block text-[11px] font-semibold text-slate-300 mb-1">ระดับชั้น <span class="text-slate-500 font-normal">(เว้นว่างได้)</span></label>
@@ -956,7 +956,7 @@
         </div>
 
         <div class="p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-[11px] text-amber-300 leading-relaxed">
-          💡 <strong>หมายเหตุ:</strong> กรอกเพียง <strong>ชื่อจริง นามสกุล และชื่อเล่น</strong> ก็สามารถบันทึกได้ทันที โดยไม่ต้องใส่ยศ เวร เลขที่ หรือเบอร์โทรศัพท์ (เมื่อสมาชิกเข้า Discord และเลือกชื่อนี้ บอทจะเปิดฟอร์มให้กรอกข้อมูลส่วนที่เหลือด้วยตนเอง)
+          💡 <strong>หมายเหตุ:</strong> กรอกเพียง <strong>ชื่อจริง และนามสกุล</strong> ก็สามารถบันทึกได้ทันที โดยไม่ต้องใส่ชื่อเล่น ยศ เวร เลขที่ หรือเบอร์โทรศัพท์ (เมื่อสมาชิกเข้า Discord และเลือกชื่อนี้ บอทจะเปิดฟอร์มให้กรอกข้อมูลส่วนที่เหลือด้วยตนเอง)
         </div>
 
         <div id="add-m-error" class="hidden p-2.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300"></div>
@@ -2449,9 +2449,9 @@
       const role = document.getElementById('add-m-role').value || 'MEMBER';
       const shiftRole = document.getElementById('add-m-shift-role').value || 'MEMBER';
 
-      if (!firstName || !lastName || !nickname) {
+      if (!firstName || !lastName) {
         if (errEl) {
-          errEl.textContent = 'กรุณากรอกชื่อจริง นามสกุล และชื่อเล่นให้ครบถ้วน';
+          errEl.textContent = 'กรุณากรอกชื่อจริง และนามสกุลให้ครบถ้วน';
           errEl.classList.remove('hidden');
         }
         return;
@@ -2469,7 +2469,7 @@
           body: JSON.stringify({
             first_name: firstName,
             last_name: lastName,
-            nickname: nickname,
+            nickname: nickname || null,
             grade_class: gradeClass,
             student_no: studentNo,
             phone_number: phone,
@@ -2486,7 +2486,8 @@
         }
 
         closeAddMemberModal();
-        alert(`✅ เพิ่มข้อมูล ${firstName} ${lastName} (${nickname}) สำเร็จ!\nสถานะ: PENDING_APPROVAL\nสารวัตรสามารถเข้าไปเลือกชื่อนี้เพื่อผูกบัญชีใน Discord ได้ทันที`);
+        const displayNick = nickname ? ` (${nickname})` : '';
+        alert(`✅ เพิ่มข้อมูล ${firstName} ${lastName}${displayNick} สำเร็จ!\nสถานะ: PENDING_APPROVAL\nสารวัตรสามารถเข้าไปเลือกชื่อนี้เพื่อผูกบัญชีใน Discord ได้ทันที`);
         await fetchData(true);
       } catch (err) {
         console.error('Add member error:', err);

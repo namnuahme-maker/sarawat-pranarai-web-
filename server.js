@@ -1443,13 +1443,15 @@ app.post('/api/members', async (req, res) => {
       shift_role
     } = req.body;
 
-    if (!first_name || !last_name || !nickname) {
-      return res.status(400).json({ error: 'กรุณากรอกชื่อจริง นามสกุล และชื่อเล่นให้ครบถ้วน' });
+    if (!first_name || !last_name) {
+      return res.status(400).json({ error: 'กรุณากรอกชื่อจริง และนามสกุลให้ครบถ้วน' });
     }
 
     const cleanFirstName = String(first_name).trim();
     const cleanLastName = String(last_name).trim();
-    const cleanNickname = String(nickname).trim();
+    const cleanNickname = (nickname && String(nickname).trim() && String(nickname).trim() !== '-') 
+      ? String(nickname).trim() 
+      : '-';
     const cleanClass = (grade_class && String(grade_class).trim()) 
       ? String(grade_class).replace(/^ม\./, '').trim() 
       : '-';
