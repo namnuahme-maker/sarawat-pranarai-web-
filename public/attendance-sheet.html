@@ -787,11 +787,11 @@
       document.getElementById('lead-head-name').textContent = head ? `[${head.duty_id}] ${head.nickname} (${head.name})` : 'ยังไม่ได้แต่งตั้ง';
       document.getElementById('lead-deputy-name').textContent = deputy ? `[${deputy.duty_id}] ${deputy.nickname} (${deputy.name})` : 'ยังไม่ได้แต่งตั้ง';
 
-      // 3. Render Session QR Code (Clean & Fast Scan URL)
-      const baseUrl = window.location.protocol.startsWith('http') 
-        ? `${window.location.origin}${window.location.pathname}`
-        : 'https://sarawat-pranarai-web.onrender.com/attendance-sheet';
-      const qrPayload = `${baseUrl}?shift=${currentShift}&q=${currentQuarter}&year=${currentYear}`;
+      // 3. Render Session QR Code (Links directly to Mobile AI Scanner)
+      const origin = window.location.protocol.startsWith('http') 
+        ? window.location.origin 
+        : 'https://sarawat-pranarai-web.onrender.com';
+      const qrPayload = `${origin}/attendance-scan?shift=${currentShift}`;
       
       const qrContainer = document.getElementById('session-qrcode');
       qrContainer.innerHTML = '';

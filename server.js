@@ -3308,12 +3308,6 @@ async function notifyAttendanceToDiscord(sessionData, summary, records) {
       {
         type: 2, // Button
         style: 5, // Link
-        label: '📄 ดูแบบฟอร์ม A4',
-        url: `${webUrl}/attendance-sheet?shift=${sessionData.shift_code || 'M'}`
-      },
-      {
-        type: 2, // Button
-        style: 5, // Link
         label: '🌐 ศูนย์บัญชาการ',
         url: webUrl
       }
@@ -4158,7 +4152,8 @@ app.get('/sheet/:id', async (req, res) => {
 });
 
 app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], requireAuth, (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'attendance-sheet.html'));
+  const shift = req.query.shift || 'M';
+  res.redirect(`/attendance-scan?shift=${shift}`);
 });
 
 app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], requireAuth, (req, res) => {
