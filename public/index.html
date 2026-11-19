@@ -1481,6 +1481,42 @@
       }).join('');
     }
 
+    // Helper function: จัดเรียงรายชื่อสารวัตรตาม ระดับชั้น (ม.4 -> ม.5 -> ม.6) -> ห้อง (1 -> N) -> เลขที่ (1 -> N) -> รหัส OMR/เวร
+    function getMemberSortKey(member) {
+      if (!member) return { isTeacher: false, grade: 99, room: 99, studentNo: 999 };
+      const isTeacher = member.role === 'TEACHER' || member.shift_role === 'TEACHER';
+      if (isTeacher) return { isTeacher: true, grade: 0, room: 0, studentNo: 0 };
+
+      const rawGc = String(member.grade_class || member.class_room || '').trim();
+      const gcMatch = rawGc.match(/(?:ม\.?\s*)?(\d+)\s*[/.-]\s*(\d+)/i);
+      const grade = gcMatch ? parseInt(gcMatch[1], 10) : 99;
+      const room = gcMatch ? parseInt(gcMatch[2], 10) : 99;
+
+      let studentNo = 999;
+      if (member.student_no !== null && member.student_no !== undefined && member.student_no !== '') {
+        const parsedNo = parseInt(String(member.student_no).replace(/\D/g, ''), 10);
+        if (!isNaN(parsedNo)) studentNo = parsedNo;
+      }
+      if (studentNo === 999) {
+        const noMatch = rawGc.match(/\((\d+)\)/);
+        if (noMatch) studentNo = parseInt(noMatch[1], 10);
+      }
+      return { isTeacher: false, grade, room, studentNo };
+    }
+
+    function sortMembersByGradeRoomNumber(members) {
+      if (!Array.isArray(members)) return [];
+      return [...members].sort((a, b) => {
+        const keyA = getMemberSortKey(a);
+        const keyB = getMemberSortKey(b);
+        if (keyA.isTeacher !== keyB.isTeacher) return keyA.isTeacher ? -1 : 1;
+        if (keyA.grade !== keyB.grade) return keyA.grade - keyB.grade;
+        if (keyA.room !== keyB.room) return keyA.room - keyB.room;
+        if (keyA.studentNo !== keyB.studentNo) return keyA.studentNo - keyB.studentNo;
+        return String(a.duty_id || '').localeCompare(String(b.duty_id || ''));
+      });
+    }
+
     // 7. Render Officer Roster Grid
     function renderRoster(members) {
       const grid = document.getElementById('roster-grid');
@@ -1526,6 +1562,9 @@
           (m.grade_class || '').toLowerCase().includes(q)
         );
       }
+
+      // 🔢 จัดเรียงรายชื่อสารวัตร: ม.4 -> ม.5 -> ม.6 -> ห้อง 1.. -> เลขที่ 1.. -> รหัส OMR/เวร
+      filtered = sortMembersByGradeRoomNumber(filtered);
 
       if (countEl) countEl.textContent = `พบสารวัตร ${filtered.length} นาย`;
 
