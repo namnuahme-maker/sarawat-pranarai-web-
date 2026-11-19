@@ -12,3 +12,10 @@
 ## 3. ยืนยันก่อนลงมือทำคำสั่งใหญ่หรือสร้างฟังก์ชันใหม่ (Confirm Before Execution)
 - ก่อนการสร้าง ปรับโครงสร้าง หรือลบฟังก์ชันสำคัญ ให้สรุปแผนและสอบถามความเห็นชอบของผู้ใช้งานก่อนลงมือเขียนโค้ดจริง
 - เมื่อเกิดปัญหาไม่ตรงตามที่ต้องการ ให้เข้าสู่โหมด `/grill-me` ทันทีเพื่อสัมภาษณ์และปรับปรุงจนตรงใจผู้ใช้งาน 100%
+
+## 4. Git Push ทุกครั้งหลังส่งมอบงาน (Mandatory Git Push Rule)
+- โปรเจกต์นี้แยกการจัดการเป็น 2 Git Repositories อิสระ:
+  1. `bot/` -> https://github.com/namnuahme-maker/sarawat-pranarai-bot.git
+  2. `web/` -> https://github.com/namnuahme-maker/sarawat-pranarai-web-.git
+- ทุกครั้งที่มีการแก้ไขและทดสอบโค้ดผ่านแล้ว ต้องทำการ `git add`, `git commit` ด้วย Conventional Commits และ `git push origin main` เสมอ ห้ามปล่อยค้างไว้เด็ดขาด
+
