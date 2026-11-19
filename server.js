@@ -1318,6 +1318,47 @@ async function revokeAllDiscordRolesForMember(discordId) {
   await Promise.allSettled(promises);
 }
 
+/**
+ * 📣 ส่งข้อความบันทึกการกระทำ (Action Log) เข้าห้อง Log ของ Discord
+ */
+async function sendDiscordActionLog({ title, description, fields = [], color = 0xE74C3C, actor = '🌐 ผู้ดูแลระบบบนเว็บ' }) {
+  if (!DISCORD_BOT_TOKEN || !DISCORD_GUILD_ID) return;
+  try {
+    const chRes = await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/channels`, {
+      headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+      signal: AbortSignal.timeout(3500)
+    });
+    const channels = await chRes.json();
+    if (!Array.isArray(channels)) return;
+    const logChan = channels.find(c => c.type === 0 && (c.name.toLowerCase() === 'log' || c.name.includes('บันทึก') || c.name.includes('action-log')));
+    if (!logChan) return;
+
+    await fetch(`https://discord.com/api/v10/channels/${logChan.id}/messages`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        embeds: [{
+          title,
+          description,
+          fields: [
+            { name: '👤 ผู้ดำเนินการ', value: actor, inline: true },
+            ...fields
+          ],
+          color,
+          footer: { text: `SARAWAT Audit Logger • เวลาไทย: ${new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok' })}` },
+          timestamp: new Date().toISOString()
+        }]
+      }),
+      signal: AbortSignal.timeout(4000)
+    });
+  } catch (err) {
+    console.warn('[LOG] Error sending Discord action log:', err.message);
+  }
+}
+
 async function syncLeadershipDiscordRole(memberId, shiftCode, position, method) {
   if (!DISCORD_BOT_TOKEN || !DISCORD_GUILD_ID) return;
   const { data: member } = await supabase.from('members').select('discord_id').eq('id', memberId).maybeSingle();
@@ -1791,6 +1832,15 @@ app.delete('/api/members/:id', async (req, res) => {
       } catch (err) {}
     }
 
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(dbUser.role)) {
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
+
     if (!isAllowed) {
       return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การลบสมาชิกสงวนเฉพาะผู้ดูแลระบบ ครูที่ปรึกษา ประธาน หรือรองประธานเท่านั้น' });
     }
@@ -1836,6 +1886,13 @@ app.delete('/api/members/:id', async (req, res) => {
       });
     }
 
+    sendDiscordActionLog({
+      title: '🗑️ [ลบข้อมูลสารวัตรผ่านระบบเว็บ]',
+      description: `มีการสั่งลบข้อมูลสารวัตร **[${targetMember.duty_id || 'ไม่มีรหัส'}] ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname || '-'})** ออกจากระบบ และเพิกถอนสิทธิ์ Discord เรียบร้อยแล้ว`,
+      color: 0xE74C3C,
+      actor: user?.username ? `${user.username} (${user.role || 'Admin'})` : '🌐 ผู้ดูแลระบบผ่าน Dashboard'
+    }).catch(() => {});
+
     console.log(`[API] 🗑️ ลบข้อมูลสมาชิกสำเร็จ: ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname}) [ID: ${id}]`);
     return res.json({ success: true, message: `ลบข้อมูล ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname || '-'}) เรียบร้อยแล้ว` });
   } catch (err) {
@@ -1852,6 +1909,15 @@ app.post('/api/members/cleanup-unlinked', async (req, res) => {
       user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident || user.canManageMembers ||
       user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT'
     );
+
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(dbUser.role)) {
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
 
     if (!isAllowed) {
       return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การล้างข้อมูลสงวนเฉพาะผู้ดูแลระบบหรือประธานสารวัตรเท่านั้น' });
@@ -1896,6 +1962,101 @@ app.post('/api/members/cleanup-unlinked', async (req, res) => {
     });
   } catch (err) {
     console.error('[API] /api/members/cleanup-unlinked crash:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// 🗑️ ลบข้อมูลสมาชิกที่เลือกแบบหลายรายการ (Batch Delete Members with Discord Sync)
+app.post('/api/members/batch-delete', async (req, res) => {
+  try {
+    let user = getUserFromReq(req);
+    let isAllowed = user && (
+      user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident || user.canManageMembers ||
+      user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT'
+    );
+
+    if (!isAllowed && user && user.id) {
+      try {
+        const { data: dbUser } = await supabase.from('members').select('role').eq('discord_id', user.id).maybeSingle();
+        if (dbUser && ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(dbUser.role)) {
+          isAllowed = true;
+        }
+      } catch (err) {}
+    }
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การลบข้อมูลสงวนเฉพาะผู้ดูแลระบบหรือประธานสารวัตรเท่านั้น' });
+    }
+
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.status(400).json({ error: 'กรุณาระบุรายการสมาชิกที่ต้องการลบ' });
+    }
+
+    // 1. ดึงข้อมูลสมาชิกทั้งหมดที่กำลังจะลบ เพื่อใช้เพิกถอนสิทธิ์ Discord และส่ง Log
+    const { data: targetMembers, error: fetchErr } = await supabase
+      .from('members')
+      .select('id, discord_id, first_name, last_name, nickname, duty_id, duty_day, status')
+      .in('id', ids);
+
+    if (fetchErr) throw fetchErr;
+    if (!targetMembers || targetMembers.length === 0) {
+      return res.json({ success: true, count: 0, message: 'ไม่พบรายการสมาชิกที่ระบุในระบบ' });
+    }
+
+    // 2. เพิกถอนสิทธิ์ใน Discord สำหรับสมาชิกที่มี discord_id
+    const revokePromises = [];
+    for (const m of targetMembers) {
+      if (m.discord_id) {
+        revokePromises.push(revokeAllDiscordRolesForMember(m.discord_id));
+      }
+    }
+    if (revokePromises.length > 0) {
+      Promise.allSettled(revokePromises).catch(err => {
+        console.warn('[API] Warning batch-revoking Discord roles:', err);
+      });
+    }
+
+    // 3. ล้างข้อมูลอ้างอิง Foreign Key
+    try {
+      await supabase.from('shift_leadership').delete().in('member_id', ids);
+      await supabase.from('leave_requests').delete().in('member_id', ids);
+      await supabase.from('lost_items').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      await supabase.from('lost_items').update({ reported_by_id: null }).in('reported_by_id', ids);
+    } catch (e) {
+      console.warn('[API] Warning batch-cleaning member relations:', e.message);
+    }
+
+    // 4. ลบข้อมูลออกจากตาราง members
+    const { error: delErr } = await supabase
+      .from('members')
+      .delete()
+      .in('id', ids);
+
+    if (delErr) throw delErr;
+
+    // 5. ส่งบันทึกการทำงานเข้าห้อง Log ใน Discord
+    const memberSummary = targetMembers.slice(0, 15).map(m => `• [${m.duty_id || 'ไม่มีรหัส'}] ${m.first_name} ${m.last_name} (${m.nickname || '-'})${m.discord_id ? ' 🔗<@' + m.discord_id + '>' : ''}`).join('\n');
+    const extraText = targetMembers.length > 15 ? `\n...และอีก ${targetMembers.length - 15} รายการ` : '';
+
+    sendDiscordActionLog({
+      title: '🗑️ [ลบข้อมูลสารวัตรผ่านระบบเว็บ]',
+      description: `มีการสั่งลบข้อมูลสารวัตรนักเรียนออกจากระบบจำนวน **${targetMembers.length} นาย** พร้อมทั้งเพิกถอนสิทธิ์ Discord ที่ผูกไว้เรียบร้อยแล้ว`,
+      fields: [
+        { name: '📋 รายชื่อที่ถูกลบ', value: `${memberSummary}${extraText}` }
+      ],
+      color: 0xE74C3C,
+      actor: user?.username ? `${user.username} (${user.role || 'Admin'})` : '🌐 ผู้ดูแลระบบผ่าน Dashboard'
+    }).catch(err => console.warn('[API] Error logging batch delete to Discord:', err));
+
+    console.log(`[API] 🗑️ ลบข้อมูลสารวัตรแบบเลือกหลายรายการสำเร็จ: ${targetMembers.length} นาย`);
+    return res.json({
+      success: true,
+      count: targetMembers.length,
+      message: `ลบข้อมูลสารวัตรนักเรียนสำเร็จจำนวน ${targetMembers.length} รายการ และเพิกถอนสิทธิ์ Discord เรียบร้อยแล้ว`
+    });
+  } catch (err) {
+    console.error('[API] /api/members/batch-delete crash:', err);
     return res.status(500).json({ error: err.message });
   }
 });

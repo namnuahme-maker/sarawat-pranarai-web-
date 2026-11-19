@@ -261,7 +261,10 @@
       <!-- Officers Table & List Container -->
       <div class="w-full max-w-full overflow-x-auto custom-scrollbar pb-2">
         <!-- Table Column Headers (Visible in List Mode) -->
-        <div id="roster-list-header" class="min-w-[940px] grid grid-cols-[36px_44px_76px_1fr_110px_140px_110px_140px_110px] items-center gap-3 px-4 py-2 mb-1.5 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider bg-tactical-950 border border-tactical-border/70 rounded-xl">
+        <div id="roster-list-header" class="min-w-[980px] grid grid-cols-[32px_36px_44px_76px_1fr_110px_140px_110px_140px_110px] items-center gap-3 px-4 py-2 mb-1.5 text-[11px] font-mono font-bold text-slate-400 uppercase tracking-wider bg-tactical-950 border border-tactical-border/70 rounded-xl">
+          <div class="flex items-center justify-center">
+            <input type="checkbox" id="roster-select-all" onchange="toggleSelectAllRoster(this.checked)" class="w-4 h-4 rounded border-slate-700 bg-tactical-900 text-amber-500 focus:ring-0 cursor-pointer" title="เลือกทั้งหมด">
+          </div>
           <div class="text-center">#</div>
           <div class="text-center">รูป</div>
           <div class="text-center">รหัสเวร</div>
@@ -274,8 +277,31 @@
         </div>
 
         <!-- High-Density Roster Viewport -->
-        <div id="roster-grid" class="flex flex-col gap-2 min-w-[940px]">
+        <div id="roster-grid" class="flex flex-col gap-2 min-w-[980px]">
           <div class="p-8 text-center text-xs text-slate-500">กำลังโหลดทำเนียบสารวัตร...</div>
+        </div>
+      </div>
+
+      <!-- 🧹 ROSTER BATCH ACTION BAR (FLOATING BOTTOM BAR) -->
+      <div id="roster-batch-bar" class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 hidden transition-all duration-300">
+        <div class="glass-panel px-5 py-3 rounded-2xl border border-amber-500/60 shadow-[0_10px_35px_rgba(0,0,0,0.7)] flex flex-wrap items-center gap-3 bg-slate-900/95 backdrop-blur-xl text-white">
+          <div class="flex items-center gap-2 pr-3 border-r border-slate-700">
+            <span class="w-6 h-6 rounded-full bg-amber-500 text-slate-950 flex items-center justify-center font-mono font-bold text-xs" id="roster-selected-count">0</span>
+            <span class="text-xs font-semibold">เลือกไว้</span>
+          </div>
+          
+          <button onclick="selectUnlinkedTestMembers()" class="text-xs px-2.5 py-1.5 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 transition font-mono flex items-center gap-1" title="เลือกรายชื่อที่ไม่ได้ ACTIVE ทั้งหมด">
+            <span>⚡</span> <span>เลือกข้อมูลทดลองทั้งหมด</span>
+          </button>
+          
+          <button onclick="clearRosterSelection()" class="text-xs px-2.5 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition">
+            ยกเลิก
+          </button>
+          
+          <button onclick="confirmBatchDeleteMembers()" class="text-xs px-4 py-2 rounded-xl bg-gradient-to-r from-rose-600 to-red-600 hover:from-rose-500 hover:to-red-500 text-white font-bold transition shadow-lg flex items-center gap-1.5 active:scale-95">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            <span id="roster-batch-delete-btn-text">ลบที่เลือก</span>
+          </button>
         </div>
       </div>
 
@@ -1069,6 +1095,7 @@
     let currentCaseFilter = 'ALL';
     let supabaseRealtime = null;
     let rosterViewMode = 'list';
+    let selectedMemberIds = new Set();
 
     const SHIFT_MAP = {
       'M': { name: 'วันจันทร์', color: 'border-blue-500/40 text-blue-400', badge: 'bg-blue-500/20 text-blue-300' },
@@ -1587,9 +1614,15 @@
           const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;' : '';
           const roleBadge = getMemberRoleBadge(m);
           const isUnlinked = !m.discord_id || m.status === 'PENDING_APPROVAL';
+          const isSelected = selectedMemberIds.has(m.id);
 
           return `
-            <div onclick="openCardModal('${m.id}')" class="grid grid-cols-[36px_44px_76px_1fr_110px_140px_110px_140px_140px] items-center gap-3 px-4 py-2.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:bg-tactical-850 cursor-pointer transition shadow-md group">
+            <div onclick="openCardModal('${m.id}')" class="roster-item-container grid grid-cols-[32px_36px_44px_76px_1fr_110px_140px_110px_140px_110px] items-center gap-3 px-4 py-2.5 rounded-xl ${isSelected ? 'bg-amber-500/10 border-amber-500/70 ring-1 ring-amber-500/40' : 'bg-tactical-900 border-tactical-border hover:border-amber-500/60 hover:bg-tactical-850'} border cursor-pointer transition shadow-md group">
+              <!-- 0. Selection Checkbox -->
+              <div class="flex items-center justify-center" onclick="event.stopPropagation()">
+                <input type="checkbox" class="roster-row-checkbox w-4 h-4 rounded border-slate-700 bg-tactical-950 text-amber-500 focus:ring-0 cursor-pointer" data-id="${m.id}" ${isSelected ? 'checked' : ''} onchange="toggleSelectMember('${m.id}', this.checked)">
+              </div>
+
               <!-- 1. Index -->
               <div class="text-center font-mono text-xs font-bold text-slate-500 group-hover:text-amber-400 transition">
                 ${String(idx + 1).padStart(2, '0')}
@@ -1680,16 +1713,22 @@
           const blurStyle = shouldBlur ? 'filter: blur(14px); transform: scale(1.25); opacity: 0.65;' : '';
           const roleBadge = getMemberRoleBadge(m);
           const isUnlinked = !m.discord_id || m.status === 'PENDING_APPROVAL';
+          const isSelected = selectedMemberIds.has(m.id);
 
           return `
-            <div onclick="openCardModal('${m.id}')" class="p-3.5 rounded-xl bg-tactical-900 border border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5 cursor-pointer transition shadow-md group flex flex-col justify-between h-full">
+            <div onclick="openCardModal('${m.id}')" class="roster-item-container relative p-3.5 rounded-xl ${isSelected ? 'bg-amber-500/10 border-amber-500/70 ring-1 ring-amber-500/40 shadow-amber-500/10' : 'bg-tactical-900 border-tactical-border hover:border-amber-500/60 hover:-translate-y-0.5'} border cursor-pointer transition shadow-md group flex flex-col justify-between h-full">
+              <!-- Selection Checkbox in Card Mode -->
+              <div class="absolute top-2.5 right-2.5 z-20" onclick="event.stopPropagation()">
+                <input type="checkbox" class="roster-row-checkbox w-4 h-4 rounded border-slate-700 bg-tactical-950 text-amber-500 focus:ring-0 cursor-pointer" data-id="${m.id}" ${isSelected ? 'checked' : ''} onchange="toggleSelectMember('${m.id}', this.checked)" title="เลือกสมาชิก">
+              </div>
+
               <div>
                 <div class="flex items-start gap-3">
                   <div class="relative w-12 h-14 rounded-lg overflow-hidden border border-slate-700 flex-shrink-0 bg-black flex items-center justify-center">
                     <img src="${m.profile_image_url || '/assets/logo.png'}" style="${blurStyle}" class="w-full h-full object-cover group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
                     ${shouldBlur ? '<span class="absolute inset-0 flex items-center justify-center text-xs bg-black/40 text-amber-400" title="ปกปิดอัตลักษณ์ความปลอดภัย">🔒</span>' : ''}
                   </div>
-                  <div class="min-w-0 flex-1">
+                  <div class="min-w-0 flex-1 pr-6">
                     <div class="flex items-center justify-between gap-1">
                       <span class="font-bold text-xs text-slate-100 truncate">${m.first_name || ''} ${m.last_name || ''}</span>
                       <span class="text-[10px] font-mono px-1.5 py-0.5 rounded ${isTeacher ? 'bg-amber-500/20 text-amber-300 border-amber-400/50' : 'bg-amber-500/10 text-amber-400 border-amber-500/30'} font-bold whitespace-nowrap">[${isTeacher ? 'ครู' : (m.duty_id || 'รอ')}]</span>
@@ -1736,6 +1775,8 @@
           `;
         }).join('');
       }
+
+      updateBatchBarUI();
     }
 
     function setRosterViewMode(mode) {
@@ -2626,6 +2667,191 @@
     window.canDeleteMember = canDeleteMember;
     window.deleteMemberConfirm = deleteMemberConfirm;
     window.deleteActiveMember = deleteActiveMember;
+
+    // ==========================================================
+    // 🗑️ CHECKBOX SELECTION & BATCH DELETE CONTROLLER
+    // ==========================================================
+    function toggleSelectMember(memberId, isChecked) {
+      if (isChecked) {
+        selectedMemberIds.add(memberId);
+      } else {
+        selectedMemberIds.delete(memberId);
+      }
+      updateBatchBarUI();
+
+      // อัปเดตสไตล์ของแถวหรือการ์ดแบบไดนามิก
+      const rowCheckboxes = document.querySelectorAll(`.roster-row-checkbox[data-id="${memberId}"]`);
+      rowCheckboxes.forEach(cb => {
+        cb.checked = isChecked;
+        const parentContainer = cb.closest('.roster-item-container');
+        if (parentContainer) {
+          if (isChecked) {
+            parentContainer.classList.add('bg-amber-500/10', 'border-amber-500/70', 'ring-1', 'ring-amber-500/40');
+            parentContainer.classList.remove('bg-tactical-900', 'border-tactical-border');
+          } else {
+            parentContainer.classList.remove('bg-amber-500/10', 'border-amber-500/70', 'ring-1', 'ring-amber-500/40');
+            parentContainer.classList.add('bg-tactical-900', 'border-tactical-border');
+          }
+        }
+      });
+    }
+
+    function toggleSelectAllRoster(isChecked) {
+      const visibleCheckboxes = document.querySelectorAll('.roster-row-checkbox');
+      visibleCheckboxes.forEach(cb => {
+        const id = cb.dataset.id;
+        if (!id) return;
+        cb.checked = isChecked;
+        if (isChecked) {
+          selectedMemberIds.add(id);
+        } else {
+          selectedMemberIds.delete(id);
+        }
+        const parentContainer = cb.closest('.roster-item-container');
+        if (parentContainer) {
+          if (isChecked) {
+            parentContainer.classList.add('bg-amber-500/10', 'border-amber-500/70', 'ring-1', 'ring-amber-500/40');
+            parentContainer.classList.remove('bg-tactical-900', 'border-tactical-border');
+          } else {
+            parentContainer.classList.remove('bg-amber-500/10', 'border-amber-500/70', 'ring-1', 'ring-amber-500/40');
+            parentContainer.classList.add('bg-tactical-900', 'border-tactical-border');
+          }
+        }
+      });
+      updateBatchBarUI();
+    }
+
+    function selectUnlinkedTestMembers() {
+      if (!allMembers || !allMembers.length) return;
+      // เลือกสมาชิกที่เป็นข้อมูลทดลอง หรือไม่ได้ ACTIVE หรือไม่มี Discord
+      const testMembers = allMembers.filter(m => 
+        !m.discord_id || 
+        m.status === 'INACTIVE' || 
+        m.status === 'REJECTED' || 
+        m.status === 'PENDING_APPROVAL' ||
+        (m.first_name || '').includes('ทดสอบ') ||
+        (m.nickname || '').includes('ทดลอง')
+      );
+
+      testMembers.forEach(m => selectedMemberIds.add(m.id));
+      renderRoster(allMembers);
+      updateBatchBarUI();
+
+      if (window.SarawatUI && SarawatUI.toast) {
+        SarawatUI.toast('info', 'เลือกข้อมูลทดลองแล้ว', `เลือกรายการที่ไม่ได้ ACTIVE หรือไม่มี Discord ทั้งหมด ${testMembers.length} นาย`);
+      }
+    }
+
+    function clearRosterSelection() {
+      selectedMemberIds.clear();
+      const selectAll = document.getElementById('roster-select-all');
+      if (selectAll) selectAll.checked = false;
+      renderRoster(allMembers);
+      updateBatchBarUI();
+    }
+
+    function updateBatchBarUI() {
+      const bar = document.getElementById('roster-batch-bar');
+      const countEl = document.getElementById('roster-selected-count');
+      const btnText = document.getElementById('roster-batch-delete-btn-text');
+      const selectAll = document.getElementById('roster-select-all');
+      const count = selectedMemberIds.size;
+
+      if (countEl) countEl.textContent = count;
+      if (btnText) btnText.textContent = `ลบที่เลือก (${count} นาย)`;
+
+      if (bar) {
+        if (count > 0) {
+          bar.classList.remove('hidden');
+        } else {
+          bar.classList.add('hidden');
+        }
+      }
+
+      if (selectAll) {
+        const visibleCheckboxes = document.querySelectorAll('.roster-row-checkbox');
+        if (visibleCheckboxes.length > 0) {
+          const allVisibleSelected = Array.from(visibleCheckboxes).every(cb => selectedMemberIds.has(cb.dataset.id));
+          selectAll.checked = allVisibleSelected;
+        } else {
+          selectAll.checked = false;
+        }
+      }
+    }
+
+    async function confirmBatchDeleteMembers() {
+      if (selectedMemberIds.size === 0) return;
+      if (!canDeleteMember()) {
+        alert('❌ ปฏิเสธการเข้าถึง: สิทธิ์การลบข้อมูลสงวนเฉพาะผู้ดูแลระบบ ครูที่ปรึกษา ประธาน หรือรองประธานเท่านั้น');
+        return;
+      }
+
+      const targets = allMembers.filter(m => selectedMemberIds.has(m.id));
+      if (targets.length === 0) {
+        alert('ไม่พบรายการที่เลือกในระบบ');
+        clearRosterSelection();
+        return;
+      }
+
+      const names = targets.map((m, i) => `${i + 1}. [${m.duty_id || 'รอ'}] ${m.first_name || ''} ${m.last_name || ''} (${m.nickname || '-'})${m.status && m.status !== 'ACTIVE' ? ' [' + m.status + ']' : ''}`).join('\n');
+      const hasDiscordCount = targets.filter(m => m.discord_id).length;
+
+      const confirmed = window.confirm(
+        `⚠️ ยืนยันการลบสมาชิกที่เลือกทั้งหมด ${targets.length} นาย?\n\n` +
+        `รายชื่อที่จะถูกลบ:\n${names}\n\n` +
+        `ระบบจะดำเนินการ:\n` +
+        `1. ลบข้อมูลจากฐานข้อมูล Supabase อย่างถาวร\n` +
+        `2. ปลด Role สารวัตรและรีเซ็ตชื่อใน Discord ทันที (${hasDiscordCount} บัญชี)\n` +
+        `3. ส่งบันทึกประวัติการลบ (Audit Log) เข้าห้อง Log ของ Discord อัตโนมัติ\n\n` +
+        `ยืนยันที่จะลบข้อมูลหรือไม่? (การกระทำนี้ไม่สามารถย้อนกลับได้)`
+      );
+
+      if (!confirmed) return;
+
+      const btn = document.querySelector('#roster-batch-bar button:last-child');
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = `<svg class="w-4 h-4 animate-spin inline-block" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path></svg> <span>กำลังลบข้อมูล...</span>`;
+      }
+
+      try {
+        const res = await fetch('/api/members/batch-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ids: Array.from(selectedMemberIds) })
+        });
+
+        const result = await res.json();
+        if (!res.ok || !result.success) {
+          throw new Error(result.error || 'เกิดข้อผิดพลาดในการลบข้อมูล');
+        }
+
+        if (window.SarawatUI && SarawatUI.toast) {
+          SarawatUI.toast('success', 'ลบข้อมูลสำเร็จ', result.message || `ลบสมาชิก ${result.count || targets.length} นายเรียบร้อยแล้ว`);
+        } else {
+          alert(`🗑️ ${result.message || `ลบสมาชิก ${result.count || targets.length} นายเรียบร้อยแล้ว`}`);
+        }
+
+        clearRosterSelection();
+        await fetchData(true);
+      } catch (err) {
+        console.error('Batch delete error:', err);
+        alert('❌ ลบข้อมูลไม่สำเร็จ: ' + err.message);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+        }
+      }
+    }
+
+    window.toggleSelectMember = toggleSelectMember;
+    window.toggleSelectAllRoster = toggleSelectAllRoster;
+    window.selectUnlinkedTestMembers = selectUnlinkedTestMembers;
+    window.clearRosterSelection = clearRosterSelection;
+    window.updateBatchBarUI = updateBatchBarUI;
+    window.confirmBatchDeleteMembers = confirmBatchDeleteMembers;
 
     function toggleMemberEditMode(show) {
       const container = document.getElementById('dossier-edit-container');
