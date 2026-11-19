@@ -451,7 +451,7 @@
           <div>
             <span><strong>รอบเวร:</strong> <span id="meta-shift-text">เวรวันจันทร์ (M)</span></span>
             <span style="margin-left: 14px;"><strong>จำนวนสมาชิกในเวร:</strong> <span id="meta-count-text">10 นาย</span></span>
-            <span style="margin-left: 14px; color: #047857; font-size: 8pt; font-weight: 600;">* ฝนดำในวงกลม [○] (ม) = มาปฏิบัติหน้าที่ | ช่องว่าง = มาสาย (ส) | การลาเวรให้แจ้งผ่านระบบ Discord *</span>
+            <span id="legend-note-text" style="margin-left: 14px; color: #047857; font-size: 8pt; font-weight: 600;">* ฝนดำในวงกลม [○] (ม) = มาปฏิบัติหน้าที่ | ช่องว่าง = มาสาย (ส) | การลาเวรให้แจ้งผ่านระบบ Discord *</span>
           </div>
 
           <!-- Machine QR Session Anchor (Offline Embedded QR) -->
@@ -767,6 +767,14 @@
       const semNum = (currentQuarter === 3 || currentQuarter === 4) ? 1 : 2;
       const fullLabel = `ภาคเรียนที่ ${semNum} / ปีการศึกษา ${currentYear} • ประจำไตรมาสที่ ${currentQuarter} (12 สัปดาห์)`;
 
+      const isSpecialShift = currentShift === 'S';
+      const legendElem = document.getElementById('legend-note-text');
+      if (legendElem) {
+        legendElem.textContent = isSpecialShift
+          ? '* ขีดนับการปฏิบัติหน้าที่รายวันในช่องสี่เหลี่ยม [卌] = มาครบ 5 วัน/สัปดาห์ | การลาเวรให้แจ้งผ่านระบบ Discord *'
+          : '* ฝนดำในวงกลม [○] (ม) = มาปฏิบัติหน้าที่ | ช่องว่าง = มาสาย (ส) | การลาเวรให้แจ้งผ่านระบบ Discord *';
+      }
+
       // 1. Update Cover Page Elements
       document.getElementById('cover-quarter-badge').innerHTML = 
         `<span>🛡️</span> ประจำไตรมาสที่ ${currentQuarter} (12 สัปดาห์) • ภาคเรียนที่ ${semNum}/${currentYear}`;
@@ -858,13 +866,20 @@
 
           let dateCells = '';
           dates12.forEach((dStr, wIdx) => {
-            dateCells += `
-              <td style="width: 12.5mm; height: 8mm; padding: 0; text-align: center; vertical-align: middle;">
-                <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
-                  ม
-                </div>
-              </td>
-            `;
+            if (isSpecialShift) {
+              dateCells += `
+                <td style="width: 12.5mm; height: 8mm; padding: 0; text-align: center; vertical-align: middle; background-color: #ffffff;">
+                </td>
+              `;
+            } else {
+              dateCells += `
+                <td style="width: 12.5mm; height: 8mm; padding: 0; text-align: center; vertical-align: middle;">
+                  <div class="omr-circle" data-duty="${m.duty_id}" data-col="${wIdx}" onclick="toggleSingleOmr(this)" title="${m.duty_id} วันที่ ${dStr}: ฝนดำเมื่อมาปฏิบัติหน้าที่ (ม)">
+                    ม
+                  </div>
+                </td>
+              `;
+            }
           });
 
           return `
