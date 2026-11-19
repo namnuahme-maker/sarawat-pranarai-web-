@@ -3446,22 +3446,31 @@ app.post('/api/attendance/scan-vision', async (req, res) => {
       base64Data = match[2];
     }
 
-    // 1. ดึงรายชื่อสารวัตรในเวรนี้
+    // 1. ดึงรายชื่อสารวัตรในเวรนี้ (รองรับผลัดควบพิเศษ เช่น MS, TS, WS, ThS, FS และเวรพิเศษ S)
     let roster = [];
+    const normShift = canonicalDutyDay(shift || 'M');
     try {
-      const { data: dbMembers } = await supabase
+      let rQuery = supabase
         .from('members')
         .select('id, duty_id, first_name, last_name, nickname, grade_class, student_no, duty_day')
-        .eq('duty_day', shift || 'M')
-        .eq('status', 'ACTIVE')
-        .order('student_no', { ascending: true });
+        .eq('status', 'ACTIVE');
+
+      if (normShift === 'S') {
+        rQuery = rQuery.or('duty_day.eq.S,duty_day.ilike.%S');
+      } else if (normShift === 'Th') {
+        rQuery = rQuery.in('duty_day', ['Th', 'ThS', 'Ts', 'TSS', 'TsS']);
+      } else {
+        rQuery = rQuery.in('duty_day', [normShift, `${normShift}S`]);
+      }
+
+      const { data: dbMembers } = await rQuery.order('student_no', { ascending: true });
       if (dbMembers && dbMembers.length > 0) {
         roster = dbMembers;
       }
     } catch (e) {}
 
     if (roster.length === 0) {
-      roster = ATTENDANCE_FALLBACK_ROSTERS[shift || 'M'] || ATTENDANCE_FALLBACK_ROSTERS['M'];
+      roster = ATTENDANCE_FALLBACK_ROSTERS[normShift] || ATTENDANCE_FALLBACK_ROSTERS['M'];
     }
 
     // 2. ดึงประวัติการลาจาก Discord Cloud (leave_requests)
@@ -3571,7 +3580,14 @@ Return JSON strictly matching this schema:
     }
 
     const rawText = geminiData.candidates[0].content.parts[0].text;
-    const aiParsed = JSON.parse(rawText || '{}');
+    let aiParsed = {};
+    try {
+      const stripped = (rawText || '').replace(/```(?:json)?/gi, '').replace(/```/g, '').trim();
+      aiParsed = JSON.parse(stripped || '{}');
+    } catch (parseErr) {
+      const match = (rawText || '').match(/\{[\s\S]*\}/);
+      if (match) aiParsed = JSON.parse(match[0]);
+    }
     const aiResults = Array.isArray(aiParsed.results) ? aiParsed.results : [];
 
     res.json({
@@ -3601,6 +3617,13 @@ Return JSON strictly matching this schema:
 // 6.8.1 บันทึกผลยืนยันการสแกนใบเช็คชื่อ (/api/attendance/confirm)
 app.post('/api/attendance/confirm', async (req, res) => {
   try {
+    const user = getUserFromReq(req);
+    const secretHeader = req.headers['x-webhook-secret'] || req.headers['authorization'];
+    const isAuthorized = user || (secretHeader && secretHeader === (process.env.WEBHOOK_SECRET || 'pranarai_secret_sarawat_2026'));
+    if (!isAuthorized) {
+      return res.status(401).json({ success: false, error: 'กรุณาเข้าสู่ระบบก่อนทำการบันทึกยืนยันยอดเช็คชื่อ' });
+    }
+
     const { shift_code, quarter, week_index, duty_date, scanned_by, image_base64, records } = req.body;
     if (!shift_code || !Array.isArray(records)) {
       return res.status(400).json({ success: false, error: 'ข้อมูลไม่ถูกต้อง กรุณาระบุกะเวรและรายชื่อสารวัตร' });
