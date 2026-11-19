@@ -870,32 +870,80 @@
             </div>
 
             <!-- Leadership Role 1: หัวหน้าเวร (Head 👑) -->
-            <div class="space-y-1.5 border-b border-tactical-border/70 pb-3">
+            <div class="space-y-2 border-b border-tactical-border/70 pb-3">
               <div class="flex items-center justify-between text-xs">
                 <span class="font-bold text-amber-400 flex items-center gap-1.5">
                   <span>👑</span> หัวหน้าผลัดเวร
                 </span>
                 <span class="font-mono text-amber-300 font-bold">${head && head.duty_id && head.duty_id !== 'null' ? head.duty_id : '-'}</span>
               </div>
-              <div class="text-base font-bold text-white truncate">
-                ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
+              
+              <div class="flex items-center gap-3">
+                ${head && head.photo_url ? `
+                  <img src="${head.photo_url}" alt="${head.nickname || head.name}" class="w-11 h-11 rounded-full object-cover border-2 border-amber-500/60 shadow-sm shadow-amber-500/20 shrink-0 bg-tactical-900" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-11 h-11 rounded-full bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center font-bold text-amber-300 text-sm shrink-0 shadow-inner\\'>${(head.nickname || head.name || '?').charAt(0)}</div>';">
+                ` : (head ? `
+                  <div class="w-11 h-11 rounded-full bg-amber-500/15 border-2 border-amber-500/40 flex items-center justify-center font-bold text-amber-300 text-sm shrink-0 shadow-inner">
+                    ${(head.nickname || head.name || '?').charAt(0)}
+                  </div>
+                ` : `
+                  <div class="w-11 h-11 rounded-full bg-slate-800/60 border border-dashed border-slate-700 flex items-center justify-center text-slate-500 text-xs shrink-0">
+                    ว่าง
+                  </div>
+                `)}
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-bold text-white truncate leading-tight" title="${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}">
+                    ${head ? (head.nickname ? `${head.nickname} (${head.name})` : head.name) : 'ว่าง'}
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-slate-400 mt-1">
+                    <span>ห้อง: <span class="text-slate-300 font-medium">${head ? (head.class_room || '-') : '-'}</span></span>
+                    ${head && head.phone ? `
+                      <a href="tel:${head.phone}" class="inline-flex items-center gap-1 text-amber-400 hover:text-amber-300 transition hover:underline font-mono text-[11px]" title="กดเพื่อโทรออก">
+                        <span>📞</span> <span>${head.phone}</span>
+                      </a>
+                    ` : (head ? `<span class="text-slate-500 text-[11px] font-mono">📞 ไม่มีเบอร์</span>` : '')}
+                  </div>
+                </div>
               </div>
-              <div class="text-xs text-slate-400">ห้อง: ${head ? head.class_room : '-'}</div>
+              
               ${assignmentControl('HEAD', head)}
             </div>
 
             <!-- Leadership Role 2: รองหัวหน้าเวร (Deputy 🥈) -->
-            <div class="space-y-1.5 border-b border-tactical-border/70 pb-3">
+            <div class="space-y-2 border-b border-tactical-border/70 pb-3">
               <div class="flex items-center justify-between text-xs">
                 <span class="font-bold text-sky-400 flex items-center gap-1.5">
                   <span>🥈</span> รองหัวหน้าผลัดเวร
                 </span>
                 <span class="font-mono text-sky-300 font-bold">${deputy && deputy.duty_id && deputy.duty_id !== 'null' ? deputy.duty_id : '-'}</span>
               </div>
-              <div class="text-base font-bold text-white truncate">
-                ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
+
+              <div class="flex items-center gap-3">
+                ${deputy && deputy.photo_url ? `
+                  <img src="${deputy.photo_url}" alt="${deputy.nickname || deputy.name}" class="w-11 h-11 rounded-full object-cover border-2 border-sky-500/60 shadow-sm shadow-sky-500/20 shrink-0 bg-tactical-900" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-11 h-11 rounded-full bg-sky-500/15 border-2 border-sky-500/40 flex items-center justify-center font-bold text-sky-400 text-sm shrink-0 shadow-inner\\'>${(deputy.nickname || deputy.name || '?').charAt(0)}</div>';">
+                ` : (deputy ? `
+                  <div class="w-11 h-11 rounded-full bg-sky-500/15 border-2 border-sky-500/40 flex items-center justify-center font-bold text-sky-300 text-sm shrink-0 shadow-inner">
+                    ${(deputy.nickname || deputy.name || '?').charAt(0)}
+                  </div>
+                ` : `
+                  <div class="w-11 h-11 rounded-full bg-slate-800/60 border border-dashed border-slate-700 flex items-center justify-center text-slate-500 text-xs shrink-0">
+                    ว่าง
+                  </div>
+                `)}
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-bold text-white truncate leading-tight" title="${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}">
+                    ${deputy ? (deputy.nickname ? `${deputy.nickname} (${deputy.name})` : deputy.name) : 'ว่าง'}
+                  </div>
+                  <div class="flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-xs text-slate-400 mt-1">
+                    <span>ห้อง: <span class="text-slate-300 font-medium">${deputy ? (deputy.class_room || '-') : '-'}</span></span>
+                    ${deputy && deputy.phone ? `
+                      <a href="tel:${deputy.phone}" class="inline-flex items-center gap-1 text-sky-400 hover:text-sky-300 transition hover:underline font-mono text-[11px]" title="กดเพื่อโทรออก">
+                        <span>📞</span> <span>${deputy.phone}</span>
+                      </a>
+                    ` : (deputy ? `<span class="text-slate-500 text-[11px] font-mono">📞 ไม่มีเบอร์</span>` : '')}
+                  </div>
+                </div>
               </div>
-              <div class="text-xs text-slate-400">ห้อง: ${deputy ? deputy.class_room : '-'}</div>
+
               ${assignmentControl('DEPUTY', deputy)}
             </div>
 

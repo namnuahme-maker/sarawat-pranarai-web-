@@ -1351,7 +1351,7 @@ app.get('/api/shift-leadership', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('shift_leadership')
-      .select('shift_code, position, member_id, members(id, duty_id, first_name, last_name, nickname, grade_class, duty_day)');
+      .select('shift_code, position, member_id, members(id, duty_id, first_name, last_name, nickname, grade_class, duty_day, phone_number, profile_image_url)');
     if (error) {
       return res.json({ success: true, data: [], canManage: canManageShiftLeadership(req.user) });
     }
@@ -3980,8 +3980,9 @@ app.get('/api/analytics/overview', async (req, res) => {
           name: `${head.first_name || ''} ${head.last_name || ''}`.trim(),
           nickname: head.nickname || '',
           class_room: head.grade_class || head.room || '',
+          phone: head.phone_number || head.phone || '',
           role: 'หัวหน้าผลัดเวร 👑',
-          photo_url: head.photo_url || ''
+          photo_url: head.profile_image_url || head.photo_url || ''
         } : null,
         deputy: deputy ? {
           id: deputy.id,
@@ -3989,16 +3990,18 @@ app.get('/api/analytics/overview', async (req, res) => {
           name: `${deputy.first_name || ''} ${deputy.last_name || ''}`.trim(),
           nickname: deputy.nickname || '',
           class_room: deputy.grade_class || deputy.room || '',
+          phone: deputy.phone_number || deputy.phone || '',
           role: 'รองหัวหน้าผลัดเวร 🥈',
-          photo_url: deputy.photo_url || ''
+          photo_url: deputy.profile_image_url || deputy.photo_url || ''
         } : null,
         officers: officers.map(o => ({
           duty_id: o.duty_id || '-',
           name: `${o.first_name || ''} ${o.last_name || ''}`.trim(),
           nickname: o.nickname || '',
           class_room: o.grade_class || o.room || '',
+          phone: o.phone_number || o.phone || '',
           role: 'สารวัตรประจำจุด',
-          photo_url: o.photo_url || ''
+          photo_url: o.profile_image_url || o.photo_url || ''
         }))
       };
     });
