@@ -719,9 +719,50 @@
       return dates;
     }
 
+    /**
+     * 🔢 ดึงข้อมูลสำหรับจัดเรียงสารวัตรตาม ระดับชั้น (ม.4 -> ม.5 -> ม.6) -> ห้อง (1 -> เรื่อยๆ) -> เลขที่ (1 -> เรื่อยๆ)
+     */
+    function getMemberSortKey(member) {
+      if (!member) return { grade: 99, room: 99, studentNo: 999 };
+      const rawGc = String(member.grade_class || member.class_room || '').trim();
+      const gcMatch = rawGc.match(/(?:ม\.?\s*)?(\d+)\s*[/.-]\s*(\d+)/i);
+      const grade = gcMatch ? parseInt(gcMatch[1], 10) : 99;
+      const room = gcMatch ? parseInt(gcMatch[2], 10) : 99;
+
+      let studentNo = 999;
+      if (member.student_no !== null && member.student_no !== undefined && member.student_no !== '') {
+        const parsedNo = parseInt(String(member.student_no).replace(/\D/g, ''), 10);
+        if (!isNaN(parsedNo)) studentNo = parsedNo;
+      }
+      if (studentNo === 999) {
+        const noMatch = rawGc.match(/\((\d+)\)/);
+        if (noMatch) studentNo = parseInt(noMatch[1], 10);
+      }
+      return { grade, room, studentNo };
+    }
+
+    /**
+     * 📋 จัดเรียงรายชื่อสารวัตรในตารางเช็คชื่อให้เป็นระเบียบสวยงาม:
+     * 1. ระดับชั้น (ม.4 -> ม.5 -> ม.6)
+     * 2. ห้อง (1, 2, 3...)
+     * 3. เลขที่ (1, 2, 3...)
+     */
+    function sortMembersByGradeRoomNumber(members) {
+      if (!Array.isArray(members)) return [];
+      return [...members].sort((a, b) => {
+        const keyA = getMemberSortKey(a);
+        const keyB = getMemberSortKey(b);
+        if (keyA.grade !== keyB.grade) return keyA.grade - keyB.grade;
+        if (keyA.room !== keyB.room) return keyA.room - keyB.room;
+        if (keyA.studentNo !== keyB.studentNo) return keyA.studentNo - keyB.studentNo;
+        return String(a.duty_id || '').localeCompare(String(b.duty_id || ''));
+      });
+    }
+
     function renderQuarterSheet() {
       const shiftData = SHIFT_INFO[currentShift] || SHIFT_INFO['M'];
-      const roster = ROSTER_DATABASE[currentShift] || ROSTER_DATABASE['M'];
+      const rawRoster = ROSTER_DATABASE[currentShift] || ROSTER_DATABASE['M'];
+      const roster = sortMembersByGradeRoomNumber(rawRoster);
       const dates12 = getQuarter12Dates(currentShift, currentQuarter, currentYear);
       const semNum = (currentQuarter === 3 || currentQuarter === 4) ? 1 : 2;
       const fullLabel = `ภาคเรียนที่ ${semNum} / ปีการศึกษา ${currentYear} • ประจำไตรมาสที่ ${currentQuarter} (12 สัปดาห์)`;
