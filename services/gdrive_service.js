@@ -149,6 +149,7 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
 
   try {
     const token = await getGoogleAccessToken(creds);
+    const mime = metadata.mimeType || (filename.endsWith('.png') ? 'image/png' : (filename.endsWith('.mp4') ? 'video/mp4' : (filename.endsWith('.mov') ? 'video/quicktime' : (filename.endsWith('.webm') ? 'video/webm' : 'image/jpeg'))));
 
     const boundary = '-------sarawat_boundary_' + Date.now();
     const delimiter = `\r\n--${boundary}\r\n`;
@@ -157,7 +158,7 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
     const fileMeta = {
       name: filename,
       parents: folderId ? [folderId] : [],
-      description: `รูปโปรไฟล์สารวัตรนักเรียน: ${metadata.memberName || filename} (${metadata.dutyId || '-'})`
+      description: metadata.description || (metadata.caseId ? `ไฟล์หลักฐานคดี ${metadata.caseId} โดย ${metadata.uploader || 'สารวัตร'}` : `รูปโปรไฟล์สารวัตรนักเรียน: ${metadata.memberName || filename} (${metadata.dutyId || '-'})`)
     };
 
     const multipartRequestBody = Buffer.concat([
@@ -166,7 +167,7 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
         'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
         JSON.stringify(fileMeta) +
         delimiter +
-        'Content-Type: image/jpeg\r\n' +
+        `Content-Type: ${mime}\r\n` +
         'Content-Transfer-Encoding: binary\r\n\r\n'
       ),
       buffer,

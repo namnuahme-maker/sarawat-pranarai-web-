@@ -2524,6 +2524,7 @@
       container.innerHTML = cases.map(c => {
         const isPending = c.status === 'PENDING';
         const isPendingApproval = c.status === 'PENDING_APPROVAL';
+        const isInProgress = c.status === 'IN_PROGRESS' || c.status === 'DUTY_ACTIVE';
         const isApproved = c.status === 'APPROVED';
         const isResolved = c.status === 'RESOLVED';
         const formattedDate = new Date(c.incident_date_time || c.created_at).toLocaleString('th-TH', {
@@ -2538,60 +2539,115 @@
           : ((c.reporter_email && !c.reporter_email.includes('anonymous')) ? c.reporter_email : 'ไม่ระบุ');
 
         let statusBadge = '';
-        if (isPending) {
+        if (isInProgress) {
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40 animate-pulse flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500 animate-ping"></span>🚨 กำลังปฏิบัติหน้าที่</span>';
+        } else if (isPending) {
           statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-rose-500/20 text-rose-300 border border-rose-500/30 animate-pulse-subtle">⏳ รอดำเนินการ</span>';
         } else if (isPendingApproval) {
           statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">⏳ รออนุมัติการตรวจ</span>';
         } else if (isApproved) {
           statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-blue-500/20 text-blue-300 border border-blue-500/30">🟢 อนุมัติแล้ว (กำลังตรวจ)</span>';
         } else if (isResolved) {
-          statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ ปิดคดีแล้ว</span>';
+          statusBadge = '<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">✅ เสร็จสิ้นภารกิจ</span>';
         } else {
           statusBadge = `<span class="px-2.5 py-0.5 rounded-full text-xs font-bold bg-slate-700 text-slate-300">${c.status}</span>`;
         }
 
+        // จัดรูปแบบบันทึก Timeline การกระทำ
+        let timelineHtml = '';
+        if (c.resolution_notes) {
+          const lines = c.resolution_notes.split('\n').filter(l => l.trim().length > 0);
+          timelineHtml = `
+            <div class="mt-3 p-3.5 rounded-xl bg-navy-950/90 border border-navy-800 text-xs text-slate-300 leading-relaxed">
+              <div class="font-bold text-amber-400 mb-2 flex items-center gap-1.5">
+                <span>⚡</span> ลำดับการปฏิบัติและบันทึกเหตุการณ์ (Action Timeline):
+              </div>
+              <div class="space-y-1.5 font-mono text-[11px]">
+                ${lines.map(line => {
+                  let badge = '📌';
+                  let colorClass = 'text-slate-300';
+                  if (line.includes('ขอออกปฏิบัติหน้าที่') || line.includes('เปิดคดี')) {
+                    badge = '🚨';
+                    colorClass = 'text-rose-400 font-bold';
+                  } else if (line.includes('แนบไฟล์หลักฐาน') || line.includes('Google Drive')) {
+                    badge = '📸';
+                    colorClass = 'text-blue-300';
+                  } else if (line.includes('บันทึกผลการปฏิบัติ') || line.includes('เสร็จสิ้นภารกิจ')) {
+                    badge = '✅';
+                    colorClass = 'text-emerald-400 font-bold';
+                  } else if (line.includes('อนุมัติ')) {
+                    badge = '👮';
+                    colorClass = 'text-amber-300';
+                  }
+                  return `<div class="flex items-start gap-1.5 ${colorClass}">
+                    <span>${badge}</span>
+                    <span class="break-words">${line.replace(/^[•\-]\s*/, '')}</span>
+                  </div>`;
+                }).join('')}
+              </div>
+            </div>
+          `;
+        }
+
         return `
-          <div class="glass-panel p-4 sm:p-5 rounded-2xl border ${isPending || isPendingApproval ? 'border-amber-500/40 bg-amber-950/10' : 'border-navy-700/80'} transition-all">
+          <div class="glass-panel p-4 sm:p-5 rounded-2xl border ${isInProgress ? 'border-rose-500/40 bg-rose-950/10 shadow-lg shadow-rose-950/20' : (isPending || isPendingApproval ? 'border-amber-500/40 bg-amber-950/10' : 'border-navy-700/80')} transition-all">
             <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-2 mb-2.5">
               <div class="flex items-center gap-2 flex-wrap">
                 <span class="font-mono text-xs font-extrabold px-2 py-0.5 rounded bg-navy-800 text-amber-400 border border-navy-700">
                   ${c.case_id}
                 </span>
                 <span class="text-xs text-slate-400">${formattedDate}</span>
+                ${c.category ? `<span class="px-2 py-0.5 rounded bg-navy-900 text-slate-300 border border-navy-700 text-xs">${c.category}</span>` : ''}
               </div>
               <div class="self-start sm:self-auto">${statusBadge}</div>
             </div>
 
-            <p class="text-sm font-bold text-white leading-relaxed">${c.description || 'ไม่มีรายละเอียดเหตุการณ์'}</p>
+            <p class="text-sm font-bold text-white leading-relaxed whitespace-pre-line">${c.description || 'ไม่มีรายละเอียดเหตุการณ์'}</p>
             <div class="flex items-center gap-3 text-xs text-slate-400 mt-2 flex-wrap">
-              <span>👤 ผู้ส่ง/เจ้าหน้าที่: <strong class="text-slate-200">${c.reporter_name || 'ไม่ประสงค์ออกนาม'}</strong></span>
-              <span>📞 ติดต่อ/สถานที่: <strong class="text-slate-200">${cleanContact}</strong></span>
+              <span>👤 สารวัตรผู้เปิดคดี/ผู้แจ้ง: <strong class="text-slate-200">${c.reporter_name || 'ไม่ประสงค์ออกนาม'}</strong></span>
+              <span>📍 สถานที่/จุดเกิดเหตุ: <strong class="text-slate-200">${cleanContact}</strong></span>
             </div>
 
-            ${c.resolution_notes ? `
-              <div class="mt-3 p-3 rounded-xl bg-navy-950/90 border border-navy-800 text-xs text-slate-300 whitespace-pre-line leading-relaxed">
-                <div class="font-bold text-amber-400 mb-1 flex items-center gap-1.5">
-                  <span>📋</span> บันทึกคำสั่งการและผลการตรวจ:
-                </div>
-                ${c.resolution_notes}
-              </div>
-            ` : ''}
+            ${timelineHtml}
 
-            <div class="mt-3 pt-3 border-t border-navy-800 flex items-center justify-between flex-wrap gap-2">
+            <div class="mt-3.5 pt-3 border-t border-navy-800 flex items-center justify-between flex-wrap gap-2">
               <div class="flex items-center gap-2 flex-wrap">
                 ${c.evidence_urls && c.evidence_urls.length > 0 ? c.evidence_urls.map((url, idx) => {
                   const isVideo = url.endsWith('.mp4') || url.endsWith('.mov') || url.endsWith('.webm') || url.includes('/uploads/');
+                  const isDrive = url.includes('drive.google.com');
+                  let driveId = null;
+                  if (isDrive) {
+                    const m = url.match(/\/d\/([a-zA-Z0-9_-]+)/) || url.match(/id=([a-zA-Z0-9_-]+)/);
+                    if (m) driveId = m[1];
+                  }
+
+                  if (driveId && !isVideo) {
+                    return `
+                      <a href="${url}" target="_blank" rel="noopener noreferrer" class="group relative inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-xl border border-blue-500/20 transition">
+                        <span>📁</span> Google Drive #${idx + 1} ↗
+                      </a>
+                    `;
+                  }
+
+                  if (isVideo && !isDrive) {
+                    return `
+                      <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-emerald-400 hover:text-emerald-300 font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 px-3 py-1.5 rounded-xl border border-emerald-500/20 transition">
+                        <span>📹</span> คลิป Bodycam #${idx + 1} ↗
+                      </a>
+                    `;
+                  }
+
                   return `
                     <a href="${url}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 text-xs text-blue-400 hover:text-blue-300 font-semibold bg-blue-500/10 hover:bg-blue-500/20 px-3 py-1.5 rounded-xl border border-blue-500/20 transition">
-                      <span>${isVideo ? '📹' : '📂'}</span> ${isVideo ? `คลิป Bodycam #${idx + 1}` : `หลักฐาน #${idx + 1}`} ↗
+                      <span>${isDrive ? '📁' : '📂'}</span> ${isDrive ? `Drive #${idx + 1}` : `หลักฐาน #${idx + 1}`} ↗
                     </a>
                   `;
                 }).join('') : `
-                  <span class="text-xs text-slate-500">ยังไม่มีไฟล์หลักฐาน</span>
+                  <span class="text-xs text-slate-500">📸 ยังไม่มีไฟล์หลักฐาน</span>
                 `}
               </div>
               <a href="/bodycam-upload.html?caseId=${encodeURIComponent(c.case_id)}" class="inline-flex items-center gap-1 text-xs text-amber-400 hover:text-amber-300 bg-amber-500/10 hover:bg-amber-500/20 px-3 py-1.5 rounded-xl border border-amber-500/20 font-semibold transition">
-                <span>+</span> อัปโหลด Bodycam
+                <span>+</span> อัปโหลด Bodycam / หลักฐาน
               </a>
             </div>
           </div>
@@ -3940,6 +3996,10 @@
             })
             .on('postgres_changes', { event: '*', schema: 'public', table: 'members' }, () => {
               console.log('[REALTIME] members updated');
+              fetchData(false);
+            })
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'cases' }, () => {
+              console.log('[REALTIME] cases updated');
               fetchData(false);
             })
             .subscribe();

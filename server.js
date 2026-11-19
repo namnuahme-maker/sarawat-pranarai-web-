@@ -2155,7 +2155,22 @@ app.post('/api/cases/:id/evidence', async (req, res) => {
         }
       }
 
-      // ถ้าไม่มี Google Drive URL หรือเกิดข้อผิดพลาด ให้บันทึกลงเครื่อง/เซิร์ฟเวอร์เสมอป้องกันข้อมูลสูญหาย (Failsafe)
+      // 2. ถ้าไม่มี GAS URL ให้ลองใช้ uploadToGoogleDrive (Service Account / Webhook)
+      if (!fileUrl) {
+        try {
+          const buffer = Buffer.from(base64Data.split(',').pop(), 'base64');
+          const mime = filename.endsWith('.mp4') ? 'video/mp4' : (filename.endsWith('.mov') ? 'video/quicktime' : (filename.endsWith('.webm') ? 'video/webm' : (filename.endsWith('.png') ? 'image/png' : 'image/jpeg')));
+          const gRes = await uploadToGoogleDrive(buffer, filename, { caseId, category: 'evidence', mimeType: mime });
+          if (gRes && gRes.success && gRes.webViewLink) {
+            fileUrl = gRes.webViewLink;
+            console.log(`[GOOGLE DRIVE SERVICE ACCOUNT] Uploaded evidence to Drive: ${fileUrl}`);
+          }
+        } catch (gErr) {
+          console.warn('[GOOGLE DRIVE SERVICE ACCOUNT WARN]:', gErr.message);
+        }
+      }
+
+      // 3. Failsafe: ถ้าไม่มี Google Drive URL หรือเชื่อมต่อไม่ได้ ให้บันทึกลงเครื่อง/เซิร์ฟเวอร์เสมอป้องกันข้อมูลสูญหาย
       if (!fileUrl) {
         const uploadDir = path.join(__dirname, 'public', 'uploads');
         if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
@@ -2180,11 +2195,13 @@ app.post('/api/cases/:id/evidence', async (req, res) => {
     const existingUrls = currentCase?.evidence_urls || [];
     const updatedUrls = [...existingUrls, fileUrl];
 
-    const updates = { evidence_urls: updatedUrls };
-    if (notes) {
-      updates.resolution_notes = (currentCase?.resolution_notes ? currentCase.resolution_notes + '\n' : '') +
-        `[แนบหลักฐาน Bodycam]: ${notes} (${fileUrl})`;
-    }
+    const timeStr = new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' });
+    const timelineEntry = `• ${timeStr} น. - 📸 แนบไฟล์หลักฐาน (${filename || 'ไฟล์'}): ${fileUrl}${notes ? ` - ${notes}` : ''}`;
+
+    const updates = {
+      evidence_urls: updatedUrls,
+      resolution_notes: (currentCase?.resolution_notes ? currentCase.resolution_notes + '\n' : '') + timelineEntry
+    };
 
     const { error } = await supabase.from('cases').update(updates).eq('case_id', caseId);
     if (error) throw error;
