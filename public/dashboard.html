@@ -525,6 +525,10 @@
         <!-- Filter Pills (Scrollable on Mobile) -->
         <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
           <button onclick="filterRoster('ALL')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-bold transition flex-shrink-0 bg-amber-500 text-navy-950">ทั้งหมด</button>
+          <button onclick="filterRoster('UNLINKED')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-amber-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0 border border-amber-500/40 flex items-center gap-1.5">
+            <span>📌</span> รอผูก Discord <span id="unlinked-pill-badge" class="px-1.5 py-0.2 rounded-full bg-amber-500/30 text-amber-300 text-[10px] font-mono font-bold">0</span>
+          </button>
+          <button onclick="filterRoster('LINKED')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">🟢 ผูกแล้ว</button>
           <button onclick="filterRoster('M')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">จันทร์ (M/MS)</button>
           <button onclick="filterRoster('T')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">อังคาร (T/TS)</button>
           <button onclick="filterRoster('W')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">พุธ (W/WS)</button>
@@ -533,15 +537,20 @@
           <button onclick="filterRoster('S')" class="roster-pill px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white bg-navy-850 hover:bg-navy-800 transition flex-shrink-0">เวรพิเศษ (S)</button>
         </div>
 
-        <!-- Action Group: Add Member & Search Bar -->
-        <div class="flex items-center gap-2.5 w-full sm:w-auto">
+        <!-- Action Group: Add Member & Cleanup & Search Bar -->
+        <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
           <!-- Button Add Member -->
           <button id="btn-add-member" onclick="openAddMemberModal()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow-lg flex-shrink-0" title="เพิ่มข้อมูลสารวัตรนักเรียนใหม่">
             <span>➕</span> เพิ่มสารวัตรใหม่
           </button>
 
+          <!-- Button Cleanup Unlinked Test Mock Members -->
+          <button id="btn-cleanup-unlinked" onclick="cleanupUnlinkedMembers()" class="px-3 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white font-bold text-xs transition active:scale-95 flex items-center gap-1.5 shadow flex-shrink-0" title="ล้างรายชื่อทดสอบที่ยังไม่ได้ผูก Discord ทั้งหมด">
+            <span>🧹</span> ล้างข้อมูลทดสอบ
+          </button>
+
           <!-- Search Bar -->
-          <div class="relative w-full sm:w-72">
+          <div class="relative w-full sm:w-64">
             <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-500 text-xs">🔍</span>
             <input type="text" id="roster-search-input" oninput="handleRosterSearch()" placeholder="ค้นหาชื่อ, รหัส, เลขที่..." class="w-full pl-8 pr-8 py-2 bg-navy-950 border border-navy-700/80 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-amber-500 transition">
             <button onclick="clearRosterSearch()" id="clear-search-btn" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-500 hover:text-slate-300 text-xs hidden">✕</button>
@@ -1180,7 +1189,7 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="grid grid-cols-3 gap-2 mt-4">
+      <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 mt-4">
         <button onclick="downloadModalCardPNG()" class="py-2.5 px-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1 shadow">
           <span>📥</span> บันทึก PNG
         </button>
@@ -1189,6 +1198,12 @@
         </button>
         <button onclick="openVerificationPage()" class="py-2.5 px-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-white font-semibold text-xs border border-navy-700 transition active:scale-95 flex items-center justify-center gap-1">
           <span>🔍</span> รับรอง QR
+        </button>
+        <button onclick="openEditMemberModal(activeCardMemberId)" class="py-2.5 px-2 rounded-xl bg-cyan-700 hover:bg-cyan-600 text-white font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1 shadow">
+          <span>✏️</span> แก้ไขข้อมูล
+        </button>
+        <button onclick="deleteMemberFromModal()" class="py-2.5 px-2 rounded-xl bg-rose-900 hover:bg-rose-800 border border-rose-500/30 text-rose-200 hover:text-white font-bold text-xs transition active:scale-95 flex items-center justify-center gap-1 shadow">
+          <span>🗑️</span> ลบสารวัตร
         </button>
       </div>
 
@@ -1509,6 +1524,124 @@
   </div>
 
   <!-- ========================================================= -->
+  <!-- MODAL: EDIT MEMBER (แก้ไขข้อมูลสารวัตร) -->
+  <!-- ========================================================= -->
+  <div id="modal-edit-member" class="fixed inset-0 z-50 bg-navy-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 transition-all">
+    <div class="relative w-full max-w-lg bg-navy-900 border border-blue-500/40 rounded-2xl p-5 sm:p-6 shadow-2xl max-h-[92vh] overflow-y-auto">
+      <!-- Close Button -->
+      <button type="button" onclick="closeEditMemberModal()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-navy-800 hover:bg-navy-700 text-slate-400 hover:text-white flex items-center justify-center text-sm font-bold transition">
+        ✕
+      </button>
+
+      <!-- Header -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center text-xl flex-shrink-0">
+          ✏️
+        </div>
+        <div>
+          <h3 class="text-base font-bold text-white">แก้ไขข้อมูลสารวัตรนักเรียน</h3>
+          <p class="text-xs text-slate-400">อัปเดตข้อมูลส่วนตัว ผลัดเวร หรือปลดการผูกบัญชี Discord</p>
+        </div>
+      </div>
+
+      <!-- Form -->
+      <form id="form-edit-member" onsubmit="submitEditMember(event)" class="space-y-3.5">
+        <input type="hidden" id="edit-m-id">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อจริง <span class="text-rose-400">*</span></label>
+            <input type="text" id="edit-m-first-name" required placeholder="เช่น นายสมชาย" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">นามสกุล <span class="text-rose-400">*</span></label>
+            <input type="text" id="edit-m-last-name" required placeholder="เช่น ใจดี" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ชื่อเล่น <span class="text-rose-400">*</span></label>
+            <input type="text" id="edit-m-nickname" required placeholder="เช่น บอส" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ระดับชั้น <span class="text-rose-400">*</span></label>
+            <input type="text" id="edit-m-grade-class" required placeholder="เช่น 4/11" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">เลขที่</label>
+            <input type="number" id="edit-m-student-no" placeholder="เช่น 15" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">เบอร์โทรศัพท์</label>
+            <input type="tel" id="edit-m-phone" placeholder="เช่น 0891234567" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">รหัสเวร (Duty ID)</label>
+            <input type="text" id="edit-m-duty-id" placeholder="เช่น TS1, M2" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-blue-500">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">ผลัดเวรปฏิบัติหน้าที่</label>
+            <select id="edit-m-duty-day" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+              <option value="M">วันจันทร์ (M)</option>
+              <option value="MS">วันจันทร์ + พิเศษ (MS)</option>
+              <option value="T">วันอังคาร (T)</option>
+              <option value="TS">วันอังคาร + พิเศษ (TS)</option>
+              <option value="W">วันพุธ (W)</option>
+              <option value="WS">วันพุธ + พิเศษ (WS)</option>
+              <option value="Th">วันพฤหัสบดี (Th)</option>
+              <option value="ThS">วันพฤหัสบดี + พิเศษ (ThS)</option>
+              <option value="F">วันศุกร์ (F)</option>
+              <option value="FS">วันศุกร์ + พิเศษ (FS)</option>
+              <option value="S">เวรพิเศษปฏิบัติหน้าที่ทุกวัน (S)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-slate-300 mb-1">สถานะในระบบ</label>
+            <select id="edit-m-status" class="w-full bg-navy-950 border border-navy-700 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">
+              <option value="PENDING_APPROVAL">⏳ PENDING_APPROVAL (รอเข้า Discord / รออนุมัติ)</option>
+              <option value="ACTIVE">🟢 ACTIVE (ปฏิบัติหน้าที่ปกติ)</option>
+              <option value="INACTIVE">⚪ INACTIVE (พ้นสภาพ / พักหน้าที่)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="p-3 bg-navy-950/80 border border-navy-700/80 rounded-xl flex items-center justify-between text-xs">
+          <div>
+            <span class="text-slate-400 block text-[10px]">สถานะการผูก Discord ID:</span>
+            <span id="edit-m-discord-status" class="font-mono font-bold text-amber-300">ยังไม่ผูก</span>
+          </div>
+          <button type="button" id="btn-unlink-discord" onclick="unlinkMemberDiscord()" class="px-2.5 py-1 rounded-lg bg-rose-950/60 hover:bg-rose-900 border border-rose-500/30 text-rose-300 text-[11px] font-semibold transition hidden">
+            ปลดการผูก Discord
+          </button>
+        </div>
+
+        <div id="edit-m-error" class="hidden p-2.5 bg-rose-500/15 border border-rose-500/40 rounded-xl text-xs text-rose-300"></div>
+
+        <!-- Buttons -->
+        <div class="pt-3 border-t border-navy-800 flex justify-between items-center gap-2">
+          <button type="button" onclick="deleteCurrentEditMember()" class="px-3.5 py-2 rounded-xl bg-rose-950/80 hover:bg-rose-900 border border-rose-500/40 text-rose-300 text-xs font-bold transition flex items-center gap-1">
+            <span>🗑️</span> ลบสารวัตรนี้
+          </button>
+          <div class="flex gap-2">
+            <button type="button" onclick="closeEditMemberModal()" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold transition">
+              ยกเลิก
+            </button>
+            <button type="submit" id="btn-submit-edit-member" class="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-95 text-white text-xs font-bold shadow-md shadow-blue-500/30 transition flex items-center gap-1.5">
+              <span>💾 บันทึกการแก้ไข</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================= -->
   <!-- MOBILE BOTTOM NAVIGATION DOCK (iOS / Android Style) -->
   <!-- ========================================================= -->
   <div class="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-navy-900/95 backdrop-blur-lg border-t border-navy-800 px-2 py-1.5 flex justify-around items-center">
@@ -1790,6 +1923,7 @@
     let allCases = [];
     let activeCardMemberId = null;
     let currentUser = null;
+    let currentRosterFilter = 'ALL';
 
     // Member Management Modal Functions
     function openAddMemberModal() {
@@ -1882,6 +2016,218 @@
       }
     }
 
+    // Member Edit Functions
+    function openEditMemberModal(memberId) {
+      const m = allMembers.find(item => item.id === memberId);
+      if (!m) return;
+
+      const modal = document.getElementById('modal-edit-member');
+      const err = document.getElementById('edit-m-error');
+      if (err) {
+        err.classList.add('hidden');
+        err.textContent = '';
+      }
+
+      document.getElementById('edit-m-id').value = m.id;
+      document.getElementById('edit-m-first-name').value = m.first_name || '';
+      document.getElementById('edit-m-last-name').value = m.last_name || '';
+      document.getElementById('edit-m-nickname').value = (m.nickname && m.nickname !== '-') ? m.nickname : '';
+      document.getElementById('edit-m-grade-class').value = m.grade_class || '';
+      document.getElementById('edit-m-student-no').value = m.student_no || '';
+      document.getElementById('edit-m-phone').value = (m.phone_number && m.phone_number !== '-') ? m.phone_number : '';
+      document.getElementById('edit-m-duty-id').value = m.duty_id || '';
+      document.getElementById('edit-m-duty-day').value = m.duty_day || 'M';
+      document.getElementById('edit-m-status').value = m.status || 'ACTIVE';
+
+      const discordStatusEl = document.getElementById('edit-m-discord-status');
+      const unlinkBtn = document.getElementById('btn-unlink-discord');
+      if (m.discord_id) {
+        if (discordStatusEl) {
+          discordStatusEl.textContent = `🟢 ผูกแล้ว (ID: ${m.discord_id})`;
+          discordStatusEl.className = 'font-mono font-bold text-emerald-400';
+        }
+        if (unlinkBtn) unlinkBtn.classList.remove('hidden');
+      } else {
+        if (discordStatusEl) {
+          discordStatusEl.textContent = '📌 ยังไม่ผูก Discord (รอลงทะเบียนในบอท)';
+          discordStatusEl.className = 'font-mono font-bold text-amber-300';
+        }
+        if (unlinkBtn) unlinkBtn.classList.add('hidden');
+      }
+
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeEditMemberModal() {
+      const modal = document.getElementById('modal-edit-member');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    async function submitEditMember(e) {
+      e.preventDefault();
+      const id = document.getElementById('edit-m-id').value;
+      const errEl = document.getElementById('edit-m-error');
+      const btn = document.getElementById('btn-submit-edit-member');
+      if (errEl) {
+        errEl.classList.add('hidden');
+        errEl.textContent = '';
+      }
+
+      const firstName = document.getElementById('edit-m-first-name').value.trim();
+      const lastName = document.getElementById('edit-m-last-name').value.trim();
+      const nickname = document.getElementById('edit-m-nickname').value.trim();
+      const gradeClass = document.getElementById('edit-m-grade-class').value.trim();
+      const studentNo = parseInt(document.getElementById('edit-m-student-no').value, 10) || 0;
+      const phone = document.getElementById('edit-m-phone').value.trim();
+      const dutyDay = document.getElementById('edit-m-duty-day').value;
+      const dutyId = document.getElementById('edit-m-duty-id').value.trim();
+      const status = document.getElementById('edit-m-status').value;
+
+      if (!firstName || !lastName || !nickname || !gradeClass) {
+        if (errEl) {
+          errEl.textContent = 'กรุณากรอกชื่อจริง นามสกุล ชื่อเล่น และระดับชั้นให้ครบถ้วน';
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>⏳ กำลังบันทึก...</span>';
+      }
+
+      try {
+        const res = await fetch(`/api/members/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            first_name: firstName,
+            last_name: lastName,
+            nickname: nickname,
+            grade_class: gradeClass,
+            student_no: studentNo,
+            phone_number: phone,
+            duty_day: dutyDay,
+            duty_id: dutyId || null,
+            status: status
+          })
+        });
+
+        const data = await res.json();
+        if (!res.ok || data.error) {
+          throw new Error(data.error || 'เกิดข้อผิดพลาดในการแก้ไขข้อมูล');
+        }
+
+        closeEditMemberModal();
+        alert(`✅ แก้ไขข้อมูล ${firstName} ${lastName} สำเร็จ!`);
+        await fetchData(true);
+      } catch (err) {
+        console.error('Edit member error:', err);
+        if (errEl) {
+          errEl.textContent = '❌ ' + err.message;
+          errEl.classList.remove('hidden');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<span>💾 บันทึกการแก้ไข</span>';
+        }
+      }
+    }
+
+    async function unlinkMemberDiscord() {
+      const id = document.getElementById('edit-m-id').value;
+      if (!id) return;
+      if (!confirm('ต้องการปลดการผูก Discord ID ของสมาชิกท่านนี้ใช่หรือไม่?\n(สมาชิกจะกลับไปอยู่ในสถานะรอลงทะเบียน และสามารถเลือกชื่อใหม่ใน Discord ได้)')) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/members/${id}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ discord_id: null, status: 'PENDING_APPROVAL' })
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'ปลดการผูกล้มเหลว');
+
+        document.getElementById('edit-m-discord-status').textContent = '📌 ยังไม่ผูก Discord (รอลงทะเบียนในบอท)';
+        document.getElementById('edit-m-discord-status').className = 'font-mono font-bold text-amber-300';
+        document.getElementById('btn-unlink-discord').classList.add('hidden');
+        alert('✅ ปลดการผูก Discord เรียบร้อยแล้ว');
+        await fetchData(true);
+      } catch (err) {
+        alert('❌ ไม่สามารถปลดการผูก Discord ได้: ' + err.message);
+      }
+    }
+
+    async function deleteMember(id, name) {
+      if (!confirm(`⚠️ ยืนยันการลบสมาชิก:\n"${name}"\n\nการลบนี้จะนำรายชื่อออกจากระบบสารวัตรถาวร คุณต้องการดำเนินการต่อหรือไม่?`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/members/${id}`, {
+          method: 'DELETE'
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'ลบข้อมูลไม่สำเร็จ');
+
+        alert(data.message || '✅ ลบข้อมูลสมาชิกเรียบร้อยแล้ว');
+        await fetchData(true);
+      } catch (err) {
+        console.error('Delete error:', err);
+        alert('❌ ลบสมาชิกไม่สำเร็จ: ' + err.message);
+      }
+    }
+
+    async function deleteCurrentEditMember() {
+      const id = document.getElementById('edit-m-id').value;
+      const firstName = document.getElementById('edit-m-first-name').value;
+      const lastName = document.getElementById('edit-m-last-name').value;
+      if (!id) return;
+
+      closeEditMemberModal();
+      await deleteMember(id, `${firstName} ${lastName}`);
+    }
+
+    async function deleteMemberFromModal() {
+      if (!activeCardMemberId) return;
+      const m = allMembers.find(item => item.id === activeCardMemberId);
+      const name = m ? `${m.first_name} ${m.last_name}` : 'สารวัตรท่านนี้';
+      
+      const modal = document.getElementById('card-modal');
+      if (modal) modal.classList.add('hidden');
+      await deleteMember(activeCardMemberId, name);
+    }
+
+    async function cleanupUnlinkedMembers() {
+      const unlinked = allMembers.filter(m => !m.discord_id);
+      if (unlinked.length === 0) {
+        alert('ℹ️ ขณะนี้ไม่มีรายชื่อที่ยังไม่ผูก Discord ในระบบ');
+        return;
+      }
+
+      if (!confirm(`🧹 ยืนยันการล้างข้อมูลทดสอบ:\n\nพบรายชื่อที่ยังไม่ผูก Discord ทั้งหมด ${unlinked.length} รายการ\nคุณต้องการลบรายชื่อเหล่านี้ออกจากระบบทั้งหมดใช่หรือไม่?`)) {
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/members/cleanup-unlinked', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+        if (!res.ok || data.error) throw new Error(data.error || 'ล้างข้อมูลล้มเหลว');
+
+        alert(data.message || `✅ ล้างข้อมูลทดสอบเรียบร้อยแล้ว (${data.count || unlinked.length} รายการ)`);
+        await fetchData(true);
+      } catch (err) {
+        console.error('Cleanup unlinked error:', err);
+        alert('❌ ไม่สามารถล้างข้อมูลได้: ' + err.message);
+      }
+    }
+
     // Smooth Number Ticker Animation (EaseOutExpo)
     function animateCounter(elementId, targetValue, duration = 1200) {
       const el = document.getElementById(elementId);
@@ -1969,6 +2315,10 @@
           allMembers = membersData.data || [];
           renderRoster(allMembers);
           renderShiftsColumns(allMembers);
+
+          const unlinkedCount = allMembers.filter(m => !m.discord_id).length;
+          const badgeEl = document.getElementById('unlinked-pill-badge');
+          if (badgeEl) badgeEl.textContent = unlinkedCount;
 
           // ตรวจสอบพารามิเตอร์ URL เพื่อเปิดบัตรประจำตัว 3D ทันที (เช่น /card?id=... หรือ ?id=... หรือ ?duty_id=...)
           try {
@@ -2126,23 +2476,29 @@
               </div>
             </div>
 
-            <!-- Middle: Quick Metadata (Class, Shift, Role) - Hidden on extra small screens -->
-            <div class="hidden md:flex items-center gap-3 text-xs font-mono text-slate-400">
+            <!-- Middle: Quick Metadata (Class, Shift, Role, Discord Status) - Hidden on extra small screens -->
+            <div class="hidden md:flex items-center gap-2.5 text-xs font-mono text-slate-400">
               <span>ชั้น: <strong class="text-slate-200">${m.grade_class || '-'}</strong></span>
               <span>เวร: <strong class="text-amber-300">${m.duty_day || '-'}</strong></span>
               <span class="text-[10px] font-bold px-2 py-0.5 rounded ${m.role === 'ADMIN' ? 'bg-rose-950/80 text-rose-300 border border-rose-500/60 shadow-[0_0_8px_rgba(244,63,94,0.3)]' : (m.role === 'PRESIDENT' ? 'bg-amber-950/80 text-amber-300 border border-amber-500/40' : 'bg-navy-950 text-slate-300 border border-navy-700')}">
                 ${roleThai}
               </span>
+              ${!m.discord_id 
+                ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/50 flex items-center gap-1 shadow-sm">📌 รอผูก Discord</span>` 
+                : `<span class="text-[10px] font-medium px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">🟢 ผูกแล้ว</span>`}
               ${isSpecial ? `<span class="text-[10px] text-amber-400 font-bold">⚡ SPECIAL</span>` : ''}
             </div>
 
-            <!-- Right: Action Button -->
-            <div class="flex items-center gap-2 flex-shrink-0">
-              <span class="text-[11px] font-mono text-slate-400 group-hover:text-cyan-400 hidden sm:inline transition">
-                ดูโปรไฟล์ / บัตร ↗
-              </span>
-              <button onclick="event.stopPropagation(); openCardModal('${m.id}')" class="px-2.5 py-1.5 rounded-md bg-navy-950 group-hover:bg-amber-500 group-hover:text-navy-950 text-amber-400 font-mono font-bold text-[11px] border border-amber-500/40 transition-all duration-150 active:scale-95 shadow">
+            <!-- Right: Action Buttons -->
+            <div class="flex items-center gap-1.5 flex-shrink-0" onclick="event.stopPropagation()">
+              <button onclick="openCardModal('${m.id}')" class="px-2.5 py-1.5 rounded-md bg-navy-950 hover:bg-amber-500 hover:text-navy-950 text-amber-400 font-mono font-bold text-[11px] border border-amber-500/40 transition-all duration-150 active:scale-95 shadow" title="ดูบัตรประจำตัว">
                 🪪 บัตร
+              </button>
+              <button onclick="openEditMemberModal('${m.id}')" class="px-2.5 py-1.5 rounded-md bg-navy-950 hover:bg-blue-600 hover:text-white text-blue-400 font-mono font-bold text-[11px] border border-blue-500/40 transition-all duration-150 active:scale-95 shadow" title="แก้ไขข้อมูลสารวัตร">
+                ✏️ แก้ไข
+              </button>
+              <button onclick="deleteMember('${m.id}', '${m.first_name} ${m.last_name}')" class="px-2 py-1.5 rounded-md bg-navy-950 hover:bg-rose-600 hover:text-white text-rose-400 font-mono font-bold text-[11px] border border-rose-500/40 transition-all duration-150 active:scale-95 shadow" title="ลบข้อมูลสารวัตร">
+                🗑️
               </button>
             </div>
 
@@ -2515,16 +2871,27 @@
     }
 
     // Roster Filtering & Search
-    function filterRoster(shiftCode) {
+    function filterRoster(shiftCode, btnEl) {
+      const activeBtn = btnEl || event?.currentTarget || event?.target?.closest('button');
       document.querySelectorAll('.roster-pill').forEach(btn => {
         btn.classList.remove('bg-amber-500', 'text-navy-950', 'font-bold');
         btn.classList.add('bg-navy-850', 'text-slate-300');
       });
-      event.target.classList.remove('bg-navy-850', 'text-slate-300');
-      event.target.classList.add('bg-amber-500', 'text-navy-950', 'font-bold');
+      if (activeBtn) {
+        activeBtn.classList.remove('bg-navy-850', 'text-slate-300');
+        activeBtn.classList.add('bg-amber-500', 'text-navy-950', 'font-bold');
+      }
+
+      currentRosterFilter = shiftCode;
 
       if (shiftCode === 'ALL') {
         renderRoster(allMembers);
+      } else if (shiftCode === 'UNLINKED') {
+        const filtered = allMembers.filter(m => !m.discord_id);
+        renderRoster(filtered);
+      } else if (shiftCode === 'LINKED') {
+        const filtered = allMembers.filter(m => !!m.discord_id);
+        renderRoster(filtered);
       } else if (shiftCode === 'S') {
         const filtered = allMembers.filter(m => m.duty_day && m.duty_day.endsWith('S'));
         renderRoster(filtered);
@@ -2547,12 +2914,32 @@
         clearBtn.classList.add('hidden');
       }
 
-      const filtered = allMembers.filter(m =>
+      let baseList = allMembers;
+      if (currentRosterFilter === 'UNLINKED') {
+        baseList = allMembers.filter(m => !m.discord_id);
+      } else if (currentRosterFilter === 'LINKED') {
+        baseList = allMembers.filter(m => !!m.discord_id);
+      } else if (currentRosterFilter === 'S') {
+        baseList = allMembers.filter(m => m.duty_day && m.duty_day.endsWith('S'));
+      } else if (currentRosterFilter && currentRosterFilter !== 'ALL') {
+        const targetDays = currentRosterFilter === 'Th'
+          ? ['Th', 'ThS', 'Ts', 'TSS', 'TsS']
+          : [currentRosterFilter, `${currentRosterFilter}S`];
+        baseList = allMembers.filter(m => targetDays.includes(m.duty_day));
+      }
+
+      if (!q) {
+        renderRoster(baseList);
+        return;
+      }
+
+      const filtered = baseList.filter(m =>
         (m.first_name && m.first_name.toLowerCase().includes(q)) ||
         (m.last_name && m.last_name.toLowerCase().includes(q)) ||
         (m.nickname && m.nickname.toLowerCase().includes(q)) ||
         (m.duty_id && m.duty_id.toLowerCase().includes(q)) ||
-        (m.grade_class && m.grade_class.toLowerCase().includes(q))
+        (m.grade_class && m.grade_class.toLowerCase().includes(q)) ||
+        (String(m.student_no || '').includes(q))
       );
       renderRoster(filtered);
     }
@@ -2561,7 +2948,7 @@
       const input = document.getElementById('roster-search-input');
       input.value = '';
       document.getElementById('clear-search-btn').classList.add('hidden');
-      renderRoster(allMembers);
+      filterRoster(currentRosterFilter);
     }
 
     // Case Filtering

@@ -1,7 +1,8 @@
 /**
- * ⚡ SARAWAT DIGITAL SYSTEM - MINIMAL ULTRA-SMOOTH ANIMATIONS
+ * ⚡ SARAWAT DIGITAL SYSTEM - ULTRA-SMOOTH ANIMATIONS v2
  * โรงเรียนพระนารายณ์ • ฝ่ายบริหารงานสารวัตรนักเรียน
  * GPU-Accelerated 60FPS CSS Transitions & Animations
+ * Layer 1–11: Original | Layer 12–19: Animation Team Upgrade
  */
 
 /* ==========================================================
@@ -202,5 +203,235 @@ dialog[open] > div {
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+}
+
+/* ==========================================================
+ * 12. Skeleton Loading Shimmer (Data-fetching state)
+ * ========================================================== */
+@keyframes skeletonShimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton,
+.skeleton-line,
+.skeleton-card {
+  background: linear-gradient(
+    90deg,
+    rgba(22, 34, 56, 1) 25%,
+    rgba(30, 48, 80, 0.9) 50%,
+    rgba(22, 34, 56, 1) 75%
+  );
+  background-size: 800px 100%;
+  animation: skeletonShimmer 1.6s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  border-radius: 0.5rem;
+  will-change: background-position;
+}
+
+.skeleton-line { height: 0.875rem; width: 100%; margin-bottom: 0.5rem; }
+.skeleton-line.w-3-4 { width: 75%; }
+.skeleton-line.w-1-2 { width: 50%; }
+.skeleton-line.w-1-3 { width: 33%; }
+.skeleton-card { height: 120px; border-radius: 0.75rem; }
+
+/* Skeleton avatar circle */
+.skeleton-avatar {
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: 9999px;
+  background: linear-gradient(
+    90deg,
+    rgba(22, 34, 56, 1) 25%,
+    rgba(30, 48, 80, 0.9) 50%,
+    rgba(22, 34, 56, 1) 75%
+  );
+  background-size: 800px 100%;
+  animation: skeletonShimmer 1.6s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  flex-shrink: 0;
+}
+
+/* ==========================================================
+ * 13. Form Shake — Validation Error Feedback
+ * ========================================================== */
+@keyframes formShake {
+  0%, 100% { transform: translateX(0); }
+  15%       { transform: translateX(-6px); }
+  30%       { transform: translateX(5px); }
+  45%       { transform: translateX(-4px); }
+  60%       { transform: translateX(3px); }
+  75%       { transform: translateX(-2px); }
+}
+
+.shake,
+.input-error {
+  animation: formShake 0.42s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+  will-change: transform;
+}
+
+.input-error-border {
+  border-color: rgba(239, 68, 68, 0.75) !important;
+  box-shadow: 0 0 0 1px rgba(239, 68, 68, 0.4) !important;
+}
+
+/* ==========================================================
+ * 14. Success Checkmark Stamp Animation
+ * ========================================================== */
+@keyframes checkmarkPop {
+  0%   { opacity: 0; transform: scale(0.4) rotate(-15deg); }
+  60%  { opacity: 1; transform: scale(1.15) rotate(5deg); }
+  80%  { transform: scale(0.95) rotate(-2deg); }
+  100% { opacity: 1; transform: scale(1) rotate(0deg); }
+}
+
+.success-checkmark,
+.checkmark-pop {
+  animation: checkmarkPop 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* SVG checkmark path draw-on effect */
+@keyframes checkStroke {
+  from { stroke-dashoffset: 48; }
+  to   { stroke-dashoffset: 0; }
+}
+
+.check-path-draw {
+  stroke-dasharray: 48;
+  stroke-dashoffset: 48;
+  animation: checkStroke 0.4s 0.15s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* ==========================================================
+ * 15. Staggered List Entry — Roster / Cards Enter In Sequence
+ * ========================================================== */
+@keyframes listItemReveal {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Add .stagger-list to the parent; children animate with delay */
+.stagger-list > * {
+  opacity: 0;
+  animation: listItemReveal 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.stagger-list > *:nth-child(1)  { animation-delay: 0.04s; }
+.stagger-list > *:nth-child(2)  { animation-delay: 0.08s; }
+.stagger-list > *:nth-child(3)  { animation-delay: 0.12s; }
+.stagger-list > *:nth-child(4)  { animation-delay: 0.16s; }
+.stagger-list > *:nth-child(5)  { animation-delay: 0.20s; }
+.stagger-list > *:nth-child(6)  { animation-delay: 0.24s; }
+.stagger-list > *:nth-child(7)  { animation-delay: 0.28s; }
+.stagger-list > *:nth-child(8)  { animation-delay: 0.32s; }
+.stagger-list > *:nth-child(n+9){ animation-delay: 0.36s; }
+
+/* ==========================================================
+ * 16. Number Counter Roll-Up (Stat Tiles)
+ * ========================================================== */
+@keyframes counterPulse {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.06); }
+  100% { transform: scale(1); }
+}
+
+.counter-updated {
+  animation: counterPulse 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================
+ * 17. Status Badge: "ONLINE" Live Dot Ring
+ * ========================================================== */
+@keyframes liveDotRing {
+  0%   { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.6); opacity: 1; }
+  70%  { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); opacity: 0.6; }
+  100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); opacity: 1; }
+}
+
+.live-dot,
+.status-online-dot {
+  animation: liveDotRing 2s infinite cubic-bezier(0.4, 0, 0.6, 1);
+  border-radius: 9999px;
+  display: inline-block;
+}
+
+/* ==========================================================
+ * 18. Page-leave Fade-Out (before navigation)
+ * ========================================================== */
+@keyframes pageFadeOut {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-6px); }
+}
+
+.page-leaving {
+  animation: pageFadeOut 0.18s cubic-bezier(0.4, 0, 1, 1) forwards;
+  pointer-events: none;
+}
+
+/* ==========================================================
+ * 19. Focus Ring — Tactical Gold keyboard focus indicator
+ * ========================================================== */
+:focus-visible {
+  outline: 2px solid rgba(245, 158, 11, 0.8);
+  outline-offset: 2px;
+}
+
+/* Input focus glow bump — same as global-theme but layered here for specificity */
+.input-tactical:focus,
+.select-tactical:focus,
+.textarea-tactical:focus {
+  transition: border-color 0.15s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow  0.15s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ==========================================================
+ * 20. Smooth Image Lazy-Load Fade-In
+ * ========================================================== */
+img[loading="lazy"] {
+  transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+img.img-loaded {
+  opacity: 1;
+}
+
+/* Profile avatar hover scale (global — no layout shift) */
+.avatar-interactive {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.avatar-interactive:hover {
+  transform: scale(1.07);
+}
+
+/* ==========================================================
+ * Accessibility: Extended prefers-reduced-motion override
+ * (Governs all new layers 12–20 as well as 1–11)
+ * ========================================================== */
+@media (prefers-reduced-motion: reduce) {
+  .skeleton,
+  .skeleton-line,
+  .skeleton-card,
+  .skeleton-avatar {
+    animation: none;
+    background: rgba(22, 34, 56, 1);
+  }
+  .shake, .input-error,
+  .success-checkmark, .checkmark-pop,
+  .check-path-draw,
+  .stagger-list > *,
+  .counter-updated,
+  .live-dot, .status-online-dot,
+  .page-leaving {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
   }
 }

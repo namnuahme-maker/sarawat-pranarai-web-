@@ -12,6 +12,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 const { uploadToGoogleDrive } = require('./services/gdrive_service');
+const { custodyOrFilter, isSchoolCustodyItem } = require('./lib/school_custody');
 
 const app = express();
 app.set('trust proxy', 1); // รองรับ Reverse Proxy บน Render (HTTPS termination)
@@ -1271,6 +1272,52 @@ const WEB_LEADERSHIP_ROLE_IDS = {
   S: { HEAD: process.env.ROLE_HEAD_S || '1567570801866047589', DEPUTY: process.env.ROLE_DEPUTY_S || '1567570803703423006' }
 };
 
+const WEB_DAY_ROLE_IDS = {
+  M: process.env.ROLE_MON || '1567570846388854804',
+  T: process.env.ROLE_TUE || '1567570847726567526',
+  W: process.env.ROLE_WED || '1567570849953743049',
+  Th: process.env.ROLE_THU || '1567570850935218449',
+  F: process.env.ROLE_FRI || '1567570856966758431',
+  S: process.env.ROLE_SPECIAL || '1567570841548627971'
+};
+
+async function revokeAllDiscordRolesForMember(discordId) {
+  if (!discordId || !DISCORD_BOT_TOKEN || !DISCORD_GUILD_ID) return;
+  const roleVerified = process.env.ROLE_VERIFIED || '1567570843335528578';
+  const roleSpecial = process.env.ROLE_SPECIAL || '1567570841548627971';
+  const allRoles = new Set([
+    roleVerified,
+    roleSpecial,
+    ...Object.values(WEB_DAY_ROLE_IDS),
+    ...Object.values(WEB_LEADERSHIP_ROLE_IDS).flatMap(p => [p.HEAD, p.DEPUTY])
+  ]);
+
+  const promises = [];
+  for (const rId of allRoles) {
+    if (!rId) continue;
+    promises.push(
+      fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${discordId}/roles/${rId}`, {
+        method: 'DELETE',
+        headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+        signal: AbortSignal.timeout(3000)
+      }).catch(() => {})
+    );
+  }
+  // Reset nickname
+  promises.push(
+    fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${discordId}`, {
+      method: 'PATCH',
+      headers: {
+        Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ nick: null }),
+      signal: AbortSignal.timeout(3000)
+    }).catch(() => {})
+  );
+  await Promise.allSettled(promises);
+}
+
 async function syncLeadershipDiscordRole(memberId, shiftCode, position, method) {
   if (!DISCORD_BOT_TOKEN || !DISCORD_GUILD_ID) return;
   const { data: member } = await supabase.from('members').select('discord_id').eq('id', memberId).maybeSingle();
@@ -1578,7 +1625,7 @@ app.patch('/api/members/:id', async (req, res) => {
     }
 
     const { id } = req.params;
-    const { first_name, last_name, nickname, grade_class, student_no, phone_number, duty_day, duty_id, role, shift_role, rank, profile_image_url } = req.body;
+    const { first_name, last_name, nickname, grade_class, student_no, phone_number, duty_day, duty_id, role, shift_role, rank, profile_image_url, status, discord_id } = req.body;
 
     const updateData = {};
     let dutyIdChanged = false;
@@ -1613,6 +1660,8 @@ app.patch('/api/members/:id', async (req, res) => {
     if (role !== undefined) updateData.role = role;
     if (shift_role !== undefined) updateData.shift_role = shift_role;
     if (rank !== undefined) updateData.rank = rank;
+    if (status !== undefined) updateData.status = status;
+    if (discord_id !== undefined) updateData.discord_id = discord_id ? String(discord_id).trim() : null;
     if (profile_image_url !== undefined) updateData.profile_image_url = profile_image_url;
     updateData.updated_at = new Date().toISOString();
 
@@ -1663,13 +1712,36 @@ app.patch('/api/members/:id', async (req, res) => {
           if (isSpecialDuty) {
             await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${roleSpecial}`, {
               method: 'PUT',
-              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+              signal: AbortSignal.timeout(3000)
             }).catch(() => {});
           } else {
             await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${roleSpecial}`, {
               method: 'DELETE',
-              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` }
+              headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+              signal: AbortSignal.timeout(3000)
             }).catch(() => {});
+          }
+        }
+
+        // 3. ซิงค์ยศวันประจำผลัดเวร (ROLE_MON..FRI)
+        const baseDay = canonicalDutyDay(dutyDay);
+        const targetDayRole = WEB_DAY_ROLE_IDS[baseDay];
+        if (targetDayRole) {
+          await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${targetDayRole}`, {
+            method: 'PUT',
+            headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+            signal: AbortSignal.timeout(3000)
+          }).catch(() => {});
+
+          for (const [dCode, rId] of Object.entries(WEB_DAY_ROLE_IDS)) {
+            if (dCode !== baseDay && dCode !== 'S' && rId) {
+              await fetch(`https://discord.com/api/v10/guilds/${DISCORD_GUILD_ID}/members/${data.discord_id}/roles/${rId}`, {
+                method: 'DELETE',
+                headers: { Authorization: `Bot ${DISCORD_BOT_TOKEN}` },
+                signal: AbortSignal.timeout(3000)
+              }).catch(() => {});
+            }
           }
         }
       } catch (dErr) {
@@ -1736,11 +1808,14 @@ app.delete('/api/members/:id', async (req, res) => {
       return res.status(404).json({ error: 'ไม่พบข้อมูลสมาชิกที่ต้องการลบ' });
     }
 
-    // ลบข้อมูลที่เกี่ยวข้องใน shift_leadership หากมี
+    // ลบข้อมูลที่เกี่ยวข้องใน shift_leadership, leave_requests, lost_items หากมี
     try {
       await supabase.from('shift_leadership').delete().eq('member_id', id);
+      await supabase.from('leave_requests').delete().eq('member_id', id);
+      await supabase.from('lost_items').update({ assigned_officer_id: null }).eq('assigned_officer_id', id);
+      await supabase.from('lost_items').update({ reported_by_id: null }).eq('reported_by_id', id);
     } catch (e) {
-      console.warn('[API] Warning deleting shift_leadership:', e.message);
+      console.warn('[API] Warning deleting member relations:', e.message);
     }
 
     // ลบเรคคอร์ดจาก members
@@ -1754,10 +1829,73 @@ app.delete('/api/members/:id', async (req, res) => {
       return res.status(500).json({ error: 'ไม่สามารถลบข้อมูลสมาชิกได้: ' + delErr.message });
     }
 
+    // 🤖 เพิกถอนสิทธิ์สารวัตรและรีเซ็ตชื่อใน Discord ทันทีแบบ Non-blocking
+    if (targetMember.discord_id) {
+      revokeAllDiscordRolesForMember(targetMember.discord_id).catch(err => {
+        console.warn('[API] Warning revoking member Discord roles:', err.message);
+      });
+    }
+
     console.log(`[API] 🗑️ ลบข้อมูลสมาชิกสำเร็จ: ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname}) [ID: ${id}]`);
     return res.json({ success: true, message: `ลบข้อมูล ${targetMember.first_name} ${targetMember.last_name} (${targetMember.nickname || '-'}) เรียบร้อยแล้ว` });
   } catch (err) {
     console.error('[API] /api/members/:id DELETE crash:', err);
+    return res.status(500).json({ error: err.message });
+  }
+});
+
+// 🧹 ล้างข้อมูลทดสอบทั้งหมดที่ยังไม่ได้ผูก Discord (Unlinked Pre-registered Records)
+app.post('/api/members/cleanup-unlinked', async (req, res) => {
+  try {
+    let user = getUserFromReq(req);
+    let isAllowed = user && (
+      user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident || user.canManageMembers ||
+      user.role === 'ADMIN' || user.role === 'TEACHER' || user.role === 'PRESIDENT' || user.role === 'VICE_PRESIDENT'
+    );
+
+    if (!isAllowed) {
+      return res.status(403).json({ error: 'ปฏิเสธการเข้าถึง: สิทธิ์การล้างข้อมูลสงวนเฉพาะผู้ดูแลระบบหรือประธานสารวัตรเท่านั้น' });
+    }
+
+    // ค้นหาสมาชิกทั้งหมดที่ discord_id เป็น null
+    const { data: unlinked, error: findErr } = await supabase
+      .from('members')
+      .select('id, first_name, last_name, nickname')
+      .is('discord_id', null);
+
+    if (findErr) throw findErr;
+    if (!unlinked || unlinked.length === 0) {
+      return res.json({ success: true, count: 0, message: 'ไม่พบรายชื่อที่ยังไม่ผูก Discord ในระบบ' });
+    }
+
+    const ids = unlinked.map(m => m.id);
+
+    // ล้างข้อมูลอ้างอิงที่เกี่ยวข้อง
+    try {
+      await supabase.from('shift_leadership').delete().in('member_id', ids);
+      await supabase.from('leave_requests').delete().in('member_id', ids);
+      await supabase.from('lost_items').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      await supabase.from('lost_items').update({ reported_by_id: null }).in('reported_by_id', ids);
+    } catch (e) {
+      console.warn('[API] Warning cleaning unlinked relations:', e.message);
+    }
+
+    // ลบสมาชิก
+    const { error: delErr } = await supabase
+      .from('members')
+      .delete()
+      .in('id', ids);
+
+    if (delErr) throw delErr;
+
+    console.log(`[API] 🧹 ล้างรายชื่อที่ยังไม่ผูก Discord สำเร็จ: ${ids.length} รายการ`);
+    return res.json({ 
+      success: true, 
+      count: ids.length, 
+      message: `ล้างรายชื่อทดสอบที่ยังไม่ผูก Discord เรียบร้อยแล้วจำนวน ${ids.length} รายการ` 
+    });
+  } catch (err) {
+    console.error('[API] /api/members/cleanup-unlinked crash:', err);
     return res.status(500).json({ error: err.message });
   }
 });
@@ -1921,6 +2059,35 @@ app.post('/api/cases', async (req, res) => {
 
     const { data, error } = await supabase.from('cases').insert(newCase).select();
     if (error) throw error;
+
+    // 📢 ส่งสัญญาณแจ้งเตือนเข้าห้อง #รับแจ้งเหตุ ใน Discord ทันทีแบบ Non-blocking
+    const incidentChanId = process.env.INCIDENT_CHANNEL_ID || '1567570890084843530';
+    if (incidentChanId && DISCORD_BOT_TOKEN) {
+      fetch(`https://discord.com/api/v10/channels/${incidentChanId}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bot ${DISCORD_BOT_TOKEN}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          embeds: [{
+            title: `🚨 [รับแจ้งเหตุใหม่จากเว็บไซต์] รหัส: ${caseId}`,
+            description:
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `📂 **หมวดหมู่:** ${newCase.category}\n` +
+              `📍 **สถานที่เกิดเหตุ:** ${newCase.location}\n` +
+              `📝 **รายละเอียด:** ${newCase.description}\n` +
+              `👤 **ผู้แจ้ง:** ${newCase.reporter_name}\n` +
+              `━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n` +
+              `🌐 *สามารถตรวจสอบและบันทึกคลิป Bodycam ได้ที่ Web Dashboard*`,
+            color: 0xE74C3C,
+            footer: { text: 'SARAWAT INCIDENT DESK • โรงเรียนพระนารายณ์' },
+            timestamp: new Date().toISOString()
+          }]
+        }),
+        signal: AbortSignal.timeout(4000)
+      }).catch(e => console.warn('[DISCORD CASE ALERT WARN]:', e.message));
+    }
 
     res.status(201).json({ success: true, case_id: caseId, data: data[0] });
   } catch (err) {
@@ -2353,10 +2520,7 @@ app.get('/api/lost-found/items', async (req, res) => {
       if (status && status !== 'ALL') query = query.eq('status', status);
       if (category && category !== 'ALL') {
         if (category === 'ของกลาง' || category.includes('ของกลาง')) {
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-          const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
-          query = query.or(`category.ilike.%ของกลาง%,found_date.lte.${thirtyDaysAgoStr}`);
+          query = query.or(custodyOrFilter());
         } else {
           query = query.ilike('category', `%${category}%`);
         }
@@ -2377,15 +2541,7 @@ app.get('/api/lost-found/items', async (req, res) => {
       }
       if (category && category !== 'ALL') {
         if (category === 'ของกลาง' || category.includes('ของกลาง')) {
-          const thirtyDaysAgo = new Date();
-          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-          const thirtyDaysAgoStr = thirtyDaysAgo.toISOString().slice(0, 10);
-          items = items.filter(it => {
-            const isCatOfKlang = it.category && it.category.includes('ของกลาง');
-            const isOldDate = it.found_date && it.found_date <= thirtyDaysAgoStr;
-            const isOldCreated = it.created_at && new Date(it.created_at) <= thirtyDaysAgo;
-            return isCatOfKlang || isOldDate || isOldCreated;
-          });
+          items = items.filter(it => isSchoolCustodyItem(it));
         } else {
           items = items.filter(it => it.category && it.category.includes(category));
         }
@@ -2799,13 +2955,14 @@ app.get('/api/inspectors/lookup/:dutyId', async (req, res) => {
 
 // ฟังก์ชันประกาศส่งมอบของหายไปยัง Discord และดึงลิงก์รูป Discord CDN
 async function announceHandoverToDiscord(payload) {
-  // 1. ลองเรียก Bot HTTP Server ก่อน
+  // 1. ลองเรียก Bot HTTP Server ก่อน (มี timeout 3 วินาที เพื่อไม่ให้เว็บค้าง)
   const botBase = process.env.RENDER_EXTERNAL_URL || 'http://localhost:10000';
   try {
     const res = await fetch(`${botBase}/api/discord/announce-handover`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(payload),
+      signal: AbortSignal.timeout(3000)
     });
     const d = await res.json();
     if (d.success && d.discord_photo_url) return d.discord_photo_url;
@@ -2818,7 +2975,8 @@ async function announceHandoverToDiscord(payload) {
     if (!token) return null;
 
     const chRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
-      headers: { Authorization: `Bot ${token}` }
+      headers: { Authorization: `Bot ${token}` },
+      signal: AbortSignal.timeout(3500)
     });
     const channels = await chRes.json();
     const chTarget = Array.isArray(channels) ? (channels.find(c => c.name.includes('ของหาย')) || channels.find(c => c.name.includes('บริการ'))) : null;
@@ -2849,7 +3007,8 @@ async function announceHandoverToDiscord(payload) {
       const postRes = await fetch(`https://discord.com/api/v10/channels/${chTarget.id}/messages`, {
         method: 'POST',
         headers: { Authorization: `Bot ${token}` },
-        body: formData
+        body: formData,
+        signal: AbortSignal.timeout(6000)
       });
       const msgData = await postRes.json();
       if (msgData.attachments && msgData.attachments[0]) {

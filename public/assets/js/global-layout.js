@@ -55,7 +55,7 @@
             <a href="/" class="flex items-center gap-2 sm:gap-2.5 min-w-0 group flex-shrink-0">
               <div class="relative flex-shrink-0">
                 <img src="/assets/logo.png" alt="ตราสารวัตรนักเรียน โรงเรียนพระนารายณ์" class="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain" onerror="this.src='/assets/school_emblem.png'">
-                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full border-2 border-black"></span>
+                <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 sm:w-2.5 sm:h-2.5 bg-emerald-500 rounded-full border-2 border-black live-dot"></span>
               </div>
               <div class="leading-tight min-w-0">
                 <div class="flex items-center gap-1 sm:gap-1.5 flex-nowrap">
@@ -221,6 +221,15 @@
       toastContainer.id = 'sarawat-toast-container';
       document.body.appendChild(toastContainer);
     }
+
+    // Inject Motion Engine if not already present
+    if (!document.getElementById('sarawat-motion-script')) {
+      const motionScript = document.createElement('script');
+      motionScript.id = 'sarawat-motion-script';
+      motionScript.src = '/assets/js/motion.js';
+      motionScript.defer = true;
+      document.head.appendChild(motionScript);
+    }
   }
 
   // User Profile Loader via /api/auth/me
@@ -280,7 +289,7 @@
         <div role="button" tabindex="0" class="flex items-center gap-1.5 sm:gap-2 cursor-pointer group select-none" title="คลิกเพื่อดูโปรไฟล์และจัดการข้อมูลส่วนตัว" onclick="window.toggleUserProfileDropdown(event)" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();window.toggleUserProfileDropdown(event);}">
           <div class="relative flex-shrink-0">
             <img src="${avatarUrl}" alt="${displayName}" class="w-7 h-7 sm:w-8 sm:h-8 rounded-full border ${badgeBorderColor} shadow-md object-cover flex-shrink-0 group-hover:border-amber-400 group-hover:scale-105 transition" onerror="this.src='/assets/logo.png'">
-            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${dotColor} border border-black"></span>
+            <span class="absolute -bottom-0.5 -right-0.5 w-2 h-2 rounded-full ${dotColor} border border-black live-dot"></span>
           </div>
           <div class="hidden md:flex flex-col text-left leading-tight">
             <div class="flex items-center gap-1">
