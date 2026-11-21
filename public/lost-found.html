@@ -403,10 +403,16 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         <!-- Big Photo View -->
         <div class="space-y-2">
           <div class="aspect-square rounded-lg overflow-hidden bg-midnight-950 border border-midnight-700/80 relative">
-            <img id="qv-image" src="" alt="รูปสิ่งของ" class="w-full h-full object-cover">
+            <img id="qv-image" src="" alt="รูปสิ่งของ" class="w-full h-full object-cover" onerror="handleLostItemImgError(this, activeQuickViewItem?.category || '')">
             <div id="qv-status-pill" class="absolute top-2.5 left-2.5 px-2 py-0.5 rounded text-xs font-medium">
               สถานะ
             </div>
+          </div>
+          <div class="pt-1 flex items-center gap-2">
+            <button onclick="document.getElementById('qv-file-input').click()" class="w-full py-1.5 px-3 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition active:scale-95 shadow">
+              <span>📷</span><span>อัปโหลดรูปหลักฐานใหม่ (ถาวร)</span>
+            </button>
+            <input type="file" id="qv-file-input" accept="image/*" class="hidden" onchange="handleQuickViewPhotoUpload(event)">
           </div>
           <p class="text-[11px] text-slate-400 text-center font-mono flex items-center justify-center gap-1">
             <svg class="w-3 h-3 text-slate-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1077,7 +1083,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
             
             <!-- Item Photo Box -->
             <div class="aspect-[4/3] bg-midnight-950 relative overflow-hidden cursor-pointer" onclick="openQuickViewModal('${it.id}')">
-              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-full h-full object-contain p-2 transition-opacity duration-200 group-hover:opacity-90" loading="lazy">
+              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-full h-full object-contain p-2 transition-opacity duration-200 group-hover:opacity-90" loading="lazy" onerror="handleLostItemImgError(this, '${it.category || ''}')">
               
               <div class="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
                 ${statusBadge}
@@ -1400,6 +1406,62 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     function closeQuickViewModal() {
       const modal = document.getElementById('modal-quick-view');
       if (modal && typeof modal.close === 'function') modal.close();
+    }
+
+    function handleLostItemImgError(img, cat) {
+      if (!img || img.dataset.errorHandled) return;
+      img.dataset.errorHandled = 'true';
+      const c = String(cat || '').toLowerCase();
+      let iconEmoji = '📦';
+      if (c.includes('ไอที') || c.includes('มือถือ') || c.includes('หูฟัง')) iconEmoji = '🎧';
+      else if (c.includes('หมวก') || c.includes('เสื้อ') || c.includes('แต่งกาย')) iconEmoji = '🧢';
+      else if (c.includes('กระเป๋า') || c.includes('ตัง')) iconEmoji = '👛';
+      else if (c.includes('เรียน') || c.includes('หนังสือ') || c.includes('สมุด')) iconEmoji = '📚';
+
+      const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="400" height="300" viewBox="0 0 400 300">
+        <rect width="100%" height="100%" fill="#090d16"/>
+        <rect x="12" y="12" width="376" height="276" rx="12" fill="none" stroke="#1e293b" stroke-dasharray="6,6"/>
+        <text x="50%" y="40%" dominant-baseline="middle" text-anchor="middle" font-size="52">${iconEmoji}</text>
+        <text x="50%" y="65%" dominant-baseline="middle" text-anchor="middle" fill="#94a3b8" font-family="sans-serif" font-size="13" font-weight="bold">รูปหลักฐานหมดอายุ / รออัปโหลดใหม่</text>
+        <text x="50%" y="78%" dominant-baseline="middle" text-anchor="middle" fill="#38bdf8" font-family="sans-serif" font-size="11">แตะเพื่อเปิดดูหรืออัปโหลดรูปภาพ</text>
+      </svg>`;
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+    }
+
+    async function handleQuickViewPhotoUpload(e) {
+      const file = e?.target?.files?.[0];
+      if (!file || !activeQuickViewItem) return;
+      showToast('กำลังอัปโหลดรูปถาวรเข้า Google Drive และระบบ...', '⏳');
+      const reader = new FileReader();
+      reader.onload = async function(evt) {
+        const base64Data = evt.target.result;
+        try {
+          const res = await fetch(\`/api/lost-found/items/\${activeQuickViewItem.id}/photo\`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image_base64: base64Data })
+          });
+          const d = await res.json();
+          if (d.success) {
+            activeQuickViewItem.image_url = d.image_url;
+            const qvImg = document.getElementById('qv-image');
+            if (qvImg) {
+              delete qvImg.dataset.errorHandled;
+              qvImg.src = d.image_url;
+            }
+            const idx = allItems.findIndex(i => i.id === activeQuickViewItem.id);
+            if (idx >= 0) allItems[idx].image_url = d.image_url;
+            renderItems(allItems);
+            showToast('อัปโหลดรูปหลักฐานถาวรสำเร็จแล้ว!', '📷');
+          } else {
+            showToast('อัปโหลดไม่สำเร็จ: ' + (d.error || ''), '❌');
+          }
+        } catch (err) {
+          showToast('เชื่อมต่อเซิร์ฟเวอร์ไม่สำเร็จ', '❌');
+        }
+      };
+      reader.readAsDataURL(file);
+      e.target.value = '';
     }
 
     function openIntakeModal() {

@@ -3,7 +3,8 @@
     "width": 430,
     "height": 680,
     "backgroundColor": "#ffffff",
-    "backgroundImage": "/assets/card-templates/default_card_bg.png"
+    "backgroundImage": "/assets/card-templates/custom_card_bg.png",
+    "supabase_url": "https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/card-templates/untitled_design.png"
   },
   "elements": {
     "watermark": {

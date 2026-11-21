@@ -28,8 +28,10 @@ function getServiceAccountCredentials() {
   const candidatePaths = [
     path.join(__dirname, '..', 'credentials', 'gdrive-key.json'),
     path.join(__dirname, '..', '..', 'credentials', 'gdrive-key.json'),
+    path.join(__dirname, 'credentials', 'gdrive-key.json'),
     path.join(__dirname, '..', 'gdrive-key.json'),
-    path.join(__dirname, '..', '..', 'gdrive-key.json')
+    path.join(__dirname, '..', '..', 'gdrive-key.json'),
+    'C:\\Users\\NAMNUAH\\Downloads\\norse-sequence-514809-u2-678efc9ab780.json'
   ];
 
   for (const p of candidatePaths) {
@@ -105,7 +107,7 @@ async function getGoogleAccessToken(creds) {
  * @param {object} metadata - ข้อมูลเพิ่มเติมเกี่ยวกับสารวัตร
  */
 async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
-  const folderId = process.env.GDRIVE_FOLDER_ID || '1lcAN_otZ7RPOax6J1oodV-LjQ4hou_ez';
+  const folderId = metadata.folderId || (metadata.category === 'lost_found' ? (process.env.GDRIVE_LOST_FOLDER_ID || '1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ') : (process.env.GDRIVE_FOLDER_ID || '1lcAN_otZ7RPOax6J1oodV-LjQ4hou_ez'));
 
   // 1. ช่องทางที่ 1: Google Apps Script Webhook (แนะนำสูงสุดสำหรับโฟลเดอร์ใน My Drive - ไม่ติด Quota 0 Byte)
   if (process.env.GDRIVE_WEBHOOK_URL) {

@@ -2509,9 +2509,15 @@ function getLayoutConfig() {
     };
   }
 
-  // ป้องกันรูปพื้นหลังหาย: หากไม่มีค่าหรือเป็นค่าว่าง ให้ตั้งเป็นเทมเพลตมาตรฐานถาวรเสมอ
-  if (config.canvas && (!config.canvas.backgroundImage || config.canvas.backgroundImage === '')) {
-    config.canvas.backgroundImage = "/assets/card-templates/default_card_bg.png";
+  // ป้องกันรูปพื้นหลังหาย: หากมี gdrive_file_id ให้อ่านผ่าน Google Drive Proxy เสมอ
+  if (config.canvas) {
+    if (config.canvas.gdrive_file_id) {
+      config.canvas.backgroundImage = `/api/drive-proxy/${config.canvas.gdrive_file_id}`;
+    } else if (config.canvas.supabase_url) {
+      config.canvas.backgroundImage = config.canvas.supabase_url;
+    } else if (!config.canvas.backgroundImage || config.canvas.backgroundImage === '') {
+      config.canvas.backgroundImage = "/assets/card-templates/default_card_bg.png";
+    }
   }
 
   return config;
@@ -2592,8 +2598,13 @@ app.post('/api/card-template', async (req, res) => {
           }
         } catch (sbEx) {}
 
-        // แทนที่ค่า backgroundImage ขนาดใหญ่ด้วย URL เส้นทางถาวร
-        payload.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+        if (gdriveId) {
+          payload.canvas.backgroundImage = `/api/drive-proxy/${gdriveId}`;
+        } else if (payload.canvas.supabase_url) {
+          payload.canvas.backgroundImage = payload.canvas.supabase_url;
+        } else {
+          payload.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+        }
       } catch (saveErr) {
         console.warn('[CARD TEMPLATE] Image parse error:', saveErr.message);
       }
@@ -2644,20 +2655,44 @@ app.post('/api/card-template/upload-background', async (req, res) => {
       console.warn('[CARD-BG-UPLOAD] Google Drive warning:', gdEx.message);
     }
 
+    // 2. สำรองขึ้น Supabase Storage sarawat-photos ถาวร
+    let supabaseUrl = null;
+    try {
+      const { error: sErr } = await supabase.storage
+        .from('sarawat-photos')
+        .upload('card-templates/custom_card_bg.png', buffer, {
+          contentType: 'image/png',
+          upsert: true
+        });
+      if (!sErr) {
+        const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl('card-templates/custom_card_bg.png');
+        supabaseUrl = publicUrl;
+      }
+    } catch (sErr) {}
+
     // อัปเดตคอนฟิก
     const currentConfig = getLayoutConfig();
     if (!currentConfig.canvas) currentConfig.canvas = { width: 430, height: 680, backgroundColor: "#ffffff" };
-    currentConfig.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
-    if (gdriveId) currentConfig.canvas.gdrive_file_id = gdriveId;
-    if (gdriveUrl) currentConfig.canvas.gdrive_url = gdriveUrl;
+    if (gdriveId) {
+      currentConfig.canvas.backgroundImage = `/api/drive-proxy/${gdriveId}`;
+      currentConfig.canvas.gdrive_file_id = gdriveId;
+      currentConfig.canvas.gdrive_url = gdriveUrl;
+    } else if (supabaseUrl) {
+      currentConfig.canvas.backgroundImage = supabaseUrl;
+      currentConfig.canvas.supabase_url = supabaseUrl;
+    } else {
+      currentConfig.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+    }
+    if (supabaseUrl) currentConfig.canvas.supabase_url = supabaseUrl;
     saveLayoutConfig(currentConfig);
 
     res.json({
       success: true,
-      message: 'Card background uploaded and backed up to Google Drive successfully',
-      url: '/assets/card-templates/custom_card_bg.png',
+      message: 'Card background uploaded and saved to Google Drive successfully',
+      url: currentConfig.canvas.backgroundImage,
       gdriveFileId: gdriveId,
-      gdriveUrl: gdriveUrl
+      gdriveUrl: gdriveUrl,
+      supabaseUrl: supabaseUrl
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -2720,15 +2755,17 @@ app.post('/api/card-template/load-from-drive', async (req, res) => {
     // อัปเดตคอนฟิก
     const currentConfig = getLayoutConfig();
     if (!currentConfig.canvas) currentConfig.canvas = { width: 430, height: 680, backgroundColor: "#ffffff" };
-    currentConfig.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+    currentConfig.canvas.backgroundImage = `/api/drive-proxy/${dl.fileId || targetId}`;
     currentConfig.canvas.gdrive_file_id = dl.fileId || targetId;
+    currentConfig.canvas.gdrive_url = `https://drive.google.com/file/d/${dl.fileId || targetId}/view`;
     saveLayoutConfig(currentConfig);
 
     res.json({
       success: true,
       message: 'Template loaded from Google Drive successfully',
-      url: '/assets/card-templates/custom_card_bg.png',
-      fileId: dl.fileId || targetId
+      url: `/api/drive-proxy/${dl.fileId || targetId}`,
+      fileId: dl.fileId || targetId,
+      gdriveUrl: currentConfig.canvas.gdrive_url
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -2745,6 +2782,14 @@ app.get('/api/drive-proxy/:fileId', async (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Access-Control-Allow-Origin', '*');
       return res.send(dl.buffer);
+    }
+    // Fallback แคช: ป้องกันกรณี Google Drive ติดขัด ให้ดึงไฟล์แคชในเซิร์ฟเวอร์
+    const customPath = path.join(__dirname, 'public', 'assets', 'card-templates', 'custom_card_bg.png');
+    if (fs.existsSync(customPath)) {
+      res.setHeader('Content-Type', 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.sendFile(customPath);
     }
     res.status(404).json({ success: false, message: 'File not found on Google Drive' });
   } catch (err) {
@@ -3060,18 +3105,22 @@ app.post('/api/lost-found/items', async (req, res) => {
       return res.status(400).json({ success: false, error: 'กรุณากรอกชื่อสิ่งของ หมวดหมู่ และลักษณะเฉพาะตัวให้ครบถ้วน' });
     }
 
-    let finalImageUrl = image_url || '/assets/sample_student.jpg';
-    if (image_base64) {
-      const uploadDir = path.join(__dirname, 'public', 'uploads');
-      if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-      const filename = `lost_item_${Date.now()}.jpg`;
-      const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
-      fs.writeFileSync(path.join(uploadDir, filename), buf);
-      finalImageUrl = `/uploads/${filename}`;
+    let finalImageUrl = image_url || null;
+    let gdriveFileId = req.body.gdrive_file_id || null;
+    let gdriveUrl = req.body.gdrive_url || null;
 
-      // อัปโหลดเข้าสู่ Supabase Storage sarawat-photos ถาวร
+    const currentYear = new Date().getFullYear();
+    const db = getLostFoundData();
+    const itemNum = String((db.items?.length || 0) + 1).padStart(3, '0');
+    const itemCode = req.body.item_code || `LF-${currentYear}-${itemNum}`;
+
+    if (image_base64) {
+      const filename = `${itemCode}.jpg`;
+      const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
+
+      // อัปโหลดเข้าสู่ Supabase Storage sarawat-photos ถาวร (1-2+ ปี ไม่หมดอายุ)
       try {
-        const storagePath = `lost-found/${filename}`;
+        const storagePath = `lost-items/${filename}`;
         const { error: sErr } = await supabase.storage
           .from('sarawat-photos')
           .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
@@ -3080,12 +3129,30 @@ app.post('/api/lost-found/items', async (req, res) => {
           finalImageUrl = publicUrl;
         }
       } catch (e) {}
-    }
 
-    const currentYear = new Date().getFullYear();
-    const db = getLostFoundData();
-    const itemNum = String((db.items?.length || 0) + 1).padStart(3, '0');
-    const itemCode = req.body.item_code || `LF-${currentYear}-${itemNum}`;
+      // สำรองเข้า Google Drive โฟลเดอร์ 03_สิ่งของที่พบเจอ (1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ)
+      try {
+        const gRes = await uploadToGoogleDrive(buf, filename, {
+          category: 'lost_found',
+          folderId: process.env.GDRIVE_LOST_FOLDER_ID || '1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ',
+          itemCode: itemCode,
+          title: title.trim(),
+          description: `สิ่งของที่พบเจอ: ${title.trim()} (${itemCode})`
+        });
+        if (gRes && gRes.success) {
+          gdriveFileId = gRes.fileId;
+          gdriveUrl = gRes.webViewLink;
+          if (!finalImageUrl) finalImageUrl = gRes.webViewLink;
+        }
+      } catch (e) {}
+
+      if (!finalImageUrl) {
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadDir, filename), buf);
+        finalImageUrl = `/uploads/${filename}`;
+      }
+    }
 
     const newItem = {
       id: req.body.id || `lf-${Date.now()}`,
@@ -3095,6 +3162,8 @@ app.post('/api/lost-found/items', async (req, res) => {
       characteristics: reqCharacteristics,
       secret_traits: (secret_traits && secret_traits.trim()) ? secret_traits.trim() : null,
       image_url: finalImageUrl,
+      gdrive_file_id: gdriveFileId,
+      gdrive_url: gdriveUrl,
       location_found: location_found || 'ไม่ระบุสถานที่',
       found_date: found_date || new Date().toISOString().slice(0, 10),
       found_time: found_time || new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.',
