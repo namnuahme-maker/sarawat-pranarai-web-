@@ -4279,12 +4279,20 @@ app.get('/api/analytics/overview', async (req, res) => {
     // 4. Fetch Cases
     let cases = [];
     try {
-      let cq = supabase.from('cases').select('*').order('incident_date', { ascending: false });
-      if (startDate) cq = cq.gte('incident_date', startDate);
-      if (endDate) cq = cq.lte('incident_date', endDate);
+      let cq = supabase.from('cases').select('*').order('incident_date_time', { ascending: false });
+      if (startDate) cq = cq.gte('incident_date_time', `${startDate}T00:00:00.000Z`);
+      if (endDate) cq = cq.lte('incident_date_time', `${endDate}T23:59:59.999Z`);
       const { data: cData, error: cErr } = await cq;
-      if (!cErr && Array.isArray(cData)) cases = cData;
-    } catch (e) {}
+      if (cErr) {
+        console.warn('[ANALYTICS] Cases query warning:', cErr.message);
+        const { data: fbData } = await supabase.from('cases').select('*').order('created_at', { ascending: false });
+        if (Array.isArray(fbData)) cases = fbData;
+      } else if (Array.isArray(cData)) {
+        cases = cData;
+      }
+    } catch (e) {
+      console.warn('[ANALYTICS] Cases error:', e.message);
+    }
 
     // 5. Fetch Lost & Found Items
     let lostItems = [];
@@ -4501,10 +4509,22 @@ app.get('/api/analytics/overview', async (req, res) => {
         leaderboard,
         cases: {
           total: cases.length,
-          pending: cases.filter(c => c.status === 'PENDING').length,
-          investigating: cases.filter(c => c.status === 'INVESTIGATING').length,
+          pending: cases.filter(c => c.status !== 'RESOLVED').length,
+          investigating: cases.filter(c => c.status === 'INVESTIGATING' || c.status === 'IN_PROGRESS').length,
           resolved: cases.filter(c => c.status === 'RESOLVED').length,
-          recent: cases.slice(0, 5)
+          recent: cases.slice(0, 10).map(c => ({
+            id: c.case_id || c.id,
+            case_id: c.case_id,
+            title: c.category || c.title || (c.description ? c.description.split('\n')[0] : '') || c.case_id || 'เหตุการณ์ทั่วไป',
+            category: c.category || 'ทั่วไป',
+            description: c.description || '',
+            location: c.location || 'ในโรงเรียน',
+            incident_date: c.incident_date_time ? c.incident_date_time.split('T')[0] : (c.created_at ? c.created_at.split('T')[0] : ''),
+            incident_date_time: c.incident_date_time || c.created_at,
+            status: c.status || 'PENDING',
+            evidence_count: Array.isArray(c.evidence_urls) ? c.evidence_urls.length : (c.evidence_url ? 1 : 0),
+            reporter_name: c.reporter_name || ''
+          }))
         },
         lostFound: {
           total: lostItems.length,

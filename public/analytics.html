@@ -789,17 +789,45 @@
         return;
       }
 
-      list.innerHTML = cases.recent.map(c => `
-        <div class="py-2 border-b border-tactical-border/70 flex items-center justify-between gap-3 last:border-0">
-          <div class="truncate">
-            <div class="font-bold text-white text-xs truncate">${c.title || 'เหตุการณ์ทั่วไป'}</div>
-            <div class="text-[10px] text-slate-400 font-mono">${c.incident_date || ''} • ${c.location || 'ในโรงเรียน'}</div>
+      list.innerHTML = cases.recent.map(c => {
+        const title = c.title || c.category || c.case_id || 'เหตุการณ์ทั่วไป';
+        let dateDisplay = '-';
+        if (c.incident_date_time) {
+          try {
+            dateDisplay = new Date(c.incident_date_time).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: '2-digit' });
+          } catch (e) {
+            dateDisplay = c.incident_date || '-';
+          }
+        } else if (c.incident_date) {
+          dateDisplay = c.incident_date;
+        }
+
+        const isResolved = c.status === 'RESOLVED';
+        const isInvestigating = c.status === 'INVESTIGATING' || c.status === 'IN_PROGRESS';
+        const statusText = isResolved ? 'คลี่คลายแล้ว' : (isInvestigating ? 'กำลังตรวจ' : 'รอดำเนินการ');
+        const statusColor = isResolved 
+          ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' 
+          : (isInvestigating ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30');
+
+        return `
+          <div class="py-2.5 border-b border-tactical-border/70 flex items-center justify-between gap-3 last:border-0 hover:bg-tactical-850/50 px-2 rounded-xl transition">
+            <div class="truncate flex-1 min-w-0">
+              <div class="flex items-center gap-1.5 truncate">
+                <span class="font-mono text-[10px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded border border-rose-900/60 shrink-0">${c.case_id || 'CASE'}</span>
+                <span class="font-bold text-white text-xs truncate">${title}</span>
+              </div>
+              <div class="text-[10px] text-slate-400 font-mono mt-0.5 flex items-center gap-2 flex-wrap">
+                <span>📅 ${dateDisplay}</span>
+                <span>📍 ${c.location || 'ในโรงเรียน'}</span>
+                ${c.evidence_count ? `<span class="text-amber-300 font-bold">📸 ${c.evidence_count} ไฟล์</span>` : ''}
+              </div>
+            </div>
+            <span class="px-2 py-0.5 rounded text-[10px] font-mono shrink-0 border ${statusColor}">
+              ${statusText}
+            </span>
           </div>
-          <span class="px-2 py-0.5 rounded text-[10px] font-mono shrink-0 ${c.status === 'RESOLVED' ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">
-            ${c.status === 'RESOLVED' ? 'สิ้นสุด' : 'รอดำเนินการ'}
-          </span>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function renderLostItems(lost = {}) {
