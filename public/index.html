@@ -1228,7 +1228,7 @@
              r === 'COMMANDER';
     }
 
-    // 🔒 สิทธิ์การมองเห็นรูปภาพ: หากคนดูเป็นผู้ดูแลระบบ, ครูที่ปรึกษา หรือประธาน -> ปลดล็อกเห็นรูปจริงของทุกคนทันที
+    // 🔒 สิทธิ์การมองเห็นรูปภาพ: หากคนดูเป็นผู้ดูแลระบบ, ครูที่ปรึกษา หรือประธาน หรือเป็นโปรไฟล์ของตนเอง -> ปลดล็อกเห็นรูปจริงทันที
     function shouldBlurPhoto(m) {
       if (!m) return false;
       const u = window.currentUser;
@@ -1236,6 +1236,14 @@
         return false;
       }
       if (isExecutiveRole(m)) {
+        return false;
+      }
+      // 🛡️ หากผู้ใช้งานที่ล็อกอินอยู่คือเจ้าของข้อมูลบัตรใบนี้เอง (ID ตรงกัน) ให้ปลดล็อกและแสดงรูปภาพตามปกติ
+      if (u && (
+        (u.memberId && String(u.memberId) === String(m.id)) ||
+        (u.id && m.discord_id && String(u.id) === String(m.discord_id)) ||
+        (u.dutyId && m.duty_id && String(u.dutyId) === String(m.duty_id))
+      )) {
         return false;
       }
       return true;
@@ -2421,12 +2429,26 @@
       if (dEngNick) dEngNick.textContent = englishNick;
 
       const phoneRaw = m.phone_number || '-';
+      const u = window.currentUser;
+      const isSelf = u && (
+        (u.memberId && String(u.memberId) === String(m.id)) ||
+        (u.id && m.discord_id && String(u.id) === String(m.discord_id)) ||
+        (u.dutyId && m.duty_id && String(u.dutyId) === String(m.duty_id))
+      );
+      const canSeePrivate = isSelf || (u && (u.isAdmin || u.role === 'ADMIN' || u.isTeacher || u.role === 'TEACHER' || u.isCommander || u.isLeader || u.isPresident || u.isVicePresident));
+
       const dPhoneText = document.getElementById('dossier-phone-text');
-      if (dPhoneText) dPhoneText.textContent = phoneRaw !== '-' ? phoneRaw : 'ไม่ได้ระบุ';
+      if (dPhoneText) {
+        if (!canSeePrivate && phoneRaw && phoneRaw !== '-') {
+          dPhoneText.textContent = phoneRaw.slice(0, 3) + '-xxx-xxxx';
+        } else {
+          dPhoneText.textContent = phoneRaw !== '-' ? phoneRaw : 'ไม่ได้ระบุ';
+        }
+      }
 
       const dPhoneCallBtn = document.getElementById('dossier-phone-call-btn');
       if (dPhoneCallBtn) {
-        if (phoneRaw && phoneRaw !== '-') {
+        if (canSeePrivate && phoneRaw && phoneRaw !== '-') {
           dPhoneCallBtn.href = `tel:${phoneRaw.replace(/[^0-9+]/g, '')}`;
           dPhoneCallBtn.classList.remove('opacity-50', 'pointer-events-none');
         } else {

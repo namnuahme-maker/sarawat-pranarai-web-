@@ -168,7 +168,14 @@ function getUserFromReq(req) {
     if (user) return user;
   }
 
-  // 3. บน Localhost ข้ามขั้นตอน Login ผ่าน Discord อัตโนมัติ (Dev Mode)
+  // 3. ตรวจสอบจาก query parameter ?auth= หรือ ?token= (สำหรับลิงก์ตรงจาก Discord)
+  const queryToken = req.query?.auth || req.query?.token;
+  if (queryToken && typeof queryToken === 'string') {
+    const user = verifyAuthToken(queryToken.trim());
+    if (user) return user;
+  }
+
+  // 4. บน Localhost ข้ามขั้นตอน Login ผ่าน Discord อัตโนมัติ (Dev Mode)
   const host = (req && req.get) ? (req.get('host') || '') : '';
   const isLocalhost = host.includes('localhost') || host.includes('127.0.0.1') || process.env.NODE_ENV === 'development' || !process.env.PORT;
   if (isLocalhost) {
@@ -202,6 +209,16 @@ function requireAuth(req, res, next) {
   const user = getUserFromReq(req);
   if (user) {
     req.user = user;
+    // หากเข้าใช้งานด้วย ?auth=... ให้เซ็ตคุกกี้เซสชัน sarawat_auth ให้อัตโนมัติ เพื่อให้คงสถานะล็อกอิน
+    if (req.query?.auth && !getCookie(req, 'sarawat_auth')) {
+      res.cookie('sarawat_auth', req.query.auth, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        path: '/'
+      });
+    }
     return next();
   }
 
