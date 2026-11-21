@@ -2806,7 +2806,7 @@
       const thaiNickname = m.thai_nickname || rawNickname;
       const phoneOrNo = m.phone_number || m.student_no || '0634125121';
       const codeLine = `${classDisplay}-${dutyId}-${phoneOrNo}`;
-      const photoUrl = m.profile_image_url || '/assets/sample_student.jpg';
+      const photoUrl = m.profile_image_url || m.photo_url || '';
 
       const elements = (studioConfig && studioConfig.elements) || DEFAULT_STUDIO_CONFIG.elements;
       let html = '';
@@ -2835,7 +2835,13 @@
         } else if (el.type === 'photo') {
           html += `
             <div style="position: absolute; left: ${left}px; top: ${top}px; width: ${width}px; height: ${height}px; display: flex; align-items: center; justify-content: center; z-index: 5; pointer-events: none; overflow: hidden;">
-              <img src="${photoUrl}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" style="width: 100%; height: 100%; object-fit: cover; object-position: top center;" alt="Photo">
+              ${photoUrl 
+                ? `<img src="${photoUrl}" onerror="this.parentElement.innerHTML='<div style=\\'width:100%;height:100%;border:2px solid #000000;box-sizing:border-box;background:#f8fafc;display:flex;flex-direction:column;align-items:center;justify-content:center;\\'><span style=\\'font-size:${Math.max(20, Math.round(width * 0.28))}px;line-height:1;\\'>👤</span><span style=\\'font-size:10px;font-weight:bold;color:#000000;margin-top:2px;font-family:sans-serif;\\'>ขนาดรูปสูงสุด</span></div>';" style="width: 100%; height: 100%; object-fit: cover; object-position: top center; border: 1.5px solid #000000; box-sizing: border-box;" alt="Photo">` 
+                : `<div style="width: 100%; height: 100%; border: 2px solid #000000; box-sizing: border-box; background: #f8fafc; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                     <span style="font-size: ${Math.max(20, Math.round(width * 0.28))}px; line-height: 1;">👤</span>
+                     <span style="font-size: 10px; font-weight: bold; color: #000000; margin-top: 2px; font-family: sans-serif;">ขนาดรูปสูงสุด</span>
+                   </div>`
+              }
             </div>
           `;
         } else if (el.type === 'text') {
@@ -3097,8 +3103,54 @@
       student_no: "69055",
       phone_number: "0634125121",
       duty_id: "TS1",
-      profile_image_url: "/assets/sample_student.jpg"
+      profile_image_url: null
     };
+
+    function createPhotoPlaceholder(left, top, width, height, angle = 0) {
+      const w = Math.round(width || 350);
+      const h = Math.round(height || 360);
+      const rect = new fabric.Rect({
+        width: w,
+        height: h,
+        fill: '#f8fafc',
+        stroke: '#000000',
+        strokeWidth: 2,
+        strokeUniform: true,
+        originX: 'center',
+        originY: 'center'
+      });
+      const iconSize = Math.max(36, Math.min(w, h) * 0.28);
+      const iconText = new fabric.Text('👤', {
+        fontSize: iconSize,
+        originX: 'center',
+        originY: 'center',
+        top: -24
+      });
+      const labelText = new fabric.Text('ขนาดรูปสูงสุด (1 นิ้ว)', {
+        fontSize: 13,
+        fontFamily: 'Prompt',
+        fontWeight: 'bold',
+        fill: '#000000',
+        originX: 'center',
+        originY: 'center',
+        top: iconSize * 0.5
+      });
+      const dimText = new fabric.Text(`${w} × ${h} px`, {
+        fontSize: 11,
+        fontFamily: 'Prompt',
+        fill: '#475569',
+        originX: 'center',
+        originY: 'center',
+        top: iconSize * 0.5 + 20
+      });
+      return new fabric.Group([rect, iconText, labelText, dimText], {
+        left: left,
+        top: top,
+        angle: angle,
+        selectable: true,
+        subTargetCheck: false
+      });
+    }
 
     async function initStudioCanvas() {
       if (studioCanvas) {
@@ -3405,29 +3457,35 @@
             }, { crossOrigin: 'anonymous' });
           });
         } else if (el.type === 'photo') {
-          const photoUrl = member.profile_image_url || '/assets/sample_student.jpg';
-          fObj = await new Promise((resolve) => {
-            fabric.Image.fromURL(photoUrl, (img) => {
-              if (!img || !img.width) {
-                // Fallback to sample photo if custom image fails to load
-                fabric.Image.fromURL('/assets/sample_student.jpg', (fallbackImg) => {
-                  if (fallbackImg) {
-                    fallbackImg.set({ left: el.left, top: el.top, angle: el.angle || 0 });
-                    fallbackImg.scaleToWidth(el.width || 350);
-                  }
-                  resolve(fallbackImg || null);
+          const photoW = el.width || 350;
+          const photoH = el.height || 360;
+          const photoLeft = el.left || 0;
+          const photoTop = el.top || 80;
+          const photoAngle = el.angle || 0;
+          const hasPhoto = !!(member && member.profile_image_url);
+
+          if (hasPhoto) {
+            fObj = await new Promise((resolve) => {
+              fabric.Image.fromURL(member.profile_image_url, (img) => {
+                if (!img || !img.width) {
+                  resolve(createPhotoPlaceholder(photoLeft, photoTop, photoW, photoH, photoAngle));
+                  return;
+                }
+                img.set({
+                  left: photoLeft,
+                  top: photoTop,
+                  angle: photoAngle,
+                  stroke: '#000000',
+                  strokeWidth: 2,
+                  strokeUniform: true
                 });
-                return;
-              }
-              img.set({
-                left: el.left,
-                top: el.top,
-                angle: el.angle || 0
-              });
-              img.scaleToWidth(el.width || 350);
-              resolve(img);
-            }, { crossOrigin: 'anonymous' });
-          });
+                img.scaleToWidth(photoW);
+                resolve(img);
+              }, { crossOrigin: 'anonymous' });
+            });
+          } else {
+            fObj = createPhotoPlaceholder(photoLeft, photoTop, photoW, photoH, photoAngle);
+          }
         } else if (el.type === 'barcode') {
           const bcVal = `${dutyId}-${member.student_no || '69055'}`;
           const bcDataUrl = generateBarcodeDataURL(bcVal);
@@ -4202,7 +4260,7 @@
         const nick = m.nickname || 'SARAWAT';
         const fullname = m.full_name || 'สารวัตรนักเรียน พระนารายณ์';
         const shiftBadge = m.shift || 'M';
-        const photo = m.profile_image_url || m.photo_url || '/assets/sample_student.jpg';
+        const photo = m.profile_image_url || m.photo_url || '';
 
         return `
           <div class="relative w-[340px] h-[538px] bg-slate-900 border border-dashed border-slate-700 rounded-xl overflow-hidden shadow p-3 flex flex-col justify-between text-white" style="page-break-inside: avoid;">
@@ -4227,7 +4285,13 @@
             <!-- Card Photo & ID -->
             <div class="my-auto flex flex-col items-center text-center">
               <div class="w-24 h-32 rounded-lg border-2 border-sky-500/50 overflow-hidden mb-2 shadow">
-                <img src="${photo}" onerror="this.onerror=null; this.src='/assets/sample_student.jpg';" class="w-full h-full object-cover" alt="${fullname}">
+                ${photo 
+                  ? `<img src="${photo}" onerror="this.parentElement.innerHTML='<div class=\\'w-full h-full bg-slate-800 border-2 border-black flex flex-col items-center justify-center text-slate-400\\'><span class=\\'text-3xl\\'>👤</span><span class=\\'text-[9px] font-bold text-slate-300 mt-1\\'>ขนาดรูปสูงสุด</span></div>';" class="w-full h-full object-cover" alt="${fullname}">`
+                  : `<div class="w-full h-full bg-slate-800 border-2 border-black flex flex-col items-center justify-center text-slate-400">
+                       <span class="text-3xl">👤</span>
+                       <span class="text-[9px] font-bold text-slate-300 mt-1">ขนาดรูปสูงสุด</span>
+                     </div>`
+                }
               </div>
               <div class="text-base font-black tracking-wider text-white">${nick}</div>
               <div class="text-[11px] text-slate-300 font-medium">${fullname}</div>

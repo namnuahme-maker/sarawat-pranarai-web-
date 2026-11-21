@@ -1077,7 +1077,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
             
             <!-- Item Photo Box -->
             <div class="aspect-[4/3] bg-midnight-950 relative overflow-hidden cursor-pointer" onclick="openQuickViewModal('${it.id}')">
-              <img src="${it.image_url || '/assets/sample_student.jpg'}" alt="${it.title}" class="w-full h-full object-cover transition-opacity duration-200 group-hover:opacity-90" loading="lazy">
+              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-full h-full object-contain p-2 transition-opacity duration-200 group-hover:opacity-90" loading="lazy">
               
               <div class="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
                 ${statusBadge}
@@ -1308,7 +1308,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           <div class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-950 flex items-center justify-between gap-3 shadow-sm hover:border-slate-500 transition-colors">
             
             <div class="flex items-center gap-3 min-w-0">
-              <img src="${it.image_url || '/assets/sample_student.jpg'}" alt="${it.title}" class="w-14 h-14 rounded-lg object-cover flex-shrink-0 bg-midnight-900 border border-midnight-700">
+              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-14 h-14 rounded-lg object-contain p-1 flex-shrink-0 bg-midnight-900 border border-midnight-700">
               <div class="min-w-0 space-y-0.5">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-xs font-mono font-semibold text-blue-400">${it.item_code}</span>
@@ -1362,7 +1362,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         <span class="${timeClass} inline-flex items-center gap-1">${icon('clock', elapsed.isOver30 ? 'w-3.5 h-3.5 text-red-400' : 'w-3.5 h-3.5 text-slate-500')} ผ่านมาแล้ว ${elapsed.text}${isConfiscated ? ' <span class="text-red-400 font-bold">(เกิน 30 วัน - จัดเป็นของกลาง)</span>' : ''}</span>
       `;
       document.getElementById('qv-storage').textContent = it.storage_location || 'ฐานหลักสารวัตร หน้าห้องกิจการ';
-      document.getElementById('qv-image').src = it.image_url || '/assets/sample_student.jpg';
+      document.getElementById('qv-image').src = it.image_url || '/assets/logo.png';
 
       // Blind Verification Secret Traits
       const secretBox = document.getElementById('qv-secret-box');

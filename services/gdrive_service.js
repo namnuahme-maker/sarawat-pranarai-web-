@@ -202,7 +202,62 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
   }
 }
 
+/**
+ * ดาวน์โหลดไฟล์จาก Google Drive
+ * @param {string} fileId - ID หรือ URL ของไฟล์บน Google Drive
+ * @returns {Promise<{success: boolean, buffer?: Buffer, mimeType?: string, error?: string}>}
+ */
+async function downloadFromGoogleDrive(fileId) {
+  if (!fileId) return { success: false, error: 'File ID is required' };
+
+  // สกัดเอาเฉพาะ ID ถ้าส่งมาเป็น URL
+  let cleanId = fileId.trim();
+  const idMatch = cleanId.match(/[-\w]{25,}/);
+  if (idMatch) cleanId = idMatch[0];
+
+  // 1. ลองผ่าน Service Account Direct API
+  const creds = getServiceAccountCredentials();
+  if (creds) {
+    try {
+      const token = await getGoogleAccessToken(creds);
+      const res = await fetch(`https://www.googleapis.com/drive/v3/files/${cleanId}?alt=media&supportsAllDrives=true`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const arrayBuf = await res.arrayBuffer();
+        const buffer = Buffer.from(arrayBuf);
+        const mimeType = res.headers.get('content-type') || 'image/png';
+        return { success: true, buffer, mimeType, fileId: cleanId };
+      }
+    } catch (e) {
+      console.warn('[GDRIVE DOWNLOAD SERVICE ACCOUNT WARN]:', e.message);
+    }
+  }
+
+  // 2. Fallback: ลองดาวน์โหลดผ่าน Google Apps Script Webhook หรือ Public Export
+  try {
+    const pubUrls = [
+      `https://drive.google.com/uc?export=download&id=${cleanId}`,
+      `https://lh3.googleusercontent.com/d/${cleanId}`
+    ];
+    for (const url of pubUrls) {
+      const pubRes = await fetch(url, { redirect: 'follow' });
+      if (pubRes.ok) {
+        const arrayBuf = await pubRes.arrayBuffer();
+        const buffer = Buffer.from(arrayBuf);
+        const mimeType = pubRes.headers.get('content-type') || 'image/png';
+        return { success: true, buffer, mimeType, fileId: cleanId };
+      }
+    }
+  } catch (pubErr) {
+    console.warn('[GDRIVE DOWNLOAD PUBLIC WARN]:', pubErr.message);
+  }
+
+  return { success: false, error: 'Failed to download from Google Drive' };
+}
+
 module.exports = {
   uploadToGoogleDrive,
+  downloadFromGoogleDrive,
   getServiceAccountCredentials
 };

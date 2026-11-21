@@ -20,7 +20,7 @@ const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
-const { uploadToGoogleDrive } = require('./services/gdrive_service');
+const { uploadToGoogleDrive, downloadFromGoogleDrive } = require('./services/gdrive_service');
 const { custodyOrFilter, isSchoolCustodyItem } = require('./lib/school_custody');
 
 const app = express();
@@ -2477,22 +2477,56 @@ app.get('/api/verify/:id', async (req, res) => {
 });
 
 // -------------------------------------------------------------
-// 6.1 API: ดึงและบันทึกโครงสร้างเลเยอร์บัตร (Card Studio Template)
+// 6.1 API: ดึงและบันทึกโครงสร้างเลเยอร์บัตร (Card Studio Template & Persistent Storage)
 // -------------------------------------------------------------
 const CONFIG_PATHS = [
   path.join(__dirname, 'card_layout_config.json'),
-  path.join(__dirname, '..', 'card_layout_config.json')
+  path.join(__dirname, '..', 'card_layout_config.json'),
+  path.join(__dirname, '..', 'bot', 'card_layout_config.json')
 ];
 
 function getLayoutConfig() {
+  let config = null;
   for (const p of CONFIG_PATHS) {
     if (fs.existsSync(p)) {
       try {
-        return JSON.parse(fs.readFileSync(p, 'utf8'));
+        config = JSON.parse(fs.readFileSync(p, 'utf8'));
+        break;
       } catch (e) {}
     }
   }
-  return null;
+
+  // หากไม่มีคอนฟิก ให้สร้างค่าเริ่มต้นพร้อมรูปพื้นหลังถาวร
+  if (!config) {
+    config = {
+      canvas: {
+        width: 430,
+        height: 680,
+        backgroundColor: "#ffffff",
+        backgroundImage: "/assets/card-templates/default_card_bg.png"
+      },
+      elements: {}
+    };
+  }
+
+  // ป้องกันรูปพื้นหลังหาย: หากไม่มีค่าหรือเป็นค่าว่าง ให้ตั้งเป็นเทมเพลตมาตรฐานถาวรเสมอ
+  if (config.canvas && (!config.canvas.backgroundImage || config.canvas.backgroundImage === '')) {
+    config.canvas.backgroundImage = "/assets/card-templates/default_card_bg.png";
+  }
+
+  return config;
+}
+
+// Helper: บันทึกคอนฟิกลงทุกไฟล์เป้าหมาย
+function saveLayoutConfig(payload) {
+  payload.updated_at = new Date().toISOString();
+  for (const p of CONFIG_PATHS) {
+    try {
+      const dir = path.dirname(p);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      fs.writeFileSync(p, JSON.stringify(payload, null, 2), 'utf8');
+    } catch (e) {}
+  }
 }
 
 app.get('/api/card-template', (req, res) => {
@@ -2503,21 +2537,216 @@ app.get('/api/card-template', (req, res) => {
   res.status(404).json({ success: false, message: 'Template configuration not found' });
 });
 
-app.post('/api/card-template', (req, res) => {
+app.post('/api/card-template', async (req, res) => {
   try {
     const payload = req.body;
     if (!payload || !payload.canvas) {
       return res.status(400).json({ success: false, message: 'Invalid config payload' });
     }
-    payload.updated_at = new Date().toISOString();
-    const targetFile = CONFIG_PATHS[0];
-    fs.writeFileSync(targetFile, JSON.stringify(payload, null, 2), 'utf8');
-    // ซิงค์ไปยัง root ด้วยถ้ามี
+
+    // จัดการรูปภาพพื้นหลัง: หากส่งมาเป็น base64 ให้แตกไฟล์และสำรองเข้า Google Drive + พื้นที่ถาวร
+    if (payload.canvas.backgroundImage && typeof payload.canvas.backgroundImage === 'string' && payload.canvas.backgroundImage.startsWith('data:image')) {
+      try {
+        const base64Data = payload.canvas.backgroundImage.replace(/^data:image\/\w+;base64,/, '');
+        const buffer = Buffer.from(base64Data, 'base64');
+        const templateDir = path.join(__dirname, 'public', 'assets', 'card-templates');
+        if (!fs.existsSync(templateDir)) fs.mkdirSync(templateDir, { recursive: true });
+
+        // 1. บันทึกลง Disk ในเครื่อง
+        const customPath = path.join(templateDir, 'custom_card_bg.png');
+        fs.writeFileSync(customPath, buffer);
+
+        // 2. ซิงค์ไปยัง bot/assets ด้วย
+        try {
+          const botTemplateDir = path.join(__dirname, '..', 'bot', 'assets', 'card-templates');
+          if (!fs.existsSync(botTemplateDir)) fs.mkdirSync(botTemplateDir, { recursive: true });
+          fs.writeFileSync(path.join(botTemplateDir, 'custom_card_bg.png'), buffer);
+        } catch (botErr) {}
+
+        // 3. สำรองเข้า Google Drive อัตโนมัติ (ป้องกัน Render รีสตาร์ทแล้วหาย)
+        try {
+          const gdriveRes = await uploadToGoogleDrive(buffer, `sarawat_card_bg_${Date.now()}.png`, {
+            category: 'card-template',
+            mimeType: 'image/png',
+            description: 'Sarawat ID Card Background Template'
+          });
+          if (gdriveRes && gdriveRes.success) {
+            payload.canvas.gdrive_file_id = gdriveRes.fileId;
+            payload.canvas.gdrive_url = gdriveRes.webViewLink;
+          }
+        } catch (gdErr) {
+          console.warn('[CARD TEMPLATE] Google Drive backup notice:', gdErr.message);
+        }
+
+        // 4. สำรองเข้า Supabase Storage ถ้ามี
+        try {
+          const { error: sbErr } = await supabase.storage
+            .from('sarawat-photos')
+            .upload('card-templates/custom_card_bg.png', buffer, {
+              contentType: 'image/png',
+              upsert: true
+            });
+          if (!sbErr) {
+            const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl('card-templates/custom_card_bg.png');
+            payload.canvas.supabase_url = publicUrl;
+          }
+        } catch (sbEx) {}
+
+        // แทนที่ค่า backgroundImage ขนาดใหญ่ด้วย URL เส้นทางถาวร
+        payload.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+      } catch (saveErr) {
+        console.warn('[CARD TEMPLATE] Image parse error:', saveErr.message);
+      }
+    }
+
+    saveLayoutConfig(payload);
+    res.json({ success: true, message: 'Layout template saved successfully', config: payload });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: อัปโหลดรูปพื้นหลังโดยตรง พร้อมสำรองขึ้น Google Drive และเก็บเป็นเทมเพลตถาวร
+app.post('/api/card-template/upload-background', async (req, res) => {
+  try {
+    const { imageBase64 } = req.body;
+    if (!imageBase64 || typeof imageBase64 !== 'string') {
+      return res.status(400).json({ success: false, message: 'Image base64 data required' });
+    }
+
+    const base64Data = imageBase64.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Data, 'base64');
+
+    const templateDir = path.join(__dirname, 'public', 'assets', 'card-templates');
+    if (!fs.existsSync(templateDir)) fs.mkdirSync(templateDir, { recursive: true });
+    fs.writeFileSync(path.join(templateDir, 'custom_card_bg.png'), buffer);
+
+    // ซิงค์ไปยัง bot ด้วย
     try {
-      fs.writeFileSync(CONFIG_PATHS[1], JSON.stringify(payload, null, 2), 'utf8');
+      const botTemplateDir = path.join(__dirname, '..', 'bot', 'assets', 'card-templates');
+      if (!fs.existsSync(botTemplateDir)) fs.mkdirSync(botTemplateDir, { recursive: true });
+      fs.writeFileSync(path.join(botTemplateDir, 'custom_card_bg.png'), buffer);
     } catch (e) {}
 
-    res.json({ success: true, message: 'Layout template saved successfully', config: payload });
+    let gdriveId = null;
+    let gdriveUrl = null;
+    try {
+      const gRes = await uploadToGoogleDrive(buffer, `sarawat_card_bg_${Date.now()}.png`, {
+        category: 'card-template',
+        mimeType: 'image/png',
+        description: 'Uploaded Card Background Template'
+      });
+      if (gRes && gRes.success) {
+        gdriveId = gRes.fileId;
+        gdriveUrl = gRes.webViewLink;
+      }
+    } catch (gdEx) {
+      console.warn('[CARD-BG-UPLOAD] Google Drive warning:', gdEx.message);
+    }
+
+    // อัปเดตคอนฟิก
+    const currentConfig = getLayoutConfig();
+    if (!currentConfig.canvas) currentConfig.canvas = { width: 430, height: 680, backgroundColor: "#ffffff" };
+    currentConfig.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+    if (gdriveId) currentConfig.canvas.gdrive_file_id = gdriveId;
+    if (gdriveUrl) currentConfig.canvas.gdrive_url = gdriveUrl;
+    saveLayoutConfig(currentConfig);
+
+    res.json({
+      success: true,
+      message: 'Card background uploaded and backed up to Google Drive successfully',
+      url: '/assets/card-templates/custom_card_bg.png',
+      gdriveFileId: gdriveId,
+      gdriveUrl: gdriveUrl
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: ดึงรายการเทมเพลตและรูปพื้นหลังที่มีให้เลือก (Default, Custom, Google Drive)
+app.get('/api/card-template/templates', (req, res) => {
+  const config = getLayoutConfig();
+  const templates = [
+    {
+      id: 'default',
+      name: 'เทมเพลตมาตรฐานทางการ (ถาวร)',
+      url: '/assets/card-templates/default_card_bg.png',
+      isDefault: true
+    }
+  ];
+
+  const customPath = path.join(__dirname, 'public', 'assets', 'card-templates', 'custom_card_bg.png');
+  if (fs.existsSync(customPath)) {
+    templates.push({
+      id: 'custom',
+      name: 'เทมเพลตกำหนดเองล่าสุด (Local/Server)',
+      url: '/assets/card-templates/custom_card_bg.png',
+      isCurrent: config.canvas && config.canvas.backgroundImage === '/assets/card-templates/custom_card_bg.png'
+    });
+  }
+
+  if (config.canvas && config.canvas.gdrive_file_id) {
+    templates.push({
+      id: 'gdrive',
+      name: 'เทมเพลตสำรองบน Google Drive',
+      url: `/api/drive-proxy/${config.canvas.gdrive_file_id}`,
+      fileId: config.canvas.gdrive_file_id,
+      webViewLink: config.canvas.gdrive_url
+    });
+  }
+
+  res.json({ success: true, templates, activeBackground: (config.canvas && config.canvas.backgroundImage) || '/assets/card-templates/default_card_bg.png' });
+});
+
+// API: โหลดรูปพื้นหลังเทมเพลตจาก Google Drive
+app.post('/api/card-template/load-from-drive', async (req, res) => {
+  try {
+    const { fileId, driveUrl } = req.body;
+    const targetId = fileId || driveUrl;
+    if (!targetId) {
+      return res.status(400).json({ success: false, message: 'Google Drive file ID or URL required' });
+    }
+
+    const dl = await downloadFromGoogleDrive(targetId);
+    if (!dl.success || !dl.buffer) {
+      return res.status(404).json({ success: false, message: dl.error || 'Failed to download from Google Drive' });
+    }
+
+    const templateDir = path.join(__dirname, 'public', 'assets', 'card-templates');
+    if (!fs.existsSync(templateDir)) fs.mkdirSync(templateDir, { recursive: true });
+    fs.writeFileSync(path.join(templateDir, 'custom_card_bg.png'), dl.buffer);
+
+    // อัปเดตคอนฟิก
+    const currentConfig = getLayoutConfig();
+    if (!currentConfig.canvas) currentConfig.canvas = { width: 430, height: 680, backgroundColor: "#ffffff" };
+    currentConfig.canvas.backgroundImage = '/assets/card-templates/custom_card_bg.png';
+    currentConfig.canvas.gdrive_file_id = dl.fileId || targetId;
+    saveLayoutConfig(currentConfig);
+
+    res.json({
+      success: true,
+      message: 'Template loaded from Google Drive successfully',
+      url: '/assets/card-templates/custom_card_bg.png',
+      fileId: dl.fileId || targetId
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// API: ตัวกลางดึงรูปจาก Google Drive (Proxy เพื่อหลบปัญหา CORS ในบราวเซอร์)
+app.get('/api/drive-proxy/:fileId', async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const dl = await downloadFromGoogleDrive(fileId);
+    if (dl.success && dl.buffer) {
+      res.setHeader('Content-Type', dl.mimeType || 'image/png');
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      return res.send(dl.buffer);
+    }
+    res.status(404).json({ success: false, message: 'File not found on Google Drive' });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }
