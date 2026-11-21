@@ -5,6 +5,15 @@
  */
 
 require('dotenv').config();
+
+// Global Process Exception Handlers
+process.on('uncaughtException', (err) => {
+  console.error('[WEB FATAL] Uncaught Exception:', err?.stack || err);
+});
+process.on('unhandledRejection', (reason, promise) => {
+  console.error('[WEB WARN] Unhandled Rejection at:', promise, 'reason:', reason);
+});
+
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -18,15 +27,52 @@ const app = express();
 app.set('trust proxy', 1); // รองรับ Reverse Proxy บน Render (HTTPS termination)
 const PORT = process.env.PORT || 10001; // ค่าเริ่มต้นพอร์ตเว็บ 10001 (เพื่อไม่ชนกับบอทพอร์ต 10000 เมื่อรันในเครื่องเดียวกัน)
 
+// Helper: สร้าง Supabase Client แบบปลอดภัย ป้องกัน Server Crash เมื่อขาดการตั้งค่า ENV
+function createSafeSupabaseClient(url, key, context = 'WEB') {
+  if (url && key) {
+    try {
+      return createClient(url, key);
+    } catch (e) {
+      console.warn(`[${context}] ⚠️ ไม่สามารถเชื่อมต่อ Supabase:`, e.message);
+    }
+  } else {
+    console.warn(`[${context}] ⚠️ ขาดค่า SUPABASE_URL หรือ SUPABASE_SERVICE_ROLE_KEY - ใช้งาน Safe Mock Fallback`);
+  }
+
+  const dummyChain = {
+    select: () => dummyChain,
+    insert: () => dummyChain,
+    update: () => dummyChain,
+    delete: () => dummyChain,
+    eq: () => dummyChain,
+    neq: () => dummyChain,
+    in: () => dummyChain,
+    is: () => dummyChain,
+    or: () => dummyChain,
+    order: () => dummyChain,
+    limit: () => dummyChain,
+    range: () => dummyChain,
+    single: async () => ({ data: null, error: new Error('Supabase unconfigured') }),
+    maybeSingle: async () => ({ data: null, error: null }),
+    then: (resolve) => resolve({ data: [], error: null })
+  };
+
+  return {
+    from: () => dummyChain,
+    storage: {
+      from: () => ({
+        upload: async () => ({ data: null, error: new Error('Supabase storage unconfigured') }),
+        getPublicUrl: () => ({ data: { publicUrl: '' } }),
+        remove: async () => ({ data: null, error: null })
+      })
+    }
+  };
+}
+
 // เชื่อมต่อ Supabase Database
 const supabaseUrl = process.env.SUPABASE_URL;
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-
-if (!supabaseUrl || !supabaseKey) {
-  console.error('[WEB] ⚠️ ขาดค่า SUPABASE_URL หรือ SUPABASE_SERVICE_ROLE_KEY ใน .env');
-}
-
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = createSafeSupabaseClient(supabaseUrl, supabaseKey, 'WEB');
 
 // Keep old Thursday values readable while the web and Discord bot roll out
 // independently; all new writes and user-facing values use Th / ThS.
@@ -2072,6 +2118,9 @@ app.post('/api/members/:id/photo', async (req, res) => {
     if (!imageBase64) {
       return res.status(400).json({ error: 'ไม่พบข้อมูลรูปภาพ (imageBase64 missing)' });
     }
+    if (typeof imageBase64 !== 'string' || imageBase64.length > 15 * 1024 * 1024) {
+      return res.status(400).json({ error: 'ขนาดรูปภาพเกินกำหนด (ต้องไม่เกิน 10MB)' });
+    }
 
     // ดึงข้อมูลสมาชิกเป้าหมาย
     const { data: targetMember, error: fetchErr } = await supabase
@@ -2289,6 +2338,10 @@ app.post('/api/cases/:id/evidence', async (req, res) => {
     const caseId = req.params.id;
     const { url, filename, base64Data, notes } = req.body || {};
     let fileUrl = url;
+
+    if (base64Data && (typeof base64Data !== 'string' || base64Data.length > 50 * 1024 * 1024)) {
+      return res.status(400).json({ success: false, error: 'ขนาดไฟล์เกินกำหนด (ต้องไม่เกิน 35MB)' });
+    }
 
     if (base64Data && filename) {
       // 1. ตรวจสอบการส่งไฟล์ขึ้น Google Drive อัตโนมัติผ่าน Google Apps Script Web App
