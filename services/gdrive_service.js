@@ -109,13 +109,19 @@ async function getGoogleAccessToken(creds) {
 async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
   const folderId = metadata.folderId || (metadata.category === 'lost_found' ? (process.env.GDRIVE_LOST_FOLDER_ID || '1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ') : (process.env.GDRIVE_FOLDER_ID || '1lcAN_otZ7RPOax6J1oodV-LjQ4hou_ez'));
 
+  const webhookUrl = process.env.GDRIVE_WEBHOOK_URL ||
+                     process.env.GOOGLE_DRIVE_WEBAPP_URL ||
+                     process.env.GOOGLE_APPS_SCRIPT_URL ||
+                     process.env.GDRIVE_APPS_SCRIPT_URL;
+
   // 1. ช่องทางที่ 1: Google Apps Script Webhook (แนะนำสูงสุดสำหรับโฟลเดอร์ใน My Drive - ไม่ติด Quota 0 Byte)
-  if (process.env.GDRIVE_WEBHOOK_URL) {
+  if (webhookUrl) {
     try {
       const mime = metadata.mimeType || (filename.endsWith('.png') ? 'image/png' : (filename.endsWith('.mp4') ? 'video/mp4' : 'image/jpeg'));
-      const res = await fetch(process.env.GDRIVE_WEBHOOK_URL, {
+      const res = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        redirect: 'follow',
         body: JSON.stringify({
           folderId,
           category: metadata.category || 'profile',
@@ -126,13 +132,20 @@ async function uploadToGoogleDrive(buffer, filename, metadata = {}) {
         })
       });
       if (res.ok) {
-        const data = await res.json().catch(() => null);
-        if (data && data.success) {
+        const text = await res.text();
+        let data = null;
+        try {
+          data = JSON.parse(text);
+        } catch (e) {
+          const match = text.match(/\{[\s\S]*"success"\s*:\s*true[\s\S]*\}/);
+          if (match) data = JSON.parse(match[0]);
+        }
+        if (data && data.success && data.fileId) {
           console.log(`[GDRIVE] ✅ อัปโหลดสำเร็จผ่าน Apps Script Gateway: ${filename} (ID: ${data.fileId})`);
           return {
             success: true,
             fileId: data.fileId,
-            webViewLink: data.webViewLink
+            webViewLink: data.webViewLink || `https://drive.google.com/file/d/${data.fileId}/view`
           };
         }
       }

@@ -408,10 +408,13 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
               สถานะ
             </div>
           </div>
-          <div class="pt-1 flex items-center gap-2">
+          <div class="pt-1 flex flex-col gap-1.5">
             <button onclick="document.getElementById('qv-file-input').click()" class="w-full py-1.5 px-3 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-cyan-300 hover:text-white border border-cyan-500/30 text-xs font-mono font-medium flex items-center justify-center gap-1.5 transition active:scale-95 shadow">
-              <span>📷</span><span>อัปโหลดรูปหลักฐานใหม่ (ถาวร)</span>
+              <span>📷</span><span>อัปโหลดรูปหลักฐานใหม่เข้า Google Drive</span>
             </button>
+            <a id="qv-gdrive-link" href="https://drive.google.com/drive/folders/1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ" target="_blank" rel="noopener noreferrer" class="w-full py-1.5 px-3 rounded-lg bg-cyan-950/40 hover:bg-cyan-900/50 text-cyan-400 hover:text-cyan-200 border border-cyan-700/40 text-[11px] font-mono flex items-center justify-center gap-1.5 transition">
+              <span>📁</span><span>เปิดดูไฟล์ใน Google Drive</span>
+            </a>
             <input type="file" id="qv-file-input" accept="image/*" class="hidden" onchange="handleQuickViewPhotoUpload(event)">
           </div>
           <p class="text-[11px] text-slate-400 text-center font-mono flex items-center justify-center gap-1">
@@ -1043,6 +1046,24 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       }
     }
 
+    // ----------------------------------------------------------
+    // 🌐 GOOGLE DRIVE IMAGE PROXY RESOLVER
+    // ----------------------------------------------------------
+    function resolveLostItemImg(it) {
+      if (!it) return '/assets/logo.png';
+      if (it.gdrive_file_id) {
+        return `/api/drive-proxy/${it.gdrive_file_id}`;
+      }
+      const url = String(it.image_url || '').trim();
+      if (!url) return '/assets/logo.png';
+      if (url.startsWith('/api/drive-proxy/')) return url;
+      if (url.includes('drive.google.com')) {
+        const m = url.match(/[-\w]{25,}/);
+        if (m) return `/api/drive-proxy/${m[0]}`;
+      }
+      return url;
+    }
+
     // Render Instant Card Showcase Grid (Midnight Style)
     function renderItemsShowcase(items) {
       const container = document.getElementById('items-grid');
@@ -1083,7 +1104,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
             
             <!-- Item Photo Box -->
             <div class="aspect-[4/3] bg-midnight-950 relative overflow-hidden cursor-pointer" onclick="openQuickViewModal('${it.id}')">
-              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-full h-full object-contain p-2 transition-opacity duration-200 group-hover:opacity-90" loading="lazy" onerror="handleLostItemImgError(this, '${it.category || ''}')">
+              <img src="${resolveLostItemImg(it)}" alt="${it.title}" class="w-full h-full object-contain p-2 transition-opacity duration-200 group-hover:opacity-90" loading="lazy" onerror="handleLostItemImgError(this, '${it.category || ''}')">
               
               <div class="absolute top-2 left-2 flex items-center gap-1.5 flex-wrap">
                 ${statusBadge}
@@ -1314,7 +1335,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           <div class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-950 flex items-center justify-between gap-3 shadow-sm hover:border-slate-500 transition-colors">
             
             <div class="flex items-center gap-3 min-w-0">
-              <img src="${it.image_url || '/assets/logo.png'}" alt="${it.title}" class="w-14 h-14 rounded-lg object-contain p-1 flex-shrink-0 bg-midnight-900 border border-midnight-700">
+              <img src="${resolveLostItemImg(it)}" alt="${it.title}" class="w-14 h-14 rounded-lg object-contain p-1 flex-shrink-0 bg-midnight-900 border border-midnight-700" onerror="handleLostItemImgError(this, '${it.category || ''}')">
               <div class="min-w-0 space-y-0.5">
                 <div class="flex items-center gap-2 flex-wrap">
                   <span class="text-xs font-mono font-semibold text-blue-400">${it.item_code}</span>
@@ -1368,7 +1389,22 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         <span class="${timeClass} inline-flex items-center gap-1">${icon('clock', elapsed.isOver30 ? 'w-3.5 h-3.5 text-red-400' : 'w-3.5 h-3.5 text-slate-500')} ผ่านมาแล้ว ${elapsed.text}${isConfiscated ? ' <span class="text-red-400 font-bold">(เกิน 30 วัน - จัดเป็นของกลาง)</span>' : ''}</span>
       `;
       document.getElementById('qv-storage').textContent = it.storage_location || 'ฐานหลักสารวัตร หน้าห้องกิจการ';
-      document.getElementById('qv-image').src = it.image_url || '/assets/logo.png';
+      document.getElementById('qv-image').src = resolveLostItemImg(it);
+
+      // Google Drive Link
+      const gdriveBtn = document.getElementById('qv-gdrive-link');
+      if (gdriveBtn) {
+        if (it.gdrive_file_id) {
+          gdriveBtn.href = `https://drive.google.com/file/d/${it.gdrive_file_id}/view`;
+          gdriveBtn.innerHTML = `<span>📁</span><span>เปิดดูไฟล์บน Google Drive ↗</span>`;
+        } else if (it.gdrive_url) {
+          gdriveBtn.href = it.gdrive_url;
+          gdriveBtn.innerHTML = `<span>📁</span><span>เปิดดูไฟล์บน Google Drive ↗</span>`;
+        } else {
+          gdriveBtn.href = 'https://drive.google.com/drive/folders/1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ';
+          gdriveBtn.innerHTML = `<span>📁</span><span>เปิดโฟลเดอร์ 03_สิ่งของที่พบเจอ ↗</span>`;
+        }
+      }
 
       // Blind Verification Secret Traits
       const secretBox = document.getElementById('qv-secret-box');
@@ -1444,15 +1480,26 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
           const d = await res.json();
           if (d.success) {
             activeQuickViewItem.image_url = d.image_url;
+            if (d.gdrive_file_id) activeQuickViewItem.gdrive_file_id = d.gdrive_file_id;
+            if (d.gdrive_url) activeQuickViewItem.gdrive_url = d.gdrive_url;
             const qvImg = document.getElementById('qv-image');
             if (qvImg) {
               delete qvImg.dataset.errorHandled;
-              qvImg.src = d.image_url;
+              qvImg.src = resolveLostItemImg(activeQuickViewItem);
+            }
+            const gdriveBtn = document.getElementById('qv-gdrive-link');
+            if (gdriveBtn && (d.gdrive_file_id || d.gdrive_url)) {
+              gdriveBtn.href = d.gdrive_url || `https://drive.google.com/file/d/${d.gdrive_file_id}/view`;
+              gdriveBtn.innerHTML = `<span>📁</span><span>เปิดดูไฟล์บน Google Drive ↗</span>`;
             }
             const idx = allItems.findIndex(i => i.id === activeQuickViewItem.id);
-            if (idx >= 0) allItems[idx].image_url = d.image_url;
+            if (idx >= 0) {
+              allItems[idx].image_url = d.image_url;
+              if (d.gdrive_file_id) allItems[idx].gdrive_file_id = d.gdrive_file_id;
+              if (d.gdrive_url) allItems[idx].gdrive_url = d.gdrive_url;
+            }
             renderItems(allItems);
-            showToast('อัปโหลดรูปหลักฐานถาวรสำเร็จแล้ว!', '📷');
+            showToast('อัปโหลดรูปหลักฐานเข้า Google Drive สำเร็จแล้ว!', '📷');
           } else {
             showToast('อัปโหลดไม่สำเร็จ: ' + (d.error || ''), '❌');
           }

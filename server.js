@@ -3139,10 +3139,10 @@ app.post('/api/lost-found/items', async (req, res) => {
           title: title.trim(),
           description: `สิ่งของที่พบเจอ: ${title.trim()} (${itemCode})`
         });
-        if (gRes && gRes.success) {
+        if (gRes && gRes.success && gRes.fileId) {
           gdriveFileId = gRes.fileId;
-          gdriveUrl = gRes.webViewLink;
-          if (!finalImageUrl) finalImageUrl = gRes.webViewLink;
+          gdriveUrl = gRes.webViewLink || `https://drive.google.com/file/d/${gRes.fileId}/view`;
+          finalImageUrl = `/api/drive-proxy/${gRes.fileId}`;
         }
       } catch (e) {}
 
@@ -3204,6 +3204,99 @@ app.post('/api/lost-found/items', async (req, res) => {
       storage: isDbSaved ? 'supabase_database' : 'local_mirror_file',
       item: savedItem,
       message: `บันทึกของพบเจอสำเร็จ รหัส: ${itemCode}`
+    });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.2.1 อัปเดต/อัปโหลดรูปภาพหลักฐานสิ่งของที่พบเจอเข้า Google Drive และระบบ (/api/lost-found/items/:id/photo)
+app.post('/api/lost-found/items/:id/photo', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { image_base64, image_url } = req.body || {};
+    if (!image_base64 && !image_url) {
+      return res.status(400).json({ success: false, error: 'กรุณาส่งข้อมูลรูปภาพ' });
+    }
+
+    const db = getLostFoundData();
+    db.items = db.items || [];
+    const itemIdx = db.items.findIndex(i => String(i.id) === String(id) || String(i.item_code) === String(id));
+    const currentItem = itemIdx >= 0 ? db.items[itemIdx] : null;
+    const itemCode = currentItem ? currentItem.item_code : `LF-${id}`;
+    const filename = `${itemCode}.jpg`;
+
+    let finalImageUrl = image_url || null;
+    let gdriveFileId = null;
+    let gdriveUrl = null;
+
+    if (image_base64) {
+      const buf = Buffer.from(image_base64.split(',').pop(), 'base64');
+
+      // 1. จัดเก็บลง Supabase Storage sarawat-photos ถาวร
+      try {
+        const storagePath = `lost-items/${filename}`;
+        const { error: sErr } = await supabase.storage
+          .from('sarawat-photos')
+          .upload(storagePath, buf, { contentType: 'image/jpeg', upsert: true });
+        if (!sErr) {
+          const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+          finalImageUrl = publicUrl;
+        }
+      } catch (e) {}
+
+      // 2. สำรองเข้า Google Drive โฟลเดอร์ 03_สิ่งของที่พบเจอ (1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ)
+      try {
+        const gRes = await uploadToGoogleDrive(buf, filename, {
+          category: 'lost_found',
+          folderId: process.env.GDRIVE_LOST_FOLDER_ID || '1que123Zlr8ewcC5KD4Gx5DLZSbyJeapQ',
+          itemCode: itemCode,
+          title: currentItem?.title || itemCode,
+          description: `สิ่งของที่พบเจอ: ${currentItem?.title || itemCode} (${itemCode})`
+        });
+        if (gRes && gRes.success && gRes.fileId) {
+          gdriveFileId = gRes.fileId;
+          gdriveUrl = gRes.webViewLink || `https://drive.google.com/file/d/${gRes.fileId}/view`;
+          finalImageUrl = `/api/drive-proxy/${gRes.fileId}`;
+        }
+      } catch (e) {}
+
+      // 3. Fallback: Local file
+      if (!finalImageUrl) {
+        const uploadDir = path.join(__dirname, 'public', 'uploads');
+        if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+        fs.writeFileSync(path.join(uploadDir, filename), buf);
+        finalImageUrl = `/uploads/${filename}`;
+      }
+    }
+
+    // อัปเดตใน Supabase Database
+    try {
+      await supabase.from('lost_items')
+        .update({
+          image_url: finalImageUrl,
+          gdrive_file_id: gdriveFileId,
+          gdrive_url: gdriveUrl,
+          updated_at: new Date().toISOString()
+        })
+        .or(`id.eq.${id},item_code.eq.${id}`);
+    } catch (e) {}
+
+    // อัปเดตใน Local JSON
+    if (itemIdx >= 0) {
+      db.items[itemIdx].image_url = finalImageUrl;
+      if (gdriveFileId) db.items[itemIdx].gdrive_file_id = gdriveFileId;
+      if (gdriveUrl) db.items[itemIdx].gdrive_url = gdriveUrl;
+      db.items[itemIdx].updated_at = new Date().toISOString();
+      saveLostFoundData(db);
+    }
+
+    res.json({
+      success: true,
+      image_url: finalImageUrl,
+      gdrive_file_id: gdriveFileId,
+      gdrive_url: gdriveUrl,
+      message: 'อัปเดตรูปหลักฐานเข้า Google Drive สำเร็จ'
     });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
