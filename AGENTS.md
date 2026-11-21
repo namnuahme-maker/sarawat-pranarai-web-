@@ -19,3 +19,7 @@
   2. `web/` -> https://github.com/namnuahme-maker/sarawat-pranarai-web-.git
 - ทุกครั้งที่มีการแก้ไขและทดสอบโค้ดผ่านแล้ว ต้องทำการ `git add`, `git commit` ด้วย Conventional Commits และ `git push origin main` เสมอ ห้ามปล่อยค้างไว้เด็ดขาด
 
+## 5. Superpowers Framework Always-On (obra/superpowers)
+- เปิดใช้งานระเบียบวิธีวิศวกรรม Superpowers ทุกคำสั่งและทุกคำถามของผู้ใช้งาน
+- ตรวจสอบและดึงสกิลที่เกี่ยวข้องมาใช้งานก่อนลงมือแก้โค้ดเสมอ (`using-superpowers`)
+- สืบหาสาเหตุที่แท้จริง (`systematic-debugging`), เขียนเทสต์ตรวจจับข้อผิดพลาดก่อนแก้ (`test-driven-development`), และรันคำสั่งทดสอบยืนยันผลจริงก่อนส่งมอบงานทุกครั้ง (`verification-before-completion`)
