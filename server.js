@@ -2242,6 +2242,24 @@ app.post('/api/members/:id/photo', async (req, res) => {
 // -------------------------------------------------------------
 // 4. API: รายการคดีและหลักฐาน (Cases Vault)
 // -------------------------------------------------------------
+const CASES_CACHE_FILE = path.join(__dirname, 'cases_cache.json');
+
+function getCasesCache() {
+  if (fs.existsSync(CASES_CACHE_FILE)) {
+    try {
+      const parsed = JSON.parse(fs.readFileSync(CASES_CACHE_FILE, 'utf8'));
+      if (Array.isArray(parsed)) return parsed;
+    } catch (e) {}
+  }
+  return [];
+}
+
+function saveCasesCache(list) {
+  try {
+    fs.writeFileSync(CASES_CACHE_FILE, JSON.stringify(list || [], null, 2), 'utf8');
+  } catch (e) {}
+}
+
 app.get('/api/cases', async (req, res) => {
   try {
     const { status } = req.query;
@@ -2257,9 +2275,18 @@ app.get('/api/cases', async (req, res) => {
     const { data: cases, error } = await query;
     if (error) throw error;
 
-    res.json({ success: true, count: (cases || []).length, data: cases || [] });
+    if (Array.isArray(cases) && cases.length > 0) {
+      saveCasesCache(cases);
+      return res.json({ success: true, count: cases.length, data: cases });
+    }
+
+    const cached = getCasesCache();
+    const result = (status && status !== 'ALL') ? cached.filter(c => c.status === status) : cached;
+    res.json({ success: true, count: result.length, data: result });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    const cached = getCasesCache();
+    const result = (req.query.status && req.query.status !== 'ALL') ? cached.filter(c => c.status === req.query.status) : cached;
+    res.json({ success: true, count: result.length, data: result });
   }
 });
 
@@ -2284,8 +2311,16 @@ app.post('/api/cases', async (req, res) => {
       status: payload.status || 'PENDING'
     };
 
-    const { data, error } = await supabase.from('cases').insert(newCase).select();
-    if (error) throw error;
+    try {
+      await supabase.from('cases').insert(newCase);
+    } catch (dbErr) {
+      console.warn('[CASES INSERT SUPABASE WARN]:', dbErr.message);
+    }
+
+    // อัปเดตสำรองข้อมูล Local Cache ทันที
+    const currentCached = getCasesCache();
+    const updated = [newCase, ...currentCached.filter(c => c.case_id !== newCase.case_id)];
+    saveCasesCache(updated);
 
     // 📢 ส่งสัญญาณแจ้งเตือนเข้าห้อง #รับแจ้งเหตุ ใน Discord ทันทีแบบ Non-blocking
     const incidentChanId = process.env.INCIDENT_CHANNEL_ID || '1567570890084843530';
@@ -4471,6 +4506,17 @@ app.get('/api/analytics/overview', async (req, res) => {
       }
     } catch (e) {
       console.warn('[ANALYTICS] Cases error:', e.message);
+    }
+
+    // Fallback: ดึงจาก Cases Cache หากยังไม่มีข้อมูลจาก Supabase
+    if (cases.length === 0) {
+      const cachedCases = getCasesCache();
+      cases = cachedCases.filter(c => {
+        const dt = c.incident_date_time || c.created_at;
+        if (startDate && dt && dt < `${startDate}T00:00:00.000Z`) return false;
+        if (endDate && dt && dt > `${endDate}T23:59:59.999Z`) return false;
+        return true;
+      });
     }
 
     // 5. Fetch Lost & Found Items

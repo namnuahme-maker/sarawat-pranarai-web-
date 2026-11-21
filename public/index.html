@@ -3515,7 +3515,7 @@
       if (m) m.classList.add('hidden');
     }
 
-    function submitQuickIncident() {
+    async function submitQuickIncident() {
       const title = document.getElementById('incident-title')?.value.trim();
       const category = document.getElementById('incident-category')?.value;
       const severity = document.getElementById('incident-severity')?.value;
@@ -3527,22 +3527,38 @@
         return;
       }
 
+      const caseId = 'CASE-' + Math.floor(1000 + Math.random() * 9000);
+      const nowIso = new Date().toISOString();
       const newCase = {
-        id: 'INC-' + Date.now().toString().slice(-6),
+        id: caseId,
+        case_id: caseId,
         title: title,
-        category: category,
-        severity: severity,
-        description: details,
+        category: category || 'รับเรื่องร้องเรียน',
+        severity: severity || 'NORMAL',
+        description: `[${severity || 'NORMAL'}] ${title}\n${details || ''}`.trim(),
         reporter: reporter,
+        reporter_name: reporter,
+        location: 'บริเวณโรงเรียน',
         status: 'PENDING',
-        created_at: new Date().toISOString()
+        incident_date_time: nowIso,
+        created_at: nowIso
       };
+
+      try {
+        await fetch('/api/cases', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(newCase)
+        });
+      } catch (err) {
+        console.warn('Sync case to backend error:', err);
+      }
 
       allCases.unshift(newCase);
       renderCases(allCases);
       closeQuickIncidentModal();
       switchTab('incidents');
-      alert('🚨 บันทึกเหตุการณ์ประจำวันสำเร็จ และเพิ่มเข้าสู่รายการเรียบร้อย');
+      alert('🚨 บันทึกเหตุการณ์ประจำวันสำเร็จ และเพิ่มเข้าสู่สารบบคดีเรียบร้อย');
     }
 
     // ==========================================================
