@@ -3312,12 +3312,22 @@ app.post('/api/lost-found/items', async (req, res) => {
 
     // บันทึกเข้า Supabase PostgreSQL Database (หากมีตาราง)
     try {
-      const { data, error } = await supabase.from('lost_items').insert(newItem).select().single();
+      const dbItem = { ...newItem };
+      delete dbItem.gdrive_file_id;
+      delete dbItem.gdrive_url;
+      if (dbItem.id && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(dbItem.id)) {
+        delete dbItem.id;
+      }
+      const { data, error } = await supabase.from('lost_items').insert(dbItem).select().single();
       if (!error && data) {
         savedItem = data;
         isDbSaved = true;
+      } else if (error) {
+        console.error('[SUPABASE INSERT LOST ITEM ERROR]:', error.message || error);
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('[SUPABASE INSERT LOST ITEM EXCEPTION]:', e.message || e);
+    }
 
     // บันทึกสำเนาลง Local JSON เสมอเพื่อความเสถียร (ป้องกัน duplicate item_code)
     db.items = db.items || [];
