@@ -2732,15 +2732,13 @@
       if (!m) return;
 
       // Ensure template config is loaded
-      if (!studioConfig) {
-        try {
-          const res = await fetch('/api/card-template');
-          const data = await res.json();
-          if (data.success && data.config) studioConfig = data.config;
-          else studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
-        } catch (e) {
-          studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
-        }
+      try {
+        const res = await fetch('/api/card-template');
+        const data = await res.json();
+        if (data.success && data.config) studioConfig = data.config;
+        else if (!studioConfig) studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
+      } catch (e) {
+        if (!studioConfig) studioConfig = JSON.parse(JSON.stringify(DEFAULT_STUDIO_CONFIG));
       }
 
       // Render the card with the saved template into both Preview (Scale 0.651) and Export (Scale 1.0)

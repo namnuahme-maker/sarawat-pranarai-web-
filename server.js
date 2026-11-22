@@ -19,6 +19,15 @@ const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
 const crypto = require('crypto');
+
+let wsTransport = null;
+try {
+  wsTransport = require('ws');
+  if (!globalThis.WebSocket) {
+    globalThis.WebSocket = wsTransport;
+  }
+} catch (e) {}
+
 const { createClient } = require('@supabase/supabase-js');
 const { uploadToGoogleDrive, downloadFromGoogleDrive } = require('./services/gdrive_service');
 const { custodyOrFilter, isSchoolCustodyItem } = require('./lib/school_custody');
@@ -29,11 +38,21 @@ const PORT = process.env.PORT || 10001; // ค่าเริ่มต้นพ�
 
 // Helper: สร้าง Supabase Client แบบปลอดภัย ป้องกัน Server Crash เมื่อขาดการตั้งค่า ENV
 function createSafeSupabaseClient(url, key, context = 'WEB') {
-  if (url && key) {
+  const cleanUrl = String(url || '').trim();
+  const cleanKey = String(key || '').trim();
+  if (cleanUrl && cleanKey) {
     try {
-      return createClient(url, key);
+      const options = {
+        auth: { persistSession: false, autoRefreshToken: false }
+      };
+      if (wsTransport) {
+        options.realtime = { transport: wsTransport };
+      }
+      const client = createClient(cleanUrl, cleanKey, options);
+      console.log(`[${context}] ✅ เชื่อมต่อ Supabase สำเร็จ: ${cleanUrl.substring(0, 25)}...`);
+      return client;
     } catch (e) {
-      console.warn(`[${context}] ⚠️ ไม่สามารถเชื่อมต่อ Supabase:`, e.message);
+      console.error(`[${context}] ⚠️ ไม่สามารถเชื่อมต่อ Supabase:`, e.message);
     }
   } else {
     console.warn(`[${context}] ⚠️ ขาดค่า SUPABASE_URL หรือ SUPABASE_SERVICE_ROLE_KEY - ใช้งาน Safe Mock Fallback`);
@@ -592,7 +611,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify สำหรับสแกน QR บัตร และ /api/crop สำหรับโทเค็นครอปรูป 1:1)
+// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify, /api/crop)
 app.use('/api', (req, res, next) => {
   if (req.path.startsWith('/auth') || req.path.startsWith('/verify') || req.path.startsWith('/crop')) {
     return next();
@@ -2537,13 +2556,45 @@ const CONFIG_PATHS = [
   path.join(__dirname, '..', 'bot', 'card_layout_config.json')
 ];
 
+let cachedLayoutConfig = null;
+
+async function syncLayoutConfigFromSupabase() {
+  try {
+    const { data, error } = await supabase.storage
+      .from('sarawat-photos')
+      .download('card-templates/card_layout_config.json');
+    if (data && !error) {
+      const text = await data.text();
+      const parsed = JSON.parse(text);
+      if (parsed && parsed.elements) {
+        cachedLayoutConfig = parsed;
+        for (const p of CONFIG_PATHS) {
+          try {
+            const dir = path.dirname(p);
+            if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+            fs.writeFileSync(p, JSON.stringify(parsed, null, 2), 'utf8');
+          } catch (e) {}
+        }
+        console.log('[CARD TEMPLATE] Synced template config from Supabase Storage.');
+        return parsed;
+      }
+    }
+  } catch (err) {
+    console.warn('[CARD TEMPLATE] Supabase download notice:', err.message);
+  }
+  return null;
+}
+
 function getLayoutConfig() {
+  if (cachedLayoutConfig && cachedLayoutConfig.elements) {
+    return cachedLayoutConfig;
+  }
   let config = null;
   for (const p of CONFIG_PATHS) {
     if (fs.existsSync(p)) {
       try {
         config = JSON.parse(fs.readFileSync(p, 'utf8'));
-        break;
+        if (config && config.elements) break;
       } catch (e) {}
     }
   }
@@ -2572,12 +2623,31 @@ function getLayoutConfig() {
     }
   }
 
+  // ป้องกันตราโรงเรียนตกหล่น
+  if (config.elements && !config.elements.schoolEmblem) {
+    config.elements.schoolEmblem = {
+      id: "schoolEmblem",
+      name: "ตราโรงเรียนพระนารายณ์",
+      type: "image",
+      src: "/assets/school_emblem.png",
+      left: 315,
+      top: 568,
+      width: 78,
+      height: 98,
+      opacity: 1,
+      angle: 0
+    };
+  }
+
+  cachedLayoutConfig = config;
   return config;
 }
 
-// Helper: บันทึกคอนฟิกลงทุกไฟล์เป้าหมาย
-function saveLayoutConfig(payload) {
+// Helper: บันทึกคอนฟิกลงทุกไฟล์เป้าหมาย + Supabase Storage
+async function saveLayoutConfig(payload) {
   payload.updated_at = new Date().toISOString();
+  cachedLayoutConfig = payload;
+
   for (const p of CONFIG_PATHS) {
     try {
       const dir = path.dirname(p);
@@ -2585,9 +2655,25 @@ function saveLayoutConfig(payload) {
       fs.writeFileSync(p, JSON.stringify(payload, null, 2), 'utf8');
     } catch (e) {}
   }
+
+  // ซิงค์ไปยัง Supabase Storage แบบถาวร
+  try {
+    const jsonBuf = Buffer.from(JSON.stringify(payload, null, 2), 'utf8');
+    await supabase.storage
+      .from('sarawat-photos')
+      .upload('card-templates/card_layout_config.json', jsonBuf, {
+        contentType: 'application/json',
+        upsert: true
+      });
+  } catch (sbEx) {
+    console.warn('[CARD TEMPLATE] Supabase storage upload warning:', sbEx.message);
+  }
 }
 
-app.get('/api/card-template', (req, res) => {
+app.get('/api/card-template', async (req, res) => {
+  if (!cachedLayoutConfig) {
+    await syncLayoutConfigFromSupabase();
+  }
   const config = getLayoutConfig();
   if (config) {
     return res.json({ success: true, config });
@@ -2650,8 +2736,8 @@ app.post('/api/card-template', async (req, res) => {
           }
         } catch (sbEx) {}
 
-        if (gdriveId) {
-          payload.canvas.backgroundImage = `/api/drive-proxy/${gdriveId}`;
+        if (payload.canvas.gdrive_file_id) {
+          payload.canvas.backgroundImage = `/api/drive-proxy/${payload.canvas.gdrive_file_id}`;
         } else if (payload.canvas.supabase_url) {
           payload.canvas.backgroundImage = payload.canvas.supabase_url;
         } else {
@@ -2662,7 +2748,7 @@ app.post('/api/card-template', async (req, res) => {
       }
     }
 
-    saveLayoutConfig(payload);
+    await saveLayoutConfig(payload);
     res.json({ success: true, message: 'Layout template saved successfully', config: payload });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
@@ -4864,6 +4950,9 @@ app.get('*', requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`[SARAWAT-WEB] 🌐 Dashboard Online on http://localhost:${PORT}`);
+  try {
+    await syncLayoutConfigFromSupabase();
+  } catch (e) {}
 });

@@ -1138,7 +1138,9 @@
                 originX: el.originX || 'left',
                 originY: el.originY || 'top',
                 angle: el.angle || 0,
-                opacity: el.opacity !== undefined ? el.opacity : 1
+                opacity: el.opacity !== undefined ? el.opacity : 1,
+                customType: 'image',
+                customSrc: el.src
               });
               if (el.width && el.height) {
                 img.scaleToWidth(el.width);
@@ -1196,6 +1198,8 @@
         if (fObj) {
           fObj.customKey = key;
           fObj.customName = el.name || key;
+          if (!fObj.customType) fObj.customType = el.type;
+          if (!fObj.customSrc && el.src) fObj.customSrc = el.src;
           studioCanvas.add(fObj);
         }
       };
@@ -1418,22 +1422,45 @@
       if (!studioCanvas || !studioConfig) return;
       if (!studioConfig.elements) studioConfig.elements = {};
 
+      const currentKeys = new Set();
       studioCanvas.getObjects().forEach(o => {
         if (!o.customKey) return;
+        currentKeys.add(o.customKey);
         const entry = studioConfig.elements[o.customKey] || {};
+        entry.id = o.customKey;
+        if (o.customName) entry.name = o.customName;
         entry.left = Math.round(o.left);
         entry.top = Math.round(o.top);
-        entry.angle = o.angle || 0;
+        entry.angle = Math.round(o.angle || 0);
         entry.opacity = o.opacity !== undefined ? o.opacity : 1;
 
         if (o.type === 'text' || o.type === 'i-text' || o.type === 'textbox') {
+          entry.type = 'text';
           entry.fontSize = o.fontSize;
           entry.fontFamily = o.fontFamily;
           entry.fontWeight = o.fontWeight;
           entry.fill = o.fill;
           entry.charSpacing = o.charSpacing;
           if (o.scaleY) entry.scaleY = o.scaleY;
+        } else if (o.type === 'image') {
+          entry.type = entry.type || o.customType || 'image';
+          if (o.customSrc || (o._element && o._element.src)) {
+            entry.src = o.customSrc || (o._element && o._element.src) || entry.src;
+          }
+          const scaledW = Math.round(o.getScaledWidth ? o.getScaledWidth() : ((o.width || 0) * (o.scaleX || 1)));
+          const scaledH = Math.round(o.getScaledHeight ? o.getScaledHeight() : ((o.height || 0) * (o.scaleY || 1)));
+          if (scaledW) entry.width = scaledW;
+          if (scaledH) entry.height = scaledH;
+        } else if (o.type === 'rect') {
+          entry.type = 'rect';
+          const scaledW = Math.round(o.getScaledWidth ? o.getScaledWidth() : ((o.width || 0) * (o.scaleX || 1)));
+          const scaledH = Math.round(o.getScaledHeight ? o.getScaledHeight() : ((o.height || 0) * (o.scaleY || 1)));
+          if (scaledW) entry.width = scaledW;
+          if (scaledH) entry.height = scaledH;
+          if (o.fill) entry.fill = o.fill;
         } else {
+          if (o.customType) entry.type = o.customType;
+          if (o.customSrc) entry.src = o.customSrc;
           const scaledW = Math.round(o.getScaledWidth ? o.getScaledWidth() : ((o.width || 0) * (o.scaleX || 1)));
           const scaledH = Math.round(o.getScaledHeight ? o.getScaledHeight() : ((o.height || 0) * (o.scaleY || 1)));
           if (scaledW) entry.width = scaledW;
@@ -1441,6 +1468,13 @@
           if (o.fill) entry.fill = o.fill;
         }
         studioConfig.elements[o.customKey] = entry;
+      });
+
+      // ลบ element ที่ถูกลบออกจากแคนวาส
+      Object.keys(studioConfig.elements).forEach(k => {
+        if (!currentKeys.has(k)) {
+          delete studioConfig.elements[k];
+        }
       });
     }
 
@@ -1458,6 +1492,9 @@
         });
         const d = await res.json();
         if (d.success) {
+          if (d.config) {
+            studioConfig = d.config;
+          }
           showToast('บันทึกเทมเพลตขึ้นเซิร์ฟเวอร์เรียบร้อย!', '💾');
         } else {
           showToast('บันทึกไม่สำเร็จ: ' + (d.message || ''), '❌');
@@ -1825,17 +1862,35 @@
         fabric.Image.fromURL(evt.target.result, (img) => {
           if (!img) return;
           if (img.width > 250) img.scaleToWidth(200);
+          const elemKey = 'custom_' + Date.now();
+          const elemName = `รูป (${file.name.slice(0, 15)})`;
           img.set({
             left: 115,
             top: 240,
-            customKey: 'custom_' + Date.now(),
-            customName: `รูป (${file.name.slice(0, 15)})`
+            customKey: elemKey,
+            customName: elemName,
+            customType: 'image',
+            customSrc: evt.target.result
           });
+          if (!studioConfig.elements) studioConfig.elements = {};
+          studioConfig.elements[elemKey] = {
+            id: elemKey,
+            name: elemName,
+            type: 'image',
+            src: evt.target.result,
+            left: 115,
+            top: 240,
+            width: Math.round(img.getScaledWidth ? img.getScaledWidth() : (img.width || 200)),
+            height: Math.round(img.getScaledHeight ? img.getScaledHeight() : (img.height || 200)),
+            opacity: 1,
+            angle: 0
+          };
           studioCanvas.add(img);
           studioCanvas.setActiveObject(img);
           studioCanvas.renderAll();
           updateLayerListUI();
           onObjectSelected({ target: img });
+          syncConfigFromCanvas();
           showToast('เพิ่มรูปภาพลงบนบัตรสำเร็จ!', '🖼️');
         });
       };
@@ -1854,17 +1909,35 @@
             img.scaleToWidth(75);
           }
           const cleanName = file.name.replace(/\.[^/.]+$/, '').slice(0, 15);
+          const elemKey = 'icon_' + Date.now();
+          const elemName = `ไอคอน (${cleanName})`;
           img.set({
             left: 175,
             top: 250,
-            customKey: 'icon_' + Date.now(),
-            customName: `ไอคอน (${cleanName})`
+            customKey: elemKey,
+            customName: elemName,
+            customType: 'image',
+            customSrc: evt.target.result
           });
+          if (!studioConfig.elements) studioConfig.elements = {};
+          studioConfig.elements[elemKey] = {
+            id: elemKey,
+            name: elemName,
+            type: 'image',
+            src: evt.target.result,
+            left: 175,
+            top: 250,
+            width: Math.round(img.getScaledWidth ? img.getScaledWidth() : (img.width || 75)),
+            height: Math.round(img.getScaledHeight ? img.getScaledHeight() : (img.height || 75)),
+            opacity: 1,
+            angle: 0
+          };
           studioCanvas.add(img);
           studioCanvas.setActiveObject(img);
           studioCanvas.renderAll();
           updateLayerListUI();
           onObjectSelected({ target: img });
+          syncConfigFromCanvas();
           showToast(`เพิ่มไอคอน ${file.name} สำเร็จ!`, '✨');
         });
       };
@@ -1874,46 +1947,91 @@
 
     function addStandardIcon(type) {
       const presets = {
-        school: { url: '/assets/school_emblem.png', name: 'ไอคอน (ตรา รร.)', width: 75 },
-        sarawat: { url: '/assets/sarawat_logo.png', name: 'ไอคอน (ตราสารวัตร)', width: 75 },
-        logo: { url: '/assets/logo.png', name: 'ไอคอน (โลโก้)', width: 75 }
+        school: { url: '/assets/school_emblem.png', name: 'ตราโรงเรียนพระนารายณ์', width: 78, key: 'schoolEmblem' },
+        sarawat: { url: '/assets/sarawat_logo.png', name: 'ไอคอน (ตราสารวัตร)', width: 75, key: 'sarawatLogo' },
+        logo: { url: '/assets/logo.png', name: 'ไอคอน (โลโก้)', width: 75, key: 'unitLogo' }
       };
 
       if (type === 'star') {
+        const starKey = 'icon_' + Date.now();
         const star = new fabric.Text('⭐', {
           fontSize: 48,
           left: 185,
           top: 250,
-          customKey: 'icon_' + Date.now(),
-          customName: 'ไอคอน (ดาวทอง)'
+          customKey: starKey,
+          customName: 'ไอคอน (ดาวทอง)',
+          customType: 'text'
         });
+        if (!studioConfig.elements) studioConfig.elements = {};
+        studioConfig.elements[starKey] = {
+          id: starKey,
+          name: 'ไอคอน (ดาวทอง)',
+          type: 'text',
+          text: '⭐',
+          left: 185,
+          top: 250,
+          fontSize: 48,
+          opacity: 1,
+          angle: 0
+        };
         studioCanvas.add(star);
         studioCanvas.setActiveObject(star);
         studioCanvas.renderAll();
         updateLayerListUI();
         onObjectSelected({ target: star });
+        syncConfigFromCanvas();
         showToast('เพิ่มไอคอนดาวทองสำเร็จ!', '⭐');
         return;
       }
 
       const p = presets[type];
       if (!p) return;
+
+      // ถ้าเป็น preset ที่มี key เจาะจง และมีอยู่แล้วบนแคนวาส ให้ select อ็อบเจกต์เดิม
+      if (p.key) {
+        const existing = studioCanvas.getObjects().find(o => o.customKey === p.key);
+        if (existing) {
+          studioCanvas.setActiveObject(existing);
+          studioCanvas.renderAll();
+          onObjectSelected({ target: existing });
+          showToast(`เลือก ${p.name} ที่มีอยู่แล้ว`, '📍');
+          return;
+        }
+      }
+
+      const elemKey = p.key || ('icon_' + Date.now());
       fabric.Image.fromURL(p.url, (img) => {
         if (!img) return;
         img.scaleToWidth(p.width);
         img.set({
           left: 175,
           top: 250,
-          customKey: 'icon_' + Date.now(),
-          customName: p.name
+          customKey: elemKey,
+          customName: p.name,
+          customType: 'image',
+          customSrc: p.url
         });
+        if (!studioConfig.elements) studioConfig.elements = {};
+        studioConfig.elements[elemKey] = {
+          id: elemKey,
+          name: p.name,
+          type: 'image',
+          src: p.url,
+          left: 175,
+          top: 250,
+          width: p.width,
+          height: Math.round(img.getScaledHeight ? img.getScaledHeight() : (p.width * (img.height / img.width))),
+          opacity: 1,
+          angle: 0
+        };
         studioCanvas.add(img);
         studioCanvas.setActiveObject(img);
         studioCanvas.renderAll();
         updateLayerListUI();
         onObjectSelected({ target: img });
+        syncConfigFromCanvas();
         showToast(`เพิ่ม ${p.name} สำเร็จ!`, '✨');
-      });
+      }, { crossOrigin: 'anonymous' });
     }
 
     function setupDragAndDrop() {
@@ -1943,11 +2061,35 @@
             fabric.Image.fromURL(evt.target.result, (img) => {
               if (img) {
                 img.scaleToWidth(180);
-                img.set({ left: 100, top: 200, customKey: 'custom_' + Date.now(), customName: 'รูปวาง' });
+                const elemKey = 'custom_' + Date.now();
+                const elemName = 'รูปวาง';
+                img.set({
+                  left: 100,
+                  top: 200,
+                  customKey: elemKey,
+                  customName: elemName,
+                  customType: 'image',
+                  customSrc: evt.target.result
+                });
+                if (!studioConfig.elements) studioConfig.elements = {};
+                studioConfig.elements[elemKey] = {
+                  id: elemKey,
+                  name: elemName,
+                  type: 'image',
+                  src: evt.target.result,
+                  left: 100,
+                  top: 200,
+                  width: Math.round(img.getScaledWidth ? img.getScaledWidth() : (img.width || 180)),
+                  height: Math.round(img.getScaledHeight ? img.getScaledHeight() : (img.height || 180)),
+                  opacity: 1,
+                  angle: 0
+                };
                 studioCanvas.add(img);
                 studioCanvas.setActiveObject(img);
                 studioCanvas.renderAll();
                 updateLayerListUI();
+                onObjectSelected({ target: img });
+                syncConfigFromCanvas();
               }
             });
           };

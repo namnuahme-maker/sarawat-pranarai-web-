@@ -2385,9 +2385,7 @@
       if (!m) return;
       activeCardMember = m;
 
-      if (!cardStudioConfig) {
-        await loadCardStudioConfig();
-      }
+      await loadCardStudioConfig();
 
       renderCardHTMLFromTemplate('modal-card-render-zone', m, 280 / 430);
 
