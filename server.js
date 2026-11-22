@@ -611,9 +611,15 @@ app.use((req, res, next) => {
   next();
 });
 
-// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify, /api/crop, /api/drive-proxy)
+// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify, /api/crop, /api/drive-proxy, และ POST /api/lost-found/claims สำหรับ Google Form / GAS)
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/auth') || req.path.startsWith('/verify') || req.path.startsWith('/crop') || req.path.startsWith('/drive-proxy')) {
+  if (
+    req.path.startsWith('/auth') ||
+    req.path.startsWith('/verify') ||
+    req.path.startsWith('/crop') ||
+    req.path.startsWith('/drive-proxy') ||
+    (req.method === 'POST' && (req.path === '/lost-found/claims' || req.path.startsWith('/lost-found/claims')))
+  ) {
     return next();
   }
   return requireAuth(req, res, next);
