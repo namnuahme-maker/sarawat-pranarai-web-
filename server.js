@@ -1224,7 +1224,7 @@ app.post('/api/crop/submit', async (req, res) => {
                     type: 2,
                     style: 5,
                     label: '🪪 เปิดดูบัตรประจำตัว 3D',
-                    url: `https://sarawat-pranarai-web.onrender.com/card?id=${member.id}`
+                    url: `https://sarawat-promax.onrender.com/card?id=${member.id}`
                   }]
                 }]
               })
@@ -3528,7 +3528,7 @@ app.post('/api/lost-found/claims', async (req, res) => {
           : null;
         if (!chTarget) return;
 
-        const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
+        const webUrl = process.env.WEB_URL || 'https://sarawat-promax.onrender.com';
         await fetch(`https://discord.com/api/v10/channels/${chTarget.id}/messages`, {
           method: 'POST',
           headers: {
@@ -3993,7 +3993,7 @@ async function notifyAttendanceToDiscord(sessionData, summary, records) {
 
     const shiftNames = { M: 'วันจันทร์', T: 'วันอังคาร', W: 'วันพุธ', Th: 'วันพฤหัสบดี', F: 'วันศุกร์', S: 'เวรพิเศษทุกวัน' };
     const shiftThai = shiftNames[sessionData.shift_code] || sessionData.shift_code;
-    const webUrl = process.env.WEB_URL || 'https://sarawat-pranarai-web.onrender.com';
+    const webUrl = process.env.WEB_URL || 'https://sarawat-promax.onrender.com';
 
     // จัดหมวดหมู่รายชื่อสารวัตรที่ตรวจเช็ค
     let memberRosterText = '';

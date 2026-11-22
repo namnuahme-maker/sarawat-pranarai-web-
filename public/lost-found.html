@@ -263,25 +263,22 @@
           </button>
         </div>
 
-        <pre id="script-code-block" class="bg-midnight-950 text-slate-300 p-4 rounded-lg text-xs font-mono overflow-x-auto max-h-56 custom-scroll leading-relaxed border border-midnight-800"><code>function onFormSubmit(e) {
-  // สคริปต์ส่งคำร้องแจ้งของหายจาก Google Form เข้าฐานสารวัตรนักเรียน
-  var WEBHOOK_URL = "http://localhost:10001/api/lost-found/claims";
-  var responses = e.response.getItemResponses();
-  var payload = {
-    category: responses[0] ? responses[0].getResponse() : "อื่นๆ",
-    item_type: responses[1] ? responses[1].getResponse() : "สิ่งของไม่ระบุชื่อ",
-    characteristics: responses[2] ? responses[2].getResponse() : "",
-    lost_location: responses[3] ? responses[3].getResponse() : "ไม่ระบุสถานที่",
-    lost_date: new Date().toISOString().slice(0, 10),
-    claimant_name: responses[4] ? responses[4].getResponse() : "นักเรียน",
-    claimant_class: responses[5] ? responses[5].getResponse() : "",
-    claimant_contact: responses[6] ? responses[6].getResponse() : ""
-  };
-  UrlFetchApp.fetch(WEBHOOK_URL, {
-    method: "post",
-    contentType: "application/json",
-    payload: JSON.stringify(payload)
-  });
+        <pre id="script-code-block" class="bg-midnight-950 text-slate-300 p-4 rounded-lg text-xs font-mono overflow-x-auto max-h-56 custom-scroll leading-relaxed border border-midnight-800"><code>// ⚙️ ตั้งค่าการเชื่อมต่อ (ไฟล์ google_apps_script_lost_item.js)
+const CONFIG = {
+  SUPABASE_URL: "https://cxrakrsyxvsrbpgphgtt.supabase.co",
+  SUPABASE_KEY: "YOUR_SUPABASE_SERVICE_ROLE_KEY",
+  WEB_API_URL: "https://sarawat-promax.onrender.com/api/lost-found/claims",
+  WEB_DASHBOARD_URL: "https://sarawat-promax.onrender.com/lost-found"
+};
+
+// 1. กดเรียกใช้ฟังก์ชันนี้เพื่อซิงค์ข้อมูลย้อนหลังทั้งหมดในชีต เข้าหน้าเว็บทันที
+function syncAllPastResponses() {
+  // ดูโค้ดฉบับเต็มได้ในไฟล์ google_apps_script_lost_item.js ในโปรเจกต์
+}
+
+// 2. ฟังก์ชันทำงานอัตโนมัติเมื่อนักเรียนส่งแบบฟอร์มเข้ามาใหม่
+function onFormSubmit(e) {
+  // ดูโค้ดฉบับเต็มได้ในไฟล์ google_apps_script_lost_item.js ในโปรเจกต์
 }</code></pre>
       </div>
 
