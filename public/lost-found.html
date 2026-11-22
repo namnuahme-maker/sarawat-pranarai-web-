@@ -1051,16 +1051,16 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     // ----------------------------------------------------------
     function resolveLostItemImg(it) {
       if (!it) return '/assets/logo.png';
-      if (it.gdrive_file_id) {
-        return `/api/drive-proxy/${it.gdrive_file_id}`;
+      let fileId = it.gdrive_file_id;
+      if (!fileId && it.image_url && it.image_url.includes('drive.google.com')) {
+        const m = it.image_url.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+        if (m) fileId = m[1];
+      }
+      if (fileId) {
+        return `https://lh3.googleusercontent.com/d/${fileId}`;
       }
       const url = String(it.image_url || '').trim();
       if (!url) return '/assets/logo.png';
-      if (url.startsWith('/api/drive-proxy/')) return url;
-      if (url.includes('drive.google.com')) {
-        const m = url.match(/[-\w]{25,}/);
-        if (m) return `/api/drive-proxy/${m[0]}`;
-      }
       return url;
     }
 
@@ -1445,7 +1445,16 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
     }
 
     function handleLostItemImgError(img, cat) {
-      if (!img || img.dataset.errorHandled) return;
+      if (!img) return;
+      if (!img.dataset.proxyTried && img.src.includes('googleusercontent.com/d/')) {
+        img.dataset.proxyTried = 'true';
+        const m = img.src.match(/\/d\/([a-zA-Z0-9_-]{25,})/);
+        if (m) {
+          img.src = `/api/drive-proxy/${m[1]}`;
+          return;
+        }
+      }
+      if (img.dataset.errorHandled) return;
       img.dataset.errorHandled = 'true';
       const c = String(cat || '').toLowerCase();
       let iconEmoji = '📦';
@@ -1472,7 +1481,7 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       reader.onload = async function(evt) {
         const base64Data = evt.target.result;
         try {
-          const res = await fetch(\`/api/lost-found/items/\${activeQuickViewItem.id}/photo\`, {
+          const res = await fetch(`/api/lost-found/items/${activeQuickViewItem.id}/photo`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ image_base64: base64Data })
