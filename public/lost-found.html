@@ -188,9 +188,27 @@
                   <span id="radar-claim-status" class="px-2 py-0.5 rounded text-[11px] font-medium bg-amber-950/80 text-amber-300 border border-amber-800/60">รอตรวจสอบ</span>
                 </div>
 
-                <div>
-                  <h3 id="radar-claim-title" class="text-sm sm:text-base font-semibold text-white">กระเป๋าสตางค์</h3>
-                  <p id="radar-claim-traits" class="text-xs text-slate-300 mt-1 leading-relaxed bg-midnight-900 p-2.5 rounded-lg border border-midnight-800"></p>
+                <div class="flex items-start justify-between gap-3 sm:gap-4">
+                  <div class="flex-1 min-w-0 space-y-1.5">
+                    <h3 id="radar-claim-title" class="text-sm sm:text-base font-semibold text-white">กระเป๋าสตางค์</h3>
+                    <div class="bg-midnight-900 p-2.5 rounded-lg border border-midnight-800 space-y-2">
+                      <p id="radar-claim-traits" class="text-xs text-slate-300 leading-relaxed break-words"></p>
+                      <div id="radar-claim-elapsed-box"></div>
+                    </div>
+                  </div>
+
+                  <!-- Right Side Photo Preview (มุมขวาตรงกลาง) -->
+                  <div id="radar-claim-photo-container" class="hidden flex-shrink-0 pt-0.5">
+                    <div class="relative group cursor-pointer" onclick="openClaimPhotoModal()" title="คลิกเพื่อดูรูปขนาดเต็ม">
+                      <img id="radar-claim-photo-img" src="" alt="รูปของที่หาย" class="w-20 h-20 sm:w-24 sm:h-24 rounded-xl object-cover border border-midnight-700 bg-midnight-900 shadow-lg group-hover:border-blue-400 group-hover:scale-105 transition-all duration-200">
+                      <div class="absolute inset-0 rounded-xl bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-[10px] font-medium backdrop-blur-[2px]">
+                        <span>🔍 ดูรูป</span>
+                      </div>
+                      <span class="absolute -bottom-2 left-1/2 -translate-x-1/2 px-1.5 py-0.2 rounded bg-midnight-950/90 text-blue-300 border border-midnight-700 text-[9px] font-mono whitespace-nowrap shadow">
+                        รูปของที่หาย
+                      </span>
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Student Contact & Location Info -->
@@ -795,6 +813,32 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
   </dialog>
 
   <!-- ========================================================== -->
+  <!-- MODAL 6: CLAIM PHOTO PREVIEW DIALOG -->
+  <!-- ========================================================== -->
+  <dialog id="modal-claim-photo" class="p-0 rounded-2xl bg-midnight-950 border border-midnight-700 shadow-2xl backdrop:bg-black/85 max-w-xl w-full text-slate-200">
+    <div class="p-4 border-b border-midnight-800 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+        <h3 id="modal-claim-photo-title" class="text-sm font-semibold text-white">รูปภาพประกอบคำร้อง</h3>
+      </div>
+      <button onclick="closeClaimPhotoModal()" class="w-7 h-7 rounded-lg bg-midnight-850 hover:bg-midnight-800 border border-midnight-700 text-slate-400 hover:text-white flex items-center justify-center transition-colors">
+        ✕
+      </button>
+    </div>
+    <div class="p-4 flex items-center justify-center bg-black/60 min-h-[300px] max-h-[70vh] overflow-hidden">
+      <img id="modal-claim-photo-img" src="" alt="รูปของที่หาย" class="max-h-[60vh] w-auto max-w-full rounded-xl object-contain shadow-2xl border border-midnight-800">
+    </div>
+    <div class="p-3.5 border-t border-midnight-800 flex items-center justify-between bg-midnight-900/60">
+      <a id="modal-claim-photo-link" href="#" target="_blank" class="px-3 py-1.5 rounded-lg bg-midnight-800 hover:bg-midnight-700 text-blue-400 hover:text-blue-300 border border-midnight-700 text-xs font-medium inline-flex items-center gap-1.5 transition-colors">
+        <span>เปิดภาพต้นฉบับใน Google Drive ↗</span>
+      </a>
+      <button onclick="closeClaimPhotoModal()" class="px-3.5 py-1.5 rounded-lg bg-midnight-800 hover:bg-midnight-750 text-slate-300 text-xs font-medium transition-colors">
+        ปิดหน้าต่าง
+      </button>
+    </div>
+  </dialog>
+
+  <!-- ========================================================== -->
   <!-- JAVASCRIPT APPLICATION CONTROLLER -->
   <!-- ========================================================== -->
   <script>
@@ -1204,6 +1248,54 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       }
     }
 
+    // Photo & Traits Extraction Helpers for Claims
+    let currentClaimPhotoUrl = "";
+    let currentClaimPhotoTitle = "";
+
+    function getClaimPhotoUrl(claim) {
+      if (!claim) return "";
+      if (claim.photo_url && typeof claim.photo_url === 'string' && claim.photo_url.startsWith('http')) {
+        return claim.photo_url;
+      }
+      if (Array.isArray(claim.photo_urls) && claim.photo_urls.length > 0 && typeof claim.photo_urls[0] === 'string') {
+        return claim.photo_urls[0];
+      }
+      if (claim.characteristics) {
+        const match = String(claim.characteristics).match(/(https?:\/\/[^\s\)\>\]]+)/i);
+        if (match) return match[1];
+      }
+      return "";
+    }
+
+    function getClaimCleanTraits(claim) {
+      if (!claim || !claim.characteristics) return "ไม่มีรายละเอียด";
+      let text = String(claim.characteristics);
+      text = text.replace(/📷\s*(รูปแนบ|ลิงก์รูปภาพ)?\s*:\s*https?:\/\/[^\s]+/gi, '');
+      text = text.replace(/https?:\/\/[^\s]+/gi, '');
+      text = text.trim();
+      return text || "ไม่มีรายละเอียดเพิ่มเติม";
+    }
+
+    function openClaimPhotoModal(url, title) {
+      const targetUrl = url || currentClaimPhotoUrl;
+      const targetTitle = title || currentClaimPhotoTitle || "รูปภาพประกอบคำร้อง";
+      if (!targetUrl) return;
+      document.getElementById('modal-claim-photo-img').src = targetUrl;
+      document.getElementById('modal-claim-photo-title').textContent = targetTitle;
+      document.getElementById('modal-claim-photo-link').href = targetUrl;
+      const dialog = document.getElementById('modal-claim-photo');
+      if (dialog && typeof dialog.showModal === 'function') {
+        dialog.showModal();
+      }
+    }
+
+    function closeClaimPhotoModal() {
+      const dialog = document.getElementById('modal-claim-photo');
+      if (dialog && typeof dialog.close === 'function') {
+        dialog.close();
+      }
+    }
+
     // Render Claims List in Left Col
     function renderClaimsList(claims) {
       const container = document.getElementById('claims-list-box');
@@ -1228,6 +1320,9 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
         if (isMatched) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-blue-950/80 text-blue-300 border border-blue-800/60">พบของใกล้เคียง</span>`;
         if (isResolved) badge = `<span class="px-2 py-0.5 rounded text-[10px] font-medium bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">ส่งมอบแล้ว</span>`;
 
+        const photoUrl = getClaimPhotoUrl(c);
+        const cleanTraits = getClaimCleanTraits(c);
+
         return `
           <div onclick="selectClaimForRadar('${c.id}')" class="p-3.5 rounded-xl border border-midnight-700/80 bg-midnight-900 hover:border-slate-500 cursor-pointer transition-colors shadow-sm space-y-2">
             <div class="flex items-center justify-between">
@@ -1241,9 +1336,14 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
               ${badge}
             </div>
 
-            <div>
-              <h4 class="text-xs sm:text-sm font-semibold text-white">${c.item_type}</h4>
-              <p class="text-xs text-slate-400 line-clamp-1">${c.characteristics}</p>
+            <div class="flex items-center justify-between gap-3">
+              <div class="min-w-0 flex-1">
+                <h4 class="text-xs sm:text-sm font-semibold text-white truncate">${c.item_type}</h4>
+                <p class="text-xs text-slate-400 line-clamp-1">${cleanTraits}</p>
+              </div>
+              ${photoUrl ? `
+                <img src="${photoUrl}" alt="รูป" class="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-midnight-700 bg-midnight-950 shadow-sm" onerror="this.style.display='none'">
+              ` : ''}
             </div>
 
             <div class="pt-1.5 border-t border-midnight-700/60 text-[11px] text-slate-400 flex items-center justify-between">
@@ -1274,16 +1374,50 @@ CREATE POLICY "Allow write lost_categories" ON public.lost_categories FOR ALL US
       const elapsedClaim = formatElapsedTime(claim.created_at || claim.lost_date);
       const claimRadarTimeClass = elapsedClaim.isOver30 ? 'text-red-400 font-medium bg-red-950/80 border-red-800' : 'text-slate-300 bg-midnight-950 border-midnight-800';
 
+      const photoUrl = getClaimPhotoUrl(claim);
+      const cleanTraits = getClaimCleanTraits(claim);
+
       document.getElementById('radar-claim-code').textContent = claim.claim_code;
       document.getElementById('radar-claim-title').textContent = `${claim.category} • ${claim.item_type}`;
-      document.getElementById('radar-claim-traits').innerHTML = `
-        ${claim.characteristics}
-        <div class="mt-2 text-[11px] ${claimRadarTimeClass} font-mono flex items-center gap-1.5 p-2 rounded-lg border">
+
+      // Update traits text & optional Drive link
+      let traitsHtml = `<span>${cleanTraits}</span>`;
+      if (photoUrl) {
+        traitsHtml += `
+          <div class="pt-1">
+            <a href="${photoUrl}" target="_blank" class="inline-flex items-center gap-1 text-[11px] text-blue-400 hover:text-blue-300 underline">
+              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              <span>เปิดดูภาพใน Google Drive</span>
+            </a>
+          </div>
+        `;
+      }
+      document.getElementById('radar-claim-traits').innerHTML = traitsHtml;
+
+      // Update right-side photo preview thumbnail (มุมขวาตรงกลาง)
+      const photoBox = document.getElementById('radar-claim-photo-container');
+      const photoImg = document.getElementById('radar-claim-photo-img');
+      if (photoUrl) {
+        currentClaimPhotoUrl = photoUrl;
+        currentClaimPhotoTitle = `${claim.claim_code} • ${claim.item_type}`;
+        photoImg.src = photoUrl;
+        photoBox.classList.remove('hidden');
+      } else {
+        currentClaimPhotoUrl = "";
+        currentClaimPhotoTitle = "";
+        photoBox.classList.add('hidden');
+      }
+
+      // Update Elapsed time badge
+      const elapsedBox = document.getElementById('radar-claim-elapsed-box');
+      elapsedBox.innerHTML = `
+        <div class="text-[11px] ${claimRadarTimeClass} font-mono flex items-center gap-1.5 p-2 rounded-lg border">
           <span class="flex items-center gap-1 text-slate-400">${icon('clock', 'w-3.5 h-3.5 text-slate-500')} เวลาที่ผ่านไป:</span>
           <strong class="${elapsedClaim.isOver30 ? 'text-red-300' : 'text-white'}">${elapsedClaim.text}${elapsedClaim.isOver30 ? ' (เกิน 30 วัน)' : ''}</strong>
           <span class="text-slate-500">(${claim.lost_date || ''})</span>
         </div>
       `;
+
       document.getElementById('radar-claimant-name').textContent = claim.claimant_name;
       document.getElementById('radar-claimant-class').textContent = claim.claimant_class ? `(${claim.claimant_class})` : '';
       document.getElementById('radar-claimant-phone').textContent = claim.claimant_contact;
