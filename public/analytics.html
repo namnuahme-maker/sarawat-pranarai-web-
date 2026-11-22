@@ -503,6 +503,171 @@
   </main>
 
   <!-- ========================================================== -->
+  <!-- 🚨 MODAL: CASE DETAIL POPUP                                -->
+  <!-- ========================================================== -->
+  <div id="case-detail-modal" onclick="if(event.target === this) closeCaseModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+    <div class="relative bg-gradient-to-b from-[#0b1322] to-[#060b14] border border-[#1e2e4a] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col text-slate-200">
+      <!-- Header -->
+      <div class="flex items-start justify-between border-b border-[#162238] pb-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center text-rose-400 text-xl shrink-0">
+            🚨
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="case-modal-code" class="font-mono text-xs font-bold text-rose-400 bg-rose-950/80 px-2 py-0.5 rounded border border-rose-900/80">CASE-XXXX</span>
+              <span id="case-modal-category-badge" class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-300 bg-slate-800/80 border border-slate-700">หมวดหมู่</span>
+              <span id="case-modal-status" class="px-2.5 py-0.5 rounded text-[11px] font-mono border">รอดำเนินการ</span>
+            </div>
+            <h3 id="case-modal-title" class="font-bold text-base sm:text-lg text-white mt-1">ชื่อคดี</h3>
+          </div>
+        </div>
+        <button onclick="closeCaseModal()" class="w-8 h-8 rounded-lg bg-[#0c1527] hover:bg-[#162238] text-slate-400 hover:text-white flex items-center justify-center transition text-sm border border-[#162238]" title="ปิด">
+          ✕
+        </button>
+      </div>
+
+      <!-- Scrollable Body -->
+      <div class="space-y-4 overflow-y-auto flex-1 pr-1 text-xs">
+        <!-- Info Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 bg-[#040810] p-3.5 rounded-xl border border-[#162238]">
+          <div>
+            <span class="text-slate-400 text-[11px]">📍 สถานที่เกิดเหตุ:</span>
+            <div id="case-modal-location" class="font-medium text-white text-xs mt-0.5">-</div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[11px]">📅 วันและเวลาที่เกิดเหตุ:</span>
+            <div id="case-modal-datetime" class="font-medium text-white text-xs mt-0.5">-</div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[11px]">👤 ผู้รายงาน / ชั้น:</span>
+            <div id="case-modal-reporter" class="font-medium text-white text-xs mt-0.5">-</div>
+          </div>
+          <div>
+            <span class="text-slate-400 text-[11px]">📞 ช่องทางติดต่อ:</span>
+            <div id="case-modal-contact" class="font-medium text-white text-xs mt-0.5">-</div>
+          </div>
+        </div>
+
+        <!-- Description -->
+        <div class="bg-[#040810] p-3.5 rounded-xl border border-[#162238] space-y-1">
+          <span class="text-slate-400 text-[11px] font-semibold flex items-center gap-1.5">
+            <span>📝</span> รายละเอียดเหตุการณ์:
+          </span>
+          <p id="case-modal-desc" class="text-slate-200 leading-relaxed text-xs whitespace-pre-wrap font-sans">-</p>
+        </div>
+
+        <!-- Evidence Section -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-slate-300 font-semibold text-xs flex items-center gap-1.5">
+              <span>📹</span> หลักฐานภาพถ่าย & คลิป Bodycam:
+            </span>
+            <span id="case-modal-evidence-count" class="text-[11px] font-mono text-amber-400">0 ไฟล์</span>
+          </div>
+          <div id="case-modal-evidence-list" class="space-y-2.5">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-3 border-t border-[#162238] flex items-center justify-between gap-2 flex-shrink-0">
+        <a id="case-modal-upload-btn" href="/bodycam-upload" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-black font-semibold text-xs flex items-center gap-1.5 transition shadow">
+          <span>📹</span> ส่งคลิปหลักฐานเพิ่มเข้าคดีนี้
+        </a>
+        <button onclick="closeCaseModal()" class="px-4 py-2 rounded-xl bg-[#0c1527] hover:bg-[#162238] text-slate-300 hover:text-white text-xs border border-[#162238] transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
+  <!-- 📦 MODAL: LOST ITEM DETAIL POPUP                           -->
+  <!-- ========================================================== -->
+  <div id="lost-item-detail-modal" onclick="if(event.target === this) closeLostModal()" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 animate-fade-in">
+    <div class="relative bg-gradient-to-b from-[#0b1322] to-[#060b14] border border-[#1e2e4a] rounded-2xl max-w-2xl w-full p-4 sm:p-6 shadow-2xl space-y-4 max-h-[90vh] flex flex-col text-slate-200">
+      <!-- Header -->
+      <div class="flex items-start justify-between border-b border-[#162238] pb-3 flex-shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-sky-500/10 border border-sky-500/30 flex items-center justify-center text-sky-400 text-xl shrink-0">
+            📦
+          </div>
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span id="lost-modal-code" class="font-mono text-xs font-bold text-sky-400 bg-sky-950/80 px-2 py-0.5 rounded border border-sky-800/80">LF-2026-XXXX</span>
+              <span id="lost-modal-category" class="px-2 py-0.5 rounded text-[11px] font-mono text-slate-300 bg-slate-800/80 border border-slate-700">หมวดหมู่</span>
+              <span id="lost-modal-status" class="px-2.5 py-0.5 rounded text-[11px] font-mono border">รอมารับ</span>
+            </div>
+            <h3 id="lost-modal-title" class="font-bold text-base sm:text-lg text-white mt-1">ชื่อสิ่งของ</h3>
+          </div>
+        </div>
+        <button onclick="closeLostModal()" class="w-8 h-8 rounded-lg bg-[#0c1527] hover:bg-[#162238] text-slate-400 hover:text-white flex items-center justify-center transition text-sm border border-[#162238]" title="ปิด">
+          ✕
+        </button>
+      </div>
+
+      <!-- Scrollable Body (Image + Details) -->
+      <div class="space-y-4 overflow-y-auto flex-1 pr-1 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <!-- Photo Preview -->
+          <div class="rounded-xl overflow-hidden border border-[#162238] bg-[#040810] flex items-center justify-center min-h-[220px] max-h-[280px]">
+            <img id="lost-modal-img" src="/assets/logo.png" alt="รูปสิ่งของ" class="w-full h-full object-contain max-h-[280px]" onerror="this.onerror=null; this.src='/assets/logo.png';">
+          </div>
+
+          <!-- Key Details -->
+          <div class="space-y-2.5">
+            <div class="bg-[#040810] p-3 rounded-xl border border-[#162238]">
+              <span class="text-slate-400 text-[11px]">📍 สถานที่พบ:</span>
+              <div id="lost-modal-location" class="font-medium text-white text-xs mt-0.5">-</div>
+            </div>
+            <div class="bg-[#040810] p-3 rounded-xl border border-[#162238]">
+              <span class="text-slate-400 text-[11px]">📅 วันที่และเวลาที่พบ:</span>
+              <div id="lost-modal-datetime" class="font-medium text-white text-xs mt-0.5">-</div>
+            </div>
+            <div class="bg-[#040810] p-3 rounded-xl border border-[#162238]">
+              <span class="text-slate-400 text-[11px]">🛡️ ผู้พบ / สารวัตรผู้บันทึก:</span>
+              <div id="lost-modal-finder" class="font-medium text-white text-xs mt-0.5">-</div>
+            </div>
+            <div class="bg-[#040810] p-3 rounded-xl border border-[#162238]">
+              <span class="text-slate-400 text-[11px]">🏢 จุดจัดเก็บสิ่งของ:</span>
+              <div id="lost-modal-storage" class="font-medium text-amber-300 text-xs mt-0.5">ห้องสารวัตรนักเรียน อาคาร 1</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Characteristics & Secret Traits -->
+        <div class="bg-[#040810] p-3.5 rounded-xl border border-[#162238] space-y-1.5">
+          <span class="text-slate-400 text-[11px] font-semibold flex items-center gap-1.5">
+            <span>🔍</span> ลักษณะเด่น / ตำหนิของสิ่งของ:
+          </span>
+          <p id="lost-modal-desc" class="text-slate-200 leading-relaxed text-xs whitespace-pre-wrap font-sans">-</p>
+          <div id="lost-modal-secret-box" class="hidden mt-2 pt-2 border-t border-[#162238]/60">
+            <span class="text-rose-400 text-[11px] font-semibold">🔒 ข้อมูลลับสำหรับยืนยันตัวตน (Blind Verification):</span>
+            <p id="lost-modal-secret" class="text-slate-300 text-xs mt-0.5">-</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="pt-3 border-t border-[#162238] flex items-center justify-between gap-2 flex-shrink-0">
+        <div class="flex items-center gap-2">
+          <a href="/lost-found" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-sky-500 to-sky-600 hover:from-sky-400 hover:to-sky-500 text-black font-semibold text-xs flex items-center gap-1.5 transition shadow">
+            <span>🌐</span> ไปที่คลังของหายเต็มรูปแบบ
+          </a>
+          <a id="lost-modal-gdrive-btn" href="#" target="_blank" rel="noopener noreferrer" class="hidden px-3 py-2 rounded-xl bg-cyan-950/60 hover:bg-cyan-900/60 text-cyan-300 text-xs font-mono border border-cyan-700/50 flex items-center gap-1.5 transition">
+            <span>📁</span> Google Drive
+          </a>
+        </div>
+        <button onclick="closeLostModal()" class="px-4 py-2 rounded-xl bg-[#0c1527] hover:bg-[#162238] text-slate-300 hover:text-white text-xs border border-[#162238] transition">
+          ปิดหน้าต่าง
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================== -->
   <!-- ⚙️ JAVASCRIPT LOGIC & TELEMETRY ENGINE                     -->
   <!-- ========================================================== -->
   <script>
@@ -922,11 +1087,11 @@
           : (isInvestigating ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30');
 
         return `
-          <div class="py-2.5 px-3 border border-[#162238]/60 bg-[#060b13] flex items-center justify-between gap-3 rounded-xl hover:border-slate-700 transition">
+          <div onclick="openCaseModal('${c.id || c.case_id}')" class="py-2.5 px-3 border border-[#162238]/60 bg-[#060b13] flex items-center justify-between gap-3 rounded-xl hover:border-rose-500/50 hover:bg-[#0c1527] transition cursor-pointer group shadow-sm">
             <div class="truncate flex-1 min-w-0">
               <div class="flex items-center gap-2 truncate">
-                <span class="font-mono text-[10px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded border border-rose-900/60 shrink-0">${c.case_id || 'CASE'}</span>
-                <span class="font-bold text-white text-xs truncate">${title}</span>
+                <span class="font-mono text-[10px] font-bold text-rose-400 bg-rose-950/60 px-1.5 py-0.2 rounded border border-rose-900/60 shrink-0 group-hover:border-rose-400/80 transition">${c.case_id || 'CASE'}</span>
+                <span class="font-bold text-white text-xs truncate group-hover:text-rose-200 transition">${title}</span>
               </div>
               <div class="text-[10px] text-slate-400 font-mono mt-1 flex items-center gap-3 flex-wrap">
                 <span class="flex items-center gap-1">
@@ -940,9 +1105,12 @@
                 ${c.evidence_count ? `<span class="text-amber-300 font-bold font-mono">📸 ${c.evidence_count} ไฟล์</span>` : ''}
               </div>
             </div>
-            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono shrink-0 border ${statusColor}">
-              ${statusText}
-            </span>
+            <div class="flex items-center gap-2 shrink-0">
+              <span class="px-2.5 py-0.5 rounded text-[10px] font-mono shrink-0 border ${statusColor}">
+                ${statusText}
+              </span>
+              <span class="text-slate-500 group-hover:text-rose-300 transition text-xs font-mono">🔍</span>
+            </div>
           </div>
         `;
       }).join('');
@@ -962,17 +1130,192 @@
       }
 
       list.innerHTML = lost.recent.map(item => `
-        <div class="py-2.5 px-3 border border-[#162238]/60 bg-[#060b13] flex items-center justify-between gap-3 rounded-xl hover:border-slate-700 transition">
-          <div class="truncate">
-            <div class="font-bold text-white text-xs truncate">${item.title || 'ของหายไม่ระบุชื่อ'}</div>
-            <div class="text-[10px] text-slate-400 font-mono mt-0.5">รหัส: ${item.item_code || '-'} • พบที่: ${item.found_location || 'บริเวณโรงเรียน'}</div>
+        <div onclick="openLostModal('${item.id || item.item_code}')" class="py-2.5 px-3 border border-[#162238]/60 bg-[#060b13] flex items-center justify-between gap-3 rounded-xl hover:border-sky-500/50 hover:bg-[#0c1527] transition cursor-pointer group shadow-sm">
+          <div class="truncate flex-1 min-w-0">
+            <div class="truncate">
+              <span class="font-bold text-white text-xs truncate group-hover:text-sky-200 transition">${item.title || 'ของหายไม่ระบุชื่อ'}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-mono mt-0.5">รหัส: <span class="text-sky-300">${item.item_code || '-'}</span> • พบที่: ${item.location_found || item.found_location || 'บริเวณโรงเรียน'}</div>
           </div>
-          <span class="px-2.5 py-0.5 rounded text-[10px] font-mono shrink-0 border ${item.status === 'CLAIMED' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-sky-500/15 text-sky-300 border-sky-500/30'}">
-            ${item.status === 'CLAIMED' ? 'ส่งมอบแล้ว' : 'รอมารับ'}
-          </span>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="px-2.5 py-0.5 rounded text-[10px] font-mono shrink-0 border ${item.status === 'CLAIMED' || item.status === 'DELIVERED' ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-sky-500/15 text-sky-300 border-sky-500/30'}">
+              ${item.status === 'CLAIMED' || item.status === 'DELIVERED' ? 'ส่งมอบแล้ว' : 'รอมารับ'}
+            </span>
+            <span class="text-slate-500 group-hover:text-sky-300 transition text-xs font-mono">🔍</span>
+          </div>
         </div>
       `).join('');
     }
+
+    // ----------------------------------------------------------
+    // 5.1 POPUP MODAL HANDLERS FOR CASES & LOST ITEMS
+    // ----------------------------------------------------------
+    function openCaseModal(caseId) {
+      if (!currentAnalyticsData?.cases?.recent) return;
+      const c = currentAnalyticsData.cases.recent.find(x => (x.id === caseId || x.case_id === caseId));
+      if (!c) return;
+
+      document.getElementById('case-modal-code').textContent = c.case_id || 'CASE';
+      document.getElementById('case-modal-category-badge').textContent = c.category || 'ทั่วไป';
+      document.getElementById('case-modal-title').textContent = c.title || 'เหตุการณ์ทั่วไป';
+      document.getElementById('case-modal-location').textContent = c.location || 'ในโรงเรียน';
+      
+      let dateDisplay = '-';
+      if (c.incident_date_time) {
+        try {
+          dateDisplay = new Date(c.incident_date_time).toLocaleString('th-TH', { 
+            dateStyle: 'medium', 
+            timeStyle: 'short' 
+          });
+        } catch(e) {
+          dateDisplay = c.incident_date || '-';
+        }
+      } else if (c.incident_date) {
+        dateDisplay = c.incident_date;
+      }
+      document.getElementById('case-modal-datetime').textContent = dateDisplay;
+      
+      const rep = c.reporter_name ? `${c.reporter_name} ${c.reporter_grade ? '(' + c.reporter_grade + ')' : ''}` : 'สารวัตรเวร / ไม่ประสงค์ออกนาม';
+      document.getElementById('case-modal-reporter').textContent = rep;
+      document.getElementById('case-modal-contact').textContent = c.contact_info || '-';
+      document.getElementById('case-modal-desc').textContent = c.description || c.title || 'ไม่มีบันทึกรายละเอียดเพิ่มเติม';
+
+      const isResolved = c.status === 'RESOLVED';
+      const isInvestigating = c.status === 'INVESTIGATING' || c.status === 'IN_PROGRESS';
+      const statusText = isResolved ? 'คลี่คลายแล้ว' : (isInvestigating ? 'กำลังตรวจ' : 'รอดำเนินการ');
+      const statusClass = isResolved 
+        ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' 
+        : (isInvestigating ? 'bg-sky-500/15 text-sky-300 border-sky-500/30' : 'bg-amber-500/15 text-amber-300 border-amber-500/30');
+      
+      const statusEl = document.getElementById('case-modal-status');
+      statusEl.className = `px-2.5 py-0.5 rounded text-[11px] font-mono border ${statusClass}`;
+      statusEl.textContent = statusText;
+
+      const uploadBtn = document.getElementById('case-modal-upload-btn');
+      if (uploadBtn) uploadBtn.href = `/bodycam-upload?caseId=${encodeURIComponent(c.case_id || '')}`;
+
+      // Evidence Rendering
+      const evList = document.getElementById('case-modal-evidence-list');
+      const evCount = document.getElementById('case-modal-evidence-count');
+      const urls = Array.isArray(c.evidence_urls) ? c.evidence_urls : (c.evidence_url ? [c.evidence_url] : []);
+      evCount.textContent = `${urls.length} ไฟล์`;
+
+      if (urls.length === 0) {
+        evList.innerHTML = `<div class="p-3 text-center text-slate-500 font-mono bg-[#040810] rounded-xl border border-[#162238]">ไม่มีไฟล์ภาพนิ่งหรือคลิปแนบในคดีนี้</div>`;
+      } else {
+        evList.innerHTML = urls.map((u, i) => {
+          let directPreview = u;
+          let isVideo = u.includes('.mp4') || u.includes('.mov') || u.includes('.webm');
+          const m = u.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+          if (m) {
+            directPreview = `https://lh3.googleusercontent.com/d/${m[1]}`;
+          }
+          return `
+            <div class="p-3 rounded-xl bg-[#040810] border border-[#162238] flex flex-col gap-2">
+              <div class="flex items-center justify-between text-[11px] font-mono text-slate-400">
+                <span class="font-bold text-amber-300">หลักฐานรายการที่ ${i + 1}</span>
+                <a href="${u}" target="_blank" rel="noopener noreferrer" class="text-amber-400 hover:text-amber-300 hover:underline flex items-center gap-1">
+                  เปิดไฟล์เต็มจอ ↗
+                </a>
+              </div>
+              ${isVideo ? `
+                <video src="${u}" controls class="w-full max-h-60 rounded-lg bg-black"></video>
+              ` : `
+                <a href="${u}" target="_blank" rel="noopener noreferrer" class="block overflow-hidden rounded-lg border border-[#162238] bg-black/40">
+                  <img src="${directPreview}" alt="Evidence ${i + 1}" class="w-full max-h-60 object-contain hover:scale-105 transition" onerror="this.onerror=null; this.src='/assets/logo.png';">
+                </a>
+              `}
+            </div>
+          `;
+        }).join('');
+      }
+
+      document.getElementById('case-detail-modal').classList.remove('hidden');
+    }
+
+    function closeCaseModal() {
+      document.getElementById('case-detail-modal').classList.add('hidden');
+    }
+
+    function openLostModal(itemId) {
+      if (!currentAnalyticsData?.lostFound?.recent) return;
+      const it = currentAnalyticsData.lostFound.recent.find(x => (x.id === itemId || x.item_code === itemId));
+      if (!it) return;
+
+      document.getElementById('lost-modal-code').textContent = it.item_code || '-';
+      document.getElementById('lost-modal-category').textContent = it.category || 'ทั่วไป';
+      document.getElementById('lost-modal-title').textContent = it.title || 'ของหายไม่ระบุชื่อ';
+      document.getElementById('lost-modal-location').textContent = it.location_found || it.found_location || 'บริเวณโรงเรียน';
+      
+      let dateDisplay = '-';
+      if (it.found_date) {
+        dateDisplay = it.found_date;
+        if (it.found_time) dateDisplay += ` (${it.found_time})`;
+      } else if (it.created_at) {
+        try {
+          dateDisplay = new Date(it.created_at).toLocaleDateString('th-TH');
+        } catch(e) {}
+      }
+      document.getElementById('lost-modal-datetime').textContent = dateDisplay;
+
+      const finder = it.finder_name ? `${it.finder_name} ${it.finder_duty_id ? '[' + it.finder_duty_id + ']' : ''}` : 'สารวัตรเวร';
+      document.getElementById('lost-modal-finder').textContent = finder;
+      document.getElementById('lost-modal-storage').textContent = it.storage_location || 'ห้องสารวัตรนักเรียน อาคาร 1';
+      document.getElementById('lost-modal-desc').textContent = it.characteristics || it.title || 'ไม่มีรายละเอียดเพิ่มเติม';
+
+      // Secret traits
+      const secBox = document.getElementById('lost-modal-secret-box');
+      if (it.secret_traits && it.secret_traits.trim()) {
+        secBox.classList.remove('hidden');
+        document.getElementById('lost-modal-secret').textContent = it.secret_traits;
+      } else {
+        secBox.classList.add('hidden');
+      }
+
+      // Status
+      const isClaimed = it.status === 'CLAIMED' || it.status === 'DELIVERED';
+      const statusEl = document.getElementById('lost-modal-status');
+      statusEl.className = `px-2.5 py-0.5 rounded text-[11px] font-mono border ${isClaimed ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/30' : 'bg-sky-500/15 text-sky-300 border-sky-500/30'}`;
+      statusEl.textContent = isClaimed ? 'ส่งมอบแล้ว' : 'รอมารับ';
+
+      // Image Preview Resolution
+      let imgUrl = it.image_url;
+      let fileId = it.gdrive_file_id;
+      if (!fileId && imgUrl && imgUrl.includes('drive.google.com')) {
+        const m = imgUrl.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+        if (m) fileId = m[1];
+      }
+      if (fileId) {
+        imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+      } else if (!imgUrl) {
+        imgUrl = '/assets/logo.png';
+      }
+      const imgEl = document.getElementById('lost-modal-img');
+      imgEl.src = imgUrl;
+
+      // Google Drive button
+      const gdriveBtn = document.getElementById('lost-modal-gdrive-btn');
+      if (it.gdrive_url || fileId) {
+        gdriveBtn.classList.remove('hidden');
+        gdriveBtn.href = it.gdrive_url || `https://drive.google.com/file/d/${fileId}/view`;
+      } else {
+        gdriveBtn.classList.add('hidden');
+      }
+
+      document.getElementById('lost-item-detail-modal').classList.remove('hidden');
+    }
+
+    function closeLostModal() {
+      document.getElementById('lost-item-detail-modal').classList.add('hidden');
+    }
+
+    // Close on ESC key
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeCaseModal();
+        closeLostModal();
+      }
+    });
 
     // ----------------------------------------------------------
     // 6. ORGANIZATION & DUTIES RENDERING

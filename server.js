@@ -4836,14 +4836,18 @@ app.get('/api/analytics/overview', async (req, res) => {
             incident_date_time: c.incident_date_time || c.created_at,
             status: c.status || 'PENDING',
             evidence_count: Array.isArray(c.evidence_urls) ? c.evidence_urls.length : (c.evidence_url ? 1 : 0),
-            reporter_name: c.reporter_name || ''
+            evidence_urls: Array.isArray(c.evidence_urls) ? c.evidence_urls : (c.evidence_url ? [c.evidence_url] : []),
+            reporter_name: c.reporter_name || '',
+            reporter_grade: c.reporter_grade || '',
+            contact_info: c.contact_info || '',
+            officer_name: c.officer_name || ''
           }))
         },
         lostFound: {
           total: lostItems.length,
           waiting: lostItems.filter(i => i.status === 'WAITING_OWNER').length,
           claimed: lostItems.filter(i => i.status === 'CLAIMED').length,
-          recent: lostItems.slice(0, 5)
+          recent: lostItems.slice(0, 10)
         },
         organization,
         canManageLeadership: canManageShiftLeadership(req.user)
