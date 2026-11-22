@@ -4571,12 +4571,22 @@ app.get('/api/analytics/overview', async (req, res) => {
     // 3. Fetch Leave Requests
     let leaves = [];
     try {
-      let lq = supabase.from('leave_requests').select('*, members(duty_id, first_name, last_name, nickname, duty_day, grade_class)');
-      if (startDate) lq = lq.gte('leave_date', startDate);
-      if (endDate) lq = lq.lte('leave_date', endDate);
-      const { data: lData, error: lErr } = await lq;
-      if (!lErr && Array.isArray(lData)) leaves = lData;
-    } catch (e) {}
+      const { data: allLeaves, error: lErr } = await supabase
+        .from('leave_requests')
+        .select('*, members(duty_id, first_name, last_name, nickname, duty_day, grade_class)')
+        .order('created_at', { ascending: false });
+
+      if (!lErr && Array.isArray(allLeaves)) {
+        leaves = allLeaves.filter(l => {
+          const dt = l.created_at ? l.created_at.slice(0, 10) : null;
+          if (startDate && dt && dt < startDate) return false;
+          if (endDate && dt && dt > endDate) return false;
+          return true;
+        });
+      }
+    } catch (e) {
+      console.warn('[ANALYTICS] Leave requests query warning:', e.message);
+    }
 
     // 4. Fetch Cases
     let cases = [];
@@ -4705,9 +4715,17 @@ app.get('/api/analytics/overview', async (req, res) => {
       const t = l.leave_type || '';
       if (t.includes('ป่วย')) leaveTypes['ลาป่วย']++;
       else if (t.includes('กิจ') && !t.includes('กรรม')) leaveTypes['ลากิจ']++;
-      else if (t.includes('กรรม')) leaveTypes['ลากิจกรรม']++;
+      else if (t.includes('กรรม') || t.includes('แข่ง')) leaveTypes['ลากิจกรรม']++;
       else leaveTypes['อื่นๆ']++;
     });
+
+    // 🛡️ ตรวจสอบความสอดคล้องกับสถิติ attendance:
+    // หากมียอดรวมการลาในรอบเวรมากกว่าจำนวนใบลาในระบบ ให้กระจายส่วนต่างเข้า 'อื่นๆ'
+    const totalCountedLeaves = Object.values(leaveTypes).reduce((a, b) => a + b, 0);
+    const attLeaveCount = attendance.filter(r => r.status === 'LEAVE').length;
+    if (attLeaveCount > totalCountedLeaves) {
+      leaveTypes['อื่นๆ'] += (attLeaveCount - totalCountedLeaves);
+    }
 
     const leaderboard = Object.values(memberMap)
       .map(m => {

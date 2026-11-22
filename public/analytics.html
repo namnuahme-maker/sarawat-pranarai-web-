@@ -912,21 +912,28 @@
       const ctx = document.getElementById('chart-leave-types')?.getContext('2d');
       if (!ctx || !window.Chart) return;
 
-      const labels = Object.keys(types);
-      const dataValues = Object.values(types);
-      const hasData = dataValues.some(v => v > 0);
+      const nonZero = Object.entries(types).filter(([_, v]) => v > 0);
+      const hasData = nonZero.length > 0;
+      const labels = hasData ? nonZero.map(([k, v]) => `${k} (${v} ครั้ง)`) : ['ไม่มีประวัติการลา'];
+      const dataValues = hasData ? nonZero.map(([_, v]) => v) : [1];
+
+      const typeColors = {
+        'ลาป่วย': '#f43f5e',
+        'ลากิจ': '#f59e0b',
+        'ลากิจกรรม': '#06b6d4',
+        'อื่นๆ': '#8b5cf6'
+      };
+      const colors = hasData ? nonZero.map(([k]) => typeColors[k] || '#3b82f6') : ['#1e293b'];
 
       if (chartTypes) chartTypes.destroy();
 
       chartTypes = new Chart(ctx, {
         type: 'doughnut',
         data: {
-          labels: hasData ? labels : ['ไม่มีประวัติการลา'],
+          labels,
           datasets: [{
-            data: hasData ? dataValues : [1],
-            backgroundColor: hasData 
-              ? ['#f43f5e', '#f59e0b', '#06b6d4', '#8b5cf6', '#3b82f6']
-              : ['#1e293b'],
+            data: dataValues,
+            backgroundColor: colors,
             borderColor: '#060B13',
             borderWidth: 3
           }]
@@ -945,7 +952,16 @@
               borderColor: '#1e293b',
               borderWidth: 1,
               padding: 10,
-              cornerRadius: 10
+              cornerRadius: 10,
+              callbacks: {
+                label: function(context) {
+                  if (!hasData) return 'ไม่มีประวัติการลา';
+                  const total = dataValues.reduce((a, b) => a + b, 0);
+                  const val = context.raw || 0;
+                  const pct = total > 0 ? Math.round((val / total) * 100) : 0;
+                  return ` ${context.label}: ${val} ครั้ง (${pct}%)`;
+                }
+              }
             }
           }
         }
