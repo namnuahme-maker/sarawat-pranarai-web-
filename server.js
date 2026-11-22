@@ -611,9 +611,9 @@ app.use((req, res, next) => {
   next();
 });
 
-// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify, /api/crop)
+// ป้องกัน API ภายในทั้งหมดด้วย Discord Auth (ยกเว้น /api/auth, /api/verify, /api/crop, /api/drive-proxy)
 app.use('/api', (req, res, next) => {
-  if (req.path.startsWith('/auth') || req.path.startsWith('/verify') || req.path.startsWith('/crop')) {
+  if (req.path.startsWith('/auth') || req.path.startsWith('/verify') || req.path.startsWith('/crop') || req.path.startsWith('/drive-proxy')) {
     return next();
   }
   return requireAuth(req, res, next);
@@ -2920,14 +2920,6 @@ app.get('/api/drive-proxy/:fileId', async (req, res) => {
       res.setHeader('Cache-Control', 'public, max-age=86400');
       res.setHeader('Access-Control-Allow-Origin', '*');
       return res.send(dl.buffer);
-    }
-    // Fallback แคช: ป้องกันกรณี Google Drive ติดขัด ให้ดึงไฟล์แคชในเซิร์ฟเวอร์
-    const customPath = path.join(__dirname, 'public', 'assets', 'card-templates', 'custom_card_bg.png');
-    if (fs.existsSync(customPath)) {
-      res.setHeader('Content-Type', 'image/png');
-      res.setHeader('Cache-Control', 'public, max-age=86400');
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      return res.sendFile(customPath);
     }
     res.status(404).json({ success: false, message: 'File not found on Google Drive' });
   } catch (err) {

@@ -399,6 +399,28 @@
     </div>
   </div>
 
+  <!-- 🔍 IMAGE LIGHTBOX MODAL (ขยายดูภาพหลักฐานแบบเต็มจอ) -->
+  <div id="image-lightbox-modal" onclick="closeImageLightbox()" class="fixed inset-0 z-[70] bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 transition-all">
+    <div class="relative max-w-5xl w-full max-h-[92vh] flex flex-col items-center" onclick="event.stopPropagation()">
+      <div class="w-full flex items-center justify-between pb-2 mb-2 border-b border-tactical-border/60">
+        <span class="text-xs text-amber-400 font-mono font-bold flex items-center gap-1.5">
+          <span>🔍</span> ภาพหลักฐานขยายความละเอียดสูง
+        </span>
+        <div class="flex items-center gap-3">
+          <a id="lightbox-direct-link" href="#" target="_blank" rel="noopener noreferrer" class="text-xs text-blue-400 hover:text-blue-300 underline font-mono flex items-center gap-1">
+            <span>↗</span> เปิดไฟล์ต้นฉบับ
+          </a>
+          <button onclick="closeImageLightbox()" class="text-slate-400 hover:text-white text-base bg-tactical-800 hover:bg-tactical-700 rounded-lg w-7 h-7 flex items-center justify-center transition">
+            ✕
+          </button>
+        </div>
+      </div>
+      <div class="w-full flex items-center justify-center overflow-auto max-h-[82vh]">
+        <img id="lightbox-img" src="" alt="ขยายภาพหลักฐาน" class="max-w-full max-h-[80vh] object-contain rounded-xl border border-tactical-border shadow-2xl bg-black">
+      </div>
+    </div>
+  </div>
+
   <!-- ========================================================== -->
   <!-- 🪪 DIGITAL ID CARD & OFFICER DOSSIER MODAL (2-COLUMN VIEW) -->
   <!-- ========================================================== -->
@@ -1957,6 +1979,18 @@
               <div class="text-[11px] text-slate-400 mt-0.5 line-clamp-2">${c.description || 'ไม่มีรายละเอียด'}</div>
             </div>
 
+            <!-- 🖼️ Mini Evidence Preview Strip -->
+            ${evidenceCount > 0 ? `
+              <div class="flex items-center gap-1.5 overflow-x-auto py-1 custom-scrollbar cursor-pointer" onclick="openEvidenceModal('${c.case_id}')" title="คลิกเพื่อเปิดดูรูป/คลิปหลักฐาน">
+                ${evidenceUrls.slice(0, 4).map((u, i) => {
+                  const gd = u.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+                  const thumbSrc = gd ? `https://lh3.googleusercontent.com/d/${gd[1]}` : u;
+                  return `<img src="${thumbSrc}" onerror="this.style.display='none'" class="w-11 h-11 object-cover rounded-lg border border-tactical-border hover:border-amber-400/50 hover:scale-105 transition shrink-0 bg-black" alt="หลักฐาน #${i+1}">`;
+                }).join('')}
+                ${evidenceCount > 4 ? `<span class="text-[10px] font-mono text-slate-400 bg-tactical-800 px-1.5 py-2.5 rounded-lg border border-tactical-border shrink-0 font-bold">+${evidenceCount - 4}</span>` : ''}
+              </div>
+            ` : ''}
+
             <!-- 📹 Bodycam & Evidence Toolbar -->
             <div class="pt-2 border-t border-tactical-border/60 flex items-center justify-between gap-2">
               ${evidenceCount > 0 ? `
@@ -3340,6 +3374,74 @@
       }
     }
 
+    // -------------------------------------------------------------
+    // 📹 EVIDENCE & BODYCAM MEDIA VIEWER / LIGHTBOX ENGINE
+    // -------------------------------------------------------------
+    function getEvidenceMediaInfo(url) {
+      if (!url) return { type: 'unknown', url: '' };
+      const rawUrl = String(url).trim();
+      const cleanUrl = rawUrl.split('?')[0].toLowerCase();
+
+      // 1. ตรวจสอบ Google Drive (รองรับทั้ง /file/d/... และ ?id=...)
+      const gdMatch = rawUrl.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
+      if (gdMatch) {
+        const fileId = gdMatch[1];
+        return {
+          type: 'gdrive',
+          fileId,
+          originalUrl: rawUrl,
+          cdnImageUrl: `https://lh3.googleusercontent.com/d/${fileId}`,
+          proxyImageUrl: `/api/drive-proxy/${fileId}`,
+          embedIframeUrl: `https://drive.google.com/file/d/${fileId}/preview`
+        };
+      }
+
+      // 2. Direct Video
+      if (cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.mkv')) {
+        return { type: 'video', originalUrl: rawUrl };
+      }
+
+      // 3. Direct Image (หรือ Supabase Storage)
+      if (cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.webp') || (cleanUrl.includes('supabase') && cleanUrl.includes('/storage/'))) {
+        return { type: 'image', originalUrl: rawUrl };
+      }
+
+      return { type: 'link', originalUrl: rawUrl };
+    }
+
+    function toggleEvidenceView(btn) {
+      const card = btn.closest('.evidence-card');
+      if (!card) return;
+      const img = card.querySelector('.evidence-img');
+      const ifr = card.querySelector('.evidence-iframe');
+      if (!img || !ifr) return;
+
+      if (ifr.classList.contains('hidden')) {
+        ifr.classList.remove('hidden');
+        img.style.display = 'none';
+        btn.innerHTML = '<span>🖼️</span> สลับดูรูป';
+      } else {
+        ifr.classList.add('hidden');
+        img.style.display = 'block';
+        btn.innerHTML = '<span>🔄</span> สลับเครื่องเล่น';
+      }
+    }
+
+    function openImageLightbox(src, originalUrl) {
+      const modal = document.getElementById('image-lightbox-modal');
+      const img = document.getElementById('lightbox-img');
+      const link = document.getElementById('lightbox-direct-link');
+      if (!modal || !img) return;
+      img.src = src;
+      if (link) link.href = originalUrl || src;
+      modal.classList.remove('hidden');
+    }
+
+    function closeImageLightbox() {
+      const modal = document.getElementById('image-lightbox-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
     // 📹 Open & Close Evidence / Bodycam Modal
     function openEvidenceModal(caseId) {
       const c = allCases.find(item => item.case_id === caseId);
@@ -3387,35 +3489,133 @@
         `;
       } else {
         content.innerHTML = officerBadgeHtml + urls.map((url, idx) => {
-          const cleanUrl = (url || '').split('?')[0].toLowerCase();
-          const isVideo = cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.mkv');
-          const isImage = cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.webp');
+          const info = getEvidenceMediaInfo(url);
+          const itemNum = idx + 1;
+
+          if (info.type === 'gdrive') {
+            return `
+              <div class="evidence-card p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${itemNum}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-mono flex items-center gap-1 font-semibold">
+                      <span>📁</span> Google Drive
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button type="button" 
+                            onclick="toggleEvidenceView(this)" 
+                            class="text-[10px] font-mono px-2 py-1 rounded bg-tactical-850 hover:bg-tactical-800 text-slate-300 border border-tactical-border/60 transition flex items-center gap-1"
+                            title="สลับโหมดพรีวิวรูปภาพ / เครื่องเล่น Google Drive">
+                      <span>🔄</span> สลับเครื่องเล่น
+                    </button>
+                    <a href="${info.originalUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
+                      เปิดในไดรฟ์ ↗
+                    </a>
+                  </div>
+                </div>
+                
+                <div class="relative rounded-lg overflow-hidden bg-black flex items-center justify-center min-h-[220px] border border-tactical-border/50">
+                  <!-- พรีวิวรูปภาพโดยตรง (Direct Image Preview) -->
+                  <img src="${info.cdnImageUrl}" 
+                       alt="หลักฐานที่ ${itemNum}" 
+                       class="evidence-img w-full max-h-96 object-contain bg-black rounded-lg cursor-pointer hover:opacity-95 transition"
+                       loading="lazy"
+                       onclick="openImageLightbox('${info.cdnImageUrl}', '${info.originalUrl}')"
+                       onload="const l = this.parentElement.querySelector('.evidence-loading'); if(l) l.remove();"
+                       onerror="
+                         if (!this.dataset.fallbackTried) {
+                           this.dataset.fallbackTried = 'true';
+                           this.src = '${info.proxyImageUrl}';
+                         } else {
+                           this.style.display = 'none';
+                           const ifr = this.parentElement.querySelector('.evidence-iframe');
+                           if (ifr) ifr.classList.remove('hidden');
+                           const l = this.parentElement.querySelector('.evidence-loading');
+                           if (l) l.remove();
+                         }
+                       ">
+
+                  <!-- พรีวิวผ่าน Google Drive Preview Embed (สำหรับวิดีโอหรือเอกสาร) -->
+                  <iframe src="${info.embedIframeUrl}" 
+                          class="evidence-iframe w-full h-80 rounded-lg hidden bg-black border-0" 
+                          allow="autoplay; fullscreen" 
+                          allowfullscreen>
+                  </iframe>
+
+                  <!-- ตัวบอกสถานะการโหลด -->
+                  <div class="evidence-loading absolute inset-0 flex items-center justify-center bg-black/60 text-slate-400 text-xs gap-2 pointer-events-none">
+                    <span class="animate-spin text-base">⏳</span> กำลังโหลดรูปตัวอย่างหลักฐาน...
+                  </div>
+                </div>
+              </div>
+            `;
+          }
+
+          if (info.type === 'image') {
+            return `
+              <div class="evidence-card p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${itemNum}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono flex items-center gap-1 font-semibold">
+                      <span>🖼️</span> รูปภาพหลักฐาน
+                    </span>
+                  </div>
+                  <a href="${info.originalUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
+                    เปิดไฟล์เต็มจอ ↗
+                  </a>
+                </div>
+                
+                <div class="rounded-lg overflow-hidden bg-black flex items-center justify-center border border-tactical-border/50">
+                  <img src="${info.originalUrl}" 
+                       alt="หลักฐานที่ ${itemNum}" 
+                       class="w-full max-h-96 object-contain bg-black rounded-lg cursor-pointer hover:opacity-95 transition"
+                       onclick="openImageLightbox('${info.originalUrl}')">
+                </div>
+              </div>
+            `;
+          }
+
+          if (info.type === 'video') {
+            return `
+              <div class="evidence-card p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2.5">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${itemNum}</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-mono flex items-center gap-1 font-semibold">
+                      <span>📹</span> คลิป Bodycam
+                    </span>
+                  </div>
+                  <a href="${info.originalUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
+                    เปิดไฟล์เต็มจอ ↗
+                  </a>
+                </div>
+                
+                <div class="rounded-lg overflow-hidden bg-black flex items-center justify-center border border-tactical-border/50">
+                  <video controls playsinline class="w-full max-h-96 bg-black rounded-lg">
+                    <source src="${info.originalUrl}">
+                    เบราว์เซอร์ไม่รองรับแท็ก video
+                  </video>
+                </div>
+              </div>
+            `;
+          }
 
           return `
-            <div class="p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2">
+            <div class="evidence-card p-3.5 rounded-xl bg-tactical-950 border border-tactical-border/80 space-y-2.5">
               <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${idx + 1}</span>
-                <a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
-                  เปิดไฟล์เต็มจอ (Direct Link) ↗
+                <span class="font-bold text-amber-400 font-mono">หลักฐานรายการที่ ${itemNum}</span>
+                <a href="${info.originalUrl}" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:text-blue-300 underline flex items-center gap-1 font-mono text-[11px]">
+                  เปิดไฟล์เต็มจอ ↗
                 </a>
               </div>
               
-              <div class="rounded-lg overflow-hidden bg-black flex items-center justify-center">
-                ${isVideo ? `
-                  <video controls playsinline class="w-full max-h-72 bg-black rounded-lg">
-                    <source src="${url}">
-                    เบราว์เซอร์ไม่รองรับแท็ก video
-                  </video>
-                ` : isImage ? `
-                  <img src="${url}" alt="หลักฐาน ${idx + 1}" class="w-full max-h-72 object-contain bg-black rounded-lg">
-                ` : `
-                  <div class="p-5 text-center text-xs w-full space-y-2">
-                    <p class="text-slate-300 font-mono break-all">${url}</p>
-                    <a href="${url}" target="_blank" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 transition">
-                      เปิดดูไฟล์หลักฐานในแท็บใหม่ ↗
-                    </a>
-                  </div>
-                `}
+              <div class="p-5 text-center text-xs w-full space-y-2.5 rounded-lg bg-black/60 border border-tactical-border/40">
+                <p class="text-slate-300 font-mono break-all text-[11px]">${info.originalUrl}</p>
+                <a href="${info.originalUrl}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-500 text-black font-semibold hover:bg-amber-400 transition shadow">
+                  <span>🔗</span> เปิดดูไฟล์หลักฐานในแท็บใหม่ ↗
+                </a>
               </div>
             </div>
           `;
@@ -3428,6 +3628,11 @@
     function closeEvidenceModal() {
       const modal = document.getElementById('evidence-modal');
       modal.querySelectorAll('video').forEach(v => v.pause());
+      modal.querySelectorAll('iframe').forEach(ifr => {
+        const s = ifr.src;
+        ifr.src = '';
+        ifr.src = s;
+      });
       modal.classList.add('hidden');
     }
 

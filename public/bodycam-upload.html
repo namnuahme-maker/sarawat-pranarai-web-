@@ -361,11 +361,38 @@
         const targetUrl = data.fileUrl || (data.evidence_urls && data.evidence_urls[data.evidence_urls.length - 1]) || '#';
         directLink.href = targetUrl;
 
+        const gdMatch = targetUrl.match(/(?:\/file\/d\/|\/d\/|id=)([a-zA-Z0-9_-]{25,})/);
         const cleanUrl = targetUrl.split('?')[0].toLowerCase();
         const isVideo = cleanUrl.endsWith('.mp4') || cleanUrl.endsWith('.webm') || cleanUrl.endsWith('.mov') || cleanUrl.endsWith('.mkv') || (selectedFile && selectedFile.type && selectedFile.type.startsWith('video/'));
         const isImage = cleanUrl.endsWith('.jpg') || cleanUrl.endsWith('.jpeg') || cleanUrl.endsWith('.png') || cleanUrl.endsWith('.gif') || cleanUrl.endsWith('.webp') || (selectedFile && selectedFile.type && selectedFile.type.startsWith('image/'));
 
-        if (isVideo) {
+        if (gdMatch) {
+          const fileId = gdMatch[1];
+          if (isVideo) {
+            previewContainer.innerHTML = `
+              <iframe src="https://drive.google.com/file/d/${fileId}/preview" class="w-full h-80 rounded-lg bg-black border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+            `;
+          } else {
+            previewContainer.innerHTML = `
+              <div class="relative w-full min-h-[220px] bg-black rounded-lg flex items-center justify-center overflow-hidden">
+                <img src="https://lh3.googleusercontent.com/d/${fileId}" 
+                     alt="หลักฐานที่อัปโหลด" 
+                     class="w-full max-h-80 object-contain rounded-lg"
+                     onerror="
+                       if (!this.dataset.fallbackTried) {
+                         this.dataset.fallbackTried = 'true';
+                         this.src = '/api/drive-proxy/${fileId}';
+                       } else {
+                         this.style.display = 'none';
+                         const ifr = this.parentElement.querySelector('iframe');
+                         if (ifr) ifr.classList.remove('hidden');
+                       }
+                     ">
+                <iframe src="https://drive.google.com/file/d/${fileId}/preview" class="w-full h-80 rounded-lg hidden bg-black border-0" allow="autoplay; fullscreen" allowfullscreen></iframe>
+              </div>
+            `;
+          }
+        } else if (isVideo) {
           previewContainer.innerHTML = `
             <video controls autoplay muted playsinline class="w-full max-h-80 bg-black rounded-lg">
               <source src="${targetUrl}">
