@@ -166,6 +166,31 @@
     <!-- ========================================================== -->
     <section id="tab-operations" class="tab-pane space-y-4">
       
+      <!-- 🚨 แถบศูนย์สั่งการยุทธวิธี & แจ้งเตือนเสียง AI (Tactical Dispatch Banner) -->
+      <div id="index-dispatch-banner" class="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-red-950/75 via-navy-900/90 to-tactical-950 border border-red-500/40 shadow-xl shadow-red-500/15 flex flex-col sm:flex-row items-center justify-between gap-4 overflow-hidden">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl bg-red-500/20 border border-red-500/50 flex items-center justify-center text-2xl shadow-inner flex-shrink-0 animate-pulse">
+            🚨
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-extrabold text-white tracking-wide font-['Chakra_Petch',sans-serif]">
+                ศูนย์สั่งการยุทธวิธี & แจ้งเตือนเสียง AI
+              </h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+                DISPATCH LIVE
+              </span>
+            </div>
+            <p class="text-xs text-slate-300 mt-0.5">พูดบันทึกเสียงไทยสด ให้ Gemini AI ขัดเกลาสำนวนยุทธวิธี แล้วยิงแจ้งเตือนเข้า Discord พร้อมปุ่มรับทราบภารกิจ</p>
+          </div>
+        </div>
+        <button type="button" onclick="openDispatchModal()" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-red-500/30 active:scale-95 transition flex items-center justify-center gap-2 flex-shrink-0">
+          <span>🎙️</span>
+          <span>เปิดระบบสั่งการและแจ้งเตือนด่วน</span>
+          <span>➔</span>
+        </button>
+      </div>
+
       <!-- สารวัตรเข้าเวรวันนี้ (Today's Duty Officers) -->
       <div class="relative p-4 sm:p-5 rounded-2xl bg-gradient-to-br from-tactical-900/95 via-tactical-850/90 to-tactical-950 border border-slate-800/80 shadow-lg space-y-3.5 overflow-hidden">
         <div class="absolute inset-x-0 top-0 h-[1px] bg-gradient-to-r from-transparent via-emerald-500/40 to-transparent"></div>
@@ -3922,6 +3947,638 @@
           card.style.top = `${cardTop}px`;
         }, 250);
       }
+    }
+  </script>
+  <!-- ========================================================= -->
+  <!-- 🚨 TACTICAL DISPATCH & AI VOICE ALERT MODAL -->
+  <!-- ========================================================= -->
+  <div id="modal-tactical-dispatch" class="fixed inset-0 z-50 bg-navy-950/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 transition-all">
+    <div class="glass-panel w-full max-w-3xl rounded-2xl border border-red-500/40 bg-gradient-to-b from-navy-900/95 via-navy-950 to-navy-900/95 shadow-2xl overflow-hidden flex flex-col max-h-[92vh] animate-scale-up">
+      
+      <!-- Modal Header -->
+      <div class="px-5 py-4 bg-gradient-to-r from-red-950/80 via-navy-900 to-navy-950 border-b border-red-500/30 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-lg shadow-inner">
+            🚨
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h3 class="text-sm sm:text-base font-extrabold text-white tracking-wide font-['Chakra_Petch',sans-serif]">
+                ศูนย์สั่งการยุทธวิธี & แจ้งเตือนเสียง AI
+              </h3>
+              <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-500/20 text-red-400 border border-red-500/40 animate-pulse">
+                LIVE
+              </span>
+            </div>
+            <p class="text-[11px] text-slate-400">ส่งคำสั่งการและกระจายสัญญาณฉุกเฉินสู่ Discord สารวัตรนักเรียน</p>
+          </div>
+        </div>
+
+        <button type="button" onclick="closeDispatchModal()" class="w-8 h-8 rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-400 hover:text-white flex items-center justify-center text-sm transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Top Nav Switcher Inside Modal -->
+      <div class="px-5 pt-3 pb-1 border-b border-navy-800/80 flex gap-2 bg-navy-950/50">
+        <button id="dispatch-tab-btn-create" onclick="switchDispatchModalTab('create')" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-red-600 text-white shadow">
+          <span>📝</span> สร้างคำสั่งการด่วน
+        </button>
+        <button id="dispatch-tab-btn-history" onclick="switchDispatchModalTab('history')" class="px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-navy-800 transition flex items-center gap-1.5">
+          <span>📜</span> ประวัติการสั่งการย้อนหลัง
+        </button>
+      </div>
+
+      <!-- Modal Body (Scrollable) -->
+      <div class="p-5 overflow-y-auto space-y-5 flex-1 custom-scrollbar">
+
+        <!-- VIEW 1: CREATE DISPATCH -->
+        <div id="dispatch-view-create" class="space-y-5">
+          
+          <!-- STEP 1: INPUT & VOICE DICTATION -->
+          <div id="dispatch-step-1" class="space-y-4">
+            
+            <!-- Category Selector -->
+            <div>
+              <label class="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">
+                1. เลือกประเภทคำสั่งการ / ภารกิจ <span class="text-red-400">*</span>
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="selectDispatchCategory('PATROL')" id="cat-btn-PATROL" class="dispatch-cat-btn p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-300 text-left transition hover:scale-[1.02] flex flex-col justify-between">
+                  <span class="text-base">🛡️</span>
+                  <span class="text-xs font-bold mt-1">ตรวจจุดพื้นที่เสี่ยง</span>
+                  <span class="text-[9.5px] text-slate-400">ลาดตระเวนจุดสำคัญ</span>
+                </button>
+                <button type="button" onclick="selectDispatchCategory('INVESTIGATION')" id="cat-btn-INVESTIGATION" class="dispatch-cat-btn p-2.5 rounded-xl border border-navy-700 bg-navy-900/60 text-slate-300 text-left transition hover:scale-[1.02] flex flex-col justify-between">
+                  <span class="text-base">🔍</span>
+                  <span class="text-xs font-bold mt-1">สืบข้อมูล / ตรวจสอบ</span>
+                  <span class="text-[9.5px] text-slate-400">เช็กข้อเท็จจริงเหตุด่วน</span>
+                </button>
+                <button type="button" onclick="selectDispatchCategory('ASSEMBLY')" id="cat-btn-ASSEMBLY" class="dispatch-cat-btn p-2.5 rounded-xl border border-navy-700 bg-navy-900/60 text-slate-300 text-left transition hover:scale-[1.02] flex flex-col justify-between">
+                  <span class="text-base">🚨</span>
+                  <span class="text-xs font-bold mt-1">รวมพล / สั่งการพิเศษ</span>
+                  <span class="text-[9.5px] text-slate-400">ระดมกำลังฉุกเฉิน</span>
+                </button>
+                <button type="button" onclick="selectDispatchCategory('ANNOUNCEMENT')" id="cat-btn-ANNOUNCEMENT" class="dispatch-cat-btn p-2.5 rounded-xl border border-navy-700 bg-navy-900/60 text-slate-300 text-left transition hover:scale-[1.02] flex flex-col justify-between">
+                  <span class="text-base">📢</span>
+                  <span class="text-xs font-bold mt-1">ประกาศทั่วไป</span>
+                  <span class="text-[9.5px] text-slate-400">กำชับระเบียบปฏิบัติ</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Target Mentions -->
+            <div>
+              <label class="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-2">
+                2. ระบุกลุ่มเป้าหมายที่จะแท็ก (Discord Mention Push Notification)
+              </label>
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="selectDispatchMention('@everyone-sarawat')" id="mention-btn-all" class="dispatch-mention-btn p-2 rounded-lg border border-cyan-500/40 bg-cyan-500/15 text-cyan-300 text-xs font-bold text-center transition">
+                  👥 @สารวัตรทุกนาย
+                </button>
+                <button type="button" onclick="selectDispatchMention('@shift-today')" id="mention-btn-today" class="dispatch-mention-btn p-2 rounded-lg border border-navy-700 bg-navy-900 text-slate-400 text-xs font-medium text-center transition">
+                  📅 @เวรประจำวันนี้
+                </button>
+                <button type="button" onclick="selectDispatchMention('@shift-leaders')" id="mention-btn-leaders" class="dispatch-mention-btn p-2 rounded-lg border border-navy-700 bg-navy-900 text-slate-400 text-xs font-medium text-center transition">
+                  👑 @หัวหน้าเวร/ผู้บริหาร
+                </button>
+                <button type="button" onclick="selectDispatchMention('none')" id="mention-btn-none" class="dispatch-mention-btn p-2 rounded-lg border border-navy-700 bg-navy-900 text-slate-400 text-xs font-medium text-center transition">
+                  🔕 ไม่แท็กบทบาท
+                </button>
+              </div>
+            </div>
+
+            <!-- Speech-to-Text & Description Box -->
+            <div>
+              <div class="flex items-center justify-between mb-1.5">
+                <label for="dispatch-raw-input" class="text-xs font-mono font-bold text-slate-300 uppercase tracking-wider">
+                  3. คำอธิบายภารกิจ (พิมพ์ข้อความ หรือ กดไมโครโฟนเพื่อพูดภาษาไทย) <span class="text-red-400">*</span>
+                </label>
+                <!-- Voice Input Toggle Button -->
+                <button type="button" id="dispatch-mic-btn" onclick="toggleDispatchVoiceDictation()" class="px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-navy-700 border border-navy-700 text-cyan-400 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow">
+                  <span id="dispatch-mic-icon">🎙️</span>
+                  <span id="dispatch-mic-text">กดพูดด้วยเสียง (Voice)</span>
+                </button>
+              </div>
+
+              <!-- Live Voice Listening Banner -->
+              <div id="dispatch-voice-status" class="hidden mb-2 px-3 py-1.5 rounded-lg bg-red-950/80 border border-red-500/40 text-red-300 text-xs flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="relative flex h-2 w-2">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                  </span>
+                  <span class="font-bold">กำลังฟังเสียงพูดภาษาไทย... (พูดคำสั่งการได้ทันที)</span>
+                </div>
+                <button type="button" onclick="stopDispatchVoiceDictation()" class="text-red-300 hover:text-white underline text-[11px]">หยุดบันทึก</button>
+              </div>
+
+              <textarea id="dispatch-raw-input" rows="4" class="w-full rounded-xl bg-navy-950/90 border border-navy-700 focus:border-red-500/70 p-3 text-xs sm:text-sm text-slate-200 placeholder-slate-500 focus:outline-none transition leading-relaxed" placeholder="พิมพ์หรือกดปุ่มไมค์เพื่อพูด เช่น: ให้สารวัตรเวรวันนี้ เดินตรวจจุดอาคาร 5 หลังเสาธง มีนักเรียนรวมกลุ่มเยอะ และกำชับให้รายงานตัวด้วย"></textarea>
+              <div class="flex items-center justify-between mt-1 text-[11px] text-slate-400">
+                <span>💡 ระบบจะตัดคำหยาบและปรับขนาดให้พอดี Discord Embed อัตโนมัติ</span>
+                <span id="dispatch-char-count">0 ตัวอักษร</span>
+              </div>
+            </div>
+
+            <!-- Proceed to Step 2 Button -->
+            <div class="pt-2">
+              <button type="button" id="btn-proceed-ai" onclick="proceedToDispatchAiReview()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-red-500/25 active:scale-[0.98] transition flex items-center justify-center gap-2">
+                <span>⚡ ขั้นตอนถัดไป: ตรวจสอบและให้ AI ขัดเกลาคำสั่ง</span>
+                <span>➔</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- STEP 2: DUAL COMPARISON & FINAL CONFIRMATION -->
+          <div id="dispatch-step-2" class="hidden space-y-4">
+            
+            <!-- AI Loading Indicator -->
+            <div id="dispatch-ai-spinner" class="py-8 text-center space-y-3">
+              <div class="inline-block w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div>
+              <p class="text-xs font-mono text-slate-300 animate-pulse">
+                🤖 Google Gemini Flash กำลังประมวลผลและขัดเกลาคำสั่งเป็นสำนวนยุทธวิธี...
+              </p>
+            </div>
+
+            <!-- Comparison Box (Loaded after AI responds) -->
+            <div id="dispatch-comparison-content" class="hidden space-y-4">
+              <div class="p-3 rounded-xl bg-navy-950/80 border border-navy-800 text-xs text-slate-300 flex items-center justify-between">
+                <span>🎯 โปรดเลือกรูปแบบข้อความที่คุณต้องการส่งไปยัง Discord:</span>
+                <span class="text-[11px] text-amber-400 font-mono font-bold">เปรียบเทียบ 2 รูปแบบ</span>
+              </div>
+
+              <!-- Two Choice Cards Grid -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                
+                <!-- Option A: Original Text -->
+                <div onclick="selectDispatchVersion('original')" id="card-choice-original" class="dispatch-choice-card cursor-pointer p-4 rounded-xl border border-navy-700 bg-navy-900/60 hover:bg-navy-900 transition flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <input type="radio" name="dispatch_version" id="radio-original" value="original" class="accent-red-500">
+                        <label for="radio-original" class="text-xs font-bold text-slate-200 cursor-pointer">
+                          ✍️ ข้อความดั้งเดิม (Original)
+                        </label>
+                      </div>
+                      <span class="text-[10px] px-2 py-0.5 rounded bg-navy-800 text-slate-400">ตามที่ผู้ใช้พิมพ์</span>
+                    </div>
+                    <div id="preview-text-original" class="text-xs text-slate-300 bg-navy-950 p-2.5 rounded-lg border border-navy-800/80 font-mono whitespace-pre-wrap min-h-[90px] leading-relaxed"></div>
+                  </div>
+                </div>
+
+                <!-- Option B: AI-Polished Tactical Text (Recommended) -->
+                <div onclick="selectDispatchVersion('ai')" id="card-choice-ai" class="dispatch-choice-card cursor-pointer p-4 rounded-xl border-2 border-red-500 bg-red-950/20 shadow-md shadow-red-500/10 transition flex flex-col justify-between">
+                  <div>
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-2">
+                        <input type="radio" name="dispatch_version" id="radio-ai" value="ai" checked class="accent-red-500">
+                        <label for="radio-ai" class="text-xs font-bold text-white cursor-pointer flex items-center gap-1.5">
+                          <span>🤖 ข้อความแต่งโดย AI</span>
+                          <span class="text-[9.5px] px-1.5 py-0.2 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">แนะนำ</span>
+                        </label>
+                      </div>
+                      <span class="text-[10px] px-2 py-0.5 rounded bg-red-500/20 text-red-300 font-mono">Tactical Polish</span>
+                    </div>
+                    <div id="preview-text-ai" class="text-xs text-slate-200 bg-navy-950 p-2.5 rounded-lg border border-red-500/30 font-mono whitespace-pre-wrap min-h-[90px] leading-relaxed"></div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Final Textarea Editor -->
+              <div>
+                <label for="dispatch-final-editor" class="block text-xs font-mono font-bold text-slate-300 uppercase tracking-wider mb-1.5">
+                  ✏️ ข้อความที่จะส่งจริงเข้า Discord (แก้ไขหรือแต่งเติมเพิ่มเติมได้ที่นี่):
+                </label>
+                <textarea id="dispatch-final-editor" rows="4" maxlength="4000" class="w-full rounded-xl bg-navy-950 border border-navy-700 focus:border-red-500/70 p-3 text-xs sm:text-sm text-slate-200 focus:outline-none transition leading-relaxed"></textarea>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="flex items-center justify-between gap-3 pt-2">
+                <button type="button" onclick="backToDispatchStep1()" class="px-4 py-2 rounded-xl bg-navy-800 hover:bg-navy-700 text-slate-300 text-xs font-semibold transition flex items-center gap-1.5">
+                  <span>◀ ย้อนกลับไปแก้ไข</span>
+                </button>
+
+                <button type="button" id="btn-submit-dispatch" onclick="submitFinalDispatch()" class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-xs sm:text-sm font-bold shadow-lg shadow-red-500/30 active:scale-95 transition flex items-center gap-2">
+                  <span id="btn-submit-dispatch-icon">🚀</span>
+                  <span id="btn-submit-dispatch-text">ยืนยันและยิงแจ้งเตือนเข้า Discord ทันที</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- VIEW 2: DISPATCH HISTORY -->
+        <div id="dispatch-view-history" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs text-slate-400">ประวัติการสั่งการย้อนหลัง 15 รายการล่าสุด</span>
+            <button onclick="loadDispatchHistory()" class="text-xs text-cyan-400 hover:text-cyan-300 font-mono flex items-center gap-1">
+              🔄 รีเฟรชประวัติ
+            </button>
+          </div>
+          <div id="dispatch-history-container" class="space-y-2.5">
+            <div class="text-center py-8 text-xs text-slate-400">กำลังโหลดประวัติการสั่งการ...</div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    // =========================================================
+    // 🚨 TACTICAL DISPATCH CLIENT CONTROLLER (INDEX EMBEDDED)
+    // =========================================================
+    let currentDispatchCategory = 'PATROL';
+    let currentDispatchMention = '@everyone-sarawat';
+    let currentDispatchOriginalText = '';
+    let currentDispatchAiText = '';
+    let currentDispatchSelectedVersion = 'ai';
+    let dispatchSpeechRecognition = null;
+    let isDispatchListeningVoice = false;
+
+    function openDispatchModal() {
+      const modal = document.getElementById('modal-tactical-dispatch');
+      if (modal) {
+        modal.classList.remove('hidden');
+        switchDispatchModalTab('create');
+        backToDispatchStep1();
+      }
+    }
+
+    function closeDispatchModal() {
+      stopDispatchVoiceDictation();
+      const modal = document.getElementById('modal-tactical-dispatch');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function switchDispatchModalTab(tab) {
+      const viewCreate = document.getElementById('dispatch-view-create');
+      const viewHistory = document.getElementById('dispatch-view-history');
+      const tabBtnCreate = document.getElementById('dispatch-tab-btn-create');
+      const tabBtnHistory = document.getElementById('dispatch-tab-btn-history');
+
+      if (tab === 'create') {
+        if (viewCreate) viewCreate.classList.remove('hidden');
+        if (viewHistory) viewHistory.classList.add('hidden');
+        if (tabBtnCreate) {
+          tabBtnCreate.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-red-600 text-white shadow';
+        }
+        if (tabBtnHistory) {
+          tabBtnHistory.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-navy-800 transition flex items-center gap-1.5';
+        }
+      } else {
+        if (viewCreate) viewCreate.classList.add('hidden');
+        if (viewHistory) viewHistory.classList.remove('hidden');
+        if (tabBtnCreate) {
+          tabBtnCreate.className = 'px-3.5 py-1.5 rounded-lg text-xs font-semibold text-slate-400 hover:text-white hover:bg-navy-800 transition flex items-center gap-1.5';
+        }
+        if (tabBtnHistory) {
+          tabBtnHistory.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 bg-red-600 text-white shadow';
+        }
+        loadDispatchHistory();
+      }
+    }
+
+    function selectDispatchCategory(catKey) {
+      currentDispatchCategory = catKey;
+      const cats = ['PATROL', 'INVESTIGATION', 'ASSEMBLY', 'ANNOUNCEMENT'];
+      cats.forEach(c => {
+        const btn = document.getElementById(`cat-btn-${c}`);
+        if (!btn) return;
+        if (c === catKey) {
+          btn.className = 'dispatch-cat-btn p-2.5 rounded-xl border border-red-500/50 bg-red-500/20 text-white text-left transition ring-2 ring-red-500/30 flex flex-col justify-between';
+        } else {
+          btn.className = 'dispatch-cat-btn p-2.5 rounded-xl border border-navy-700 bg-navy-900/60 text-slate-400 text-left transition hover:scale-[1.02] flex flex-col justify-between';
+        }
+      });
+    }
+
+    function selectDispatchMention(mentionKey) {
+      currentDispatchMention = mentionKey;
+      const map = {
+        '@everyone-sarawat': 'mention-btn-all',
+        '@shift-today': 'mention-btn-today',
+        '@shift-leaders': 'mention-btn-leaders',
+        'none': 'mention-btn-none'
+      };
+      Object.entries(map).forEach(([k, id]) => {
+        const btn = document.getElementById(id);
+        if (!btn) return;
+        if (k === mentionKey) {
+          btn.className = 'dispatch-mention-btn p-2 rounded-lg border border-cyan-500/50 bg-cyan-500/20 text-cyan-300 text-xs font-bold text-center transition ring-1 ring-cyan-500/40';
+        } else {
+          btn.className = 'dispatch-mention-btn p-2 rounded-lg border border-navy-700 bg-navy-900 text-slate-400 text-xs font-medium text-center transition';
+        }
+      });
+    }
+
+    function initDispatchSpeechRecognition() {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) return null;
+      const recognition = new SpeechRecognition();
+      recognition.lang = 'th-TH';
+      recognition.continuous = true;
+      recognition.interimResults = true;
+
+      recognition.onstart = () => {
+        isDispatchListeningVoice = true;
+        updateVoiceDictationUI(true);
+      };
+
+      recognition.onresult = (event) => {
+        let finalTranscript = '';
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          }
+        }
+        if (finalTranscript) {
+          const inputEl = document.getElementById('dispatch-raw-input');
+          if (inputEl) {
+            const currentVal = inputEl.value.trim();
+            inputEl.value = currentVal ? `${currentVal} ${finalTranscript.trim()}` : finalTranscript.trim();
+            const charEl = document.getElementById('dispatch-char-count');
+            if (charEl) charEl.textContent = `${inputEl.value.length} ตัวอักษร`;
+          }
+        }
+      };
+
+      recognition.onerror = (event) => {
+        console.warn('[SPEECH_ERR]', event.error);
+        stopDispatchVoiceDictation();
+      };
+
+      recognition.onend = () => {
+        isDispatchListeningVoice = false;
+        updateVoiceDictationUI(false);
+      };
+
+      return recognition;
+    }
+
+    function toggleDispatchVoiceDictation() {
+      if (isDispatchListeningVoice) {
+        stopDispatchVoiceDictation();
+      } else {
+        startDispatchVoiceDictation();
+      }
+    }
+
+    function startDispatchVoiceDictation() {
+      if (!dispatchSpeechRecognition) {
+        dispatchSpeechRecognition = initDispatchSpeechRecognition();
+      }
+      if (!dispatchSpeechRecognition) {
+        alert('⚠️ เบราว์เซอร์ของคุณไม่รองรับการแปลงเสียงเป็นข้อความสด (Web Speech API) สามารถพิมพ์ข้อความในช่องได้ตามปกติ');
+        return;
+      }
+      try {
+        dispatchSpeechRecognition.start();
+      } catch (e) {
+        dispatchSpeechRecognition.stop();
+      }
+    }
+
+    function stopDispatchVoiceDictation() {
+      if (dispatchSpeechRecognition && isDispatchListeningVoice) {
+        try {
+          dispatchSpeechRecognition.stop();
+        } catch (e) {}
+      }
+      isDispatchListeningVoice = false;
+      updateVoiceDictationUI(false);
+    }
+
+    function updateVoiceDictationUI(listening) {
+      const micBtn = document.getElementById('dispatch-mic-btn');
+      const micIcon = document.getElementById('dispatch-mic-icon');
+      const micText = document.getElementById('dispatch-mic-text');
+      const statusBanner = document.getElementById('dispatch-voice-status');
+
+      if (listening) {
+        if (micBtn) micBtn.className = 'px-2.5 py-1 rounded-lg bg-red-600 text-white text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow animate-pulse';
+        if (micIcon) micIcon.textContent = '🛑';
+        if (micText) micText.textContent = 'กำลังฟังเสียง... (กดหยุด)';
+        if (statusBanner) statusBanner.classList.remove('hidden');
+      } else {
+        if (micBtn) micBtn.className = 'px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-navy-700 border border-navy-700 text-cyan-400 text-xs font-bold flex items-center gap-1.5 transition active:scale-95 shadow';
+        if (micIcon) micIcon.textContent = '🎙️';
+        if (micText) micText.textContent = 'กดพูดด้วยเสียง (Voice)';
+        if (statusBanner) statusBanner.classList.add('hidden');
+      }
+    }
+
+    async function proceedToDispatchAiReview() {
+      const inputEl = document.getElementById('dispatch-raw-input');
+      const rawText = (inputEl?.value || '').trim();
+
+      if (!rawText) {
+        alert('⚠️ กรุณาระบุข้อความคำสั่งการ (พิมพ์หรือกดพูดด้วยเสียง)');
+        if (inputEl) inputEl.focus();
+        return;
+      }
+
+      currentDispatchOriginalText = rawText;
+      stopDispatchVoiceDictation();
+
+      const step1 = document.getElementById('dispatch-step-1');
+      const step2 = document.getElementById('dispatch-step-2');
+      const spinner = document.getElementById('dispatch-ai-spinner');
+      const compContent = document.getElementById('dispatch-comparison-content');
+
+      if (step1) step1.classList.add('hidden');
+      if (step2) step2.classList.remove('hidden');
+      if (spinner) spinner.classList.remove('hidden');
+      if (compContent) compContent.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/dispatch/ai-polish', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            category: currentDispatchCategory,
+            rawText: currentDispatchOriginalText
+          })
+        });
+        const data = await res.json();
+        if (data.success && data.polishedText) {
+          currentDispatchAiText = data.polishedText;
+        } else {
+          currentDispatchAiText = currentDispatchOriginalText;
+        }
+      } catch (err) {
+        console.warn('AI Polish Error:', err);
+        currentDispatchAiText = currentDispatchOriginalText;
+      }
+
+      const originalPreview = document.getElementById('preview-text-original');
+      const aiPreview = document.getElementById('preview-text-ai');
+      const finalEditor = document.getElementById('dispatch-final-editor');
+
+      if (originalPreview) originalPreview.textContent = currentDispatchOriginalText;
+      if (aiPreview) aiPreview.textContent = currentDispatchAiText;
+
+      selectDispatchVersion('ai');
+
+      if (spinner) spinner.classList.add('hidden');
+      if (compContent) compContent.classList.remove('hidden');
+    }
+
+    function selectDispatchVersion(version) {
+      currentDispatchSelectedVersion = version;
+      const radioOriginal = document.getElementById('radio-original');
+      const radioAi = document.getElementById('radio-ai');
+      const cardOriginal = document.getElementById('card-choice-original');
+      const cardAi = document.getElementById('card-choice-ai');
+      const finalEditor = document.getElementById('dispatch-final-editor');
+
+      if (version === 'ai') {
+        if (radioAi) radioAi.checked = true;
+        if (radioOriginal) radioOriginal.checked = false;
+        if (cardAi) {
+          cardAi.className = 'dispatch-choice-card cursor-pointer p-4 rounded-xl border-2 border-red-500 bg-red-950/20 shadow-md shadow-red-500/10 transition flex flex-col justify-between';
+        }
+        if (cardOriginal) {
+          cardOriginal.className = 'dispatch-choice-card cursor-pointer p-4 rounded-xl border border-navy-700 bg-navy-900/60 hover:bg-navy-900 transition flex flex-col justify-between';
+        }
+        if (finalEditor) finalEditor.value = currentDispatchAiText;
+      } else {
+        if (radioOriginal) radioOriginal.checked = true;
+        if (radioAi) radioAi.checked = false;
+        if (cardOriginal) {
+          cardOriginal.className = 'dispatch-choice-card cursor-pointer p-4 rounded-xl border-2 border-amber-500 bg-amber-950/20 shadow-md shadow-amber-500/10 transition flex flex-col justify-between';
+        }
+        if (cardAi) {
+          cardAi.className = 'dispatch-choice-card cursor-pointer p-4 rounded-xl border border-navy-700 bg-navy-900/60 hover:bg-navy-900 transition flex flex-col justify-between';
+        }
+        if (finalEditor) finalEditor.value = currentDispatchOriginalText;
+      }
+    }
+
+    function backToDispatchStep1() {
+      const step1 = document.getElementById('dispatch-step-1');
+      const step2 = document.getElementById('dispatch-step-2');
+      if (step1) step1.classList.remove('hidden');
+      if (step2) step2.classList.add('hidden');
+    }
+
+    async function submitFinalDispatch() {
+      const finalEditor = document.getElementById('dispatch-final-editor');
+      const finalText = (finalEditor?.value || '').trim();
+
+      if (!finalText) {
+        alert('⚠️ กรุณาระบุข้อความคำสั่งการที่จะส่งเข้า Discord');
+        if (finalEditor) finalEditor.focus();
+        return;
+      }
+
+      const submitBtn = document.getElementById('btn-submit-dispatch');
+      const submitIcon = document.getElementById('btn-submit-dispatch-icon');
+      const submitText = document.getElementById('btn-submit-dispatch-text');
+
+      if (submitBtn) submitBtn.disabled = true;
+      if (submitIcon) submitIcon.textContent = '⏳';
+      if (submitText) submitText.textContent = 'กำลังส่งสัญญาณสู่ Discord...';
+
+      try {
+        const payload = {
+          category: currentDispatchCategory,
+          mentionTarget: currentDispatchMention,
+          originalText: currentDispatchOriginalText,
+          aiText: currentDispatchAiText,
+          selectedVersion: currentDispatchSelectedVersion,
+          finalText: finalText
+        };
+
+        const res = await fetch('/api/dispatch/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          alert('🚀 ส่งสัญญาณคำสั่งการเข้า Discord สำเร็จเรียบร้อยแล้ว!');
+          const inputEl = document.getElementById('dispatch-raw-input');
+          if (inputEl) inputEl.value = '';
+          switchDispatchModalTab('history');
+        } else {
+          alert('⚠️ ส่งคำสั่งการไม่สำเร็จ: ' + (data.error || 'เกิดข้อผิดพลาด'));
+        }
+      } catch (err) {
+        alert('⚠️ เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ' + err.message);
+      } finally {
+        if (submitBtn) submitBtn.disabled = false;
+        if (submitIcon) submitIcon.textContent = '🚀';
+        if (submitText) submitText.textContent = 'ยืนยันและยิงแจ้งเตือนเข้า Discord ทันที';
+      }
+    }
+
+    async function loadDispatchHistory() {
+      const container = document.getElementById('dispatch-history-container');
+      if (!container) return;
+      container.innerHTML = '<div class="text-center py-6 text-xs text-slate-400">⏳ กำลังโหลดข้อมูลประวัติคำสั่งการ...</div>';
+
+      try {
+        const res = await fetch('/api/dispatch/history');
+        const data = await res.json();
+        if (data.success && data.history && data.history.length > 0) {
+          container.innerHTML = data.history.map(item => {
+            const timeStr = item.created_at ? new Date(item.created_at).toLocaleString('th-TH', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+            const catMap = {
+              PATROL: { icon: '🛡️', label: 'ตรวจจุด', color: 'border-amber-500/30 text-amber-400 bg-amber-500/10' },
+              INVESTIGATION: { icon: '🔍', label: 'สืบข้อมูล', color: 'border-cyan-500/30 text-cyan-400 bg-cyan-500/10' },
+              ASSEMBLY: { icon: '🚨', label: 'รวมพล', color: 'border-red-500/30 text-red-400 bg-red-500/10' },
+              ANNOUNCEMENT: { icon: '📢', label: 'ประกาศ', color: 'border-emerald-500/30 text-emerald-400 bg-emerald-500/10' }
+            };
+            const meta = catMap[item.category] || catMap.PATROL;
+            const ackCount = Array.isArray(item.acknowledged_officers) ? item.acknowledged_officers.length : 0;
+            const versionBadge = item.selected_version === 'ai' ? '🤖 AI' : '✍️ ต้นฉบับ';
+
+            return `
+              <div class="p-3.5 rounded-xl bg-navy-950/70 border border-navy-800 hover:border-navy-700 transition space-y-2">
+                <div class="flex items-center justify-between text-xs">
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-0.5 rounded text-[10px] font-bold border ${meta.color}">
+                      ${meta.icon} ${meta.label}
+                    </span>
+                    <span class="text-slate-300 font-bold">${item.sender_name || 'ผู้ดูแลระบบ'}</span>
+                    <span class="text-[10px] text-slate-400">(${item.sender_role || 'ADMIN'})</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-1.5 py-0.2 rounded text-[9.5px] bg-navy-800 text-slate-400 font-mono">${versionBadge}</span>
+                    <span class="text-[11px] text-slate-400 font-mono">${timeStr}</span>
+                  </div>
+                </div>
+                <div class="text-xs text-slate-200 font-mono whitespace-pre-wrap bg-navy-900/60 p-2.5 rounded-lg border border-navy-800/80 leading-relaxed">
+${item.final_text || item.original_text || '-'}
+                </div>
+                <div class="flex items-center justify-between text-[11px] pt-1">
+                  <span class="text-slate-400">แท็ก: <code class="text-cyan-400">${item.mention_target || 'none'}</code></span>
+                  <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${ackCount > 0 ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'bg-navy-800 text-slate-400'}">
+                    📌 รับทราบแล้ว ${ackCount} นาย
+                  </span>
+                </div>
+              </div>
+            `;
+          }).join('');
+        } else {
+          container.innerHTML = '<div class="text-center py-8 text-xs text-slate-400">ยังไม่มีประวัติการส่งคำสั่งการในระบบ</div>';
+        }
+      } catch (err) {
+        container.innerHTML = `<div class="text-center py-6 text-xs text-red-400">⚠️ โหลดประวัติไม่สำเร็จ: ${err.message}</div>`;
+      }
+    }
+
+    // Auto-open modal if URL specifies
+    if (new URLSearchParams(window.location.search).get('openDispatch') === '1' || window.location.hash === '#dispatch') {
+      window.addEventListener('DOMContentLoaded', () => {
+        setTimeout(openDispatchModal, 400);
+      });
     }
   </script>
   <script src="/assets/nav-auth.js"></script>

@@ -10,6 +10,7 @@
   // Shared navigation items used in the all-screen menu drawer.
   const NAV_ITEMS = [
     { id: 'home', label: 'หน้าหลัก', icon: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>', href: '/' },
+    { id: 'dispatch', label: '🚨 ศูนย์สั่งการด่วน & AI', icon: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>', href: 'javascript:window.openDispatchModal()', highlight: 'rose' },
     { id: 'roster', label: 'ทำเนียบสารวัตรทั้งหมด', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>', href: '/?tab=roster' },
     { id: 'attendance-scan', label: 'สแกนเช็คชื่อ', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', href: '/attendance-scan', highlight: 'emerald' },
     { id: 'analytics', label: 'สถิติ & คลังข้อมูล', icon: '<path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8V9m4 6v-6"/>', href: '/analytics', highlight: 'cyan' },
@@ -280,6 +281,26 @@
         badgeRoleColor = 'text-amber-300 font-bold';
         badgeBorderColor = 'border-amber-400 shadow-[0_0_8px_rgba(245,158,11,0.4)]';
         dotColor = 'bg-amber-400 shadow-[0_0_6px_#f59e0b]';
+      }
+
+      // 🚨 Inject Tactical Dispatch Button in Global Header
+      const canManage = Boolean(user.canManageMembers || user.isAdmin || user.isTeacher || user.isPresident || user.isVicePresident || isSysAdmin || isTeacher || ['ADMIN', 'TEACHER', 'PRESIDENT', 'VICE_PRESIDENT'].includes(user.role));
+      
+      if (canManage && !document.getElementById('global-dispatch-header-btn')) {
+        const dispatchBtn = document.createElement('button');
+        dispatchBtn.id = 'global-dispatch-header-btn';
+        dispatchBtn.type = 'button';
+        dispatchBtn.className = 'px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-gradient-to-r from-red-600 via-rose-600 to-amber-600 hover:from-red-500 hover:to-amber-500 text-white text-[11px] sm:text-xs font-bold font-mono flex items-center gap-1.5 transition shadow-lg shadow-red-500/25 active:scale-95 animate-pulse flex-shrink-0';
+        dispatchBtn.title = 'ศูนย์สั่งการด่วน & แจ้งเตือนเสียง AI';
+        dispatchBtn.innerHTML = `<span>🚨</span><span class="hidden sm:inline tracking-wider uppercase">สั่งการด่วน</span>`;
+        dispatchBtn.onclick = () => {
+          if (typeof window.openDispatchModal === 'function') {
+            window.openDispatchModal();
+          } else {
+            window.location.href = '/?openDispatch=1';
+          }
+        };
+        headerActions.insertBefore(dispatchBtn, headerActions.firstChild);
       }
 
       const profileBadge = document.createElement('div');
