@@ -256,3 +256,53 @@ test('Task 5: handleDispatchAcknowledgment falls back to embed when log is null 
   assert.equal(newResult.officers.length, 2);
   assert.equal(newResult.officers[1].name, 'นายพงศ์ภัค (แบงก์)');
 });
+
+test('Task 6: supports > 10 officers acknowledgment with truncation preview and accurate total count', () => {
+  const officers = [];
+  for (let i = 1; i <= 25; i++) {
+    officers.push({
+      discord_id: `officer_${i}`,
+      name: `สารวัตรนักเรียน #${i}`,
+      role: 'OFFICER',
+      timestamp: new Date().toISOString()
+    });
+  }
+
+  // 1. Check buildDiscordDispatchPayload with 25 officers
+  const payload = buildDiscordDispatchPayload({
+    logId: 'test-uuid-more-than-10',
+    category: 'PATROL',
+    finalText: 'ลาดตระเวนรอบโรงเรียน',
+    senderName: 'ผู้ดูแลระบบ',
+    senderRole: 'ADMIN',
+    acknowledgedCount: 25,
+    acknowledgedOfficers: officers
+  });
+
+  const ackField = payload.embeds[0].fields.find(f => f.name.includes('รายชื่อผู้รับทราบภารกิจ'));
+  assert.ok(ackField);
+  assert.equal(ackField.name, '👥 รายชื่อผู้รับทราบภารกิจ (25 นาย)');
+  assert.match(ackField.value, /\*...และอีก 15 นาย\*/);
+  assert.equal(payload.components[0].components[0].label, '📌 รับทราบภารกิจ (25 นาย)');
+
+  // 2. Check recoverLogFromEmbed with truncated embed preserves total count 25
+  const recovered = recoverLogFromEmbed(payload.embeds[0], 'test-uuid-more-than-10');
+  assert.equal(recovered.acknowledged_officers.length, 25);
+
+  // 3. 26th officer acknowledges -> should succeed and count becomes 26
+  const officer26 = {
+    id: 'officer_26',
+    displayName: 'สารวัตรคนที่ 26',
+    roles: ['role_verified_123']
+  };
+
+  const ackResult = handleDispatchAcknowledgment({
+    log: recovered,
+    officerUser: officer26,
+    env: { ROLE_VERIFIED: 'role_verified_123' }
+  });
+
+  assert.equal(ackResult.success, true);
+  assert.equal(ackResult.count, 26);
+  assert.equal(ackResult.officers.length, 26);
+});
