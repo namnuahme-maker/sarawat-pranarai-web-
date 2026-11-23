@@ -9,6 +9,7 @@ const {
   polishDispatchMessage,
   resolveMentionRoleIds,
   buildDiscordDispatchPayload,
+  recoverLogFromEmbed,
   handleDispatchAcknowledgment
 } = require('../lib/dispatch_service');
 
@@ -188,4 +189,70 @@ test('Task 4: handleDispatchAcknowledgment enforces role verification and idempo
   });
   assert.equal(secondAck.success, false);
   assert.ok(secondAck.alreadyAck);
+});
+
+test('Task 5: recoverLogFromEmbed extracts acknowledged officers correctly', () => {
+  const embed = {
+    title: '🛡️ ศูนย์สั่งการด่วน: ตรวจจุด / ลาดตระเวน',
+    fields: [
+      {
+        name: '👥 รายชื่อผู้รับทราบภารกิจ (2 นาย)',
+        value: '1. **นายณิชกานต์ คำไชย (น้ำเหนือ)** (23:40)\n2. **นายพงศ์ภัค (แบงก์)** (23:42)'
+      }
+    ]
+  };
+
+  const recovered = recoverLogFromEmbed(embed, 'recovered-id-123');
+  assert.ok(recovered);
+  assert.equal(recovered.id, 'recovered-id-123');
+  assert.equal(recovered.acknowledged_officers.length, 2);
+  assert.equal(recovered.acknowledged_officers[0].name, 'นายณิชกานต์ คำไชย (น้ำเหนือ)');
+  assert.equal(recovered.acknowledged_officers[1].name, 'นายพงศ์ภัค (แบงก์)');
+});
+
+test('Task 5: handleDispatchAcknowledgment falls back to embed when log is null and prevents duplicate by name', () => {
+  const embed = {
+    title: '🛡️ ศูนย์สั่งการด่วน: ตรวจจุด / ลาดตระเวน',
+    fields: [
+      {
+        name: '👥 รายชื่อผู้รับทราบภารกิจ (1 นาย)',
+        value: '1. **นายณิชกานต์ คำไชย (น้ำเหนือ)** (23:40)'
+      }
+    ]
+  };
+
+  // 1. Same officer attempts to acknowledge again -> should reject as already acknowledged
+  const duplicateOfficer = {
+    id: 'different_discord_id_or_same',
+    displayName: 'นายณิชกานต์ คำไชย (น้ำเหนือ)',
+    roles: ['role_verified_123']
+  };
+
+  const dupResult = handleDispatchAcknowledgment({
+    log: null,
+    embed,
+    officerUser: duplicateOfficer,
+    env: { ROLE_VERIFIED: 'role_verified_123' }
+  });
+
+  assert.equal(dupResult.success, false);
+  assert.ok(dupResult.alreadyAck);
+
+  // 2. New officer acknowledges -> should succeed and increment count to 2
+  const newOfficer = {
+    id: 'officer_new_456',
+    displayName: 'นายพงศ์ภัค (แบงก์)',
+    roles: ['role_verified_123']
+  };
+
+  const newResult = handleDispatchAcknowledgment({
+    log: null,
+    embed,
+    officerUser: newOfficer,
+    env: { ROLE_VERIFIED: 'role_verified_123' }
+  });
+
+  assert.equal(newResult.success, true);
+  assert.equal(newResult.officers.length, 2);
+  assert.equal(newResult.officers[1].name, 'นายพงศ์ภัค (แบงก์)');
 });

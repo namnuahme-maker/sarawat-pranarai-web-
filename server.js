@@ -4974,6 +4974,41 @@ app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], requi
 // -------------------------------------------------------------
 // 7.2.5 🚨 ศูนย์สั่งการด่วน & แจ้งเตือนเสียง AI (Tactical Dispatch)
 // -------------------------------------------------------------
+const DISPATCH_CACHE_PATHS = [
+  path.join(__dirname, '..', 'data', 'dispatch_logs_cache.json'),
+  path.join(__dirname, 'data', 'dispatch_logs_cache.json'),
+  path.join(process.cwd(), 'data', 'dispatch_logs_cache.json')
+];
+
+function getDispatchLogsFromCache() {
+  for (const f of DISPATCH_CACHE_PATHS) {
+    try {
+      if (fs.existsSync(f)) {
+        return JSON.parse(fs.readFileSync(f, 'utf8') || '[]');
+      }
+    } catch (e) {}
+  }
+  return [];
+}
+
+function saveDispatchLogToCache(record) {
+  if (!record || !record.id) return;
+  const target = DISPATCH_CACHE_PATHS[0];
+  try {
+    const dir = path.dirname(target);
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    let list = getDispatchLogsFromCache();
+    const idx = list.findIndex(item => item && item.id === record.id);
+    if (idx >= 0) {
+      list[idx] = { ...list[idx], ...record };
+    } else {
+      list.unshift(record);
+      if (list.length > 100) list = list.slice(0, 100);
+    }
+    fs.writeFileSync(target, JSON.stringify(list, null, 2), 'utf8');
+  } catch (e) {}
+}
+
 app.post('/api/dispatch/ai-polish', requireAuth, async (req, res) => {
   const user = req.user;
   if (!user?.canManageMembers && !user?.isAdmin && !user?.isPresident && !user?.isTeacher) {
@@ -5046,6 +5081,9 @@ app.post('/api/dispatch/send', requireAuth, async (req, res) => {
       console.warn('[DISPATCH_DB_WARN] Failed to insert dispatch log into Supabase:', dbErr.message);
     }
 
+    // Always cache locally as resilient fail-safe
+    saveDispatchLogToCache({ ...logPayload, id: logId, created_at: new Date().toISOString() });
+
     // 2. สร้าง Discord REST API payload พร้อมปุ่ม
     const discordPayload = buildDiscordDispatchPayload({
       logId,
@@ -5073,6 +5111,7 @@ app.post('/api/dispatch/send', requireAuth, async (req, res) => {
         const msgData = await dRes.json();
         if (msgData?.id) {
           discordMessageId = msgData.id;
+          saveDispatchLogToCache({ id: logId, discord_message_id: discordMessageId });
           try {
             await supabase.from('dispatch_logs').update({ discord_message_id: discordMessageId }).eq('id', logId);
           } catch (e) {}
@@ -5107,8 +5146,13 @@ app.get('/api/dispatch/history', requireAuth, async (req, res) => {
         .select('*')
         .order('created_at', { ascending: false })
         .limit(15);
-      if (!error && data) history = data;
+      if (!error && data && data.length > 0) history = data;
     } catch (e) {}
+
+    // Fallback to local cache if database returned no records or table missing
+    if (!history || history.length === 0) {
+      history = getDispatchLogsFromCache().slice(0, 15);
+    }
 
     return res.json({ success: true, history });
   } catch (err) {
