@@ -31,6 +31,13 @@ try {
 const { createClient } = require('@supabase/supabase-js');
 const { uploadToGoogleDrive, downloadFromGoogleDrive } = require('./services/gdrive_service');
 const { custodyOrFilter, isSchoolCustodyItem } = require('./lib/school_custody');
+const {
+  CATEGORY_META,
+  polishDispatchMessage,
+  resolveMentionRoleIds,
+  buildDiscordDispatchPayload,
+  handleDispatchAcknowledgment
+} = require('./lib/dispatch_service');
 
 const app = express();
 app.set('trust proxy', 1); // รองรับ Reverse Proxy บน Render (HTTPS termination)
@@ -4962,6 +4969,148 @@ app.get(['/attendance-sheet', '/attendance-sheet.html', '/print-attendance'], re
 
 app.get(['/attendance-scan', '/attendance-scan.html', '/scan-attendance'], requireAuth, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'attendance-scan.html'));
+});
+
+// -------------------------------------------------------------
+// 7.2.5 🚨 ศูนย์สั่งการด่วน & แจ้งเตือนเสียง AI (Tactical Dispatch)
+// -------------------------------------------------------------
+app.post('/api/dispatch/ai-polish', requireAuth, async (req, res) => {
+  const user = req.user;
+  if (!user?.canManageMembers && !user?.isAdmin && !user?.isPresident && !user?.isTeacher) {
+    return res.status(403).json({ success: false, error: 'เฉพาะผู้ดูแลระบบ, ประธาน, และครูที่ปรึกษาเท่านั้นที่สามารถใช้ระบบสั่งการได้' });
+  }
+  try {
+    const { category, rawText } = req.body;
+    const result = await polishDispatchMessage({
+      category,
+      rawText,
+      apiKey: process.env.GEMINI_API_KEY
+    });
+    return res.json(result);
+  } catch (err) {
+    return res.status(400).json({ success: false, error: err.message || 'ไม่สามารถประมวลผลข้อความได้' });
+  }
+});
+
+app.post('/api/dispatch/send', requireAuth, async (req, res) => {
+  const user = req.user;
+  if (!user?.canManageMembers && !user?.isAdmin && !user?.isPresident && !user?.isTeacher) {
+    return res.status(403).json({ success: false, error: 'เฉพาะผู้ดูแลระบบ, ประธาน, และครูที่ปรึกษาเท่านั้นที่สามารถใช้ระบบสั่งการได้' });
+  }
+  try {
+    const {
+      category = 'PATROL',
+      mentionTarget = 'none',
+      originalText = '',
+      aiText = '',
+      selectedVersion = 'ai',
+      finalText = ''
+    } = req.body;
+
+    if (!finalText && !originalText) {
+      return res.status(400).json({ success: false, error: 'กรุณาระบุข้อความคำสั่งการ' });
+    }
+
+    const chosenFinalText = (finalText || (selectedVersion === 'ai' ? aiText : originalText) || '').trim();
+    const mentionRoleIds = resolveMentionRoleIds({ mentionTarget, env: process.env });
+    const channelId = process.env.INCIDENT_CHANNEL_ID || '1567570890084843530';
+    const botToken = process.env.DISCORD_TOKEN;
+
+    // 1. สร้าง Record เริ่มต้นใน Supabase
+    let logId = crypto.randomUUID();
+    let senderRole = 'COMMANDER';
+    if (user.isAdmin) senderRole = 'ADMIN';
+    else if (user.isTeacher) senderRole = 'TEACHER';
+    else if (user.isPresident) senderRole = 'PRESIDENT';
+    else if (user.isVicePresident) senderRole = 'VICE_PRESIDENT';
+
+    const logPayload = {
+      id: logId,
+      sender_discord_id: user.id || 'system',
+      sender_name: user.displayName || user.nickname || user.username || 'ผู้ดูแลระบบ',
+      sender_role: senderRole,
+      category,
+      mention_target: mentionTarget,
+      original_text: originalText,
+      ai_text: aiText,
+      selected_version: selectedVersion,
+      final_text: chosenFinalText,
+      discord_channel_id: channelId,
+      acknowledged_officers: []
+    };
+
+    try {
+      const { data: dbData } = await supabase.from('dispatch_logs').insert(logPayload).select().single();
+      if (dbData?.id) logId = dbData.id;
+    } catch (dbErr) {
+      console.warn('[DISPATCH_DB_WARN] Failed to insert dispatch log into Supabase:', dbErr.message);
+    }
+
+    // 2. สร้าง Discord REST API payload พร้อมปุ่ม
+    const discordPayload = buildDiscordDispatchPayload({
+      logId,
+      category,
+      mentionRoleIds,
+      finalText: chosenFinalText,
+      senderName: logPayload.sender_name,
+      senderRole: logPayload.sender_role,
+      selectedVersion,
+      acknowledgedCount: 0,
+      acknowledgedOfficers: []
+    });
+
+    let discordMessageId = null;
+    if (botToken && channelId) {
+      try {
+        const dRes = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+          method: 'POST',
+          headers: {
+            Authorization: `Bot ${botToken}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(discordPayload)
+        });
+        const msgData = await dRes.json();
+        if (msgData?.id) {
+          discordMessageId = msgData.id;
+          try {
+            await supabase.from('dispatch_logs').update({ discord_message_id: discordMessageId }).eq('id', logId);
+          } catch (e) {}
+        }
+      } catch (dErr) {
+        console.warn('[DISPATCH_DISCORD_WARN] Failed to send message to Discord:', dErr.message);
+      }
+    }
+
+    return res.json({
+      success: true,
+      logId,
+      discordMessageId,
+      channelId,
+      message: 'ส่งคำสั่งการแจ้งเตือนเข้า Discord เรียบร้อยแล้ว'
+    });
+  } catch (err) {
+    console.error('[DISPATCH_SEND_ERR]', err);
+    return res.status(500).json({ success: false, error: err.message || 'เกิดข้อผิดพลาดในการส่งคำสั่งการ' });
+  }
+});
+
+app.get('/api/dispatch/history', requireAuth, async (req, res) => {
+  try {
+    let history = [];
+    try {
+      const { data, error } = await supabase
+        .from('dispatch_logs')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(15);
+      if (!error && data) history = data;
+    } catch (e) {}
+
+    return res.json({ success: true, history });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
 });
 
 // -------------------------------------------------------------
