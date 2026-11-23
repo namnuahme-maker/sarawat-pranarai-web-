@@ -136,6 +136,19 @@ test('Task 3: buildDiscordDispatchPayload constructs content, embed, and ack but
   assert.equal(payload.components[0].components[0].custom_id, 'btn_dispatch_ack_test-uuid-1234');
 });
 
+test('Task 3: buildDiscordDispatchPayload defensively slices long finalText to 4000 chars', () => {
+  const hugeText = 'A'.repeat(5000);
+  const payload = buildDiscordDispatchPayload({
+    logId: 'test-uuid-5000',
+    category: 'PATROL',
+    finalText: hugeText,
+    senderName: 'Admin',
+    senderRole: 'ADMIN'
+  });
+
+  assert.equal(payload.embeds[0].description.length, 4000);
+});
+
 test('Task 4: handleDispatchAcknowledgment enforces role verification and idempotency', () => {
   const log = {
     id: 'test-uuid-1234',

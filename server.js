@@ -5086,8 +5086,11 @@ app.post('/api/dispatch/send', requireAuth, async (req, res) => {
       success: true,
       logId,
       discordMessageId,
+      discordDelivered: Boolean(discordMessageId),
       channelId,
-      message: 'ส่งคำสั่งการแจ้งเตือนเข้า Discord เรียบร้อยแล้ว'
+      message: discordMessageId
+        ? 'ส่งคำสั่งการแจ้งเตือนเข้า Discord เรียบร้อยแล้ว'
+        : 'บันทึกคำสั่งการลงระบบสำเร็จ (แต่ยังไม่สามารถส่งเข้า Discord ได้ ตรวจสอบ Channel ID/Bot Token)'
     });
   } catch (err) {
     console.error('[DISPATCH_SEND_ERR]', err);
