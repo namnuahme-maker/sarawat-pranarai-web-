@@ -93,13 +93,23 @@
       <section class="lg:col-span-6 bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
         
         <!-- Headers matching mockup: [จำนวนคนในเวร] and สถานะ (Yellow Badges) -->
-        <div class="flex items-center justify-between gap-2 pb-1 border-b border-slate-800">
-          <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-sm">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-800">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-md shadow-amber-400/20">
             <span>📋</span>
             <span id="manual-roster-count-header">[จำนวนคนในเวร]</span>
           </div>
-          <div class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-sm">
-            <span>สถานะ</span>
+
+          <div class="flex items-center gap-1.5">
+            <!-- Tactical Quick Controls (เพื่อความสะดวกสบายและรวดเร็ว) -->
+            <button type="button" onclick="markAllPresent()" class="px-2.5 py-1.5 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 text-[11px] font-bold border border-emerald-500/30 transition flex items-center gap-1 active:scale-95 shadow-sm" title="ทำเครื่องหมาย 'มา' ให้ทุกคนในผลัดนี้ (เว้นคนที่แจ้งลาไว้)">
+              <span>⚡</span> <span>มาทุกคน</span>
+            </button>
+            <button type="button" onclick="resetAllStatus()" class="px-2 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-[11px] font-medium border border-slate-700 transition flex items-center gap-1 active:scale-95" title="รีเซ็ตสถานะทุกคน">
+              <span>🔄</span> <span>รีเซ็ต</span>
+            </button>
+            <div class="px-3 py-1.5 rounded-xl bg-amber-400 text-slate-950 font-black text-xs shadow-md shadow-amber-400/20">
+              <span>สถานะ</span>
+            </div>
           </div>
         </div>
 
@@ -662,42 +672,107 @@
     let rawSourceH = 0;
     let listenersAttached = false;
 
-    // ฐานข้อมูลสารวัตรสำรอง (Fallback Database)
+    // 🎯 ฐานข้อมูลภาพโปรไฟล์จริงของสารวัตรทุกคน (Known Officer Profile Photos)
+    const KNOWN_OFFICER_PHOTOS = {
+      // เวรวันอังคาร (TS)
+      'TS1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_TS1_1794753087186.jpg', // นายณิชกานต์ คำไชย
+      'TS2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/members/member_TS2_1794446554881.jpg', // นายคณิศร ตะพานแก้ว
+      'TS3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/members/member_TS3_1794063309247.jpg', // นายพงศ์ภัค ทองคำใส
+      'TS4': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_TS4_1795146208238.jpg', // นายนนท์ธวัตร แย้มอำพล
+      'TS5': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_bd14f947-f4ad-4e3a-a2ff-68d4165add44_1795500090805.jpg', // นายปัณณวัฒน์ ปานฮวด
+      'TS6': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_TS6_1794746794114.jpg', // นางสาวกันติชา ชอบธรรมดี
+      'T1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_5a3f206d-70e7-484c-a39a-8d174ab70a42_1794752057652.jpg',
+      'T2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_e924f937-63a8-4652-9590-46711ced2912_1794761234058.jpg', // นางสาวชญาน์นันท์ ฉิมรัมย์
+
+      // เวรวันจันทร์ (M / MS)
+      'MS1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_0456e29d-c809-4d06-b6a3-c815f5f1e413_1794744096478.jpg',
+      'MS2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_24bfb05b-267f-469f-ad6b-7c58ecd89066_1794742247486.jpg',
+      'MS3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_c47d0c7d-eb84-46f1-b6a1-74b99ea8bb79_1794755326241.jpg',
+      'MS4': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_fb4948cc-c261-4935-8f1b-cfe26042307b_1794751347964.jpg',
+      'M1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/members/member_94a4ae91-9293-49e2-b103-2fffc343f574_1794744764059.jpg', // นางสาวปวีณธิดา ประกอบแก้ว
+      'M2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_aa3e734d-57cb-48ae-95c3-b80b88cead21_1795099927115.jpg', // นายทดลอง
+
+      // เวรวันพุธ (W / WS)
+      'W1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_fa959ae4-948b-4c79-8e8d-96eabbd26506_1794738281356.jpg',
+      'W2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_953c6630-a896-45d7-b3a4-7fa4d307a5e4_1794740246085.jpg',
+      'W3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_61a58c7d-c858-4a10-ad1a-4d63f0e86494_1794746832095.jpg',
+      'WS1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_d89c5865-2fb9-497e-8e8b-cf820a03e719_1794754260227.jpg',
+      'WS2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_c61dbfd9-4bef-46b1-a0c2-3ab796da86a8_1794744856437.jpg', // นายพชรพล กระดุมผล
+      'WS3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_WS3_1794824627059.jpg', // นางสาวยุพิน บุญวัง
+
+      // เวรวันพฤหัสฯ (Th / ThS)
+      'Th1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/members/member_4b1f46dd-e661-4118-a463-55a5d11ad807_1794745641829.jpg', // นางสาวบุญญาพร ลือสาคร
+      'Th2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_ad3304a7-ec02-459d-9e31-e2029e8ac9a4_1794747699343.jpg',
+      'Th3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_98384ef8-8904-4e36-af2e-a2aaf43a9f97_1794756921381.jpg',
+
+      // เวรวันศุกร์ (F / FS)
+      'FS1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_73a560ef-258e-44a9-8707-f0b6f9f19308_1794755531789.jpg', // นายภัทรพล บุญวิเศษ
+      'FS2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_84e31f62-3e8f-4b33-b799-180f4a219c2f_1794818665534.jpg', // นางสาวปรีณาพรรณ ขันศิริ
+      'FS3': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_4bd26a54-2f0d-45e0-89c3-f1a64daff727_1794745381578.jpg', // นายจาตุพัฒน์ ขอนแก่น
+      'F1': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_51f2fcf6-dccf-4165-9cfa-52204bd23dfe_1794753350938.jpg', // นายเมธา สุขม่วง
+      'F2': 'https://cxrakrsyxvsrbpgphgtt.supabase.co/storage/v1/object/public/sarawat-photos/profile-photos/profile_cropped_0648f94a-f7e2-4f6b-9f26-753f0803dd28_1794750803666.jpg'
+    };
+
+    function getOfficerPhoto(dutyId, name = '') {
+      if (dutyId && KNOWN_OFFICER_PHOTOS[dutyId]) {
+        return KNOWN_OFFICER_PHOTOS[dutyId];
+      }
+      if (name) {
+        if (name.includes('ณิชกานต์')) return KNOWN_OFFICER_PHOTOS['TS1'];
+        if (name.includes('คณิศร')) return KNOWN_OFFICER_PHOTOS['TS2'];
+        if (name.includes('พงศ์ภัค')) return KNOWN_OFFICER_PHOTOS['TS3'];
+        if (name.includes('นนท์ธวัตร')) return KNOWN_OFFICER_PHOTOS['TS4'];
+        if (name.includes('ปัณณวัฒน์')) return KNOWN_OFFICER_PHOTOS['TS5'];
+        if (name.includes('กันติชา')) return KNOWN_OFFICER_PHOTOS['TS6'];
+        if (name.includes('ภัทรพล')) return KNOWN_OFFICER_PHOTOS['FS1'];
+        if (name.includes('ปรีณาพรรณ')) return KNOWN_OFFICER_PHOTOS['FS2'];
+        if (name.includes('ปวีณธิดา')) return KNOWN_OFFICER_PHOTOS['M1'];
+        if (name.includes('เมธา')) return KNOWN_OFFICER_PHOTOS['F1'];
+        if (name.includes('บุญญาพร')) return KNOWN_OFFICER_PHOTOS['Th1'];
+        if (name.includes('จาตุพัฒน์')) return KNOWN_OFFICER_PHOTOS['FS3'];
+        if (name.includes('พชรพล')) return KNOWN_OFFICER_PHOTOS['WS2'];
+        if (name.includes('ยุพิน')) return KNOWN_OFFICER_PHOTOS['WS3'];
+      }
+      const initial = (name ? name.replace(/^นาย|^นางสาว|^เด็กชาย|^เด็กหญิง/, '').trim().charAt(0) : (dutyId || 'ส')).toUpperCase();
+      return `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&background=0f172a&color=38bdf8&bold=true&size=128&format=svg`;
+    }
+
+    // ฐานข้อมูลสารวัตรสำรอง (Fallback Database พร้อมรูปโปรไฟล์จริงทุกคน)
     const FALLBACK_ROSTERS = {
       M: [
-        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_head: true },
-        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)", is_deputy: true },
-        { duty_id: "MS3", name: "นางสาวพรนัชชา ประสมพงค์", nickname: "น้ำชา", class_room: "5/5 (3)" },
-        { duty_id: "MS4", name: "นางสาวพิมพิพัฒณ์ รักษาทางดี", nickname: "พิมมี่", class_room: "5/7 (27)" },
-        { duty_id: "M1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)" },
-        { duty_id: "M2", name: "นายกิตติคุณ สุขสม", nickname: "อาร์ม", class_room: "5/2 (12)" }
+        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['MS1'] },
+        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['MS2'] },
+        { duty_id: "MS3", name: "นางสาวพรนัชชา ประสมพงค์", nickname: "น้ำชา", class_room: "5/5 (3)", profile_image_url: KNOWN_OFFICER_PHOTOS['MS3'] },
+        { duty_id: "MS4", name: "นางสาวพิมพิพัฒณ์ รักษาทางดี", nickname: "พิมมี่", class_room: "5/7 (27)", profile_image_url: KNOWN_OFFICER_PHOTOS['MS4'] },
+        { duty_id: "M1", name: "นางสาวปวีณธิดา ประกอบแก้ว", nickname: "แบม", class_room: "5/7 (36)", profile_image_url: KNOWN_OFFICER_PHOTOS['M1'] },
+        { duty_id: "M2", name: "นายทดลอง จำยองสำพาสอนฝฝิน", nickname: "ทดลอง", class_room: "5/2 (12)", profile_image_url: KNOWN_OFFICER_PHOTOS['M2'] }
       ],
       T: [
-        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "น้ำเหนือ", class_room: "5/7 (36)", is_head: true },
-        { duty_id: "TS2", name: "นายคณิศร ตะพานแก้ว", nickname: "คิว", class_room: "5/8 (5)", is_deputy: true },
-        { duty_id: "TS3", name: "นายพงศ์ภัค ทองคำใส", nickname: "แบงก์", class_room: "5/7 (38)" },
-        { duty_id: "TS4", name: "นายนนท์ธวัตร แย้มอำพล", nickname: "กานต์", class_room: "5/7 (32)" },
-        { duty_id: "TS5", name: "นายปัณณวัฒน์ ปานฮวด", nickname: "ปัน", class_room: "5/7 (22)" }
+        { duty_id: "TS1", name: "นายณิชกานต์ คำไชย", nickname: "น้ำเหนือ", class_room: "5/7 (36)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['TS1'] },
+        { duty_id: "TS2", name: "นายคณิศร ตะพานแก้ว", nickname: "คิว", class_room: "5/8 (5)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['TS2'] },
+        { duty_id: "TS3", name: "นายพงศ์ภัค ทองคำใส", nickname: "แบงก์", class_room: "5/7 (38)", profile_image_url: KNOWN_OFFICER_PHOTOS['TS3'] },
+        { duty_id: "TS4", name: "นายนนท์ธวัตร แย้มอำพล", nickname: "กานต์", class_room: "5/7 (32)", profile_image_url: KNOWN_OFFICER_PHOTOS['TS4'] },
+        { duty_id: "TS5", name: "นายปัณณวัฒน์ ปานฮวด", nickname: "ปัน", class_room: "5/7 (22)", profile_image_url: KNOWN_OFFICER_PHOTOS['TS5'] }
       ],
       W: [
-        { duty_id: "W1", name: "นายธีรภัทร พรหมดิสาร", nickname: "บีม", class_room: "4/7 (19)", is_head: true },
-        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "5/3 (15)", is_deputy: true },
-        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "3/4 (20)" }
+        { duty_id: "W1", name: "นายธีรภัทร พรหมดิสาร", nickname: "บีม", class_room: "4/7 (19)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['W1'] },
+        { duty_id: "W2", name: "นายก้องภพ ทองใบ", nickname: "อาร์ม", class_room: "5/3 (15)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['W2'] },
+        { duty_id: "W3", name: "เด็กชายธราเทพ พงษ์สวัสดิ์", nickname: "ปัน", class_room: "3/4 (20)", profile_image_url: KNOWN_OFFICER_PHOTOS['W3'] }
       ],
       Th: [
-        { duty_id: "Th1", name: "นายณิชกานต์ คำไชย", nickname: "นำเหนือ", class_room: "5/7 (36)", is_head: true },
-        { duty_id: "Th2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true },
-        { duty_id: "Th3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)" }
+        { duty_id: "Th1", name: "นางสาวบุญญาพร ลือสาคร", nickname: "ปอร์เช่", class_room: "5/7 (36)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['Th1'] },
+        { duty_id: "Th2", name: "นายปรเมศวร์ ดวงดี", nickname: "โบ๊ท", class_room: "5/6 (8)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['Th2'] },
+        { duty_id: "Th3", name: "เด็กชายอภิวัฒน์ มีทรัพย์", nickname: "ไอซ์", class_room: "3/6 (14)", profile_image_url: KNOWN_OFFICER_PHOTOS['Th3'] }
       ],
       F: [
-        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true },
-        { duty_id: "F1", name: "นายกฤษฎา พรหมมา", nickname: "แบงค์", class_room: "6/4 (10)", is_deputy: true },
-        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "5/2 (16)" }
+        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['FS1'] },
+        { duty_id: "F1", name: "นายเมธา สุขม่วง", nickname: "ออกัส", class_room: "6/4 (10)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['F1'] },
+        { duty_id: "F2", name: "นายชาญชัย มิ่งขวัญ", nickname: "กาย", class_room: "5/2 (16)", profile_image_url: KNOWN_OFFICER_PHOTOS['F2'] }
       ],
       S: [
-        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true },
-        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_deputy: true },
-        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)" }
+        { duty_id: "FS1", name: "นายภัทรพล บุญวิเศษ", nickname: "ภีมะ", class_room: "5/7 (4)", is_head: true, profile_image_url: KNOWN_OFFICER_PHOTOS['FS1'] },
+        { duty_id: "MS1", name: "นางสาวมัลลิกา เลื่อนลอย", nickname: "ไอซ์", class_room: "5/7 (14)", is_deputy: true, profile_image_url: KNOWN_OFFICER_PHOTOS['MS1'] },
+        { duty_id: "MS2", name: "นายศรัณยพงศ์ วงศ์สุวรรณ", nickname: "นาย", class_room: "5/7 (33)", profile_image_url: KNOWN_OFFICER_PHOTOS['MS2'] }
       ]
     };
 
@@ -2009,17 +2084,24 @@
       try {
         const res = await fetch(`/api/members?duty_day=${shift}`);
         const data = await res.json();
-        if (data && data.success && Array.isArray(data.members) && data.members.length > 0) {
-          activeRoster = data.members.map(m => ({
-            id: m.id,
-            duty_id: m.duty_id || 'ID',
-            name: `${m.first_name || ''} ${m.last_name || ''}`.trim(),
-            nickname: m.nickname || '',
-            class_room: m.grade_class ? `${m.grade_class} (${m.student_no || '-'})` : '-',
-            profile_image_url: m.profile_image_url || '/assets/sarawat_logo.png',
-            status: 'UNCHECKED',
-            was_edited: false
-          }));
+        const memberList = (data && data.success && Array.isArray(data.data)) 
+          ? data.data 
+          : ((data && Array.isArray(data.members)) ? data.members : []);
+
+        if (memberList.length > 0) {
+          activeRoster = memberList.map(m => {
+            const rawPhoto = m.profile_image_url || m.photo_url || m.profile_photo_url;
+            return {
+              id: m.id,
+              duty_id: m.duty_id || 'ID',
+              name: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.duty_id,
+              nickname: m.nickname || '',
+              class_room: m.grade_class ? `${m.grade_class} (${m.student_no || '-'})` : '-',
+              profile_image_url: rawPhoto || getOfficerPhoto(m.duty_id, m.first_name),
+              status: 'UNCHECKED',
+              was_edited: false
+            };
+          });
           syncDiscordLeavesToRoster();
           renderManualRoster();
           updateManualCounters();
@@ -2033,7 +2115,7 @@
       const fallbackList = FALLBACK_ROSTERS[shift] || FALLBACK_ROSTERS['W'];
       activeRoster = fallbackList.map(m => ({
         ...m,
-        profile_image_url: '/assets/sarawat_logo.png',
+        profile_image_url: m.profile_image_url || getOfficerPhoto(m.duty_id, m.name),
         status: 'UNCHECKED',
         was_edited: false
       }));
@@ -2055,13 +2137,37 @@
       updateManualCounters();
     }
 
+    // ⚡ ฟังก์ชันอำนวยความสะดวก: เช็ค 'มา' ให้ทุกคนในรอบเวรทันที (เว้นคนที่แจ้งลาไว้)
+    function markAllPresent() {
+      if (!activeRoster || activeRoster.length === 0) return;
+      activeRoster.forEach(m => {
+        if (m.status !== 'LEAVE') {
+          m.status = 'PRESENT';
+          m.was_edited = true;
+        }
+      });
+      renderManualRoster();
+      updateManualCounters();
+    }
+
+    // 🔄 รีเซ็ตสถานะทั้งหมดในรอบเวร
+    function resetAllStatus() {
+      if (!activeRoster || activeRoster.length === 0) return;
+      activeRoster.forEach(m => {
+        m.status = discordLeavesMap[m.duty_id] ? 'LEAVE' : 'UNCHECKED';
+        m.was_edited = false;
+      });
+      renderManualRoster();
+      updateManualCounters();
+    }
+
     // 📋 Render Left Column Manual Check-in Roster
     function renderManualRoster() {
       const container = document.getElementById('manual-roster-list');
       if (!container) return;
 
       if (!activeRoster || activeRoster.length === 0) {
-        container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">ไม่พบรายชื่อสารวัตรในผลัดนี้</div>`;
+        container.innerHTML = `<div class="p-8 text-center text-slate-400 text-xs">ไม่พบรายชื่อสารวัตรในผลัดนี้</div>`;
         return;
       }
 
@@ -2070,37 +2176,48 @@
         const isLeave = m.status === 'LEAVE';
         const isLate = m.status === 'LATE';
 
-        // Styling for the 3 buttons
-        // Green for มา, Orange for ลา, Red for สาย, White/Dim for Unchecked
+        // Animated button styling with tactile glows
         const btnPresentClass = isPresent
-          ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.5)] border-emerald-400'
-          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+          ? 'bg-gradient-to-br from-emerald-400 to-emerald-600 text-slate-950 font-black shadow-[0_0_16px_rgba(16,185,129,0.55)] border-emerald-300 scale-[1.03] ring-2 ring-emerald-500/30'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-emerald-300 hover:border-emerald-500/40 hover:bg-emerald-950/20';
 
         const btnLeaveClass = isLeave
-          ? 'bg-orange-500 text-slate-950 font-black shadow-[0_0_12px_rgba(249,115,22,0.5)] border-orange-400'
-          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+          ? 'bg-gradient-to-br from-amber-400 to-orange-600 text-slate-950 font-black shadow-[0_0_16px_rgba(249,115,22,0.55)] border-orange-300 scale-[1.03] ring-2 ring-orange-500/30'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-orange-300 hover:border-orange-500/40 hover:bg-orange-950/20';
 
         const btnLateClass = isLate
-          ? 'bg-rose-600 text-white font-black shadow-[0_0_12px_rgba(225,29,72,0.5)] border-rose-400'
-          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+          ? 'bg-gradient-to-br from-rose-500 to-red-600 text-white font-black shadow-[0_0_16px_rgba(225,29,72,0.55)] border-rose-300 scale-[1.03] ring-2 ring-rose-500/30'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-rose-300 hover:border-rose-500/40 hover:bg-rose-950/20';
 
-        const photo = m.profile_image_url || '/assets/sarawat_logo.png';
+        const photo = m.profile_image_url || getOfficerPhoto(m.duty_id, m.name);
+        const initial = (m.nickname || m.name || m.duty_id).charAt(0);
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&background=0f172a&color=38bdf8&bold=true&size=128&format=svg`;
 
         return `
-          <div class="grid grid-cols-12 gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80 items-center transition hover:border-slate-600">
+          <div class="grid grid-cols-12 gap-2 p-2 sm:p-2.5 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-850/80 to-slate-900/90 border border-slate-700/80 items-center transition-all duration-300 hover:scale-[1.01] hover:border-cyan-500/40 hover:shadow-[0_6px_20px_rgba(6,182,212,0.12)] group/row">
             <!-- Left Info Card (Col 7) -->
-            <div class="col-span-7 flex items-center gap-2 sm:gap-2.5 min-w-0">
-              <div class="w-12 h-14 sm:w-13 sm:h-15 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div class="col-span-7 flex items-center gap-2 sm:gap-3 min-w-0">
+              <!-- Officer Photo Container -->
+              <div class="w-13 h-16 sm:w-16 sm:h-20 rounded-xl bg-slate-950 border border-slate-700 overflow-hidden relative shadow-md shrink-0 flex items-center justify-center group/avatar">
                 <img src="${photo}" 
-                     onerror="this.onerror=null; this.src='/assets/sarawat_logo.png';" 
-                     class="w-full h-full object-cover" 
+                     onerror="this.onerror=null; this.src='${avatarFallback}';" 
+                     class="w-full h-full object-cover transition-transform duration-500 group-hover/avatar:scale-110" 
                      alt="${m.name}">
-              </div>
-              <div class="min-w-0 flex-1 space-y-0.5">
-                <div class="font-bold text-white text-xs sm:text-[13px] truncate leading-tight">
-                  <span class="text-slate-400 font-normal">ชื่อ:</span> ${m.name}
+                <div class="absolute bottom-0 inset-x-0 bg-slate-950/85 backdrop-blur-xs text-amber-300 font-mono text-[9px] font-black text-center py-0.5 border-t border-amber-500/30 truncate">
+                  ${m.duty_id}
                 </div>
-                <div class="text-slate-300 text-[11px] truncate">
+              </div>
+
+              <!-- Officer Details -->
+              <div class="min-w-0 flex-1 space-y-0.5">
+                <div class="font-bold text-white text-xs sm:text-[13px] truncate leading-tight flex items-center gap-1.5">
+                  <span>${m.name}</span>
+                </div>
+                ${m.nickname ? `
+                <div class="flex items-center gap-1">
+                  <span class="px-1.5 py-0.2 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/25 text-[10px] font-medium truncate">ชื่อเล่น: ${m.nickname}</span>
+                </div>` : ''}
+                <div class="text-slate-300 text-[11px] truncate flex items-center gap-1">
                   <span class="text-slate-400">ชั้น:</span> <span class="font-mono font-medium">${m.class_room}</span>
                 </div>
                 <div class="text-amber-400 text-[11px] font-mono font-bold truncate">
@@ -2110,17 +2227,17 @@
             </div>
 
             <!-- Right Status Selector (Col 5) -->
-            <div class="col-span-5 grid grid-cols-3 gap-1 sm:gap-1.5 h-11 sm:h-12">
+            <div class="col-span-5 grid grid-cols-3 gap-1 sm:gap-1.5 h-12 sm:h-14">
               <button type="button" onclick="setManualStatus(${idx}, 'PRESENT')" 
-                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnPresentClass}">
+                      class="rounded-xl text-xs sm:text-sm font-bold border flex items-center justify-center transition-all duration-200 active:scale-95 ${btnPresentClass}">
                 มา
               </button>
               <button type="button" onclick="setManualStatus(${idx}, 'LEAVE')" 
-                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnLeaveClass}">
+                      class="rounded-xl text-xs sm:text-sm font-bold border flex items-center justify-center transition-all duration-200 active:scale-95 ${btnLeaveClass}">
                 ลา
               </button>
               <button type="button" onclick="setManualStatus(${idx}, 'LATE')" 
-                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnLateClass}">
+                      class="rounded-xl text-xs sm:text-sm font-bold border flex items-center justify-center transition-all duration-200 active:scale-95 ${btnLateClass}">
                 สาย
               </button>
             </div>
@@ -2345,13 +2462,15 @@
         }
 
         const memberData = activeRoster.find(m => m.duty_id === r.duty_id) || {};
-        const photo = memberData.profile_image_url || '/assets/sarawat_logo.png';
+        const photo = memberData.profile_image_url || getOfficerPhoto(r.duty_id, r.name);
+        const initial = (memberData.nickname || r.name || r.duty_id).charAt(0);
+        const avatarFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(initial)}&background=0f172a&color=38bdf8&bold=true&size=128&format=svg`;
 
         return `
           <div class="p-2.5 rounded-xl border ${statusBorder} flex items-center justify-between gap-3 transition">
             <div class="flex items-center gap-2.5 min-w-0">
-              <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
-                <img src="${photo}" onerror="this.onerror=null; this.src='/assets/sarawat_logo.png';" class="w-full h-full object-cover">
+              <div class="w-11 h-13 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <img src="${photo}" onerror="this.onerror=null; this.src='${avatarFallback}';" class="w-full h-full object-cover">
               </div>
               <div class="min-w-0 flex-1">
                 <div class="font-bold text-white text-xs truncate">
