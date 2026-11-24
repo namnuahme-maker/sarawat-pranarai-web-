@@ -50,7 +50,7 @@
   <!-- 📱 HEADER & TOP STATUS                                     -->
   <!-- ========================================================== -->
   <header class="bg-slate-900/95 border-b border-slate-800 sticky top-0 z-40 backdrop-blur-md px-3.5 py-3">
-    <div class="max-w-2xl mx-auto flex items-center justify-between">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
       <div class="flex items-center gap-2.5">
         <a href="/" class="p-1.5 rounded-lg bg-slate-800 text-slate-300 hover:text-white transition border border-slate-700 text-xs">
           ← หน้าหลัก
@@ -77,18 +77,77 @@
   </header>
 
   <!-- ========================================================== -->
-  <!-- 📥 MAIN SCANNER CONTAINER                                 -->
+  <!-- 📥 MAIN DUAL WORKSPACE CONTAINER                           -->
   <!-- ========================================================== -->
-  <main class="max-w-2xl mx-auto w-full px-3.5 py-4 flex-1 space-y-4">
+  <main class="max-w-6xl mx-auto w-full px-3.5 py-4 flex-1">
 
     <!-- HIDDEN NATIVE CAMERA FILE INPUTS -->
     <input type="file" id="native-camera-input" accept="image/*" capture="environment" onchange="onPhotoSelected(event)" class="hidden">
     <input type="file" id="album-file-input" accept="image/*" onchange="onPhotoSelected(event)" class="hidden">
 
-    <!-- ====================================================== -->
-    <!-- 🗓️ STEP 1: HYBRID INGESTION CONTROL (ก่อนถ่ายภาพ)          -->
-    <!-- ====================================================== -->
-    <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+      <!-- ====================================================== -->
+      <!-- 👈 LEFT COLUMN: ระบบกดเอง (Interactive Manual Check-in)  -->
+      <!-- ====================================================== -->
+      <section class="lg:col-span-6 bg-slate-900/95 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
+        
+        <!-- Headers matching mockup: [จำนวนคนในเวร] and สถานะ (Yellow Badges) -->
+        <div class="flex items-center justify-between gap-2 pb-1 border-b border-slate-800">
+          <div class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-sm">
+            <span>📋</span>
+            <span id="manual-roster-count-header">[จำนวนคนในเวร]</span>
+          </div>
+          <div class="px-3 py-1.5 rounded-lg bg-amber-400 text-slate-950 font-bold text-xs shadow-sm">
+            <span>สถานะ</span>
+          </div>
+        </div>
+
+        <!-- Dynamic List of Officers in this Shift -->
+        <div id="manual-roster-list" class="space-y-2.5 max-h-[580px] overflow-y-auto pr-1 custom-scrollbar">
+          <div class="p-8 text-center text-slate-400 text-xs animate-pulse">
+            กำลังโหลดข้อมูลสารวัตรประจำเวร...
+          </div>
+        </div>
+
+        <!-- 4 Status Counter Badges: [มา] [ลา] [สาย] [ขาด] -->
+        <div class="grid grid-cols-4 gap-2 pt-1 text-center font-mono select-none">
+          <!-- มา (Green) -->
+          <div class="py-2 px-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 flex flex-col items-center">
+            <span class="text-[10px] text-emerald-400 font-sans font-bold">มา</span>
+            <span id="manual-count-present" class="text-lg font-black text-emerald-300">0</span>
+          </div>
+          <!-- ลา (Orange) -->
+          <div class="py-2 px-1.5 rounded-xl bg-orange-500/15 border border-orange-500/40 flex flex-col items-center">
+            <span class="text-[10px] text-orange-400 font-sans font-bold">ลา</span>
+            <span id="manual-count-leave" class="text-lg font-black text-orange-300">0</span>
+          </div>
+          <!-- สาย (Red) -->
+          <div class="py-2 px-1.5 rounded-xl bg-rose-500/15 border border-rose-500/40 flex flex-col items-center">
+            <span class="text-[10px] text-rose-400 font-sans font-bold">สาย</span>
+            <span id="manual-count-late" class="text-lg font-black text-rose-300">0</span>
+          </div>
+          <!-- ขาด (White / Grey) -->
+          <div class="py-2 px-1.5 rounded-xl bg-slate-800/90 border border-slate-700/80 flex flex-col items-center">
+            <span class="text-[10px] text-slate-300 font-sans font-bold">ขาด</span>
+            <span id="manual-count-absent" class="text-lg font-black text-white">0</span>
+          </div>
+        </div>
+
+        <!-- Big Green Confirmation Button -->
+        <button id="btn-manual-confirm" onclick="submitAttendanceConfirmation()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-400 to-emerald-500 hover:from-emerald-400 hover:to-teal-300 text-slate-950 font-black text-lg sm:text-xl shadow-xl shadow-emerald-500/25 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <span>ยืนยัน</span>
+        </button>
+
+      </section>
+
+      <!-- ====================================================== -->
+      <!-- 👉 RIGHT COLUMN: ระบบถ่ายรูป & ตั้งค่าเวร (Shift & Camera/OMR) -->
+      <!-- ====================================================== -->
+      <div class="lg:col-span-6 space-y-4">
+
+        <!-- 🗓️ STEP 1: HYBRID INGESTION CONTROL (ก่อนถ่ายภาพ) -->
+        <div id="step-select-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 shadow-xl space-y-4">
       
       <!-- ตัวเลือกไตรมาสและวันที่ (ซ่อนไว้สำหรับการประมวลผลเบื้องหลัง) -->
       <div class="hidden">
@@ -440,7 +499,81 @@
       </div>
     </div>
 
+      </div>
+    </div>
   </main>
+
+  <!-- ========================================================== -->
+  <!-- 📋 MODAL รายงานผลการเช็คชื่อละเอียด (Post-Confirm Report)     -->
+  <!-- ========================================================== -->
+  <div id="modal-attendance-report" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-5 overflow-y-auto">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-xl w-full p-4 sm:p-6 space-y-4 shadow-2xl relative my-auto">
+      <!-- Header -->
+      <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-lg text-emerald-400">
+            📋
+          </div>
+          <div>
+            <h2 class="text-base sm:text-lg font-bold text-white leading-tight">
+              รายงานสรุปผลการเช็คชื่อ
+            </h2>
+            <p id="report-shift-date" class="text-xs text-amber-400 font-medium">
+              กำลังรวบรวมข้อมูล...
+            </p>
+          </div>
+        </div>
+        <button onclick="closeReportModal()" class="w-8 h-8 rounded-full bg-slate-800 text-slate-400 hover:text-white flex items-center justify-center transition border border-slate-700">
+          ✕
+        </button>
+      </div>
+
+      <!-- Quick Stats Pills (มา, ลา, สาย, ขาด) -->
+      <div class="grid grid-cols-4 gap-2 text-center font-mono">
+        <div class="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30">
+          <div class="text-[10px] text-emerald-400 font-sans font-bold">มา</div>
+          <div id="report-count-present" class="text-base sm:text-lg font-black text-emerald-300">0</div>
+        </div>
+        <div class="p-2 rounded-xl bg-orange-500/10 border border-orange-500/30">
+          <div class="text-[10px] text-orange-400 font-sans font-bold">ลา</div>
+          <div id="report-count-leave" class="text-base sm:text-lg font-black text-orange-300">0</div>
+        </div>
+        <div class="p-2 rounded-xl bg-rose-500/10 border border-rose-500/30">
+          <div class="text-[10px] text-rose-400 font-sans font-bold">สาย</div>
+          <div id="report-count-late" class="text-base sm:text-lg font-black text-rose-300">0</div>
+        </div>
+        <div class="p-2 rounded-xl bg-slate-800/90 border border-slate-700">
+          <div class="text-[10px] text-slate-300 font-sans font-bold">ขาด</div>
+          <div id="report-count-absent" class="text-base sm:text-lg font-black text-white">0</div>
+        </div>
+      </div>
+
+      <!-- Member by Member Detail Breakdown -->
+      <div class="space-y-1.5">
+        <div class="text-xs font-bold text-slate-300 flex items-center justify-between">
+          <span>รายละเอียดรายบุคคล (ผลปฏิบัติหน้าที่):</span>
+          <span id="report-rate-badge" class="text-amber-400 font-mono text-[11px] font-bold">ความพร้อม --%</span>
+        </div>
+        
+        <div id="report-members-list" class="space-y-2 max-h-72 overflow-y-auto pr-1 custom-scrollbar">
+          <!-- Populated dynamically with each officer and their clear status badge -->
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="pt-2 flex flex-col sm:flex-row gap-2 border-t border-slate-800">
+        <a href="/" class="flex-1 py-2.5 px-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs sm:text-sm flex items-center justify-center gap-1.5 transition">
+          <span>📊</span> <span>ดูแดชบอร์ดสรุปยอด</span>
+        </a>
+        <a id="report-analytics-link" href="/analytics" class="flex-1 py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-cyan-300 font-bold text-xs sm:text-sm border border-cyan-500/30 flex items-center justify-center gap-1.5 transition">
+          <span>📈</span> <span>ดูสถิติผลัดนี้</span>
+        </a>
+        <button onclick="closeReportModal()" class="py-2.5 px-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs sm:text-sm font-semibold border border-slate-700 transition">
+          ปิด / ตรวจต่อ
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ========================================================== -->
   <!-- 🎯 MODAL ปรับแก้ 4 มุมกรอบตาราง (Interactive 4-Point UI)        -->
@@ -854,6 +987,7 @@
             </div>
           `).join('');
         }
+        syncDiscordLeavesToRoster();
 
       } catch (err) {
         badge.textContent = '0 รายการ';
@@ -1833,6 +1967,8 @@
       summaryLabel.innerHTML = `ผลวิเคราะห์ Vision AI: <strong>มา ${presentCnt} นาย</strong>, <strong>สาย ${lateCnt} นาย (ช่องว่าง)</strong>, <strong>ลา ${leaveCnt} นาย (Discord)</strong>`;
 
       renderRosterList();
+      renderManualRoster();
+      updateManualCounters();
       renderReviewWeekSelector();
     }
 
@@ -1875,13 +2011,18 @@
         const data = await res.json();
         if (data && data.success && Array.isArray(data.members) && data.members.length > 0) {
           activeRoster = data.members.map(m => ({
+            id: m.id,
             duty_id: m.duty_id || 'ID',
             name: `${m.first_name || ''} ${m.last_name || ''}`.trim(),
             nickname: m.nickname || '',
             class_room: m.grade_class ? `${m.grade_class} (${m.student_no || '-'})` : '-',
-            status: 'PRESENT',
+            profile_image_url: m.profile_image_url || '/assets/sarawat_logo.png',
+            status: 'UNCHECKED',
             was_edited: false
           }));
+          syncDiscordLeavesToRoster();
+          renderManualRoster();
+          updateManualCounters();
           document.getElementById('selected-member-count').textContent = `${activeRoster.length} นาย`;
           return;
         }
@@ -1892,14 +2033,142 @@
       const fallbackList = FALLBACK_ROSTERS[shift] || FALLBACK_ROSTERS['W'];
       activeRoster = fallbackList.map(m => ({
         ...m,
-        status: 'PRESENT',
+        profile_image_url: '/assets/sarawat_logo.png',
+        status: 'UNCHECKED',
         was_edited: false
       }));
+      syncDiscordLeavesToRoster();
+      renderManualRoster();
+      updateManualCounters();
       document.getElementById('selected-member-count').textContent = `${activeRoster.length} นาย`;
+    }
+
+    function syncDiscordLeavesToRoster() {
+      if (!activeRoster || activeRoster.length === 0) return;
+      activeRoster.forEach(m => {
+        if (discordLeavesMap[m.duty_id] && !m.was_edited) {
+          m.status = 'LEAVE';
+          m.omr_note = discordLeavesMap[m.duty_id].reason || 'แจ้งลาผ่านระบบ Discord';
+        }
+      });
+      renderManualRoster();
+      updateManualCounters();
+    }
+
+    // 📋 Render Left Column Manual Check-in Roster
+    function renderManualRoster() {
+      const container = document.getElementById('manual-roster-list');
+      if (!container) return;
+
+      if (!activeRoster || activeRoster.length === 0) {
+        container.innerHTML = `<div class="p-6 text-center text-slate-400 text-xs">ไม่พบรายชื่อสารวัตรในผลัดนี้</div>`;
+        return;
+      }
+
+      container.innerHTML = activeRoster.map((m, idx) => {
+        const isPresent = m.status === 'PRESENT';
+        const isLeave = m.status === 'LEAVE';
+        const isLate = m.status === 'LATE';
+
+        // Styling for the 3 buttons
+        // Green for มา, Orange for ลา, Red for สาย, White/Dim for Unchecked
+        const btnPresentClass = isPresent
+          ? 'bg-emerald-500 text-slate-950 font-black shadow-[0_0_12px_rgba(16,185,129,0.5)] border-emerald-400'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+
+        const btnLeaveClass = isLeave
+          ? 'bg-orange-500 text-slate-950 font-black shadow-[0_0_12px_rgba(249,115,22,0.5)] border-orange-400'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+
+        const btnLateClass = isLate
+          ? 'bg-rose-600 text-white font-black shadow-[0_0_12px_rgba(225,29,72,0.5)] border-rose-400'
+          : 'bg-slate-900/90 text-slate-400 border border-slate-700/60 hover:text-white hover:border-slate-500';
+
+        const photo = m.profile_image_url || '/assets/sarawat_logo.png';
+
+        return `
+          <div class="grid grid-cols-12 gap-2 p-2 sm:p-2.5 rounded-xl bg-slate-800/80 border border-slate-700/80 items-center transition hover:border-slate-600">
+            <!-- Left Info Card (Col 7) -->
+            <div class="col-span-7 flex items-center gap-2 sm:gap-2.5 min-w-0">
+              <div class="w-12 h-14 sm:w-13 sm:h-15 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <img src="${photo}" 
+                     onerror="this.onerror=null; this.src='/assets/sarawat_logo.png';" 
+                     class="w-full h-full object-cover" 
+                     alt="${m.name}">
+              </div>
+              <div class="min-w-0 flex-1 space-y-0.5">
+                <div class="font-bold text-white text-xs sm:text-[13px] truncate leading-tight">
+                  <span class="text-slate-400 font-normal">ชื่อ:</span> ${m.name}
+                </div>
+                <div class="text-slate-300 text-[11px] truncate">
+                  <span class="text-slate-400">ชั้น:</span> <span class="font-mono font-medium">${m.class_room}</span>
+                </div>
+                <div class="text-amber-400 text-[11px] font-mono font-bold truncate">
+                  <span class="text-slate-400 font-normal">รหัสประจำตัว:</span> ${m.duty_id}
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Status Selector (Col 5) -->
+            <div class="col-span-5 grid grid-cols-3 gap-1 sm:gap-1.5 h-11 sm:h-12">
+              <button type="button" onclick="setManualStatus(${idx}, 'PRESENT')" 
+                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnPresentClass}">
+                มา
+              </button>
+              <button type="button" onclick="setManualStatus(${idx}, 'LEAVE')" 
+                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnLeaveClass}">
+                ลา
+              </button>
+              <button type="button" onclick="setManualStatus(${idx}, 'LATE')" 
+                      class="rounded-lg text-xs sm:text-sm font-bold border flex items-center justify-center transition active:scale-95 ${btnLateClass}">
+                สาย
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Toggle status: if already selected, toggle back to UNCHECKED
+    function setManualStatus(idx, newStatus) {
+      if (!activeRoster[idx]) return;
+      if (activeRoster[idx].status === newStatus) {
+        activeRoster[idx].status = 'UNCHECKED';
+      } else {
+        activeRoster[idx].status = newStatus;
+      }
+      activeRoster[idx].was_edited = true;
+      renderManualRoster();
+      updateManualCounters();
+      renderRosterList();
+    }
+
+    function updateManualCounters() {
+      const total = activeRoster.length;
+      const present = activeRoster.filter(m => m.status === 'PRESENT').length;
+      const leave = activeRoster.filter(m => m.status === 'LEAVE').length;
+      const late = activeRoster.filter(m => m.status === 'LATE').length;
+      const absent = activeRoster.filter(m => m.status === 'ABSENT' || m.status === 'UNCHECKED' || !m.status).length;
+
+      const pEl = document.getElementById('manual-count-present');
+      const lvEl = document.getElementById('manual-count-leave');
+      const ltEl = document.getElementById('manual-count-late');
+      const abEl = document.getElementById('manual-count-absent');
+
+      if (pEl) pEl.textContent = present;
+      if (lvEl) lvEl.textContent = leave;
+      if (ltEl) ltEl.textContent = late;
+      if (abEl) abEl.textContent = absent;
+
+      const headerCount = document.getElementById('manual-roster-count-header');
+      if (headerCount) headerCount.textContent = `[จำนวนคนในเวร: ${total} นาย]`;
+
+      updateKpiStats();
     }
 
     function renderRosterList() {
       const container = document.getElementById('roster-review-list');
+      if (!container) return;
       
       container.innerHTML = activeRoster.map((m, idx) => {
         const isPresent = m.status === 'PRESENT';
@@ -1959,11 +2228,7 @@
     }
 
     function setMemberStatus(idx, newStatus) {
-      if (activeRoster[idx]) {
-        activeRoster[idx].status = newStatus;
-        activeRoster[idx].was_edited = true;
-        renderRosterList();
-      }
+      setManualStatus(idx, newStatus);
     }
 
     function updateKpiStats() {
@@ -1972,19 +2237,42 @@
       const late = activeRoster.filter(m => m.status === 'LATE').length;
       const leave = activeRoster.filter(m => m.status === 'LEAVE').length;
 
-      document.getElementById('stat-total').textContent = total;
-      document.getElementById('stat-present').textContent = present;
-      document.getElementById('stat-late').textContent = late;
-      document.getElementById('stat-leave').textContent = leave;
+      const statTot = document.getElementById('stat-total');
+      const statPres = document.getElementById('stat-present');
+      const statLate = document.getElementById('stat-late');
+      const statLeave = document.getElementById('stat-leave');
+
+      if (statTot) statTot.textContent = total;
+      if (statPres) statPres.textContent = present;
+      if (statLate) statLate.textContent = late;
+      if (statLeave) statLeave.textContent = leave;
     }
 
     // ----------------------------------------------------------
-    // 7. SUBMIT ATTENDANCE
+    // 7. SUBMIT ATTENDANCE & POPUP DETAILED REPORT
     // ----------------------------------------------------------
     async function submitAttendanceConfirmation() {
-      const btn = document.getElementById('btn-submit-attendance');
-      btn.disabled = true;
-      btn.innerHTML = `<span>⏳</span><span>กำลังบันทึกข้อมูล...</span>`;
+      const btn1 = document.getElementById('btn-manual-confirm');
+      const btn2 = document.getElementById('btn-submit-attendance');
+      if (btn1) { btn1.disabled = true; btn1.innerHTML = `<span>⏳ กำลังบันทึกข้อมูล...</span>`; }
+      if (btn2) { btn2.disabled = true; btn2.innerHTML = `<span>⏳ กำลังบันทึกข้อมูล...</span>`; }
+
+      // Map any UNCHECKED to ABSENT (ขาด) per user instruction
+      const records = activeRoster.map(m => {
+        let finalStatus = m.status;
+        if (!finalStatus || finalStatus === 'UNCHECKED') {
+          finalStatus = 'ABSENT';
+        }
+        return {
+          duty_id: m.duty_id,
+          name: m.name || m.duty_id,
+          nickname: m.nickname || '',
+          class_room: m.class_room || '',
+          status: finalStatus,
+          was_edited: m.was_edited || false,
+          omr_note: m.omr_note || ''
+        };
+      });
 
       const payload = {
         shift_code: currentShiftCode,
@@ -1992,16 +2280,9 @@
         academic_year: currentYear,
         duty_date: document.getElementById('exact-date-picker')?.value || todayInfo.dateIso,
         week_index: document.getElementById('date-col-select').selectedIndex,
-        scanned_by: 'หัวหน้าเวร (Hybrid QR + Vision AI)',
+        scanned_by: 'หัวหน้าเวร (Dual Manual & Vision AI)',
         image_base64: annotatedDataUrl || singleCapturedImage || '',
-        records: activeRoster.map(m => ({
-          duty_id: m.duty_id,
-          name: m.name || m.duty_id,
-          nickname: m.nickname || '',
-          class_room: m.class_room || '',
-          status: m.status,
-          was_edited: m.was_edited
-        }))
+        records: records
       };
 
       try {
@@ -2012,19 +2293,92 @@
         });
 
         const resData = await res.json();
-        if (resData && resData.success) {
-          showSuccessStep();
-        } else {
-          alert('บันทึกสำเร็จ (โหมดสาธิตแบบจำลอง)');
-          showSuccessStep();
-        }
+        showConfirmationReport(records);
       } catch (err) {
-        console.warn('API error, showing demo success:', err);
-        showSuccessStep();
+        console.warn('API error, showing report:', err);
+        showConfirmationReport(records);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = `<span>🚀</span><span>ยืนยันบันทึกผล 1 คลิก</span>`;
+        if (btn1) { btn1.disabled = false; btn1.innerHTML = `<span>ยืนยัน</span>`; }
+        if (btn2) { btn2.disabled = false; btn2.innerHTML = `<span>🚀 ยืนยันบันทึกผล 1 คลิก</span>`; }
       }
+    }
+
+    function showConfirmationReport(records) {
+      const modal = document.getElementById('modal-attendance-report');
+      if (!modal) return;
+
+      const total = records.length;
+      const present = records.filter(r => r.status === 'PRESENT').length;
+      const leave = records.filter(r => r.status === 'LEAVE').length;
+      const late = records.filter(r => r.status === 'LATE').length;
+      const absent = records.filter(r => r.status === 'ABSENT').length;
+      const readiness = total > 0 ? Math.round(((present + leave) / total) * 100) : 100;
+
+      const pickedDateIso = document.getElementById('exact-date-picker')?.value;
+      const dateStr = pickedDateIso ? `${currentTargetCol} (${pickedDateIso})` : currentTargetCol;
+
+      document.getElementById('report-shift-date').textContent = `${SHIFT_NAMES[currentShiftCode]} • ประจำวันที่ ${dateStr} • สารวัตรทั้งหมด ${total} นาย`;
+      document.getElementById('report-count-present').textContent = present;
+      document.getElementById('report-count-leave').textContent = leave;
+      document.getElementById('report-count-late').textContent = late;
+      document.getElementById('report-count-absent').textContent = absent;
+      document.getElementById('report-rate-badge').textContent = `ความพร้อม ${readiness}%`;
+
+      const listContainer = document.getElementById('report-members-list');
+      listContainer.innerHTML = records.map(r => {
+        let statusBadge = '';
+        let statusBorder = 'border-slate-800 bg-slate-850';
+
+        if (r.status === 'PRESENT') {
+          statusBorder = 'border-emerald-500/30 bg-emerald-500/10';
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> มาปฏิบัติหน้าที่</span>`;
+        } else if (r.status === 'LEAVE') {
+          statusBorder = 'border-orange-500/30 bg-orange-500/10';
+          const reasonText = r.omr_note || 'ขอลาเวร';
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-orange-500/20 text-orange-300 border border-orange-500/40 text-xs font-bold flex items-center gap-1.5" title="${reasonText}"><span class="w-2 h-2 rounded-full bg-orange-400"></span> ขอลาเวร</span>`;
+        } else if (r.status === 'LATE') {
+          statusBorder = 'border-rose-500/30 bg-rose-500/10';
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-rose-500/20 text-rose-300 border border-rose-500/40 text-xs font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-400"></span> มาสาย</span>`;
+        } else {
+          statusBorder = 'border-slate-700 bg-slate-800/70';
+          statusBadge = `<span class="px-2.5 py-1 rounded-lg bg-slate-700/50 text-slate-300 border border-slate-600/50 text-xs font-bold flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-slate-400"></span> ขาดเวร (ยังไม่ทราบสถานะ)</span>`;
+        }
+
+        const memberData = activeRoster.find(m => m.duty_id === r.duty_id) || {};
+        const photo = memberData.profile_image_url || '/assets/sarawat_logo.png';
+
+        return `
+          <div class="p-2.5 rounded-xl border ${statusBorder} flex items-center justify-between gap-3 transition">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-10 h-10 rounded-lg bg-slate-900 border border-slate-700 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                <img src="${photo}" onerror="this.onerror=null; this.src='/assets/sarawat_logo.png';" class="w-full h-full object-cover">
+              </div>
+              <div class="min-w-0 flex-1">
+                <div class="font-bold text-white text-xs truncate">
+                  ${r.name}
+                </div>
+                <div class="text-[11px] text-slate-400 flex items-center gap-2 mt-0.5">
+                  <span class="font-mono text-amber-300 font-bold">[${r.duty_id}]</span>
+                  <span>ชั้น: ${r.class_room || '-'}</span>
+                </div>
+              </div>
+            </div>
+            <div class="shrink-0">
+              ${statusBadge}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const analyticsLink = document.getElementById('report-analytics-link');
+      if (analyticsLink) analyticsLink.href = `/analytics?shift=${currentShiftCode}`;
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeReportModal() {
+      const modal = document.getElementById('modal-attendance-report');
+      if (modal) modal.classList.add('hidden');
     }
 
     function showSuccessStep() {
@@ -2057,6 +2411,8 @@
       document.getElementById('step-select-card').classList.remove('hidden');
       singleCapturedImage = null;
       annotatedDataUrl = null;
+      closeReportModal();
+      loadRosterForShift(currentShiftCode);
     }
 
     function openSingleImageModal() {

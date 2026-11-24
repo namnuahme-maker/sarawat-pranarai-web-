@@ -12,7 +12,7 @@
     { id: 'home', label: 'หน้าหลัก', icon: '<path d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/>', href: '/' },
     { id: 'dispatch', label: '🚨 ศูนย์สั่งการด่วน & AI', icon: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/>', href: 'javascript:window.openDispatchModal()', highlight: 'rose' },
     { id: 'roster', label: 'ทำเนียบสารวัตรทั้งหมด', icon: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>', href: '/?tab=roster' },
-    { id: 'attendance-scan', label: 'สแกนเช็คชื่อ', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', href: '/attendance-scan', highlight: 'emerald' },
+    { id: 'attendance-scan', label: 'เช็คชื่อ', icon: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>', href: '/attendance-scan', highlight: 'emerald' },
     { id: 'analytics', label: 'สถิติ & คลังข้อมูล', icon: '<path d="M4 19V5m0 14h16M8 15v-4m4 4V7m4 8V9m4 6v-6"/>', href: '/analytics', highlight: 'cyan' },
     { id: 'card-studio', label: 'ทำบัตร', icon: '<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M6 16c.6-1.3 1.3-2 2-2s1.4.7 2 2m3-4h5m-5 3h5"/>', href: '/card-studio' },
     { id: 'lost-found', label: 'ของหาย', icon: '<path d="m4 7 8-4 8 4v10l-8 4-8-4z"/><path d="m4 7 8 4 8-4m-8 4v10"/>', href: '/lost-found' }
