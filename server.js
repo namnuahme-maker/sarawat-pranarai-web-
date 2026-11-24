@@ -1953,12 +1953,13 @@ app.delete('/api/members/:id', async (req, res) => {
       return res.status(404).json({ error: 'ไม่พบข้อมูลสมาชิกที่ต้องการลบ' });
     }
 
-    // ลบข้อมูลที่เกี่ยวข้องใน shift_leadership, leave_requests, lost_items หากมี
+    // ลบข้อมูลที่เกี่ยวข้องใน shift_leadership, leave_requests, crop_tokens และปลด FK ใน cases, duty_logs หากมี
     try {
       await supabase.from('shift_leadership').delete().eq('member_id', id);
       await supabase.from('leave_requests').delete().eq('member_id', id);
-      await supabase.from('lost_items').update({ assigned_officer_id: null }).eq('assigned_officer_id', id);
-      await supabase.from('lost_items').update({ reported_by_id: null }).eq('reported_by_id', id);
+      await supabase.from('crop_tokens').delete().eq('member_id', id);
+      await supabase.from('cases').update({ assigned_officer_id: null }).eq('assigned_officer_id', id);
+      await supabase.from('duty_logs').update({ reported_by_id: null }).eq('reported_by_id', id);
     } catch (e) {
       console.warn('[API] Warning deleting member relations:', e.message);
     }
@@ -2035,8 +2036,9 @@ app.post('/api/members/cleanup-unlinked', async (req, res) => {
     try {
       await supabase.from('shift_leadership').delete().in('member_id', ids);
       await supabase.from('leave_requests').delete().in('member_id', ids);
-      await supabase.from('lost_items').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
-      await supabase.from('lost_items').update({ reported_by_id: null }).in('reported_by_id', ids);
+      await supabase.from('crop_tokens').delete().in('member_id', ids);
+      await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      await supabase.from('duty_logs').update({ reported_by_id: null }).in('reported_by_id', ids);
     } catch (e) {
       console.warn('[API] Warning cleaning unlinked relations:', e.message);
     }
@@ -2116,8 +2118,9 @@ app.post('/api/members/batch-delete', async (req, res) => {
     try {
       await supabase.from('shift_leadership').delete().in('member_id', ids);
       await supabase.from('leave_requests').delete().in('member_id', ids);
-      await supabase.from('lost_items').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
-      await supabase.from('lost_items').update({ reported_by_id: null }).in('reported_by_id', ids);
+      await supabase.from('crop_tokens').delete().in('member_id', ids);
+      await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      await supabase.from('duty_logs').update({ reported_by_id: null }).in('reported_by_id', ids);
     } catch (e) {
       console.warn('[API] Warning batch-cleaning member relations:', e.message);
     }

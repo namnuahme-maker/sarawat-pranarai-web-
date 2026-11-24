@@ -73,7 +73,7 @@ CREATE TABLE IF NOT EXISTS cases (
     evidence_urls TEXT[],
     status VARCHAR(30) DEFAULT 'PENDING',
     assigned_duty_day VARCHAR(5),
-    assigned_officer_id UUID REFERENCES members(id),
+    assigned_officer_id UUID REFERENCES members(id) ON DELETE SET NULL,
     resolution_notes TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -87,6 +87,6 @@ CREATE TABLE IF NOT EXISTS duty_logs (
     attendees_count INT DEFAULT 0,
     attendees_list JSONB,
     notes TEXT,
-    reported_by_id UUID REFERENCES members(id),
+    reported_by_id UUID REFERENCES members(id) ON DELETE SET NULL,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
