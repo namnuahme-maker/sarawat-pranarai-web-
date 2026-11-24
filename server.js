@@ -404,6 +404,11 @@ app.get(['/crop', '/crop.html'], (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'crop.html'));
 });
 
+// หน้าเว็บเช็คชื่อและถ่ายรูป Selfie ประจำตัวสารวัตร (Dedicated Mobile Check-in)
+app.get(['/attendance-checkin', '/attendance-checkin.html'], (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'attendance-checkin.html'));
+});
+
 // -------------------------------------------------------------
 // 2. หน้า Login และ Discord OAuth2 Authentication Endpoints
 // -------------------------------------------------------------
@@ -1945,7 +1950,7 @@ app.delete('/api/members/:id', async (req, res) => {
 
     const { data: targetMember, error: findErr } = await supabase
       .from('members')
-      .select('id, first_name, last_name, nickname, discord_id')
+      .select('id, first_name, last_name, nickname, discord_id, duty_id')
       .eq('id', id)
       .maybeSingle();
 
@@ -1958,8 +1963,21 @@ app.delete('/api/members/:id', async (req, res) => {
       await supabase.from('shift_leadership').delete().eq('member_id', id);
       await supabase.from('leave_requests').delete().eq('member_id', id);
       await supabase.from('crop_tokens').delete().eq('member_id', id);
-      await supabase.from('cases').update({ assigned_officer_id: null }).eq('assigned_officer_id', id);
+      
+      const { error: caseNullErr } = await supabase.from('cases').update({ assigned_officer_id: null }).eq('assigned_officer_id', id);
+      if (caseNullErr) {
+        console.warn('[API] Warning unlinking cases by setting null:', caseNullErr.message);
+        const { data: fallbackOfficer } = await supabase.from('members').select('id').neq('id', id).eq('status', 'ACTIVE').limit(1).maybeSingle();
+        if (fallbackOfficer?.id) {
+          await supabase.from('cases').update({ assigned_officer_id: fallbackOfficer.id }).eq('assigned_officer_id', id);
+        } else {
+          await supabase.from('cases').delete().eq('assigned_officer_id', id);
+        }
+      }
       await supabase.from('duty_logs').update({ reported_by_id: null }).eq('reported_by_id', id);
+      if (targetMember.duty_id) {
+        await supabase.from('attendance_records').delete().eq('duty_id', targetMember.duty_id);
+      }
     } catch (e) {
       console.warn('[API] Warning deleting member relations:', e.message);
     }
@@ -2037,7 +2055,15 @@ app.post('/api/members/cleanup-unlinked', async (req, res) => {
       await supabase.from('shift_leadership').delete().in('member_id', ids);
       await supabase.from('leave_requests').delete().in('member_id', ids);
       await supabase.from('crop_tokens').delete().in('member_id', ids);
-      await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      const { error: caseNullErr } = await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      if (caseNullErr) {
+        const { data: fallbackOfficer } = await supabase.from('members').select('id').not('id', 'in', `(${ids.join(',')})`).eq('status', 'ACTIVE').limit(1).maybeSingle();
+        if (fallbackOfficer?.id) {
+          await supabase.from('cases').update({ assigned_officer_id: fallbackOfficer.id }).in('assigned_officer_id', ids);
+        } else {
+          await supabase.from('cases').delete().in('assigned_officer_id', ids);
+        }
+      }
       await supabase.from('duty_logs').update({ reported_by_id: null }).in('reported_by_id', ids);
     } catch (e) {
       console.warn('[API] Warning cleaning unlinked relations:', e.message);
@@ -2119,7 +2145,15 @@ app.post('/api/members/batch-delete', async (req, res) => {
       await supabase.from('shift_leadership').delete().in('member_id', ids);
       await supabase.from('leave_requests').delete().in('member_id', ids);
       await supabase.from('crop_tokens').delete().in('member_id', ids);
-      await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      const { error: caseNullErr } = await supabase.from('cases').update({ assigned_officer_id: null }).in('assigned_officer_id', ids);
+      if (caseNullErr) {
+        const { data: fallbackOfficer } = await supabase.from('members').select('id').not('id', 'in', `(${ids.join(',')})`).eq('status', 'ACTIVE').limit(1).maybeSingle();
+        if (fallbackOfficer?.id) {
+          await supabase.from('cases').update({ assigned_officer_id: fallbackOfficer.id }).in('assigned_officer_id', ids);
+        } else {
+          await supabase.from('cases').delete().in('assigned_officer_id', ids);
+        }
+      }
       await supabase.from('duty_logs').update({ reported_by_id: null }).in('reported_by_id', ids);
     } catch (e) {
       console.warn('[API] Warning batch-cleaning member relations:', e.message);
@@ -4522,6 +4556,388 @@ app.get('/api/attendance/records', async (req, res) => {
       shift_code: canonicalDutyDay(r.shift_code),
       duty_id: canonicalDutyId(r.duty_id)
     })) });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// ==========================================================
+// 📸 DEDICATED ATTENDANCE SELFIE & LEADER APPROVAL WORKFLOW
+// ==========================================================
+
+// ค้นหาหรือสร้างห้อง #📸│คลังหลักฐานเช็คชื่อ ใน Discord เพื่อเก็บภาพเป็น CDN
+async function getOrCreateDiscordEvidenceChannel() {
+  const token = process.env.DISCORD_TOKEN;
+  const guildId = process.env.GUILD_ID || DISCORD_GUILD_ID;
+  if (!token || !guildId) return null;
+
+  try {
+    const res = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
+      headers: { Authorization: `Bot ${token}` }
+    });
+    if (!res.ok) return null;
+    const channels = await res.json();
+    const existing = channels.find(c => c.name && (
+      c.name.includes('คลังหลักฐานเช็คชื่อ') || 
+      c.name.includes('attendance-evidence') || 
+      c.name.includes('คลังรูปเช็คชื่อ')
+    ));
+    if (existing) return existing.id;
+
+    // สร้างช่องเก็บรูปภาพหลักฐานแบบซ่อนอัตโนมัติ (เฉพาะบอทและแอดมิน)
+    const createRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}/channels`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bot ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        name: '📸│คลังหลักฐานเช็คชื่อ',
+        type: 0,
+        permission_overwrites: [
+          {
+            id: guildId, // @everyone
+            type: 0,
+            deny: '1024' // ViewChannel = false
+          }
+        ]
+      })
+    });
+    if (createRes.ok) {
+      const newChan = await createRes.json();
+      return newChan.id;
+    }
+  } catch (err) {
+    console.warn('[DISCORD-EVIDENCE-CHANNEL] Warning:', err.message);
+  }
+  return null;
+}
+
+// อัปโหลดภาพหลักฐานเช็คชื่อเข้าคลัง Discord เพื่อรับ URL จาก Discord CDN
+async function uploadSelfieToDiscord(buffer, filename, officerInfo) {
+  const token = process.env.DISCORD_TOKEN;
+  if (!token) return null;
+  const channelId = await getOrCreateDiscordEvidenceChannel();
+  if (!channelId) return null;
+
+  try {
+    const formData = new FormData();
+    const blob = new Blob([buffer], { type: 'image/jpeg' });
+    formData.append('files[0]', blob, filename);
+
+    const payloadJson = {
+      embeds: [{
+        title: `📸 หลักฐานเช็คชื่อ: [${officerInfo.duty_id || 'สารวัตร'}] ${officerInfo.first_name || ''} ${officerInfo.last_name || ''}`,
+        description: `• **เวรประจำวัน:** ${officerInfo.duty_day || '-'}\n• **เวลาเช็คชื่อ:** ${officerInfo.checkinTime || '-'}\n• **พิกัด GPS:** ${officerInfo.latitude ? `${officerInfo.latitude}, ${officerInfo.longitude}` : 'ไม่ได้ระบุพิกัด'}`,
+        color: 0x2ECC71,
+        image: { url: `attachment://${filename}` },
+        timestamp: new Date().toISOString()
+      }]
+    };
+    formData.append('payload_json', JSON.stringify(payloadJson));
+
+    const res = await fetch(`https://discord.com/api/v10/channels/${channelId}/messages`, {
+      method: 'POST',
+      headers: { Authorization: `Bot ${token}` },
+      body: formData
+    });
+
+    if (res.ok) {
+      const msg = await res.json();
+      if (msg.attachments && msg.attachments[0]) {
+        return msg.attachments[0].url;
+      }
+    }
+  } catch (err) {
+    console.warn('[DISCORD-UPLOAD-SELFIE-WARN]', err.message);
+  }
+  return null;
+}
+
+// ส่งข้อความแจ้งเตือนทาง DM หาหัวหน้าเวรและรองหัวหน้าเวรเพื่อขออนุมัติ
+async function notifyLeadersForAttendanceApproval(member, record, evidenceUrl) {
+  const token = process.env.DISCORD_TOKEN;
+  if (!token) return;
+
+  try {
+    const shiftCode = canonicalDutyDay(member.duty_day);
+    const { data: leaders } = await supabase
+      .from('shift_leadership')
+      .select('member_id, position')
+      .in('shift_code', expandDutyDayAliases([shiftCode]));
+
+    if (!leaders || leaders.length === 0) return;
+
+    const leaderMemberIds = leaders.map(l => l.member_id);
+    const { data: leaderUsers } = await supabase
+      .from('members')
+      .select('id, discord_id, nickname, first_name')
+      .in('id', leaderMemberIds)
+      .not('discord_id', 'is', null);
+
+    if (!leaderUsers || leaderUsers.length === 0) return;
+
+    for (const leader of leaderUsers) {
+      if (!leader.discord_id) continue;
+      const dmRes = await fetch('https://discord.com/api/v10/users/@me/channels', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bot ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ recipient_id: leader.discord_id })
+      });
+      if (!dmRes.ok) continue;
+      const dmChannel = await dmRes.json();
+
+      const embed = {
+        title: `📸 คำขอเช็คชื่อเวร: [${member.duty_id || 'สารวัตร'}] คุณ${member.nickname || member.first_name}`,
+        description: `สารวัตรได้ส่งภาพถ่าย Selfie เช็คชื่อเข้าเวรประจำวันเรียบร้อยแล้ว กรุณาตรวจสอบหลักฐานและอนุมัติ:\n\n` +
+          `👤 **ชื่อ-สกุล:** ${member.first_name} ${member.last_name}\n` +
+          `🏫 **ชั้น/ห้อง:** ${member.grade_class || '-'} เลขที่ ${member.student_no || '-'}\n` +
+          `📅 **เวรประจำวัน:** ${shiftCode}\n` +
+          `⏰ **เวลาเช็คชื่อ:** ${record.checkin_time || 'เช้าวันนี้'}\n` +
+          `📍 **พิกัด GPS:** ${record.gps_lat ? `${record.gps_lat}, ${record.gps_lng}` : 'ไม่ได้ระบุพิกัด'}`,
+        color: 0x3498DB,
+        image: evidenceUrl ? { url: evidenceUrl } : undefined,
+        timestamp: new Date().toISOString()
+      };
+
+      const components = [{
+        type: 1,
+        components: [
+          {
+            type: 2,
+            style: 3, // Success
+            label: 'อนุมัติ (มาปฏิบัติหน้าที่)',
+            custom_id: `btn_att_approve_${record.duty_id}_${record.duty_date}`,
+            emoji: { name: '✅' }
+          },
+          {
+            type: 2,
+            style: 2, // Secondary
+            label: 'ระบุว่ามาสาย',
+            custom_id: `btn_att_late_${record.duty_id}_${record.duty_date}`,
+            emoji: { name: '⏰' }
+          },
+          {
+            type: 2,
+            style: 4, // Danger
+            label: 'ไม่อนุมัติ (ขาด)',
+            custom_id: `btn_att_reject_${record.duty_id}_${record.duty_date}`,
+            emoji: { name: '❌' }
+          }
+        ]
+      }];
+
+      await fetch(`https://discord.com/api/v10/channels/${dmChannel.id}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bot ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ embeds: [embed], components })
+      });
+    }
+  } catch (err) {
+    console.warn('[NOTIFY-LEADERS-ERR]', err.message);
+  }
+}
+
+// 6.8.2.1 ดึงข้อมูลสารวัตรสำหรับหน้าเช็คชื่อ Selfie (/api/attendance/selfie-info)
+app.get('/api/attendance/selfie-info', async (req, res) => {
+  try {
+    const rawToken = req.query.auth || req.query.token;
+    if (!rawToken) {
+      return res.status(401).json({ success: false, error: 'ไม่พบ Token ยืนยันตัวตน' });
+    }
+
+    const payload = verifyAuthToken(rawToken);
+    if (!payload || !payload.id) {
+      return res.status(401).json({ success: false, error: 'Token ไม่ถูกต้องหรือหมดอายุการใช้งานแล้ว' });
+    }
+
+    const { data: member, error } = await supabase
+      .from('members')
+      .select('id, duty_id, first_name, last_name, nickname, duty_day, grade_class, student_no, profile_image_url, role')
+      .eq('id', payload.id)
+      .maybeSingle();
+
+    if (error || !member) {
+      return res.json({
+        success: true,
+        member: {
+          id: payload.id,
+          duty_id: payload.duty_id || 'สารวัตร',
+          first_name: payload.first_name || 'สารวัตร',
+          last_name: payload.last_name || '',
+          nickname: payload.nickname || '',
+          duty_day: payload.duty_day || 'M',
+          grade_class: payload.grade_class || '-',
+          student_no: payload.student_no || '-',
+          profile_image_url: null
+        }
+      });
+    }
+
+    res.json({ success: true, member });
+  } catch (err) {
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.8.2.2 ส่งภาพ Selfie และพิกัด GPS ยืนยันเช็คชื่อ (/api/attendance/selfie-submit)
+app.post('/api/attendance/selfie-submit', async (req, res) => {
+  try {
+    const { auth, imageData, latitude, longitude, checkinTime, checkinDate } = req.body;
+    if (!auth || !imageData) {
+      return res.status(400).json({ success: false, error: 'ข้อมูลไม่ครบถ้วน (ขาด Auth Token หรือรูปภาพ)' });
+    }
+
+    const payload = verifyAuthToken(auth);
+    if (!payload || !payload.id) {
+      return res.status(401).json({ success: false, error: 'Token ยืนยันตัวตนไม่ถูกต้องหรือหมดอายุ' });
+    }
+
+    // 1. ดึงข้อมูลสมาชิก
+    let member = payload;
+    try {
+      const { data: mData } = await supabase
+        .from('members')
+        .select('*')
+        .eq('id', payload.id)
+        .maybeSingle();
+      if (mData) member = mData;
+    } catch (e) {}
+
+    const dutyId = canonicalDutyId(member.duty_id || payload.duty_id || 'TS1');
+    const shiftCode = canonicalDutyDay(member.duty_day || payload.duty_day || 'M');
+    const dutyDate = checkinDate || new Date().toISOString().slice(0, 10);
+    const timeStr = checkinTime || new Date().toLocaleTimeString('th-TH', { timeZone: 'Asia/Bangkok', hour: '2-digit', minute: '2-digit' }) + ' น.';
+
+    // 2. บันทึกรูปลง Local Uploads
+    const uploadDir = path.join(__dirname, 'public', 'uploads', 'attendance');
+    if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+    const base64Clean = imageData.replace(/^data:image\/\w+;base64,/, '');
+    const buffer = Buffer.from(base64Clean, 'base64');
+    const filename = `selfie_${dutyId}_${Date.now()}.jpg`;
+    fs.writeFileSync(path.join(uploadDir, filename), buffer);
+
+    let evidenceUrl = `/uploads/attendance/${filename}`;
+
+    // 3. ส่งขึ้น Discord คลังรูป เพื่อรับ Discord CDN URL
+    const discordUrl = await uploadSelfieToDiscord(buffer, filename, {
+      duty_id: dutyId,
+      first_name: member.first_name,
+      last_name: member.last_name,
+      duty_day: shiftCode,
+      checkinTime: timeStr,
+      latitude,
+      longitude
+    });
+
+    if (discordUrl) {
+      evidenceUrl = discordUrl;
+    } else {
+      // หรือสำรองขึ้น Supabase Storage
+      try {
+        const storagePath = `attendance/${filename}`;
+        const { error: sErr } = await supabase.storage
+          .from('sarawat-photos')
+          .upload(storagePath, buffer, { contentType: 'image/jpeg', upsert: true });
+        if (!sErr) {
+          const { data: { publicUrl } } = supabase.storage.from('sarawat-photos').getPublicUrl(storagePath);
+          if (publicUrl) evidenceUrl = publicUrl;
+        }
+      } catch (e) {}
+    }
+
+    // 4. บันทึกคำขอเช็คชื่อลง Supabase Database
+    const recordRow = {
+      duty_id: dutyId,
+      member_name: `${member.first_name || ''} ${member.last_name || ''}`.trim() || dutyId,
+      shift_code: shiftCode,
+      duty_date: dutyDate,
+      status: 'PRESENT',
+      confidence: 1.0,
+      was_manually_edited: false
+    };
+
+    try {
+      await supabase.from('attendance_records').upsert(recordRow, { onConflict: 'duty_id,duty_date' });
+    } catch (dbErr) {
+      console.warn('[ATTENDANCE-DB] Upsert warning:', dbErr.message);
+    }
+
+    // 5. บันทึกลง Local Cache
+    const db = getAttendanceData();
+    const existingIdx = db.records.findIndex(r => r.duty_id === dutyId && r.duty_date === dutyDate);
+    const enrichedRecord = {
+      ...recordRow,
+      checkin_time: timeStr,
+      gps_lat: latitude || null,
+      gps_lng: longitude || null,
+      evidence_photo_url: evidenceUrl,
+      approval_status: 'PENDING',
+      created_at: new Date().toISOString()
+    };
+
+    if (existingIdx >= 0) {
+      db.records[existingIdx] = { ...db.records[existingIdx], ...enrichedRecord };
+    } else {
+      db.records.push(enrichedRecord);
+    }
+    saveAttendanceData(db);
+
+    // 6. แจ้งเตือน DM หาหัวหน้าเวรและรองเวร
+    notifyLeadersForAttendanceApproval(member, enrichedRecord, evidenceUrl).catch(e => {
+      console.warn('[NOTIFY-LEADERS-FAIL]', e.message);
+    });
+
+    return res.json({
+      success: true,
+      message: 'เช็คชื่อเรียบร้อยแล้ว ระบบได้ส่งหลักฐานไปยังหัวหน้าเวรเพื่อทำการอนุมัติแล้ว',
+      evidence_photo_url: evidenceUrl,
+      record: enrichedRecord
+    });
+  } catch (err) {
+    console.error('[API-SELFIE-SUBMIT-ERROR]', err);
+    res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// 6.8.2.3 อนุมัติสถานะการเข้าเวรจาก Web Dashboard (/api/attendance/approve)
+app.post('/api/attendance/approve', async (req, res) => {
+  try {
+    const user = getUserFromReq(req);
+    const { duty_id, duty_date, status = 'PRESENT', action = 'APPROVE' } = req.body;
+    if (!duty_id || !duty_date) {
+      return res.status(400).json({ success: false, error: 'ข้อมูลไม่ครบถ้วน' });
+    }
+
+    const newStatus = status;
+    const approvalStatus = action === 'APPROVE' ? 'APPROVED' : (action === 'LATE' ? 'LATE_APPROVED' : 'REJECTED');
+    const approverName = user?.displayName || user?.username || 'หัวหน้าเวร';
+
+    try {
+      await supabase.from('attendance_records').update({
+        status: newStatus,
+        was_manually_edited: true
+      }).eq('duty_id', duty_id).eq('duty_date', duty_date);
+    } catch (e) {}
+
+    const db = getAttendanceData();
+    const rec = db.records.find(r => r.duty_id === duty_id && r.duty_date === duty_date);
+    if (rec) {
+      rec.status = newStatus;
+      rec.approval_status = approvalStatus;
+      rec.approved_by = approverName;
+      rec.approved_at = new Date().toISOString();
+      saveAttendanceData(db);
+    }
+
+    res.json({ success: true, message: 'บันทึกการอนุมัติสำเร็จ', status: newStatus });
   } catch (err) {
     res.status(500).json({ success: false, error: err.message });
   }

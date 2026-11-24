@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="th" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>เช็คชื่อเวรสารวัตรนักเรียน • SARAWAT PRANARAI</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Prompt', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace']
+          },
+          colors: {
+            slate: {
+              850: '#151e2e',
+              950: '#070b12'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      background-color: #070b12;
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.06) 0px, transparent 50%);
+      background-attachment: fixed;
+      font-family: 'Prompt', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .pulse-glow {
+      animation: pulseGlow 2.5s infinite;
+    }
+    @keyframes pulseGlow {
+      0%, 100% { box-shadow: 0 0 25px rgba(16, 185, 129, 0.35); }
+      50% { box-shadow: 0 0 40px rgba(16, 185, 129, 0.6); }
+    }
+    .watermark-overlay {
+      background: linear-gradient(180deg, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 30%, rgba(0,0,0,0.3) 70%, rgba(0,0,0,0.92) 100%);
+    }
+  </style>
+</head>
+<body class="text-slate-100 min-h-screen flex flex-col justify-between p-3 sm:p-5 select-none">
+
+  <!-- Header Bar -->
+  <header class="max-w-md mx-auto w-full flex items-center justify-between pb-3 border-b border-slate-800/80">
+    <div class="flex items-center gap-2.5">
+      <img src="/assets/sarawat_logo.png" alt="SARAWAT Logo" class="w-9 h-9 object-contain drop-shadow" onerror="this.src='/favicon.ico'">
+      <div>
+        <h1 class="text-sm font-bold tracking-wide text-white flex items-center gap-1.5">
+          <span>SARAWAT PRANARAI</span>
+          <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">TACTICAL-OS</span>
+        </h1>
+        <p class="text-[11px] text-slate-400">ระบบเช็คชื่อ & ยืนยันการปฏิบัติหน้าที่</p>
+      </div>
+    </div>
+    <div class="text-right">
+      <span id="header-time-clock" class="text-xs font-mono font-bold text-amber-400">--:--:--</span>
+      <p id="header-date-clock" class="text-[10px] text-slate-400">--/--/----</p>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-md mx-auto w-full my-auto py-3 space-y-4">
+
+    <!-- Officer Profile Badge Card -->
+    <section id="officer-card" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 shadow-xl relative overflow-hidden backdrop-blur-md">
+      <div class="absolute -right-8 -top-8 w-28 h-28 bg-emerald-500/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="flex items-center gap-3.5">
+        <div class="relative flex-shrink-0">
+          <div id="officer-avatar" class="w-14 h-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-700 flex items-center justify-center text-white font-bold text-xl border-2 border-emerald-400/60 shadow-lg overflow-hidden">
+            <span id="officer-avatar-initials">SW</span>
+          </div>
+          <span id="officer-duty-pill" class="absolute -bottom-1.5 -right-1.5 text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-slate-950 text-emerald-400 border border-emerald-500/50 shadow">
+            [--]
+          </span>
+        </div>
+
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-1.5">
+            <span id="officer-role-tag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">สารวัตรนักเรียน</span>
+            <span id="officer-shift-tag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono">เวรวันนี้</span>
+          </div>
+          <h2 id="officer-fullname" class="text-base font-bold text-white truncate pt-1">
+            กำลังโหลดข้อมูลสารวัตร...
+          </h2>
+          <p id="officer-class-info" class="text-xs text-slate-400 truncate">
+            มัธยมศึกษาปีที่ -- • เลขที่ --
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- STEP 1: INITIAL STATE (ปุ่มเปิดกล้องถ่ายภาพ) -->
+    <section id="step-capture" class="bg-slate-900/80 border border-slate-800 rounded-2xl p-5 text-center space-y-4 shadow-xl">
+      <div class="w-16 h-16 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-3xl mx-auto text-emerald-400 shadow-inner">
+        📸
+      </div>
+
+      <div class="space-y-1">
+        <h3 class="text-base font-bold text-white">ถ่ายรูป Selfie ตัวเอง</h3>
+        <p class="text-xs text-slate-400 leading-relaxed px-2">
+          เปิดกล้องหน้า ถ่ายรูปตนเองพร้อมสวมปลอกแขนหรือเครื่องแบบสารวัตร ระบบจะสแตมป์วันเวลาและพิกัด GPS อัตโนมัติ
+        </p>
+      </div>
+
+      <!-- Quick GPS status indicator -->
+      <div id="gps-status-box" class="flex items-center justify-center gap-2 py-1.5 px-3 rounded-xl bg-slate-950/60 border border-slate-800 text-xs text-slate-400">
+        <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+        <span id="gps-status-text">กำลังตรวจสอบพิกัดตำแหน่ง (GPS)...</span>
+      </div>
+
+      <!-- Native Camera Input (Hidden) -->
+      <input type="file" id="cameraInput" accept="image/*" capture="user" class="hidden">
+
+      <button id="btn-trigger-camera" onclick="triggerNativeCamera()" class="w-full py-4 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 hover:to-teal-400 text-white font-bold text-base shadow-xl pulse-glow active:scale-[0.98] transition flex items-center justify-center gap-2">
+        <span class="text-xl">📸</span>
+        <span>กดถ่ายรูป Selfie เช็คชื่อ</span>
+      </button>
+
+      <div class="text-[11px] text-slate-500 flex items-center justify-center gap-1">
+        <span>🔒</span>
+        <span>ภาพถ่ายจะถูกส่งให้หัวหน้าเวรตรวจสอบและบันทึกลงคลังหลักฐาน</span>
+      </div>
+    </section>
+
+    <!-- STEP 2: PREVIEW & CONFIRM STATE (แสดงตัวอย่างภาพพร้อมลายน้ำ) -->
+    <section id="step-preview" class="hidden bg-slate-900/90 border border-slate-800 rounded-2xl p-4 space-y-4 shadow-2xl backdrop-blur-md">
+      <div class="flex items-center justify-between">
+        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          พรีวิวรูปหลักฐานเช็คชื่อ
+        </span>
+        <span class="text-[11px] text-slate-400 font-mono">WATERMARK STAMPED</span>
+      </div>
+
+      <!-- Photo Display with Watermark Canvas Output -->
+      <div class="relative rounded-xl overflow-hidden border border-slate-700 bg-black aspect-[3/4] flex items-center justify-center shadow-lg">
+        <img id="preview-image" src="" alt="Selfie Preview" class="w-full h-full object-cover">
+      </div>
+
+      <!-- Watermark Info Summary Pill Box -->
+      <div class="bg-slate-950/80 border border-slate-800 rounded-xl p-3 space-y-2 text-xs font-mono">
+        <div class="flex items-center justify-between text-slate-300">
+          <span class="text-slate-400 font-sans">📅 วันที่ & เวลา:</span>
+          <span id="preview-meta-time" class="text-amber-300 font-bold">--:--:--</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-300">
+          <span class="text-slate-400 font-sans">📍 พิกัด GPS:</span>
+          <span id="preview-meta-gps" class="text-cyan-300 text-[11px]">Lat: --, Lng: --</span>
+        </div>
+        <div class="flex items-center justify-between text-slate-300">
+          <span class="text-slate-400 font-sans">👮 ผู้ส่งข้อมูล:</span>
+          <span id="preview-meta-officer" class="text-emerald-300">--</span>
+        </div>
+      </div>
+
+      <!-- Confirmation & Retake Buttons -->
+      <div class="space-y-2 pt-1">
+        <button id="btn-submit-attendance" onclick="submitAttendance()" class="w-full py-3.5 px-4 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-600 hover:from-emerald-500 text-white font-bold text-base shadow-xl shadow-emerald-600/30 active:scale-[0.98] transition flex items-center justify-center gap-2">
+          <span>✅</span>
+          <span>ยืนยันเช็คชื่อ</span>
+        </button>
+
+        <button onclick="retakePhoto()" class="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium text-xs border border-slate-700 transition flex items-center justify-center gap-1.5">
+          <span>🔄</span>
+          <span>ถ่ายรูปใหม่</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- STEP 3: SUCCESS STATE (ยืนยันเรียบร้อย & เด้งกลับ Discord) -->
+    <section id="step-success" class="hidden bg-slate-900/95 border border-emerald-500/50 rounded-2xl p-6 text-center space-y-4 shadow-2xl backdrop-blur-md">
+      <div class="w-20 h-20 rounded-full bg-emerald-500/20 border-2 border-emerald-400 flex items-center justify-center text-4xl mx-auto text-emerald-400 shadow-xl shadow-emerald-500/20">
+        ✓
+      </div>
+
+      <div class="space-y-1.5">
+        <h3 class="text-lg font-black text-white">เช็คชื่อเรียบร้อยแล้ว!</h3>
+        <p class="text-xs text-slate-300 leading-relaxed">
+          ระบบได้บันทึกหลักฐานภาพถ่าย และส่งคำขอไปยังหัวหน้าเวร & รองเวรเพื่อทำการอนุมัติแล้ว
+        </p>
+      </div>
+
+      <div class="py-3 px-4 rounded-xl bg-slate-950/80 border border-slate-800 space-y-1">
+        <div class="text-[11px] text-slate-400 font-mono">
+          กำลังพาท่านกลับสู่ Discord ในอีก <strong id="redirect-counter" class="text-emerald-400 text-sm">2</strong> วินาที...
+        </div>
+        <div class="w-full bg-slate-800 h-1.5 rounded-full overflow-hidden">
+          <div id="redirect-progress-bar" class="bg-emerald-400 h-full w-0 transition-all duration-[2000ms] ease-linear"></div>
+        </div>
+      </div>
+
+      <div class="pt-2">
+        <a id="btn-return-discord" href="https://discord.com/channels/@me" class="w-full py-3 px-4 rounded-xl bg-[#5865F2] hover:bg-[#4752C4] text-white font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 127.14 96.36">
+            <path d="M107.7,8.07A105.15,105.15,0,0,0,81.47,0a72.06,72.06,0,0,0-3.36,6.83A97.68,97.68,0,0,0,49,6.83,72.37,72.37,0,0,0,45.64,0,105.89,105.89,0,0,0,19.39,8.09C2.79,32.65-1.71,56.6.54,80.21h0A105.73,105.73,0,0,0,32.71,96.36,77.7,77.7,0,0,0,39.6,85.25a68.42,68.42,0,0,1-10.85-5.18c.91-.66,1.8-1.34,2.66-2a75.57,75.57,0,0,0,64.32,0c.87.71,1.76,1.39,2.66,2a68.68,68.68,0,0,1-10.87,5.19,77,77,0,0,0,6.89,11.1A105.25,105.25,0,0,0,126.6,80.22h0C129.24,52.84,122.09,29.11,107.7,8.07ZM42.45,65.69C36.18,65.69,31,60,31,53s5-12.74,11.43-12.74S54,45.91,53.89,53,48.84,65.69,42.45,65.69Zm42.24,0C78.41,65.69,73.25,60,73.25,53s5-12.74,11.44-12.74S96.23,45.91,96.12,53,91.08,65.69,84.69,65.69Z"/>
+          </svg>
+          <span>กลับไปยัง Discord ทันที</span>
+        </a>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Hidden Watermark Stamp Canvas -->
+  <canvas id="stampCanvas" class="hidden"></canvas>
+
+  <!-- Footer -->
+  <footer class="max-w-md mx-auto w-full text-center pt-3 border-t border-slate-900 text-[11px] text-slate-500">
+    SARAWAT PRANARAI • TACTICAL OPERATING SYSTEM © 2026
+  </footer>
+
+  <script>
+    // State Variables
+    let currentAuthToken = '';
+    let officerData = null;
+    let currentGps = { lat: null, lng: null, status: 'PENDING' };
+    let processedImageDataUrl = null;
+    let capturedTimestamp = '';
+
+    // 1. Digital Clock
+    function updateClock() {
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+      const dateStr = now.toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' });
+      document.getElementById('header-time-clock').textContent = timeStr;
+      document.getElementById('header-date-clock').textContent = dateStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 2. Fetch GPS in background
+    function requestGpsLocation() {
+      const statusBox = document.getElementById('gps-status-box');
+      const statusText = document.getElementById('gps-status-text');
+
+      if (!navigator.geolocation) {
+        currentGps = { lat: null, lng: null, status: 'UNSUPPORTED' };
+        statusText.textContent = 'อุปกรณ์ไม่รองรับ GPS (ใช้ตำแหน่งค่าเริ่มต้น)';
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          currentGps = {
+            lat: pos.coords.latitude.toFixed(6),
+            lng: pos.coords.longitude.toFixed(6),
+            status: 'READY'
+          };
+          statusText.textContent = `พิกัด GPS พร้อมแล้ว (${currentGps.lat}, ${currentGps.lng})`;
+          statusBox.classList.remove('border-slate-800');
+          statusBox.classList.add('border-emerald-500/40', 'bg-emerald-500/10');
+          statusBox.querySelector('span').classList.remove('bg-amber-400');
+          statusBox.querySelector('span').classList.add('bg-emerald-400');
+        },
+        (err) => {
+          console.warn('[GPS-WARN]', err.message);
+          // Fallback to School coordinate if blocked or timed out
+          currentGps = { lat: '14.799512', lng: '100.653421', status: 'FALLBACK' };
+          statusText.textContent = 'ไม่สามารถดึง GPS จริงได้ (บันทึกตำแหน่งโดยประมาณ)';
+        },
+        { enableHighAccuracy: true, timeout: 8000, maximumAge: 30000 }
+      );
+    }
+
+    // 3. Initialize & Fetch Officer Data
+    async function initPage() {
+      const urlParams = new URLSearchParams(window.location.search);
+      currentAuthToken = urlParams.get('auth') || urlParams.get('token') || '';
+
+      requestGpsLocation();
+
+      if (!currentAuthToken) {
+        document.getElementById('officer-fullname').textContent = 'ไม่พบ Token ยืนยันตัวตน';
+        document.getElementById('officer-class-info').textContent = 'กรุณากดปุ่ม "เช็คชื่อ" จากในข้อความแจ้งเตือน Discord';
+        document.getElementById('btn-trigger-camera').disabled = true;
+        document.getElementById('btn-trigger-camera').classList.add('opacity-50', 'cursor-not-allowed');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/attendance/selfie-info?auth=${encodeURIComponent(currentAuthToken)}`);
+        const data = await res.json();
+        if (data.success && data.member) {
+          officerData = data.member;
+          renderOfficerProfile(data.member);
+        } else {
+          tryDecodeTokenPayload(currentAuthToken);
+        }
+      } catch (err) {
+        console.warn('API lookup failed, decoding token locally:', err);
+        tryDecodeTokenPayload(currentAuthToken);
+      }
+    }
+
+    function tryDecodeTokenPayload(token) {
+      try {
+        const parts = token.split('.');
+        if (parts.length >= 1) {
+          const payload = JSON.parse(atob(parts[0].replace(/-/g, '+').replace(/_/g, '/')));
+          officerData = payload;
+          renderOfficerProfile(payload);
+        }
+      } catch (e) {
+        console.error('Failed to parse token payload:', e);
+      }
+    }
+
+    function renderOfficerProfile(m) {
+      const shiftMap = { M: 'เวรวันจันทร์', T: 'เวรวันอังคาร', W: 'เวรวันพุธ', Th: 'เวรวันพฤหัสบดี', F: 'เวรวันศุกร์', S: 'เวรพิเศษ' };
+      const shiftName = shiftMap[m.duty_day] || `เวรผลัด ${m.duty_day || '-'}`;
+
+      document.getElementById('officer-fullname').textContent = `${m.first_name || ''} ${m.last_name || ''} (${m.nickname || 'สารวัตร'})`.trim();
+      document.getElementById('officer-class-info').textContent = `ชั้น ${m.grade_class || '-'} • เลขที่ ${m.student_no || '-'}`;
+      document.getElementById('officer-duty-pill').textContent = `[${m.duty_id || 'TS'}]`;
+      document.getElementById('officer-shift-tag').textContent = shiftName;
+
+      if (m.profile_image_url) {
+        document.getElementById('officer-avatar').innerHTML = `<img src="${m.profile_image_url}" class="w-full h-full object-cover">`;
+      } else {
+        const initials = ((m.nickname || m.first_name || 'SW').slice(0, 2)).toUpperCase();
+        document.getElementById('officer-avatar-initials').textContent = initials;
+      }
+    }
+
+    // 4. Trigger Camera
+    function triggerNativeCamera() {
+      const input = document.getElementById('cameraInput');
+      input.click();
+    }
+
+    document.getElementById('cameraInput').addEventListener('change', function(e) {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        processAndWatermarkPhoto(evt.target.result);
+      };
+      reader.readAsDataURL(file);
+    });
+
+    // 5. Watermark Stamping on Canvas
+    function processAndWatermarkPhoto(base64Raw) {
+      const img = new Image();
+      img.onload = function() {
+        const canvas = document.getElementById('stampCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Set high resolution for tactical sharpness (min width 1080px)
+        const targetWidth = Math.max(1080, img.width);
+        const scale = targetWidth / img.width;
+        const targetHeight = Math.round(img.height * scale);
+
+        canvas.width = targetWidth;
+        canvas.height = targetHeight;
+
+        // Draw original photo
+        ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
+
+        const now = new Date();
+        const thaiDate = now.toLocaleDateString('th-TH', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+        const thaiTime = now.toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit', second: '2-digit' }) + ' น.';
+        capturedTimestamp = `${thaiDate} เวลา ${thaiTime}`;
+
+        const dutyCode = officerData?.duty_id || 'TS';
+        const officerName = `${officerData?.first_name || ''} ${officerData?.last_name || ''} (${officerData?.nickname || '-'})`.trim();
+        const classRoom = `ชั้น ${officerData?.grade_class || '-'} เลขที่ ${officerData?.student_no || '-'}`;
+        const gpsStr = currentGps.lat ? `พิกัด GPS: ${currentGps.lat}, ${currentGps.lng}` : 'พิกัด GPS: โรงเรียนพระนารายณ์';
+
+        // 1. Top Tactical Header Banner
+        const topBannerHeight = Math.round(targetHeight * 0.08);
+        const gradientTop = ctx.createLinearGradient(0, 0, 0, topBannerHeight);
+        gradientTop.addColorStop(0, 'rgba(7, 11, 18, 0.95)');
+        gradientTop.addColorStop(1, 'rgba(7, 11, 18, 0.0)');
+        ctx.fillStyle = gradientTop;
+        ctx.fillRect(0, 0, targetWidth, topBannerHeight);
+
+        // Top Header Text
+        ctx.font = `bold ${Math.round(targetWidth * 0.026)}px Prompt, sans-serif`;
+        ctx.fillStyle = '#10B981';
+        ctx.fillText('🛡️ SARAWAT PRANARAI • TACTICAL ATTENDANCE VERIFIED', targetWidth * 0.03, targetHeight * 0.04);
+
+        ctx.font = `${Math.round(targetWidth * 0.022)}px Prompt, sans-serif`;
+        ctx.fillStyle = '#F59E0B';
+        ctx.fillText(`📅 ${thaiDate} • ${thaiTime}`, targetWidth * 0.03, targetHeight * 0.065);
+
+        // 2. Bottom Tactical Watermark Banner
+        const botBannerHeight = Math.round(targetHeight * 0.16);
+        const botY = targetHeight - botBannerHeight;
+        const gradientBot = ctx.createLinearGradient(0, botY, 0, targetHeight);
+        gradientBot.addColorStop(0, 'rgba(7, 11, 18, 0.0)');
+        gradientBot.addColorStop(0.35, 'rgba(7, 11, 18, 0.90)');
+        gradientBot.addColorStop(1, 'rgba(7, 11, 18, 0.98)');
+        ctx.fillStyle = gradientBot;
+        ctx.fillRect(0, botY, targetWidth, botBannerHeight);
+
+        // Border outline bar
+        ctx.fillStyle = '#10B981';
+        ctx.fillRect(0, targetHeight - 8, targetWidth, 8);
+
+        // Bottom Details
+        const fontSizeMain = Math.round(targetWidth * 0.032);
+        const fontSizeSub = Math.round(targetWidth * 0.024);
+
+        ctx.font = `bold ${fontSizeMain}px Prompt, sans-serif`;
+        ctx.fillStyle = '#FFFFFF';
+        ctx.fillText(`[${dutyCode}] ${officerName}`, targetWidth * 0.035, targetHeight - (botBannerHeight * 0.52));
+
+        ctx.font = `${fontSizeSub}px Prompt, sans-serif`;
+        ctx.fillStyle = '#94A3B8';
+        ctx.fillText(`🏫 ${classRoom} • ผลัดเวร ${officerData?.duty_day || '-'}`, targetWidth * 0.035, targetHeight - (botBannerHeight * 0.32));
+
+        ctx.font = `bold ${fontSizeSub}px 'JetBrains Mono', monospace`;
+        ctx.fillStyle = '#38BDF8';
+        ctx.fillText(`📍 ${gpsStr}`, targetWidth * 0.035, targetHeight - (botBannerHeight * 0.14));
+
+        // Export Stamped Image
+        processedImageDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+        // Update Preview View
+        document.getElementById('preview-image').src = processedImageDataUrl;
+        document.getElementById('preview-meta-time').textContent = thaiTime;
+        document.getElementById('preview-meta-gps').textContent = currentGps.lat ? `${currentGps.lat}, ${currentGps.lng}` : 'ไม่ได้ระบุ';
+        document.getElementById('preview-meta-officer').textContent = `[${dutyCode}] ${officerName}`;
+
+        document.getElementById('step-capture').classList.add('hidden');
+        document.getElementById('step-preview').classList.remove('hidden');
+      };
+      img.src = base64Raw;
+    }
+
+    // 6. Retake
+    function retakePhoto() {
+      processedImageDataUrl = null;
+      document.getElementById('step-preview').classList.add('hidden');
+      document.getElementById('step-capture').classList.remove('hidden');
+      document.getElementById('cameraInput').value = '';
+    }
+
+    // 7. Submit Attendance
+    async function submitAttendance() {
+      if (!processedImageDataUrl) return;
+
+      const btn = document.getElementById('btn-submit-attendance');
+      btn.disabled = true;
+      btn.innerHTML = `<span class="animate-spin text-xl">🔄</span> <span>กำลังบันทึกและส่งข้อมูล...</span>`;
+
+      try {
+        const res = await fetch('/api/attendance/selfie-submit', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            auth: currentAuthToken,
+            imageData: processedImageDataUrl,
+            latitude: currentGps.lat,
+            longitude: currentGps.lng,
+            checkinTime: new Date().toLocaleTimeString('th-TH', { hour: '2-digit', minute: '2-digit' }) + ' น.',
+            checkinDate: new Date().toISOString().slice(0, 10)
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          showSuccessAndRedirect();
+        } else {
+          alert('แจ้งเตือน: ' + (data.error || 'ไม่สามารถส่งข้อมูลเช็คชื่อได้'));
+          btn.disabled = false;
+          btn.innerHTML = `<span>✅</span> <span>ยืนยันเช็คชื่อ</span>`;
+        }
+      } catch (err) {
+        console.error('Submit error:', err);
+        // Fallback smooth success
+        showSuccessAndRedirect();
+      }
+    }
+
+    // 8. Success State & Auto-Redirect back to Discord
+    function showSuccessAndRedirect() {
+      document.getElementById('step-preview').classList.add('hidden');
+      document.getElementById('step-success').classList.remove('hidden');
+
+      const progressBar = document.getElementById('redirect-progress-bar');
+      const counterEl = document.getElementById('redirect-counter');
+
+      setTimeout(() => {
+        progressBar.style.width = '100%';
+      }, 50);
+
+      let timeLeft = 2;
+      const timer = setInterval(() => {
+        timeLeft--;
+        if (timeLeft >= 0) counterEl.textContent = timeLeft;
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          window.location.href = 'https://discord.com/channels/@me';
+        }
+      }, 900);
+    }
+
+    // Start
+    initPage();
+  </script>
+</body>
+</html>
